@@ -1,0 +1,97 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { Router } from '@angular/router';
+import { ErrorDialogComponent } from '@app/components/general-elements/error-dialog/error-dialog.component';
+import { JoinEvents } from '@app/constants/enum-class';
+import { Quiz } from '@app/interfaces/quiz';
+import { QuizService } from '@app/services/back-end-communication-services/quiz-service/quiz.service';
+import { WaitingPageService } from '@app/services/waiting-room-services/waiting-page.service';
+import { SocketClientService } from '@app/services/websocket-services/general/socket-client-manager.service';
+
+@Component({
+    selector: 'app-pop-up-creation',
+    templateUrl: './pop-up-creation.component.html',
+    styleUrls: ['./pop-up-creation.component.scss'],
+})
+export class PopUpCreationComponent {
+    errorMessage: string | null = null;
+    component: { title: string; description: string; duration: number; questions: { text: string }[] };
+    isQuizValid: boolean = false;
+
+    // constructeur a 6 parametres permis selon les charges et le prof, etant donne la nature des attributs
+    // eslint-disable-next-line max-params
+    constructor(
+        public dialogRef: MatDialogRef<PopUpCreationComponent>,
+        @Inject(MAT_DIALOG_DATA) public data: Quiz,
+        private quizService: QuizService,
+        private router: Router,
+        private dialog: MatDialog,
+        private socketService: SocketClientService,
+        private waitingPageService: WaitingPageService,
+    ) {
+        this.fetchQuizById(this.data.id);
+    }
+
+    onClose(): void {
+        this.dialogRef.close();
+    }
+
+    openNewGame(): void {
+        const isRandomMode = this.data.title === 'Mode aléatoire';
+        const quiz = this.data;
+        this.socketService.send(JoinEvents.Create, { quiz, isRandomMode }, (roomId: string) => {
+            this.socketService.roomId = roomId;
+            this.socketService.isOrganizer = true;
+            if (isRandomMode) {
+                this.socketService.isRandomMode = true;
+                this.socketService.isOrganizer = false;
+                this.socketService.playerName = 'Organisateur';
+                this.waitingPageService.players = ['Organisateur'];
+            } else {
+                this.socketService.isRandomMode = false;
+            }
+            this.verifyLocalStorage();
+            this.navigate('/waiting');
+        });
+    }
+
+    navigate(route: string): void {
+        if (!this.isQuizValid) {
+            this.openErrorMessage();
+            return;
+        }
+        this.router.navigate([route]);
+        this.dialogRef.close();
+    }
+    private openErrorMessage(): void {
+        this.dialogRef.close();
+        this.dialog.open(ErrorDialogComponent, {
+            width: '400px',
+            data: { message: this.errorMessage, reloadOnClose: true },
+        });
+    }
+
+    private verifyLocalStorage() {
+        if (localStorage.getItem('navigatedFromUnload') === 'true') {
+            localStorage.removeItem('navigatedFromUnload');
+        }
+    }
+    private fetchQuizById(id: string | undefined) {
+        if (id) {
+            this.quizService.getQuizById(id).subscribe({
+                next: (quiz: Quiz) => {
+                    if (quiz.visibility) {
+                        this.data = quiz;
+                        this.isQuizValid = true;
+                    } else {
+                        this.errorMessage = 'Le jeu a été caché aux utilisateurs!';
+                    }
+                },
+                error: (httpErrorResponse: HttpErrorResponse) => {
+                    this.errorMessage = "Le jeu n'existe plus. Message erreur: " + httpErrorResponse.message;
+                },
+            });
+        }
+    }
+}

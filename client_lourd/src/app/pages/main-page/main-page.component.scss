@@ -1,0 +1,486 @@
+@import url('https://fonts.googleapis.com/css?family=Lato:400,400i,700');
+//https://codepen.io/Mark_Bowley/pen/LYZEBq source utilisee pour les nuages
+$primary-color: #00115a;
+$secondary-color: #000000;
+$text-color: #000000;
+$light-color: #fff;
+html,
+body {
+    overflow-x: hidden;
+    max-width: 100%;
+    max-height: 100%;
+}
+#component-overflow-container {
+    overflow-x: hidden;
+    bottom: 0;
+    left: 0;
+    position: fixed;
+    right: 0;
+    top: 0;
+}
+body {
+    background: #00b4ff;
+    color: #333;
+    font:
+        100% Arial,
+        Sans Serif;
+    height: 100vh;
+    max-height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#background-wrap {
+    bottom: 0;
+    left: 0;
+    padding-top: 50px;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 2;
+}
+
+/* KEYFRAMES */
+
+@-webkit-keyframes animateCloud {
+    0% {
+        left: -800px;
+    }
+    100% {
+        left: calc(110%);
+    }
+}
+
+@-moz-keyframes animateCloud {
+    0% {
+        left: -800px;
+    }
+    100% {
+        left: calc(110%);
+    }
+}
+
+@keyframes animateCloud {
+    0% {
+        left: -800px;
+    }
+    100% {
+        left: calc(110%);
+    }
+}
+
+/* ANIMATIONS */
+
+.x1,
+.x2,
+.x3,
+.x4,
+.x5 {
+    position: absolute;
+}
+.x1 {
+    -webkit-animation: animateCloud 50s linear infinite;
+    -moz-animation: animateCloud 50s linear infinite;
+    animation: animateCloud 50s linear infinite;
+    -webkit-transform: scale(0.65);
+    -moz-transform: scale(0.65);
+    transform: scale(0.65);
+}
+
+.x2 {
+    -webkit-animation: animateCloud 38s linear infinite;
+    -moz-animation: animateCloud 38s linear infinite;
+    animation: animateCloud 38s linear infinite;
+
+    -webkit-transform: scale(0.5);
+    -moz-transform: scale(0.5);
+    transform: scale(0.5);
+    margin-bottom: 300px;
+}
+
+.x3 {
+    -webkit-animation: animateCloud 30s linear infinite;
+    -moz-animation: animateCloud 30s linear infinite;
+    animation: animateCloud 30s linear infinite;
+
+    -webkit-transform: scale(0.5);
+    -moz-transform: scale(0.5);
+    transform: scale(0.5);
+    margin-top: 220px;
+}
+
+.x4 {
+    -webkit-animation: animateCloud 50s linear infinite;
+    -moz-animation: animateCloud 50s linear infinite;
+    animation: animateCloud 50s linear infinite;
+
+    -webkit-transform: scale(0.4);
+    -moz-transform: scale(0.4);
+    transform: scale(0.4);
+
+    bottom: 15%;
+    z-index: 8;
+}
+
+.x5 {
+    -webkit-animation: animateCloud 20s linear infinite;
+    -moz-animation: animateCloud 20s linear infinite;
+    animation: animateCloud 20s linear infinite;
+
+    -webkit-transform: scale(0.55);
+    -moz-transform: scale(0.55);
+    transform: scale(0.55);
+    bottom: 100px;
+    z-index: 10;
+}
+
+/* OBJECTS */
+
+.cloud {
+    background: -moz-linear-gradient(top, #fff 5%, #f1f1f1 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(5%, #fff), color-stop(100%, #f1f1f1));
+    background: -webkit-linear-gradient(top, #fff 5%, #f1f1f1 100%);
+    background: -o-linear-gradient(top, #fff 5%, #f1f1f1 100%);
+    background: -ms-linear-gradient(top, #fff 5%, #f1f1f1 100%);
+    background: linear-gradient(to top, #fff 5%, #f1f1f1 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fff', endColorstr='#f1f1f1',GradientType=0 );
+
+    -webkit-border-radius: 100px;
+    -moz-border-radius: 100px;
+    border-radius: 100px;
+
+    -webkit-box-shadow: 0 8px 5px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow: 0 8px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 5px rgba(0, 0, 0, 0.1);
+
+    height: 120px;
+    position: relative;
+    width: 350px;
+}
+.x1 > .cloud {
+    background: #ffc353;
+}
+.x1 > .cloud:after {
+    background: #ffc353;
+}
+.x1 > .cloud:before {
+    background: #ffc353;
+}
+
+.x2 > .cloud {
+    background: #006db6;
+}
+.x2 > .cloud:after {
+    background: #006db6;
+}
+.x2 > .cloud:before {
+    background: #006db6;
+}
+
+.x3 > .cloud {
+    background: #006bf7;
+}
+.x3 > .cloud:after {
+    background: #006bf7;
+}
+.x3 > .cloud:before {
+    background: #006bf7;
+}
+
+.x4 > .cloud {
+    background: #0bdb96;
+}
+.x4 > .cloud:after {
+    background: #0bdb96;
+}
+.x4 > .cloud:before {
+    background: #0bdb96;
+}
+
+.x5 > .cloud {
+    background: #ff9b58;
+}
+.x5 > .cloud:after {
+    background: #ff9b58;
+}
+.x5 > .cloud:before {
+    background: #ff9b58;
+}
+
+.cloud:after,
+.cloud:before {
+    filter: blur(4px);
+    content: '';
+    position: absolute;
+    z-index: 2;
+}
+.cloud {
+    filter: blur(4px);
+}
+
+.cloud:after {
+    -webkit-border-radius: 100px;
+    -moz-border-radius: 100px;
+    border-radius: 100px;
+
+    height: 100px;
+    left: 50px;
+    top: -50px;
+    width: 100px;
+}
+
+.cloud:before {
+    -webkit-border-radius: 200px;
+    -moz-border-radius: 200px;
+    border-radius: 200px;
+
+    width: 180px;
+    height: 180px;
+    right: 50px;
+    top: -90px;
+}
+
+*,
+*::after,
+*::before {
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+body {
+    font-family: Lato;
+    font-weight: 400;
+    line-height: 1.7;
+    color: #777;
+    padding: 3rem;
+    background: #ececec;
+    box-sizing: border-box;
+}
+
+.header {
+    height: 90vh;
+    background-size: cover;
+    background-position: top;
+    position: relative;
+    z-index: 6;
+}
+
+.logo-container {
+    position: relative;
+    top: 3rem;
+    left: 4rem;
+    display: inline-block;
+}
+
+img {
+    height: auto;
+    width: 300px;
+}
+
+.feature-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    padding: 2rem;
+    text-align: center;
+    backface-visibility: hidden;
+    transform: translate(-50%, -50%);
+    z-index: 999;
+}
+
+.main-wrapper {
+    background: linear-gradient(to bottom, #00115a, #0046a1);
+    display: block;
+    overflow: hidden;
+    position: relative;
+    margin: 0 auto;
+}
+
+.theme-btn {
+    color: #000;
+    font-family: 'Lato';
+    min-width: 170px;
+    min-height: 30px;
+}
+
+.theme-btn:hover {
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2);
+    transform: translatey(-3px);
+    color: $text-color;
+}
+.theme-btn:active {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+    transform: translatey(-1px);
+    color: $text-color;
+}
+
+.theme-btn::after {
+    content: '';
+    display: inline-block;
+    height: 100%;
+    width: 100%;
+    border-radius: 10rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    transition: all 0.4s;
+    background: #fff;
+    color: $text-color;
+}
+.theme-btn:hover::after {
+    transform: scaleX(1.4) scaleY(1.6);
+    opacity: 0;
+}
+
+.btn-animated {
+    animation: moveInBottom 0.5s ease-out 0.75s;
+    animation-fill-mode: backwards;
+}
+
+@mixin button-style($color) {
+    background: $color;
+    padding: 1.5rem 4rem;
+    display: inline-block;
+    margin-top: 3rem;
+    text-decoration: none;
+    border-radius: 10rem;
+    transition: all 0.2s;
+    position: relative;
+    backface-visibility: hidden;
+}
+
+.btn-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+.theme-btn {
+    @include button-style($light-color);
+    cursor: pointer;
+}
+
+.play-btn {
+    @extend .theme-btn;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-size: 2rem;
+}
+
+.create-btn {
+    @extend .theme-btn;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-size: 1.5rem;
+}
+.admin-btn {
+    @extend .theme-btn;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-size: 1.5rem;
+}
+
+%feature-content-styles {
+    color: #fff;
+    display: block;
+    text-transform: uppercase;
+}
+
+.feature-content h1 {
+    @extend %feature-content-styles;
+    font-size: 3rem;
+    letter-spacing: 1.1rem;
+    animation: moveInLeft;
+    animation-duration: 2s;
+    animation-timing-function: ease-out;
+}
+
+.feature-content p {
+    @extend %feature-content-styles;
+    font-size: 1.5rem;
+    letter-spacing: 0.8rem;
+    animation: moveInRight;
+    animation-duration: 2s;
+    animation-timing-function: ease-out;
+}
+
+@keyframes moveInLeft {
+    0% {
+        opacity: 0;
+        transform: translatex(-100px);
+    }
+    80% {
+        transform: translatex(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(0);
+    }
+}
+
+@keyframes moveInRight {
+    0% {
+        opacity: 0;
+        transform: translatex(100px);
+    }
+    80% {
+        transform: translatex(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(0);
+    }
+}
+
+@keyframes moveInBottom {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(0);
+    }
+}
+
+.clouds-bottom {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    height: 350px;
+    width: 100%;
+    z-index: 10;
+}
+
+.cloud1 {
+    filter: blur(3px);
+    z-index: 8;
+}
+
+.cloud2 {
+    filter: blur(2px);
+    z-index: 9;
+}
+
+.cloud3 {
+    filter: blur(1px);
+}
+.footer-item {
+    position: relative;
+    width: 80%;
+    margin: 0 auto;
+    text-align: center;
+    z-index: 15;
+    h4.team-number {
+        margin-bottom: 1rem;
+        font-size: 2rem;
+    }
+    p {
+        font-size: 1.2rem;
+    }
+}

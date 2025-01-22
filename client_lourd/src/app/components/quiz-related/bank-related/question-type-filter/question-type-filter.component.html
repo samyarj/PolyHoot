@@ -1,0 +1,8 @@
+<div class="filter-container">
+    <label class="filter-label" for="question-type"> <mat-icon>filter_alt</mat-icon> Filtrer par type </label>
+    <select id="question-type" (change)="filterChanged($event)">
+        <option value="ALL">Toutes</option>
+        <option value="QCM">QCM</option>
+        <option value="QRL">QRL</option>
+    </select>
+</div>

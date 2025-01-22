@@ -1,0 +1,78 @@
+<div *ngIf="quizReady" class="gameContainer">
+    <app-header-game [title]="this.quizTitle" [onLogoClick]="abandonGame.bind(this)"></app-header-game>
+    <div id="header-separator"></div>
+    <div id="main-container">
+        <div id="question-container">
+            <div id="current-question">
+                <div id="user-points">
+                    Mes Points<strong>{{ playerPoints }}</strong>
+                </div>
+                <div *ngIf="time" id="timer">
+                    Temps Restant
+                    <strong *ngIf="!waitingForQuestion">{{ time }}</strong>
+                    <div *ngIf="gamePaused">PAUSE</div>
+                </div>
+                <div *ngIf="!time" id="timer">
+                    Temps
+                    <strong>ECOULÉ</strong>
+                </div>
+                <div id="question-info">
+                    <div id="question-text">
+                        <p *ngIf="waitingForQuestion">La prochaine question commence dans {{ time }} seconde{{ time === 0 ? '.' : 's.' }}</p>
+                        <p *ngIf="!waitingForQuestion">
+                            {{ this.currentQuestion.text }}
+                        </p>
+                    </div>
+                    <div id="question-additional-info">
+                        <div id="question-number">Question # {{ currentIndex + 1 }}</div>
+                        <div id="question-points">{{ currentQuestion.points }} pts</div>
+                    </div>
+                </div>
+                <div id="filler"></div>
+                <div id="answer-section">
+                    <p id="character-limit" *ngIf="currentQuestion.type === 'QRL' && !submitted">
+                        Caractères restants : {{ MAX_CHARACTERS - answer.length }}
+                    </p>
+                    <p *ngIf="currentQuestion.type === 'QCM' && choiceFeedback === 'first'" style="color: white">
+                        Félicitations, vous êtes le premier à avoir bien répondu! Un bonus de point de 20% vous est accordé
+                    </p>
+                    <p *ngIf="choiceFeedback === 'correct'" style="color: white">
+                        Bonne réponse{{ currentQuestion.type === 'QCM' ? ', mais pas la première!' : '!' }} Tous les points sont accordés.
+                    </p>
+                    <p *ngIf="choiceFeedback === 'awaiting'" style="color: white">En attente de la réponse des autres joueurs.</p>
+                    <p *ngIf="choiceFeedback === 'idle'" style="color: white">
+                        En attente de votre {{ currentQuestion.type === 'QCM' ? 'sélection de choix.' : 'réponse.' }}
+                    </p>
+                    <p *ngIf="choiceFeedback === 'awaitingCorrection'" style="color: white">Nous attendons la correction de l'organisateur...</p>
+                    <p *ngIf="choiceFeedback === 'incorrect'" style="color: white">Mauvaise réponse, aucun point accordé.</p>
+                    <p *ngIf="choiceFeedback === 'partial' && currentQuestion.type === 'QRL'" style="color: white">
+                        Pas tout à fait! L'organisateur vous a accordé des points partiels.
+                    </p>
+                    <div *ngIf="currentQuestion.type === 'QCM'" id="multiple-choice-section">
+                        <div
+                            *ngFor="let choice of currentQuestion.choices; let choiceIndex = index"
+                            (click)="selectChoice(choiceIndex)"
+                            [class.clicked]="choiceSelected[choiceIndex]"
+                            [ngClass]="this.showAnswers ? (choice.isCorrect ? 'correct-choice' : 'incorrect-choice') : 'hide-choice-truth'"
+                            class="multiple-choice"
+                        >
+                            Choix {{ choiceIndex + 1 }}: {{ choice.text }}
+                        </div>
+                    </div>
+                    <textarea
+                        *ngIf="currentQuestion.type === 'QRL'"
+                        (input)="textAreaModified()"
+                        id="question-answer-input"
+                        [(ngModel)]="answer"
+                        maxlength="{{ MAX_CHARACTERS }}"
+                        [disabled]="submitted"
+                    ></textarea>
+                    <button [disabled]="submitted" id="submit-choice-button" (click)="finalizeAnswer()">Submit</button>
+                </div>
+                <button id="abandon-button" (click)="abandonGame()">Abandonner</button>
+            </div>
+        </div>
+        <div id="chat-separator"></div>
+        <app-chat id="chat-container"></app-chat>
+    </div>
+</div>

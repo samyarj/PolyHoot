@@ -1,0 +1,105 @@
+<div class="container">
+    <div class="forms-container">
+        <form class="row mt-2 game-info" #gameForm="ngForm" @gameFormAnimation>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="title">Titre du questionnaire:</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="title"
+                        [(ngModel)]="quiz.title"
+                        placeholder="Entrez le titre du questionnaire"
+                        name="title"
+                        required
+                        #title="ngModel"
+                    />
+                    <small class="text-danger" *ngIf="isQuizTitleEmpty()"> Il faut un titre.</small>
+                </div>
+                <div class="form-group" id="description">
+                    <label for="description-input">Description du questionnaire:</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="description-input"
+                        [(ngModel)]="quiz.description"
+                        name="description"
+                        maxlength="200"
+                        #descriptionModel="ngModel"
+                        required
+                    />
+                    <small class="text-danger">
+                        <ng-container *ngIf="isDescriptionEmpty()"> Il faut une description.</ng-container>
+                        <ng-container *ngIf="descriptionModel.errors?.maxlength">
+                            La description ne devrait pas avoir plus de 200 caractères.
+                        </ng-container>
+                    </small>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="duration">Durée d'une QCM:</label>
+                    <div class="input-group">
+                        <input
+                            type="number"
+                            class="form-control"
+                            id="duration"
+                            min="10"
+                            max="60"
+                            step="10"
+                            [(ngModel)]="quiz.duration"
+                            name="duration"
+                            required
+                            #durationInput="ngModel"
+                        />
+                        <div class="input-group-text">sec</div>
+                    </div>
+                    <small class="form-text text-danger" *ngIf="durationInput.invalid && (durationInput.dirty || !durationInput.touched)">
+                        <ng-container *ngIf="durationInput.errors?.required"> La durée est requise. </ng-container>
+                        <ng-container *ngIf="durationInput.errors?.min"> La durée doit être d'au moins 10 secondes. </ng-container>
+                        <ng-container *ngIf="durationInput.errors?.max"> La durée doit être d'au plus 60 secondes. </ng-container>
+                    </small>
+                </div>
+            </div>
+        </form>
+        <app-question-form
+            @questionFormAnimation
+            [submitButton]="submitQuestionButton"
+            [question]="currentQuestion"
+            (questionSubmitted)="onQuestionSubmitted($event)"
+            (emptyQuestion)="emptyCurrentQuestion()"
+        >
+        </app-question-form>
+    </div>
+    <div class="created-question-container" @gameFormAnimation>
+        <h2>Questions</h2>
+        <ul class="question-list-container" cdkDropList (cdkDropListDropped)="onDrop($event)">
+            <li
+                *ngFor="let question of quiz.questions; trackBy: trackByFn; let i = index"
+                @zoomIn
+                @bounceOut
+                class="question-item"
+                [ngClass]="{ qcm: question.type === 'QCM', qrl: question.type === 'QRL' }"
+                cdkDrag
+                cdkDragPreviewClass="drag-preview"
+            >
+                <div class="question-title truncate-text">{{ i + 1 }}. {{ question.text }}</div>
+                <span class="action-icons">
+                    <i class="fas fa-plus-circle" (click)="addQuestionToBank(question)" matTooltip="Ajouter à la banque de questions"></i>
+                    <i class="fas fa-pencil-alt" (click)="modifyQuestionAction(question)" matTooltip="Modifier"></i>
+                    <i class="fas fa-trash-alt" (click)="deleteQuestion(i)" matTooltip="Supprimer"></i>
+                </span>
+            </li>
+        </ul>
+        <div *ngIf="quiz.questions.length > 0" class="btn btn-dark add-question-icon">
+            <i class="fas fa-plus-circle" (click)="addEmptyQuestion()"></i>
+        </div>
+    </div>
+</div>
+<div class="submit-game-section">
+    <button (click)="emptyQuizAndRedirect()" class="btn btn-danger custom-width">Annuler</button>
+    <button class="btn btn-primary custom-width" [disabled]="!gameForm.valid || !validateQuiz()" (click)="submitQuizEvent()">
+        {{ submitQuizButton }}
+    </button>
+</div>

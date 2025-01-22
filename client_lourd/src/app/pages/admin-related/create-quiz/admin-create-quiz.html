@@ -1,0 +1,18 @@
+<div class="page-container" [@.disabled]="disableAnimations">
+    <app-header-game [title]="title"></app-header-game>
+    <div class="page-container">
+        <div class="create-quiz-container">
+            <div class="left-section">
+                <app-create-quiz
+                    [submitQuizButton]="submitButton"
+                    (submitQuiz)="submitQuiz($event)"
+                    (questionToBank)="addQuestionToBank($event)"
+                    class="form-game-container"
+                ></app-create-quiz>
+            </div>
+            <div class="right-section">
+                <app-question-bank @gameFormAnimation #questionBankComponent (questionToQuiz)="addQuestionToQuiz($event)"></app-question-bank>
+            </div>
+        </div>
+    </div>
+</div>

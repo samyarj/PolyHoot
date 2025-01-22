@@ -1,0 +1,36 @@
+<div id="main-wrapper">
+    <app-header-game [title]="title"></app-header-game>
+    <div id="header-separator"></div>
+    <div class="secondary-wrapper">
+        <div class="cloud-background">
+            <img class="x1 owl" src="assets/pictures/birds-create-game/light-blue-owl.png" />
+            <img class="x2 owl" src="assets/pictures/birds-create-game/gold-owl.png" />
+            <img class="x3 owl" src="assets/pictures/birds-create-game/jade-owl.png" />
+            <img class="x4 owl" src="assets/pictures/birds-create-game/ruby-owl.png" />
+            <img class="x6 owl" src="assets/pictures/birds-create-game/jade-owl.png" />
+            <img class="x5 owl" src="assets/pictures/birds-create-game/sapphire-owl.png" />
+            <img class="cloud layer1 left" src="assets/pictures/clouds-create-game/light-cloud-side.png" />
+            <img class="cloud layer2 left" src="assets/pictures/clouds-create-game/bluish-cloud-side.png" />
+            <img class="cloud layer3 left" src="assets/pictures/clouds-create-game/blue-cloud-side.png" />
+            <img class="cloud layer4 left" src="assets/pictures/clouds-create-game/dark-blue-cloud-side.png" />
+
+            <img class="cloud layer1 right" src="assets/pictures/clouds-create-game/light-cloud-side.png" />
+            <img class="cloud layer2 right" src="assets/pictures/clouds-create-game/bluish-cloud-side.png" />
+            <img class="cloud layer3 right" src="assets/pictures/clouds-create-game/blue-cloud-side.png" />
+            <img class="cloud layer4 right" src="assets/pictures/clouds-create-game/dark-blue-cloud-side.png" />
+        </div>
+        <div id="quizlist">
+            <ol class="quizzes-list" style="--length: 5" role="list">
+                <li *ngIf="randomModeQuiz && randomModeQuiz.title === 'Mode aléatoire'" class="quizContainer" (click)="openDialog(randomModeQuiz)">
+                    <h3>{{randomModeQuiz.title}}</h3>
+                </li>
+                <li class="quizContainer" *ngFor="let quiz of quizzes" (click)="openDialog(quiz)">
+                    <h3>{{ quiz.title }}</h3>
+                </li>
+            </ol>
+        </div>
+        <div class="show-logo-button">
+            <button class="custom-button-cancel custom-width create-page-button btn" routerLink="/home">Retour</button>
+        </div>
+    </div>
+</div>

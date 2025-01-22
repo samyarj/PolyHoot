@@ -1,0 +1,17 @@
+<h2>Banque de questions</h2>
+<div class="bank-question-container">
+    <app-question-type-filter (filterQuestionTypeChange)="updateSelectedQuestions($event, true)"></app-question-type-filter>
+    <ul>
+        <li *ngFor="let question of selectedQuestions" [ngClass]="{ qcm: question.type === 'QCM', qrl: question.type === 'QRL' }">
+            <i
+                class="fa-solid question-type-icon"
+                [ngClass]="{
+                    'fa-list-check': question.type === 'QCM',
+                    'fa-keyboard': question.type === 'QRL'
+                }"
+            ></i>
+            <span class="truncate-text question-title">{{ question.text }}</span>
+            <i matTooltip="Ajouter au jeu" (click)="addQuestionToQuiz(question)" class="fas fa-plus-circle add-icon"></i>
+        </li>
+    </ul>
+</div>

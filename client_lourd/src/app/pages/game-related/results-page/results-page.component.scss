@@ -1,0 +1,301 @@
+#header-separator {
+    width: 100%;
+    height: 3px;
+    background-color: #ffffff;
+}
+
+#chat-container {
+    height: 100%;
+    width: 25%;
+    background: linear-gradient(to bottom, #00115a, #004080);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+#chat-separator {
+    height: 100%;
+    width: 3px;
+    background-color: #ffffff;
+}
+
+#page-container {
+    height: calc(90vh - 3px);
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+#abandon-button {
+    position: absolute;
+    height: 50px;
+    width: 100px;
+    bottom: 50px;
+    background: rgb(152, 24, 24);
+    color: white;
+    align-self: flex-end;
+    margin-top: 25px;
+    margin-right: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    transition:
+        background 1s ease,
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+#abandon-button:hover {
+    background: linear-gradient(to bottom, rgb(145, 0, 0), red);
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#global-page-wrapper {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#main-content-container {
+    height: 100%;
+    width: calc(75% - 3px);
+    background: linear-gradient(to bottom, #00115a, #004080);
+    display: flex;
+    flex-direction: column;
+}
+
+#general-info-section {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    max-width: 100%;
+    padding: 10px;
+    border-radius: 15px;
+}
+
+#player-list-section {
+    padding: 5px;
+    height: 100%;
+    width: 30%;
+    border-radius: 15px;
+    background: linear-gradient(to top, #3498db, #2980b9);
+    border: 1px solid white;
+    box-shadow: 5px 5px 5px #6978bb;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    .player-list-div {
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+    .player-list-div::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .player-list-div::-webkit-scrollbar-track {
+        background-color: transparent;
+    }
+
+    .player-list-div::-webkit-scrollbar-thumb {
+        background-color: #01d9ff;
+        border-radius: 15px;
+    }
+}
+
+.player-info-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 50px;
+    width: 95%;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    p {
+        font-size: medium;
+        margin-top: 10px;
+    }
+    .player-name {
+        margin-left: 10px;
+    }
+    .player-bonuses {
+        margin-right: 10px;
+    }
+}
+
+.crossed {
+    text-decoration: line-through;
+    background: rgb(0, 72, 8);
+    text-decoration-color: white;
+    color: white;
+}
+
+.not-crossed {
+    background: rgb(4, 255, 0);
+}
+
+#histogram-section {
+    flex-direction: column;
+    align-items: center;
+    width: 70%;
+    height: 99%;
+    border-radius: 15px;
+    margin-right: 10px;
+    background: #c4e1ff;
+    border: 1px solid white;
+    box-shadow: 5px 5px 5px #6978bb;
+    #histogram-title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        max-width: 100%;
+        height: 10%;
+        max-height: 10%;
+        > p {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            max-width: 90%;
+            overflow-y: scroll;
+            text-overflow: ellipsis;
+            font-weight: bold;
+            font-size: medium;
+            overflow-wrap: break-word;
+            margin: 0;
+            color: #00115a;
+            font-size: x-large;
+            font-weight: bold;
+        }
+    }
+    #histogram-title > p::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    #histogram-title > p::-webkit-scrollbar-track {
+        background-color: transparent;
+    }
+
+    #histogram-title > p::-webkit-scrollbar-thumb {
+        background-color: #888;
+        border-radius: 15px;
+    }
+}
+
+#option-counter-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    height: 10%;
+    margin-left: 15px;
+    margin-right: 15px;
+    background: linear-gradient(to top, #3498db, #2980b9);
+    border-radius: 15px 15px 0px 0px;
+    .option-counter p {
+        font-size: large;
+        color: white;
+    }
+}
+
+#bands-container {
+    width: 100%;
+    height: 50%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-around;
+    overflow-y: hidden;
+    .band-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        width: 10%;
+        height: 100%;
+        > img {
+            width: 100%;
+        }
+        .band {
+            width: 100%;
+            border-radius: 15px 15px 0px 0px;
+            background: black;
+        }
+    }
+}
+
+#options-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    height: 10%;
+    background: linear-gradient(to top, #3498db, #2980b9);
+    margin-left: 15px;
+    margin-right: 15px;
+    margin-bottom: 10px;
+    border-radius: 0px 0px 15px 15px;
+    p {
+        font-size: large;
+        color: white;
+    }
+}
+
+#navigation-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    width: 100%;
+    height: 3%;
+    background: 'green';
+    border-radius: 0px 0px 15px 15px;
+}
+
+#player-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 10%;
+    color: white;
+    font-weight: bold;
+    padding: 10px;
+}
+
+.custom-button-cancel,
+.custom-button {
+    box-shadow: 5px 5px 5px #6978bb;
+    margin-top: 40px;
+}
+
+.option {
+    height: 75%;
+    width: 20%;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+.option > p {
+    font-size: large;
+    margin: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+#previous-button:disabled,
+#next-button:disabled {
+    background-color: gray;
+    color: white;
+    cursor: not-allowed;
+}

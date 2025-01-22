@@ -1,0 +1,114 @@
+<form class="form-question-container" #questionForm="ngForm" (ngSubmit)="submitQuestion()">
+    <div class="question-info-section">
+        <div class="form-group question-type">
+            <label class="form-label" for="options">Type</label>
+            <select
+                id="options"
+                [(ngModel)]="questionType"
+                (ngModelChange)="onQuestionTypeChange()"
+                name="type"
+                [disabled]="isTypeLocked"
+                title="Question à choix multiples (QCM) ou question à réponse libre (QRL)"
+            >
+                <option value="QCM">QCM</option>
+                <option value="QRL">QRL</option>
+            </select>
+        </div>
+        <div class="form-group question-text">
+            <label class="form-label" for="question-text-id">Question</label>
+            <input
+                class="form-control"
+                id="question-text-id"
+                type="text"
+                [(ngModel)]="question.text"
+                placeholder="Entrez votre question."
+                name="text"
+                #text="ngModel"
+                required
+            />
+            <small class="text-danger" *ngIf="isQuestionTextValid()">Entrez votre question</small>
+        </div>
+
+        <div class="form-group question-score">
+            <label class="form-label" for="question-score-id">Pointage:</label>
+            <div class="input-group">
+                <input
+                    class="form-control"
+                    id="question-score-id"
+                    type="number"
+                    min="10"
+                    max="100"
+                    step="10"
+                    [(ngModel)]="question.points"
+                    name="score"
+                    required
+                    #scoreInput="ngModel"
+                />
+                <div class="input-group-text">pts</div>
+            </div>
+            <div class="form-text text-danger" *ngIf="!validateStep(question.points)">Le score doit être un multiple de 10</div>
+            <small class="form-text text-danger" *ngIf="scoreInput.invalid && (scoreInput.dirty || scoreInput.touched)">
+                <ng-container *ngIf="scoreInput.errors?.required"> Le pointage de la question est requis. </ng-container>
+                <ng-container *ngIf="scoreInput.errors?.min"> Le pointage ne peut pas être inférieur à 10. </ng-container>
+                <ng-container *ngIf="scoreInput.errors?.max"> Le pointage ne peut pas être supérieur à 100. </ng-container>
+            </small>
+        </div>
+    </div>
+    <div class="form-group answers-section" *ngIf="questionType === 'QCM'">
+        <label class="form-label">Réponses:</label>
+        <div cdkDropList class="answers-list" (cdkDropListDropped)="drop($event)">
+            <div *ngFor="let choice of question.choices; let i = index" class="mb-2 question-choice" cdkDrag>
+                <div class="input-group">
+                    <p>{{ i + 1 }}.</p>
+                    <input
+                        type="text"
+                        class="form-control"
+                        [(ngModel)]="choice.text"
+                        placeholder="Entrez le contenu de la réponse"
+                        name="answer{{ choice.text }}"
+                        required
+                        #answer="ngModel"
+                    />
+                    <div class="button-section">
+                        <button
+                            class="btn btn-sm"
+                            [class.btn-success]="choice.isCorrect"
+                            [class.btn-danger]="!choice.isCorrect"
+                            type="button"
+                            (click)="toggleAnswer(choice)"
+                            [matTooltip]="choice.isCorrect ? 'Marquer comme faux' : 'Marquer comme vrai'"
+                            matTooltipClass="tooltip-custom-class"
+                        >
+                            <i class="fas" [ngClass]="{ 'fa-check': choice.isCorrect, 'fa-circle-xmark': !choice.isCorrect }"></i>
+                        </button>
+                        <button
+                            class="btn btn-dark btn-sm"
+                            type="button"
+                            *ngIf="question.choices && question.choices.length > 2"
+                            (click)="deleteAnswer(i)"
+                            matTooltip="Supprimer"
+                        >
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <i class="fas fa-grip-vertical"></i>
+                    </div>
+                </div>
+                <small class="form-text text-danger" *ngIf="answer.invalid && (answer.dirty || answer.touched)"> La réponse est requise </small>
+            </div>
+        </div>
+
+        <button class="btn btn-secondary btn-sm" type="button" *ngIf="question.choices && question.choices.length < 4" (click)="addAnswer()">
+            <i matTooltip="Ajouter un choix de réponse" class="fa-solid fa-plus"></i>
+        </button>
+
+        <div *ngIf="!hasAtLeastOneTrueAndFalseChoice()" class="text-danger">*Au moins un choix devrait être faux et un vrai.</div>
+        <div *ngIf="!validUniqueChoiceTexts()" class="text-danger">*Les choix de réponse doivent être uniques</div>
+        <div *ngIf="!questionForm.valid || !areQuestionChoicesTextValid()" class="text-danger">*Tous les champs sont requis.</div>
+    </div>
+    <div class="submit-section">
+        <button *ngIf="showButton" type="button" class="btn btn-dark custom-width" (click)="resetAnswers()">Tout effacer</button>
+        <button *ngIf="showButton" type="submit" class="btn custom-button custom-width" [disabled]="!questionForm.valid || !validQuestion()">
+            {{ submitButton }}
+        </button>
+    </div>
+</form>

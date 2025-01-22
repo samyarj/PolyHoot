@@ -1,0 +1,440 @@
+$primary-color: #00115a;
+$second-color: #7ac97a;
+
+.page-wrapper {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    align-items: stretch;
+    height: 100vh;
+    max-height: 100vh;
+}
+#header-separator {
+    width: 100%;
+    height: 3px;
+    background-color: #ffffff;
+}
+.main-wrapper {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: calc(90vh - 3px);
+}
+.body-section {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+}
+
+.chat-section {
+    width: calc(25% - 3px);
+    max-width: calc(400px - 3px);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    background: linear-gradient(to bottom, #00115a, #004080);
+}
+
+.intro-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 200px;
+    margin-top: 50px;
+    > p {
+        color: white;
+        font-size: large;
+    }
+    .lock-section {
+        display: flex;
+        justify-content: space-around;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 10px;
+
+        i {
+            font-size: xx-large;
+        }
+        button {
+            margin-top: 10px;
+        }
+    }
+
+    .start-game-btn {
+        font-size: x-large;
+    }
+}
+
+.players-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 50px;
+    width: 100%;
+    height: 40%;
+    margin-bottom: 0px;
+    > p {
+        color: white;
+        font-size: xx-large;
+        margin-top: 10vh;
+        text-align: center;
+    }
+    > div {
+        width: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        background-color: rgba(255, 251, 208, 0.836);
+        border-radius: 30px;
+        margin-bottom: 30px;
+        p {
+            font-weight: 600;
+            font-size: 2rem;
+            text-align: center;
+            margin: 0;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+    }
+
+    ul {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        height: 70%;
+        overflow-y: scroll;
+        list-style: none;
+        width: 40%;
+        min-width: 300px;
+        padding-left: 0px;
+
+        li {
+            margin-top: 1rem;
+            font-size: 1.5rem;
+        }
+
+        &::-webkit-scrollbar {
+            width: 10px; /* Width of the scrollbar */
+        }
+
+        /* Handle */
+        &::-webkit-scrollbar-thumb {
+            background: #fafe22; /* Darker color for the scrollbar handle */
+            border-radius: 5px; /* Rounded corners for the scrollbar handle */
+        }
+
+        /* Handle on hover */
+        &::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 217, 0, 0.701); /* Darker color for the scrollbar handle on hover */
+        }
+    }
+}
+
+.timer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 90vh;
+    background: linear-gradient(to bottom, #c1ccff, #c1ccff, $second-color);
+
+    img {
+        width: 15%;
+        left: 10%;
+        top: 10%;
+        position: absolute;
+        animation: moveOwl 4s infinite;
+    }
+
+    h1 {
+        margin-bottom: 100px;
+        color: $primary-color;
+        font-size: 36px;
+        font-weight: bold;
+        margin-bottom: 100px;
+    }
+}
+
+.timer-container h2 {
+    font-size: 36px;
+    font-weight: bold;
+    color: $primary-color;
+    animation: pulse 0.5s infinite alternate;
+}
+
+@keyframes pulse {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(1.5);
+    }
+}
+
+@keyframes moveOwl {
+    0% {
+        transform: translateX(0px) translateY(0px);
+    }
+    25% {
+        transform: translateX(1100px) translateY(0px);
+    }
+    50% {
+        transform: translateX(1100px) translateY(450px);
+    }
+    75% {
+        transform: translateX(0px) translateY(450px);
+    }
+    100% {
+        transform: translateX(0px) translateY(0px);
+    }
+}
+
+.player-container {
+    width: 80%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background-color: rgba(89, 216, 255, 0.801);
+    border-radius: 30px;
+    padding: 25px 15px;
+    width: 70%;
+    height: 40px;
+}
+
+.player-container button {
+    margin-right: 10px;
+}
+
+.player-container {
+    text-align: left;
+}
+
+.leave-btn {
+    position: absolute;
+    right: min(calc(5%), 100px);
+    bottom: min(calc(5%), 100px);
+    width: 100px;
+}
+
+.title-section {
+    border-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 15%;
+    margin-top: 4%;
+}
+
+.title-section p {
+    color: #040735;
+    font-size: 30px;
+    font-weight: bold;
+    font-family: 'Lucida Handwriting';
+    margin-top: 20px;
+}
+
+.background-img,
+.hibou {
+    position: absolute;
+    z-index: -1;
+    height: 100%;
+    width: 100%;
+}
+
+#chat-separator {
+    height: 100%;
+    width: 3px;
+    background-color: #ffffff;
+}
+
+.room-board-container {
+    position: relative;
+    height: 300px;
+    width: 300px;
+    max-height: 20%;
+    max-width: 25%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.room-board {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    left: 1%;
+}
+
+.room-board-container > p {
+    position: absolute;
+    padding: 10px;
+    top: 50%;
+    font-size: xx-large;
+    font-weight: bold;
+
+    font-family: 'Lucida Handwriting';
+}
+
+.player-container {
+    background-color: rgba(167, 232, 255, 0.801);
+}
+
+.player-container-2 {
+    background-color: rgba(97, 249, 132, 0.87);
+}
+
+.players-list > .player-container:first-child {
+    margin-top: 0px;
+}
+
+.game-view {
+    margin-top: 23vh;
+}
+
+.fa-solid {
+    color: white;
+}
+
+.far {
+    filter: blur(2px);
+}
+
+.mid {
+    filter: blur(0.6px);
+}
+
+.animation-container {
+    width: 100%;
+    height: calc(90vh - 3px);
+    max-height: calc(90vh - 3px);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    .info-content {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        margin-top: 100px;
+        h1 {
+            color: $primary-color;
+            font-size: 36px;
+            font-weight: bold;
+        }
+        h2 {
+            margin-top: 100px;
+            font-size: 36px;
+            font-weight: bold;
+            color: $primary-color;
+            animation: pulse 0.5s infinite alternate;
+        }
+    }
+}
+
+.loading-owl {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    max-height: 100%;
+    max-width: 100%;
+    overflow: hidden;
+}
+.loading-owl > * {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+}
+.eye > * {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+}
+@keyframes eyeMove {
+    0% {
+        transform: translate(0, 0);
+    }
+    25% {
+        transform: translate(15px, -12px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+    75% {
+        transform: translate(-15px, -12px);
+    }
+    100% {
+        transform: translateX(0, 0);
+    }
+}
+
+@keyframes pupilMove {
+    0% {
+        transform: translate(0, 0);
+    }
+    25% {
+        transform: translate(20px, -15px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+    75% {
+        transform: translate(-20px, -15px);
+    }
+    100% {
+        transform: translate(0, 0);
+    }
+}
+
+@keyframes smallPupilMove {
+    0% {
+        transform: translate(0, 0);
+    }
+    25% {
+        transform: translate(23px, -15px);
+    }
+    50% {
+        transform: translateY(-22px);
+    }
+    75% {
+        transform: translate(-23px, -15px);
+    }
+    100% {
+        transform: translate(0, 0);
+    }
+}
+
+.left-eye,
+.right-eye {
+    animation: eyeMove 3.5s infinite;
+}
+
+.pupil {
+    animation: pupilMove 3.5s infinite;
+}
+
+.mini-pupil {
+    animation: smallPupilMove 3.5s infinite;
+    filter: blur(0.7px);
+}
+
+.background-container {
+    height: 100%;
+    width: 100%;
+    max-height: 100%;
+    max-width: 100%;
+}
+
+.background-img-2 {
+    position: absolute;
+    width: 100%;
+    height: calc(90vh - 3px);
+}

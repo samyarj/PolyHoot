@@ -1,0 +1,20 @@
+<div class="popup-container">
+    <div class="popup-header">
+        <h2 class="quiz-title">{{ data.title }}</h2>
+        <button class="close-button" (click)="onClose()">X</button>
+    </div>
+    <div class="popup-content">
+        <p class="quiz-description"><strong>Description:</strong> {{ data.description }}</p>
+        <p class="quiz-time"><strong>Temps par question:</strong> {{ data.duration }} sec</p>
+        <h3>Questions:</h3>
+        <ol class="questions-list">
+            <li *ngFor="let question of data.questions">
+                <span>{{ question.text + ' : ' + question.type }}</span>
+            </li>
+        </ol>
+        <div class="popup-actions">
+            <button class="btn custom-width custom-button play-button" (click)="openNewGame()">Créer une partie</button>
+            <button *ngIf="data.title !== 'Mode aléatoire'" class="btn custom-width custom-button test-button" (click)="navigate('/test-game/' + this.data.id)">Tester</button>
+        </div>
+    </div>
+</div>

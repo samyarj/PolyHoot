@@ -1,0 +1,88 @@
+.player-list-section {
+    overflow: hidden;
+    padding: 5px;
+    height: 100%;
+    width: 100%;
+    border-radius: 15px;
+    border: 1px solid white;
+    background: linear-gradient(to top, #3498db, #2980b9);
+    .player-list-header {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 5px;
+        border-radius: 5px;
+        p {
+            font-size: large;
+            color: white;
+            align-self: center;
+        }
+        select {
+            background-color: #3498db;
+            color: white;
+            border: 1px solid white;
+            border-radius: 5px;
+            padding: 5px;
+            align-self: center;
+        }
+    }
+    .player-info-section {
+        display: flex;
+        justify-content: space-between;
+        margin: 10px;
+        padding: 10px;
+        // background-color: #00115a;
+        border-radius: 5px;
+        p {
+            font-size: large;
+            color: white;
+        }
+    }
+}
+.player-list {
+    height: 80%;
+    width: 100%;
+    overflow-y: scroll;
+}
+.player-list::-webkit-scrollbar {
+    width: 12px;
+}
+
+.player-list::-webkit-scrollbar-thumb {
+    background-color: #00115a;
+    border-radius: 6px;
+}
+
+.player-list::-webkit-scrollbar-thumb:hover {
+    background-color: #172d8c;
+}
+
+.player-list::-webkit-scrollbar-thumb:active {
+    background-color: #172d8c;
+}
+.player-list-section {
+    box-shadow: 5px 5px 5px #6978bb;
+}
+.not-interacted {
+    background-color: rgb(224, 33, 33);
+    color: white;
+}
+.interacted {
+    background-color: rgb(206, 189, 6);
+    color: white;
+}
+.submitted {
+    background-color: rgb(4, 199, 4);
+    color: white;
+}
+
+.crossed {
+    background-color: black;
+    color: white;
+    text-decoration: line-through;
+    text-decoration-thickness: 3px;
+    text-decoration-color: #ffff;
+}
+.button-icon {
+    color: white;
+}

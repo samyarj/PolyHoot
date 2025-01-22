@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "polyhoot": {
+      "hosting": {
+        "client": [
+          "polyhoot"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "polyhoot"
+  }
+}

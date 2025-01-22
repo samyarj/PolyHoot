@@ -1,0 +1,320 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat:400,700');
+
+#main-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.secondary-wrapper {
+    display: flex;
+    position: relative;
+    flex-grow: 1;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(to right, #72a0df, #e2f9ff, #e2f9ff, #e2f9ff, #72a0df);
+}
+
+.cloud-background {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    overflow: hidden;
+}
+
+.layer1 {
+    filter: blur(2px);
+    z-index: 4;
+}
+
+.layer2 {
+    filter: blur(1px);
+    z-index: 5;
+}
+
+.layer3 {
+    z-index: 6;
+}
+
+.layer4 {
+    z-index: 7;
+}
+
+#header-separator {
+    width: 100%;
+    height: 5px;
+    background-color: #ffffff;
+}
+
+/* ANIMATIONS HIBOUX */
+
+@-webkit-keyframes animateOwlFromLeft {
+    0% {
+        left: -800px;
+    }
+    100% {
+        left: calc(110%);
+    }
+}
+
+@-moz-keyframes animateOwlFromLeft {
+    0% {
+        left: -800px;
+    }
+    100% {
+        left: calc(110%);
+    }
+}
+
+@keyframes animateOwlFromLeft {
+    0% {
+        left: -800px;
+    }
+    100% {
+        left: calc(110%);
+    }
+}
+
+@-webkit-keyframes animateOwlFromRight {
+    0% {
+        right: -800px;
+    }
+    100% {
+        right: 110%;
+    }
+}
+
+@-moz-keyframes animateOwlFromRight {
+    0% {
+        right: -800px;
+    }
+    100% {
+        right: 110%;
+    }
+}
+
+@keyframes animateOwlFromRight {
+    0% {
+        right: -800px;
+    }
+    100% {
+        right: 110%;
+    }
+}
+
+.x1,
+.x2,
+.x3,
+.x4,
+.x5,
+.x6 {
+    position: absolute;
+}
+.x1 {
+    -webkit-animation: animateOwlFromRight 16s linear infinite;
+    -moz-animation: animateOwlFromRight 16s linear infinite;
+    animation: animateOwlFromRight 16s linear infinite;
+    -webkit-transform: scale(0.65);
+    -moz-transform: scale(0.65);
+    transform: scale(0.65);
+    z-index: 5;
+    filter: blur(1px);
+}
+
+.x2 {
+    -webkit-animation: animateOwlFromLeft 15s linear infinite;
+    -moz-animation: animateOwlFromLeft 15s linear infinite;
+    animation: animateOwlFromLeft 15s linear infinite;
+    -webkit-transform: scale(0.5);
+    -moz-transform: scale(0.5);
+    transform: scale(0.5);
+    transform: scaleX(-1);
+    top: 10%;
+    z-index: 4;
+    filter: blur(1px);
+}
+
+.x3 {
+    -webkit-animation: animateOwlFromRight 20s linear infinite;
+    -moz-animation: animateOwlFromRight 20s linear infinite;
+    animation: animateOwlFromRight 20s linear infinite;
+    -webkit-transform: scale(0.35);
+    -moz-transform: scale(0.35);
+    transform: scale(0.35);
+    top: 30%;
+    z-index: 6;
+    filter: blur(1px);
+}
+
+.x4 {
+    -webkit-animation: animateOwlFromLeft 25s linear infinite;
+    -moz-animation: animateOwlFromLeft 25s linear infinite;
+    animation: animateOwlFromLeft 25s linear infinite;
+    -webkit-transform: scale(0.45);
+    -moz-transform: scale(0.45);
+    transform: scale(0.45);
+    transform: scaleX(-1);
+    top: 70%;
+    z-index: 6;
+    filter: blur(1px);
+}
+
+.x5 {
+    -webkit-animation: animateOwlFromRight 40s linear infinite;
+    -moz-animation: animateOwlFromRight 40s linear infinite;
+    animation: animateOwlFromRight 40s linear infinite;
+    -webkit-transform: scale(0.8);
+    -moz-transform: scale(0.8);
+    transform: scale(0.8);
+    top: 50%;
+    z-index: 3;
+    filter: blur(1px);
+}
+
+.x6 {
+    -webkit-animation: animateOwlFromLeft 35s linear infinite;
+    -moz-animation: animateOwlFromLeft 35s linear infinite;
+    animation: animateOwlFromLeft 35s linear infinite;
+    -webkit-transform: scale(0.6);
+    -moz-transform: scale(0.6);
+    transform: scale(0.6);
+    transform: scaleX(-1);
+    top: 60%;
+    z-index: 6;
+    filter: blur(1px);
+}
+
+.owl {
+    position: absolute;
+    width: auto;
+    height: 100px;
+}
+
+.cloud {
+    position: absolute;
+    bottom: 0px;
+    height: 100%;
+    max-width: 250px;
+}
+
+.left {
+    left: 0px;
+}
+
+.right {
+    right: 0px;
+    transform: scaleX(-1);
+}
+
+#quizlist {
+    position: absolute;
+    max-width: 100vw;
+    width: 100%;
+    z-index: 6;
+}
+
+.quizzes-list {
+    height: 85vh;
+    width: 100%;
+    overflow: auto;
+    margin: 0;
+}
+
+.quizzes-list::-webkit-scrollbar {
+    width: 12px;
+    height: 100%;
+    z-index: 999;
+}
+
+.quizzes-list::-webkit-scrollbar-thumb {
+    background: #488fd6;
+    border-radius: 10px;
+}
+
+.quizzes-list::-webkit-scrollbar-track {
+    background: #004080;
+    border-radius: 10px;
+}
+
+p {
+    margin: 0;
+    line-height: 1.6;
+}
+
+ol {
+    list-style: none;
+    counter-reset: list;
+}
+
+li {
+    --stop: calc(100% / var(--length) * var(--i));
+    --l: 62%;
+    --l2: 88%;
+    --h: calc((var(--i) - 1) * (180 / var(--length)));
+    --c1: hsl(var(--h), 71%, var(--l));
+    --c2: hsl(var(--h), 71%, var(--l2));
+
+    position: relative;
+    counter-increment: list;
+    max-width: 45rem;
+    box-shadow: 0.1rem 0.1rem 1.5rem rgba(0, 0, 0, 0.3);
+    border-radius: 500px;
+    overflow: hidden;
+    justify-content: center;
+    background: linear-gradient(to right, rgb(0, 25, 134, 0.6), rgba(0, 168, 180, 0.6), rgb(0, 25, 134, 0.6));
+    backdrop-filter: blur(5px);
+}
+
+h3 {
+    display: flex;
+    align-items: baseline;
+    font-weight: bold;
+    font-size: medium;
+    justify-content: center;
+    color: white;
+}
+
+@media (min-width: 40em) {
+    li {
+        margin: 3rem auto;
+        padding: 3rem 2rem 2rem;
+    }
+
+    h3 {
+        font-size: 2.25rem;
+        margin: 0 0 2rem;
+    }
+
+    h3::before {
+        margin-right: 1.5rem;
+    }
+}
+
+.quizContainer {
+    cursor: pointer;
+    transition:
+        box-shadow 0.3s ease,
+        transform 0.3s ease;
+    will-change: transform, box-shadow;
+}
+
+.quizContainer:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+}
+
+.create-page-button {
+    margin: 20px 50px;
+    transition: background-color 0.3s ease;
+    z-index: 25;
+}
+
+.show-logo-button {
+    position: absolute;
+    z-index: 20;
+    top: 3%;
+    left: 3%;
+}

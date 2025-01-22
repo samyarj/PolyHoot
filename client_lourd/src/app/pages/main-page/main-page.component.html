@@ -1,0 +1,45 @@
+<app-menu-bar></app-menu-bar>
+<div id="component-overflow-container">
+    <div class="main-wrapper">
+        <header class="header">
+            <div class="x1">
+                <div class="cloud"></div>
+            </div>
+            <div class="x3">
+                <div class="cloud"></div>
+            </div>
+            <div class="logo-container">
+                <img class="logo" src="assets/pictures/logo.png" alt="Logo Projet" />
+            </div>
+            <div class="x2">
+                <div class="cloud"></div>
+            </div>
+        </header>
+    </div>
+    <img class="clouds-bottom cloud1" src="assets/pictures/clouds-main-page/clouds-dark-blue-layer.png" />
+    <div class="x4">
+        <div class="cloud"></div>
+    </div>
+    <div class="x5">
+        <div class="cloud"></div>
+    </div>
+    <img class="clouds-bottom cloud2" src="assets/pictures/clouds-main-page/clouds-blue-layer.png" />
+    <img class="clouds-bottom cloud3" src="assets/pictures/clouds-main-page/clouds-light-blue-layer.png" />
+    <img class="clouds-bottom cloud4" src="assets/pictures/clouds-main-page/clouds-white-layer.png" />
+    <footer class="footer-item">
+        <h4 class="team-number">Équipe 211</h4>
+        <p class="team-members">
+            <span>Zekaria Bouchama</span>, <span>Amélie Boudjellab</span>, <span>Gabriel Mejia</span>, <span>Mina-Marius Mihaila</span>,
+            <span>Nour Alhuda Mofti</span>, <span>Elias Zidane</span>
+        </p>
+    </footer>
+    <div class="feature-content">
+        <h1 class="title">PolyHoot</h1>
+        <p>Testez vos connaissances!</p>
+        <div class="btn-container">
+            <button class="theme-btn btn-animated create-btn" (click)="navigate('/create')">Créer une partie</button>
+            <button class="theme-btn btn-animated play-btn btn" (click)="navigate('/joinGame')"><b>Joindre une partie</b></button>
+            <button class="theme-btn btn-animated admin-btn" (click)="navigateToAdmin()">Administrer les jeux</button>
+        </div>
+    </div>
+</div>

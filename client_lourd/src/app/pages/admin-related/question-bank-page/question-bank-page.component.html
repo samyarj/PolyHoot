@@ -1,0 +1,35 @@
+<app-header-game [title]="title"></app-header-game>
+<div>
+    <div class="buttons">
+        <div class="show-logo-button">
+            <button class="custom-button-cancel custom-width bank-page-button btn" (click)="redirectToPage('\admin')">Retour</button>
+            <img src="assets/pictures/button-owl.png" class="character" />
+        </div>
+        <app-question-type-filter (filterQuestionTypeChange)="updateSelectedQuestions($event, true)"></app-question-type-filter>
+        <div class="show-logo-button">
+            <button class="custom-button custom-width bank-page-button btn" (click)="addNewQuestion()">Ajouter une question</button>
+            <img src="assets/pictures/button-owl.png" class="character" />
+        </div>
+    </div>
+    <div *ngIf="showForm" class="new-question">
+        <app-bank-panel
+            [question]="emptyQuestion"
+            [expansionPanelDisabled]="true"
+            [expanded]="true"
+            [isEditMode]="true"
+            (cancelQuestionAdd)="handleCancelAdd()"
+            (questionAdded)="handleAddedQuestion($event)"
+        ></app-bank-panel>
+    </div>
+    <div class="questions-from-bank">
+        <ul>
+            <li *ngFor="let question of selectedQuestions">
+                <app-bank-panel
+                    [question]="question"
+                    (questionDeleted)="handleDeletedQuestion($event)"
+                    (questionModified)="handleModifiedQuestion($event)"
+                ></app-bank-panel>
+            </li>
+        </ul>
+    </div>
+</div>

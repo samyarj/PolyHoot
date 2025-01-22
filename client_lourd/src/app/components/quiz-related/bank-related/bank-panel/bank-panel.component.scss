@@ -1,0 +1,129 @@
+$primary-color: #00115a;
+$modified-primary-color: #00115aaa;
+$second-color: #5cb85c;
+$qrl-color: #f0c33b;
+// $question-qcm-color: #198038;
+$question-qcm-color: #2a9152;
+$question-qcm-color-hover: #125d29;
+$question-qrl-color: #194e80;
+$question-qrl-color-hover: #15395b;
+
+.question-panel {
+    margin: 20px;
+    mat-expansion-panel {
+        &:not(.mat-expanded):hover {
+            mat-expansion-panel-header {
+                mat-icon {
+                    font-size: 25px;
+                }
+            }
+        }
+
+        background: linear-gradient(to right, lighten($modified-primary-color, 60%), lighten($second-color, 60%));
+        color: black;
+
+        mat-expansion-panel-header {
+            color: white;
+            border-radius: 5px;
+            margin-right: 0;
+            align-items: center;
+            padding: 30px 10px;
+
+            mat-panel-title {
+                font-weight: bold;
+                font-size: medium;
+                color: white;
+            }
+
+            mat-panel-description {
+                font-size: medium;
+                margin-top: 5px;
+                color: white;
+            }
+
+            mat-icon {
+                font-size: x-large;
+                margin-right: 8px;
+                align-items: center;
+            }
+        }
+        transition: all 0.2s ease-in-out;
+
+        mat-expansion-panel-header.qcm {
+            background: $question-qcm-color;
+        }
+
+        mat-expansion-panel-header.qrl {
+            background: $question-qrl-color;
+        }
+    }
+
+    transition: all 0.2s ease-in-out;
+}
+
+.question-type-icon {
+    font-size: 20px;
+    margin-right: 20px;
+}
+
+.question-and-score {
+    display: flex;
+    justify-content: space-between;
+}
+
+.question {
+    font-size: large;
+    margin-top: 15px;
+}
+
+.answer-choices {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    text-align: center;
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    font-size: large;
+}
+
+button {
+    background-color: $primary-color;
+    color: white;
+    transition: transform 0.3s ease;
+    border-color: transparent;
+    border-radius: 10px;
+
+    &:hover {
+        background-color: lighten($primary-color, 50%);
+        transform: scale(1.1);
+    }
+}
+
+.custom-button {
+    background-color: $primary-color;
+    color: white;
+    transition: transform 0.3s ease;
+    border-color: transparent;
+    border-radius: 5px;
+
+    &:hover {
+        background-color: lighten($primary-color, 50%);
+        transform: scale(1.1);
+    }
+}
+
+.expanded-panel {
+    cursor: default;
+}
+
+.choice-check {
+    color: green;
+    font-weight: bolder;
+}

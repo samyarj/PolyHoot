@@ -1,0 +1,96 @@
+$primary-color: #00115a;
+
+.questions-from-bank {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+ul {
+    list-style-type: none;
+    width: 60%;
+}
+.questions-from-bank li {
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+    border-radius: 5px;
+}
+.questions-from-bank li:hover {
+    scale: 1.1;
+}
+
+@media (max-width: 1400px) {
+    ul {
+        width: 80%;
+    }
+}
+
+.custom-button {
+    background-color: $primary-color;
+    border: 3px solid $primary-color;
+    color: white;
+    transition:
+        background-color 0.3s,
+        border-color 0.3s;
+    border-radius: 5px;
+    font-size: large;
+
+    &:hover {
+        background-color: white;
+        color: $primary-color;
+    }
+}
+
+.custom-button-cancel {
+    background-color: white;
+    border: 3px solid $primary-color;
+    color: $primary-color;
+    transition:
+        background-color 0.3s,
+        border-color 0.3s;
+    border-radius: 5px;
+    font-size: large;
+
+    &:hover {
+        background-color: $primary-color;
+        color: white;
+    }
+}
+
+.bank-page-button {
+    margin: 20px 50px;
+    transition: background-color 0.3s ease;
+    z-index: 1;
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    font-size: large;
+    align-items: center;
+}
+
+.new-question {
+    margin: 0px 150px;
+}
+
+.show-logo-button {
+    position: relative;
+}
+
+.character {
+    width: 90px;
+    position: absolute;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: -2;
+}
+
+.bank-page-button:hover + .character {
+    top: -35%;
+    opacity: 1;
+}
