@@ -1,10 +1,12 @@
 import 'package:client_leger/UI/coins/coins_page.dart';
 import 'package:client_leger/UI/equipped/equipped_page.dart';
+import 'package:client_leger/UI/login/login_page.dart';
 import 'package:client_leger/UI/play/creategamepage.dart';
 import 'package:client_leger/UI/play/playbutton.dart';
 import 'package:client_leger/UI/play/playpage.dart';
 import 'package:client_leger/UI/quiz/quiz_page.dart';
 import 'package:client_leger/UI/sidebar/sidebar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
@@ -16,6 +18,10 @@ final GoRouter router = GoRouter(
   navigatorKey: _rootNavigatorKey,
   debugLogDiagnostics: true,
   routes: [
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => const LoginPage(),
+    ),
     StatefulShellRoute.indexedStack(
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state, statefulNavigationShell) {
@@ -40,7 +46,8 @@ final GoRouter router = GoRouter(
                 ),
               ),
               PlayButton(
-                onPressed: () => statefulNavigationShell.goBranch(0),  // Go to the Play branch (without clearing nav stack; saves the state!)
+                onPressed: () => statefulNavigationShell.goBranch(
+                    0), // Go to the Play branch (without clearing nav stack; saves the state!)
               ),
             ]),
             iconTheme: const IconThemeData(color: Colors.white),
@@ -114,4 +121,11 @@ final GoRouter router = GoRouter(
       ],
     ),
   ],
+  redirect: (BuildContext context, GoRouterState state) async {
+    final bool loggedIn = FirebaseAuth.instance.currentUser != null;
+    final bool loggingIn = state.matchedLocation == '/login';
+    if (!loggedIn) return '/login';
+    if (loggingIn) return '/play';
+    return null;
+  },
 );
