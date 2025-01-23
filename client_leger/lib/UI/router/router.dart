@@ -130,7 +130,8 @@ final GoRouter router = GoRouter(
   redirect: (BuildContext context, GoRouterState state) async {
     final bool loggedIn = FirebaseAuth.instance.currentUser != null &&
         !FirebaseAuth.instance.currentUser!.isAnonymous;
-    final bool loggingIn = state.matchedLocation == Paths.logIn;
+    final bool loggingIn = state.matchedLocation == Paths.logIn ||
+        state.matchedLocation == Paths.signUp;
     if (!loggedIn) {
       if (state.matchedLocation == Paths.signUp) return null;
       return Paths.logIn;

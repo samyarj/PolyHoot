@@ -1,6 +1,8 @@
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
+    as auth_service;
 
 class SignUpForm extends StatefulWidget {
   const SignUpForm({super.key});
@@ -16,6 +18,19 @@ class _SignUpFormState extends State<SignUpForm> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
+
+  final FocusNode _usernameFocusNode = FocusNode();
+  final FocusNode _emailFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
+  final FocusNode _confirmPasswordFocusNode = FocusNode();
+
+  final GlobalKey<FormFieldState> _usernameFieldKey =
+      GlobalKey<FormFieldState>();
+  final GlobalKey<FormFieldState> _emailFieldKey = GlobalKey<FormFieldState>();
+  final GlobalKey<FormFieldState> _passwordFieldKey =
+      GlobalKey<FormFieldState>();
+  final GlobalKey<FormFieldState> _confirmPasswordFieldKey =
+      GlobalKey<FormFieldState>();
 
   final greyBorder = OutlineInputBorder(
     borderRadius: BorderRadius.circular(8),
@@ -33,7 +48,55 @@ class _SignUpFormState extends State<SignUpForm> {
   bool isUsernameTaken = false;
   bool isEmailTaken = false;
 
-  void signUp() {}
+  @override
+  void initState() {
+    super.initState();
+
+    _usernameFocusNode.addListener(() {
+      if (!_usernameFocusNode.hasFocus) {
+        _usernameFieldKey.currentState?.validate();
+      }
+    });
+
+    _emailFocusNode.addListener(() {
+      if (!_emailFocusNode.hasFocus) {
+        _emailFieldKey.currentState?.validate();
+      }
+    });
+
+    _passwordFocusNode.addListener(() {
+      if (!_passwordFocusNode.hasFocus) {
+        _passwordFieldKey.currentState?.validate();
+      }
+    });
+
+    _confirmPasswordFocusNode.addListener(() {
+      if (!_confirmPasswordFocusNode.hasFocus ||
+          _confirmPasswordFocusNode.hasFocus) {
+        _confirmPasswordFieldKey.currentState?.validate();
+      }
+    });
+  }
+
+  Future signUp() async {
+    try {
+      await auth_service.signUp(_usernameController.text.trim(),
+          _emailController.text.trim(), _passwordController.text.trim());
+    } catch (e) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString(),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onErrorContainer,
+            ),
+          ),
+          backgroundColor: Theme.of(context).colorScheme.errorContainer,
+        ),
+      );
+    }
+  }
 
   void signUpWithGoogle() {
     print("Signing up with Google");
@@ -45,6 +108,10 @@ class _SignUpFormState extends State<SignUpForm> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    _confirmPasswordFocusNode.dispose();
+    _usernameFocusNode.dispose();
     super.dispose();
   }
 
@@ -115,7 +182,9 @@ class _SignUpFormState extends State<SignUpForm> {
               SizedBox(height: 16),
               // Username Field
               TextFormField(
+                key: _usernameFieldKey,
                 controller: _usernameController,
+                focusNode: _usernameFocusNode,
                 decoration: InputDecoration(
                   labelText: 'Username',
                   hintText: 'Enter your username',
@@ -126,7 +195,9 @@ class _SignUpFormState extends State<SignUpForm> {
               SizedBox(height: 16),
               // Email Field
               TextFormField(
+                key: _emailFieldKey,
                 controller: _emailController,
+                focusNode: _emailFocusNode,
                 decoration: InputDecoration(
                   labelText: 'Email',
                   hintText: 'Enter your email',
@@ -137,7 +208,9 @@ class _SignUpFormState extends State<SignUpForm> {
               SizedBox(height: 16),
               // Password Field
               TextFormField(
+                key: _passwordFieldKey,
                 controller: _passwordController,
+                focusNode: _passwordFocusNode,
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'Password',
@@ -149,7 +222,9 @@ class _SignUpFormState extends State<SignUpForm> {
               SizedBox(height: 16),
               // Confirm Password Field
               TextFormField(
+                key: _confirmPasswordFieldKey,
                 controller: _confirmPasswordController,
+                focusNode: _confirmPasswordFocusNode,
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'Confirm Password',
@@ -167,7 +242,11 @@ class _SignUpFormState extends State<SignUpForm> {
               ),
               SizedBox(height: 16),
               ElevatedButton(
-                onPressed: signUp,
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    await signUp();
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
