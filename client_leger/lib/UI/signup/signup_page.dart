@@ -1,8 +1,8 @@
-import 'package:client_leger/UI/login/login_form.dart';
+import 'package:client_leger/UI/signup/signup_form.dart';
 import 'package:flutter/material.dart';
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+class SignUpPage extends StatelessWidget {
+  const SignUpPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -10,7 +10,7 @@ class LoginPage extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       body: Row(
         children: [
-          LoginForm(),
+          SignUpForm(),
           SizedBox(
             width: 32,
           ),
