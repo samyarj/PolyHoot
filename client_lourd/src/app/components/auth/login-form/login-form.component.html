@@ -17,7 +17,7 @@
         *ngIf="
           loginForm.get('identifier')?.invalid &&
           loginForm.get('identifier')?.touched &&
-          loginForm.get('identifier')?.hasError('pattern')
+          !loginForm.get('identifier')?.hasError('pattern')
         "
         class="text-danger"
       >
