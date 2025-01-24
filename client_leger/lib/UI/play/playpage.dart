@@ -1,3 +1,4 @@
+import 'package:client_leger/UI/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -49,8 +50,10 @@ class PlayPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
-                    onPressed: () =>
-                        {GoRouter.of(context).push('/play/game_creation')},
+                    onPressed: () => {
+                      GoRouter.of(context)
+                          .push('${Paths.play}/${Paths.gameCreation}')
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black,

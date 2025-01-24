@@ -1,6 +1,6 @@
 class User {
   final String avatarEquipped;
-  final String borderEquipped;
+  final String? borderEquipped;
   final int coins;
   final Map<String, dynamic> config;
   final String languageEquipped;

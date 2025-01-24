@@ -1,5 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:client_leger/UI/router/routes.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
+    as auth_service;
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -12,6 +15,18 @@ class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final greyBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(8),
+    borderSide: BorderSide(
+      color: Colors.grey.shade300,
+    ),
+  );
+  final blueBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(8),
+    borderSide: BorderSide(
+      color: Colors.blue.shade300,
+    ),
+  );
 
   @override
   void dispose() {
@@ -21,26 +36,52 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   Future signIn() async {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(   // ca retourne le userCredential
-      email: _emailController.text.trim(),
-      password: _passwordController.text.trim(),
-    );
+    try {
+      await auth_service.signIn(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString(),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onErrorContainer,
+            ),
+          ),
+          backgroundColor: Theme.of(context).colorScheme.errorContainer,
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        width: 400,
-        child: Form(
-          key: _formKey,
+    return Container(
+      alignment: Alignment.center,
+      width: 400,
+      padding: EdgeInsets.all(32),
+      child: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
+            children: [
+              Text(
+                "Sign In",
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 32),
               TextFormField(
                 controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  enabledBorder: greyBorder,
+                  focusedBorder: blueBorder,
+                  errorBorder: greyBorder,
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your email';
@@ -48,9 +89,15 @@ class _LoginFormState extends State<LoginForm> {
                   return null;
                 },
               ),
+              SizedBox(height: 32),
               TextFormField(
                 controller: _passwordController,
-                decoration: InputDecoration(labelText: 'Password'),
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  enabledBorder: greyBorder,
+                  focusedBorder: blueBorder,
+                  errorBorder: greyBorder,
+                ),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -60,13 +107,75 @@ class _LoginFormState extends State<LoginForm> {
                 },
               ),
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    await signIn();
-                  }
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      await signIn();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 19, 99, 236),
+                    foregroundColor: Colors.white, // White text color
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    textStyle: const TextStyle(fontSize: 18),
+                  ),
+                  child: Text('Login'),
+                ),
+              ),
+              SizedBox(height: 16),
+              // Sign Up Link
+              TextButton(
+                onPressed: () {
+                  context.go(Paths.signUp);
                 },
-                child: Text('Login'),
+                child: Text(
+                  "Don't have an account? Sign Up",
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              // Forgot Password Link
+              TextButton(
+                onPressed: () {},
+                child: Text(
+                  "Forgot your password? Reset Password",
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              SizedBox(height: 16),
+              // Divider
+              Row(
+                children: [
+                  Expanded(child: Divider()),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text('or'),
+                  ),
+                  Expanded(child: Divider()),
+                ],
+              ),
+              SizedBox(height: 16),
+              // Google Login
+              OutlinedButton.icon(
+                onPressed: () {},
+                icon: Icon(Icons.account_circle, size: 20),
+                label: Text(
+                  'Login with Google',
+                  style: TextStyle(fontSize: 18),
+                ),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
               ),
             ],
           ),

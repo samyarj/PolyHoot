@@ -5,7 +5,9 @@ import 'package:client_leger/UI/play/creategamepage.dart';
 import 'package:client_leger/UI/play/playbutton.dart';
 import 'package:client_leger/UI/play/playpage.dart';
 import 'package:client_leger/UI/quiz/quiz_page.dart';
+import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/UI/sidebar/sidebar.dart';
+import 'package:client_leger/UI/signup/signup_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -14,13 +16,17 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _playShellNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter router = GoRouter(
-  initialLocation: '/play',
+  initialLocation: Paths.play,
   navigatorKey: _rootNavigatorKey,
   debugLogDiagnostics: true,
   routes: [
     GoRoute(
-      path: '/login',
+      path: Paths.logIn,
       builder: (context, state) => const LoginPage(),
+    ),
+    GoRoute(
+      path: Paths.signUp,
+      builder: (context, state) => const SignUpPage(),
     ),
     StatefulShellRoute.indexedStack(
       parentNavigatorKey: _rootNavigatorKey,
@@ -55,17 +61,17 @@ final GoRouter router = GoRouter(
               IconButton(
                 icon: const Icon(Icons.edit),
                 iconSize: 34,
-                onPressed: () => context.go('/quiz'),
+                onPressed: () => context.go(Paths.quiz),
               ),
               IconButton(
                 icon: const Icon(Icons.backpack),
                 iconSize: 34,
-                onPressed: () => context.go('/equipped'),
+                onPressed: () => context.go(Paths.equipped),
               ),
               IconButton(
                 icon: const Icon(Icons.attach_money),
                 iconSize: 34,
-                onPressed: () => context.go('/coins'),
+                onPressed: () => context.go(Paths.coins),
               ),
             ],
           ),
@@ -83,11 +89,11 @@ final GoRouter router = GoRouter(
           navigatorKey: _playShellNavigatorKey,
           routes: [
             GoRoute(
-              path: '/play',
+              path: Paths.play,
               builder: (context, state) => const PlayPage(),
               routes: [
                 GoRoute(
-                  path: 'game_creation',
+                  path: Paths.gameCreation,
                   builder: (context, state) => const GameCreationPage(),
                 ),
               ],
@@ -97,7 +103,7 @@ final GoRouter router = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/quiz',
+              path: Paths.quiz,
               builder: (context, state) => const QuizPage(),
             ),
           ],
@@ -105,7 +111,7 @@ final GoRouter router = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/equipped',
+              path: Paths.equipped,
               builder: (context, state) => const EquippedPage(),
             ),
           ],
@@ -113,7 +119,7 @@ final GoRouter router = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/coins',
+              path: Paths.coins,
               builder: (context, state) => const CoinsPage(),
             ),
           ],
@@ -122,10 +128,15 @@ final GoRouter router = GoRouter(
     ),
   ],
   redirect: (BuildContext context, GoRouterState state) async {
-    final bool loggedIn = FirebaseAuth.instance.currentUser != null;
-    final bool loggingIn = state.matchedLocation == '/login';
-    if (!loggedIn) return '/login';
-    if (loggingIn) return '/play';
+    final bool loggedIn = FirebaseAuth.instance.currentUser != null &&
+        !FirebaseAuth.instance.currentUser!.isAnonymous;
+    final bool loggingIn = state.matchedLocation == Paths.logIn ||
+        state.matchedLocation == Paths.signUp;
+    if (!loggedIn) {
+      if (state.matchedLocation == Paths.signUp) return null;
+      return Paths.logIn;
+    }
+    if (loggingIn) return Paths.play;
     return null;
   },
 );
