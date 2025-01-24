@@ -58,10 +58,15 @@ export class UserService {
         return !querySnapshot.empty;
     }
 
-    async isEmailTaken(email: string): Promise<boolean> {
+    async isEmailTaken(email: string): Promise<{ emailExists: boolean; provider: string }> {
         const usersRef = this.firestore.collection('users');
         const querySnapshot = await usersRef.where('email', '==', email).get();
-        return !querySnapshot.empty;
+
+        // get provider
+        const user = await this.adminAuth.getUserByEmail(email);
+        const provider = user.providerData[0].providerId;
+
+        return { emailExists: !querySnapshot.empty, provider };
     }
 
     async logout(uid: string): Promise<void> {
@@ -136,7 +141,10 @@ export class UserService {
             friendRequests: userDoc.friendRequests || [],
             avatarEquipped: userDoc.avatarEquipped || null,
             borderEquipped: userDoc.borderEquipped || null,
-            config: userDoc.config || { themeEquipped: 'default', languageEquipped: 'en' },
+            config: userDoc.config || {
+                themeEquipped: 'default',
+                languageEquipped: 'en',
+            },
             nbReport: userDoc.nbReport || 0,
             nbBan: userDoc.nbBan || 0,
             unBanDate: userDoc.unBanDate || null,

@@ -88,8 +88,8 @@ export class AuthController {
     @Get('check-email')
     async verifyEmail(@Query('email') email: string, @Res() response: Response) {
         try {
-            const exists = await this.userService.isEmailTaken(email);
-            response.status(HttpStatus.OK).json({ emailExists: exists });
+            const results = await this.userService.isEmailTaken(email);
+            response.status(HttpStatus.OK).json(results);
         } catch (error) {
             response.status(HttpStatus.BAD_REQUEST).send({ message: error.message || 'Invalid email' });
         }
