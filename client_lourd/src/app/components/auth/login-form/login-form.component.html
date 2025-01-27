@@ -1,99 +1,68 @@
 <div class="login-container">
-  <h2 class="text-center mb-4">Sign In</h2>
+    <h2 class="text-center mb-4">Sign In</h2>
 
-  <!-- Login Form -->
-  <form [formGroup]="loginForm" (ngSubmit)="login()">
-    <!-- Email or Username Field -->
-    <div class="form-group mb-3">
-      <label for="identifier" class="form-label">Email or Username</label>
-      <input
-        id="identifier"
-        type="text"
-        placeholder="Enter your email or username"
-        formControlName="identifier"
-        class="form-control"
-      />
-      <small
-        *ngIf="
-          loginForm.get('identifier')?.invalid &&
-          loginForm.get('identifier')?.touched &&
-          !loginForm.get('identifier')?.hasError('pattern')
-        "
-        class="text-danger"
-      >
-        Identifier is required.
-      </small>
-      <small
-        *ngIf="
-          loginForm.get('identifier')?.hasError('pattern') &&
-          loginForm.get('identifier')?.touched
-        "
-        class="text-danger"
-      >
-        Please enter a valid email address.
-      </small>
-    </div>
+    <!-- Login Form -->
+    <form [formGroup]="loginForm" (ngSubmit)="login()">
+        <!-- Email or Username Field -->
+        <div class="form-group mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input id="email" type="text" placeholder="Enter your email or username" formControlName="email" class="form-control" />
+            <small
+                *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched && !loginForm.get('email')?.hasError('pattern')"
+                class="text-danger"
+            >
+                email is required.
+            </small>
+            <small *ngIf="loginForm.get('email')?.hasError('pattern') && loginForm.get('email')?.touched" class="text-danger">
+                Please enter a valid email address.
+            </small>
+        </div>
 
-    <!-- Password Field -->
-    <div class="form-group mb-3">
-      <label for="password" class="form-label">Password</label>
-      <input
-        id="password"
-        type="password"
-        placeholder="Enter your password"
-        formControlName="password"
-        class="form-control"
-      />
-      <small
-        *ngIf="
-          loginForm.get('password')?.invalid &&
-          loginForm.get('password')?.touched
-        "
-        class="text-danger"
-      >
-        Password is required.
-      </small>
-    </div>
+        <!-- Password Field -->
+        <div class="form-group mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input id="password" type="password" placeholder="Enter your password" formControlName="password" class="form-control" />
+            <small *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="text-danger">
+                Password is required.
+            </small>
+        </div>
 
-    <!-- Submit Button -->
-    <div class="form-group">
-      <button
-        type="submit"
-        [disabled]="loginForm.invalid"
-        class="btn btn-primary w-100"
-      >
-        Login
-      </button>
-    </div>
-  </form>
+        <!-- Submit Button -->
+        <div class="form-group position-relative">
+            <button type="submit" [disabled]="loginForm.invalid || isSubmitting" class="btn btn-primary w-100">Login</button>
+            <div
+                *ngIf="isSubmitting"
+                class="spinner-border text-light position-absolute bottom-0 end-0"
+                style="width: 1.5rem; height: 1.5rem"
+                role="status"
+            >
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </form>
 
-  <!-- Sign Up Link -->
-  <p class="text-center mt-3">
-    Don't have an account? <a [routerLink]="'/signup'">Sign Up</a>
-  </p>
+    <!-- Sign Up Link -->
+    <p class="text-center mt-3">Don't have an account? <a [routerLink]="'/signup'">Sign Up</a></p>
 
-  <!-- Forgot Password Link -->
-  <p class="text-center">
-    Forgot your password?
-    <a [routerLink]="'/forgot-password'">Reset Password</a>
-  </p>
+    <!-- Forgot Password Link -->
+    <p class="text-center">
+        Forgot your password?
+        <a [routerLink]="'/forgot-password'">Reset Password</a>
+    </p>
 
-  <!-- Divider -->
-  <hr />
-  <p class="divider-text text-center">or</p>
+    <!-- Divider -->
+    <hr />
+    <p class="divider-text text-center">or</p>
 
-  <!-- Google Login -->
-  <button
-    (click)="loginWithGoogle()"
-    class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center"
-  >
-    <div class="d-flex align-items-center gap-2">
-      <span
-        class="iconify"
-        data-icon="logos:google-icon"
-        style="font-size: 20px"
-      ></span>
-      <span>Login with Google</span>
-    </div>
-  </button>
+    <!-- Google Login -->
+    <button
+        [disabled]="isSubmitting"
+        (click)="loginWithGoogle()"
+        class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center"
+    >
+        <div class="d-flex align-items-center gap-2">
+            <span class="iconify" data-icon="logos:google-icon" style="font-size: 20px"></span>
+            <span>Login with Google</span>
+        </div>
+    </button>
 </div>

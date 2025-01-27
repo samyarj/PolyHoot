@@ -12,6 +12,7 @@ import { AuthService } from '@app/services/auth/auth.service';
 export class LoginFormComponent {
     loginForm: FormGroup;
     errorMessage: string = '';
+    isSubmitting: boolean = false;
 
     constructor(
         private fb: FormBuilder,
@@ -20,7 +21,7 @@ export class LoginFormComponent {
         private route: ActivatedRoute,
     ) {
         this.loginForm = this.fb.group({
-            identifier: ['', [Validators.required, Validators.pattern(EMAIL_REGEX)]],
+            email: ['', [Validators.required, Validators.pattern(EMAIL_REGEX)]],
             password: ['', Validators.required],
         });
     }
@@ -33,9 +34,11 @@ export class LoginFormComponent {
             return;
         }
 
-        const { identifier, password } = this.loginForm.value;
+        const { email, password } = this.loginForm.value;
+        this.isSubmitting = true;
+        this.loginForm.disable();
 
-        this.authService.login(identifier, password).subscribe({
+        this.authService.login(email, password).subscribe({
             next: (user) => {
                 const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
                 this.router.navigateByUrl(returnUrl);
@@ -43,6 +46,8 @@ export class LoginFormComponent {
             },
             error: (error) => {
                 this.errorMessage = error.message;
+                this.isSubmitting = false;
+                this.loginForm.enable();
             },
         });
     }

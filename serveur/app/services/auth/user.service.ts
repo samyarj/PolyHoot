@@ -14,7 +14,7 @@ export class UserService {
     async createUserInFirestore(uid: string, username: string, email: string): Promise<User> {
         // Check if the username or email already exists in Firestore
         const usernameExists = await this.isUsernameTaken(username);
-        const emailExists = await this.isEmailTaken(email);
+        const { emailExists } = await this.isEmailTaken(email);
         if (usernameExists) throw new Error('Username is already taken.');
         if (emailExists) throw new Error('Email is already in use.');
 
@@ -58,15 +58,23 @@ export class UserService {
         return !querySnapshot.empty;
     }
 
-    async isEmailTaken(email: string): Promise<{ emailExists: boolean; provider: string }> {
-        const usersRef = this.firestore.collection('users');
-        const querySnapshot = await usersRef.where('email', '==', email).get();
+    async isEmailTaken(email: string): Promise<{ emailExists: boolean; provider: string | null }> {
+        try {
+            // Check if the email exists in Firestore
+            const usersRef = this.firestore.collection('users');
+            const querySnapshot = await usersRef.where('email', '==', email).get();
 
-        // get provider
-        const user = await this.adminAuth.getUserByEmail(email);
-        const provider = user.providerData[0].providerId;
+            let provider: string | null = null;
+            const user = await this.adminAuth.getUserByEmail(email);
+            provider = user.providerData.length > 0 ? user.providerData[0].providerId : null;
 
-        return { emailExists: !querySnapshot.empty, provider };
+            return { emailExists: !querySnapshot.empty, provider };
+        } catch (error) {
+            if ((error as { code: string }).code === 'auth/user-not-found') {
+                return { emailExists: false, provider: null };
+            }
+            throw new Error('Failed to check email availability.');
+        }
     }
 
     async logout(uid: string): Promise<void> {
