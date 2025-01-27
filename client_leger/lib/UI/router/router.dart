@@ -76,10 +76,11 @@ final GoRouter router = GoRouter(
                 onPressed: () => context.go(Paths.coins),
               ),
               IconButton(
-                icon: const Icon(Icons.logout),
-                iconSize: 34,
-                onPressed: () => auth_service.logout(),
-              ),
+                  icon: const Icon(Icons.logout),
+                  iconSize: 34,
+                  onPressed: () => {
+                        auth_service.logout(),
+                      }),
             ],
           ),
           body: Row(
@@ -137,7 +138,7 @@ final GoRouter router = GoRouter(
   redirect: (BuildContext context, GoRouterState state) async {
     final bool loggedIn = FirebaseAuth.instance.currentUser != null &&
         !FirebaseAuth.instance.currentUser!.isAnonymous &&
-        !auth_service.isLoggedInElsewhere;
+        auth_service.shouldBeRedirected;
     final bool loggingIn = state.matchedLocation == Paths.logIn ||
         state.matchedLocation == Paths.signUp;
     if (!loggedIn) {
