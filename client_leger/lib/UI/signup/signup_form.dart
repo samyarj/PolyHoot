@@ -83,6 +83,7 @@ class _SignUpFormState extends State<SignUpForm> {
       await auth_service.signUp(_usernameController.text.trim(),
           _emailController.text.trim(), _passwordController.text.trim());
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
