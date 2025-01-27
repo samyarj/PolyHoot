@@ -42,6 +42,7 @@ class _LoginFormState extends State<LoginForm> {
         _passwordController.text.trim(),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

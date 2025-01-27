@@ -9,6 +9,8 @@ import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/UI/sidebar/sidebar.dart';
 import 'package:client_leger/UI/signup/signup_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
+    as auth_service;
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
@@ -73,6 +75,11 @@ final GoRouter router = GoRouter(
                 iconSize: 34,
                 onPressed: () => context.go(Paths.coins),
               ),
+              IconButton(
+                icon: const Icon(Icons.logout),
+                iconSize: 34,
+                onPressed: () => auth_service.logout(),
+              ),
             ],
           ),
           body: Row(
@@ -129,7 +136,8 @@ final GoRouter router = GoRouter(
   ],
   redirect: (BuildContext context, GoRouterState state) async {
     final bool loggedIn = FirebaseAuth.instance.currentUser != null &&
-        !FirebaseAuth.instance.currentUser!.isAnonymous;
+        !FirebaseAuth.instance.currentUser!.isAnonymous &&
+        !auth_service.isLoggedInElsewhere;
     final bool loggingIn = state.matchedLocation == Paths.logIn ||
         state.matchedLocation == Paths.signUp;
     if (!loggedIn) {
