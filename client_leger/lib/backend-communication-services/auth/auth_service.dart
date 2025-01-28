@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:client_leger/backend-communication-services/environment.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:client_leger/backend-communication-services/models/user.dart'
     as user_model;
@@ -10,10 +12,13 @@ const String baseUrl = '${Environment.serverUrl}/users';
 const String getProfileUrl = '$baseUrl/profile';
 const String createUserUrl = '$baseUrl/create-user';
 const String logOutUrl = '$baseUrl/logout';
-user_model.User? currentSignedInUser;
-bool shouldBeRedirected = false;
+Completer<user_model.User?> currentSignedInUserCompleter =
+    Completer<user_model.User?>();
+Future<user_model.User?> get currentSignedInUser =>
+    currentSignedInUserCompleter.future;
+ValueNotifier<bool> isLoggedIn = ValueNotifier<bool>(false);
 
-Future<user_model.User> fetchUser(
+Future<user_model.User?> fetchUser(
   UserCredential userCredential,
 ) async {
   AppLogger.d("in fetchUser");
@@ -28,15 +33,20 @@ Future<user_model.User> fetchUser(
   if (response.statusCode == 200) {
     final userJson = jsonDecode(response.body);
     AppLogger.i("userJson successfully fetched: $userJson");
-    currentSignedInUser = user_model.User.fromJson(userJson);
+    try {
+      currentSignedInUserCompleter.complete(user_model.User.fromJson(userJson));
+    } catch (e) {
+      AppLogger.e("Error while parsing userJson: $e");
+      throw Exception("Error while parsing userJson: $e");
+    }
     AppLogger.d("just updated the currentSignedInUser");
-    return currentSignedInUser!;
+    return currentSignedInUser;
   } else {
     throw Exception('Failed to fetch user: ${response.reasonPhrase}');
   }
 }
 
-Future<user_model.User> createAndFetchUser(
+Future<user_model.User?> createAndFetchUser(
     UserCredential userCredential, String endpoint) async {
   // with email or Google
   AppLogger.d("in createAndFetchUser");
@@ -52,8 +62,17 @@ Future<user_model.User> createAndFetchUser(
   if (response.statusCode == 201) {
     final userJson = jsonDecode(response.body);
     AppLogger.i("userJson successfully fetched: $userJson");
-    currentSignedInUser = user_model.User.fromJson(userJson);
-    return currentSignedInUser!;
+
+    try {
+      currentSignedInUserCompleter.complete(user_model.User.fromJson(userJson));
+      AppLogger.d("just updated the currentSignedInUser $currentSignedInUser");
+    } catch (e) {
+      AppLogger.e("Error while parsing userJson: $e");
+      logout();
+      throw Exception("Error while parsing userJson: $e");
+    }
+
+    return currentSignedInUser;
   } else {
     await userCredential.user!.delete();
     AppLogger.e(
@@ -62,12 +81,13 @@ Future<user_model.User> createAndFetchUser(
   }
 }
 
-Future<user_model.User> signUp(
+Future<user_model.User?> signUp(
   String username,
   String email,
   String password,
 ) async {
   AppLogger.d("in signUp");
+
   UserCredential userCredential = await FirebaseAuth.instance
       .createUserWithEmailAndPassword(email: email, password: password);
 
@@ -75,17 +95,17 @@ Future<user_model.User> signUp(
 
   final user = await createAndFetchUser(userCredential, createUserUrl);
 
-  shouldBeRedirected = true;
-
+  AppLogger.d("About to refresh the listenable");
+  isLoggedIn.value = true;
   return user;
 }
 
-Future<user_model.User> signIn(String email, String password) async {
+Future<user_model.User?> signIn(String email, String password) async {
   AppLogger.d("in signIn");
+
   final isOnline = await isUserOnline(email);
 
   if (isOnline) {
-    shouldBeRedirected = false;
     AppLogger.e("User is already logged in on another device.");
     throw Exception('User is already logged in on another device.');
   }
@@ -98,10 +118,11 @@ Future<user_model.User> signIn(String email, String password) async {
     );
 
     final user = await fetchUser(userCredential);
-    shouldBeRedirected = true;
+    AppLogger.d("About to change the listenable");
+    isLoggedIn.value = true;
     return user;
   } on Exception catch (e) {
-    shouldBeRedirected = false;
+    logout();
     AppLogger.e("Failed to sign in user: ${e.toString()}  ");
     throw Exception("Failed to sign in user: ${e.toString()}");
   }
@@ -137,8 +158,10 @@ void logout() async {
   if (idToken == null) {
     AppLogger.e("idToken is null");
     await FirebaseAuth.instance.signOut();
-    currentSignedInUser = null;
-    shouldBeRedirected = false;
+    AppLogger.d(
+        "token is null but still signing out and about to refresh the listenable");
+    isLoggedIn.value = false;
+    currentSignedInUserCompleter = Completer<user_model.User?>();
     return;
   }
 
@@ -152,10 +175,11 @@ void logout() async {
   if (response.statusCode == 200) {
     AppLogger.d("logging out successfully on server");
     await FirebaseAuth.instance.signOut();
-    currentSignedInUser = null;
-    shouldBeRedirected = false;
+    isLoggedIn.value = false;
+    currentSignedInUserCompleter = Completer<user_model.User?>();
   } else {
-    shouldBeRedirected = false;
+    AppLogger.e(
+        "Error during backend logout ${response.reasonPhrase} ${response.statusCode}");
     throw Exception("Error during backend logout");
   }
 }

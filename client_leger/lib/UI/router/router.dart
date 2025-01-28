@@ -8,6 +8,7 @@ import 'package:client_leger/UI/quiz/quiz_page.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/UI/sidebar/sidebar.dart';
 import 'package:client_leger/UI/signup/signup_page.dart';
+import 'package:client_leger/utilities/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
@@ -18,6 +19,7 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _playShellNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter router = GoRouter(
+  refreshListenable: auth_service.isLoggedIn,
   initialLocation: Paths.play,
   navigatorKey: _rootNavigatorKey,
   debugLogDiagnostics: true,
@@ -138,14 +140,15 @@ final GoRouter router = GoRouter(
   redirect: (BuildContext context, GoRouterState state) async {
     final bool loggedIn = FirebaseAuth.instance.currentUser != null &&
         !FirebaseAuth.instance.currentUser!.isAnonymous &&
-        auth_service.shouldBeRedirected;
+        auth_service.isLoggedIn.value;
     final bool loggingIn = state.matchedLocation == Paths.logIn ||
         state.matchedLocation == Paths.signUp;
-    if (!loggedIn) {
-      if (state.matchedLocation == Paths.signUp) return null;
-      return Paths.logIn;
-    }
-    if (loggingIn) return Paths.play;
+
+    AppLogger.d(
+        "IN REDIRECT loggedIn = $loggedIn and loggingIn = $loggingIn  and isLoggedIn = ${auth_service.isLoggedIn.value} and state.matchedlocation = ${state.matchedLocation}");
+
+    if (!loggedIn && !loggingIn) return Paths.logIn;
+    if (loggedIn && loggingIn) return Paths.play; // TODO: replace with homepage once its done
     return null;
   },
 );
