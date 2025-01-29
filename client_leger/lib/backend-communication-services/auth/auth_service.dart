@@ -4,6 +4,7 @@ import 'package:client_leger/backend-communication-services/environment.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:client_leger/backend-communication-services/models/user.dart'
     as user_model;
@@ -13,6 +14,7 @@ const String getProfileUrl = '$baseUrl/profile';
 const String createUserUrl = '$baseUrl/create-user';
 const String logOutUrl = '$baseUrl/logout';
 const String checkEmailUrl = '$baseUrl/check-email';
+const String googleSignInUrl = '$baseUrl/signin-google';
 const String googleProvider = "google.com";
 const String passwordProvider = 'password';
 
@@ -80,8 +82,8 @@ Future<user_model.User?> createAndFetchUser(
   } else {
     await userCredential.user!.delete();
     AppLogger.e(
-        "Failed to fetch user: ${response.reasonPhrase} ${response.statusCode}");
-    throw Exception('Failed to fetch user: ${response.reasonPhrase}');
+        "Failed to fetch/create user: ${response.reasonPhrase} ${response.statusCode}");
+    throw Exception('Failed to fetch/create user: ${response.reasonPhrase}');
   }
 }
 
@@ -219,4 +221,37 @@ Future<bool> emailCheck(String email) async {
     throw Exception("An error occured ${response.reasonPhrase}");
   }
   return false;
+}
+
+signWithGoogle() async {
+  final userCredential = await signInWithGoogle();
+
+  bool isOnline = false;
+  if (userCredential.user?.email != null) {
+    isOnline = await isUserOnline(userCredential.user!.email!);
+  }
+
+  if (isOnline) throw Exception("User is already logged in on another device.");
+
+  await userCredential.user!
+      .updateProfile(displayName: userCredential.user?.displayName);
+
+  await createAndFetchUser(userCredential, googleSignInUrl);
+}
+
+Future<UserCredential> signInWithGoogle() async {
+  final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+  if (googleUser == null) {
+    throw Exception("Google Sign-In aborted");
+  }
+
+  final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+  final OAuthCredential credential = GoogleAuthProvider.credential(
+    accessToken: googleAuth.accessToken,
+    idToken: googleAuth.idToken,
+  );
+
+  return await FirebaseAuth.instance.signInWithCredential(credential);
 }

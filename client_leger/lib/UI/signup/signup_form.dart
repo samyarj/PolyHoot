@@ -1,4 +1,5 @@
 import 'package:client_leger/UI/router/routes.dart';
+import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
@@ -99,8 +100,25 @@ class _SignUpFormState extends State<SignUpForm> {
     }
   }
 
-  void signUpWithGoogle() {
-    print("Signing up with Google");
+  void signUpWithGoogle() async {
+    try {
+      await auth_service.signInWithGoogle();
+    } catch (e) {
+      if (!mounted) return;
+      AppLogger.e(e.toString());
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString(),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onErrorContainer,
+            ),
+          ),
+          backgroundColor: Theme.of(context).colorScheme.errorContainer,
+        ),
+      );
+    }
   }
 
   @override

@@ -27,6 +27,7 @@ class _LoginFormState extends State<LoginForm> {
       color: Colors.blue.shade300,
     ),
   );
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -36,11 +37,39 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   Future signIn() async {
+    setState(() {
+      _isLoading = true;
+    });
     try {
       await auth_service.signIn(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString(),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onErrorContainer,
+            ),
+          ),
+          backgroundColor: Theme.of(context).colorScheme.errorContainer,
+        ),
+      );
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void loginWithGoogle() async {
+    try {
+      await auth_service.signInWithGoogle();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -111,11 +140,13 @@ class _LoginFormState extends State<LoginForm> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      await signIn();
-                    }
-                  },
+                  onPressed: _isLoading
+                      ? null
+                      : () async {
+                          if (_formKey.currentState!.validate()) {
+                            await signIn();
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 19, 99, 236),
                     foregroundColor: Colors.white, // White text color
@@ -124,11 +155,15 @@ class _LoginFormState extends State<LoginForm> {
                     ),
                     textStyle: const TextStyle(fontSize: 18),
                   ),
-                  child: Text('Login'),
+                  child: _isLoading
+                      ? CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        )
+                      : Text('Login'),
                 ),
               ),
               SizedBox(height: 16),
-              // Sign Up Link
               TextButton(
                 onPressed: () {
                   context.go(Paths.signUp);
@@ -138,6 +173,7 @@ class _LoginFormState extends State<LoginForm> {
                   style: TextStyle(
                     fontSize: 16,
                   ),
+                  textAlign: TextAlign.center,
                 ),
               ),
               // Forgot Password Link
@@ -150,6 +186,7 @@ class _LoginFormState extends State<LoginForm> {
                   style: TextStyle(
                     fontSize: 16,
                   ),
+                  textAlign: TextAlign.center,
                 ),
               ),
               SizedBox(height: 16),
@@ -167,7 +204,7 @@ class _LoginFormState extends State<LoginForm> {
               SizedBox(height: 16),
               // Google Login
               OutlinedButton.icon(
-                onPressed: () {},
+                onPressed: loginWithGoogle,
                 icon: Icon(Icons.account_circle, size: 20),
                 label: Text(
                   'Login with Google',
