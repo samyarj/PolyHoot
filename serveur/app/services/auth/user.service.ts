@@ -3,7 +3,6 @@ import { User } from '@app/interface/user';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { UserCredential } from 'firebase/auth';
-// import { UserCredential } from 'firebase/auth'; // For signInWithEmailAndPassword
 
 @Injectable()
 export class UserService {
@@ -79,7 +78,6 @@ export class UserService {
 
     async logout(uid: string): Promise<void> {
         await this.firestore.collection('users').doc(uid).update({ isOnline: false });
-        // await this.adminAuth.revokeRefreshTokens(uid);
     }
 
     async getUserByUid(uid: string): Promise<User> {

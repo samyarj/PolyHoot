@@ -20,9 +20,11 @@ import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { WINDOW } from '@app/services/general-services/window.token';
 import { ToastrModule } from 'ngx-toastr';
 import { environment } from 'src/environments/environment';
+import { ForgotPasswordFormComponent } from './components/auth/forgot-password-form/forgot-password-form.component';
 import { LoginFormComponent } from './components/auth/login-form/login-form.component';
 import { SignUpFormComponent } from './components/auth/sign-up-form/sign-up-form.component';
 import { ChatComponent } from './components/chat/chat.component';
+import { Chat2Component } from './components/chat/chat2/chat2.component';
 import { ConfirmationDialogComponent } from './components/general-elements/confirmation-dialog/confirmation-dialog.component';
 import { ErrorDialogComponent } from './components/general-elements/error-dialog/error-dialog.component';
 import { HeaderGameComponent } from './components/general-elements/header-game/header-game.component';
@@ -40,6 +42,7 @@ import { AdminPageComponent } from './pages/admin-related/admin-page/admin-page.
 import { AdminQuizCreateComponent } from './pages/admin-related/create-quiz/admin-create-quiz';
 import { HistoryPageComponent } from './pages/admin-related/history/history.component';
 import { QuestionBankPageComponent } from './pages/admin-related/question-bank-page/question-bank-page.component';
+import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-password.component';
 import { LoginPageComponent } from './pages/auth/login-page/login-page.component';
 import { SignUpComponent } from './pages/auth/sign-up/sign-up.component';
 import { CreatePageComponent } from './pages/create-page/create-page.component';
@@ -47,14 +50,14 @@ import { JoinGamePageComponent } from './pages/game-related/join-game-page/join-
 import { OrganizerPageComponent } from './pages/game-related/organizer-page/organizer-page.component';
 import { ResultsPageComponent } from './pages/game-related/results-page/results-page.component';
 import { TestGamePageComponent } from './pages/game-related/test-page/test-game-page.component';
+import { TestComponentsPageComponent } from './pages/test-components-page/test-components-page.component';
 import { WaitingPageComponent } from './pages/waiting-page/waiting-page.component';
 import { QuestionService } from './services/back-end-communication-services/question-service/question.service';
 import { QuizService } from './services/back-end-communication-services/quiz-service/quiz.service';
+import { FirebaseChatService } from './services/chat-services/firebase/firebase-chat.service';
 import { FrenchPaginatorIntlService } from './services/general-services/french-paginator/french-paginator-intl.service';
 import { GlobalErrorHandlerService } from './services/global-error-handler.service';
 import { SocketClientService } from './services/websocket-services/general/socket-client-manager.service';
-import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-password.component';
-import { ForgotPasswordFormComponent } from './components/auth/forgot-password-form/forgot-password-form.component';
 
 /**
  * Main module that is used in main.ts.
@@ -95,11 +98,14 @@ import { ForgotPasswordFormComponent } from './components/auth/forgot-password-f
         MenuBarComponent,
         ForgotPasswordComponent,
         ForgotPasswordFormComponent,
+        TestComponentsPageComponent,
+        Chat2Component,
     ],
     providers: [
         QuizService,
         QuestionService,
         SocketClientService,
+        FirebaseChatService,
         { provide: WINDOW, useValue: window },
         { provide: MatPaginatorIntl, useClass: FrenchPaginatorIntlService },
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },

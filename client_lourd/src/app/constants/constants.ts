@@ -14,22 +14,17 @@ export const TIME_TO_NEXT_ANSWER = 3000;
 export const TIMER_VALUE = 5000;
 export const NOT_FOUND = -1;
 export const BUFFER_TIME = 4000;
-export const EMPTY_STRING = "";
-export const ID = "id";
-export const WIDTH_SIZE = "400px";
-export const DISPLAYED_COLUMNS = [
-  "name",
-  "startingDate",
-  "playersNumber",
-  "bestScore",
-];
+export const EMPTY_STRING = '';
+export const ID = 'id';
+export const WIDTH_SIZE = '400px';
+export const DISPLAYED_COLUMNS = ['name', 'startingDate', 'playersNumber', 'bestScore'];
 
-export const ASC = "asc";
-export const DESC = "desc";
-export const NONE = "";
+export const ASC = 'asc';
+export const DESC = 'desc';
+export const NONE = '';
 
 export type SortDirection = typeof ASC | typeof DESC | typeof NONE;
-export const ALERT_SOUND_PATH = "assets/alert_sound.mp3";
+export const ALERT_SOUND_PATH = 'assets/alert_sound.mp3';
 export const ALERT_SOUND_INTENSITY_DECREMENTATION = 0.01;
 export const ALERT_SOUND_DECREASE_INTERVAL = 200;
 export const BASE_VOLUME = 0.5;

@@ -1,0 +1,8 @@
+<div class="page-container d-flex justify-content-center align-items-center vh-100">
+    <app-chat2
+        [name]="name"
+        [chatMessagesLoading]="chatMessagesLoading"
+        [chatMessages]="chatMessages"
+        (sendMessageToRoom)="handleSendMessage($event)"
+    ></app-chat2>
+</div>
