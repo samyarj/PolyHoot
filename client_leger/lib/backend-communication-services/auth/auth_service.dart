@@ -12,6 +12,10 @@ const String baseUrl = '${Environment.serverUrl}/users';
 const String getProfileUrl = '$baseUrl/profile';
 const String createUserUrl = '$baseUrl/create-user';
 const String logOutUrl = '$baseUrl/logout';
+const String checkEmailUrl = '$baseUrl/check-email';
+const String googleProvider = "google.com";
+const String passwordProvider = 'password';
+
 Completer<user_model.User?> currentSignedInUserCompleter =
     Completer<user_model.User?>();
 Future<user_model.User?> get currentSignedInUser =>
@@ -182,4 +186,37 @@ void logout() async {
         "Error during backend logout ${response.reasonPhrase} ${response.statusCode}");
     throw Exception("Error during backend logout");
   }
+}
+
+Future<void> forgotPassword(String email) async {
+  await FirebaseAuth.instance.setLanguageCode('fr');
+  await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+}
+
+Future<bool> emailCheck(String email) async {
+  final http.Response response = await http.get(
+    Uri.parse(checkEmailUrl).replace(
+      queryParameters: {'email': email},
+    ),
+  );
+  if (response.statusCode == 200) {
+    final responseJson = jsonDecode(response.body);
+    AppLogger.d(
+        'responseJson of emailCheck is $responseJson'); // {emailExists: false, provider: null}
+    final bool emailExists = responseJson['emailExists'];
+    final String? provider = responseJson['provider'];
+    if (emailExists && provider == passwordProvider) {
+      return true;
+    } else if (provider == googleProvider) {
+      throw Exception(
+          "This functionnality is not available with Google sign-in");
+    } else if (!emailExists) {
+      throw Exception("This email is not registered.");
+    }
+  } else {
+    AppLogger.e(
+        "Error in emailCheck : ${response.statusCode}  ${response.reasonPhrase}");
+    throw Exception("An error occured ${response.reasonPhrase}");
+  }
+  return false;
 }

@@ -1,5 +1,6 @@
 import 'package:client_leger/UI/coins/coins_page.dart';
 import 'package:client_leger/UI/equipped/equipped_page.dart';
+import 'package:client_leger/UI/forgot-password/password_reset_page.dart';
 import 'package:client_leger/UI/login/login_page.dart';
 import 'package:client_leger/UI/play/creategamepage.dart';
 import 'package:client_leger/UI/play/playbutton.dart';
@@ -31,6 +32,10 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: Paths.signUp,
       builder: (context, state) => const SignUpPage(),
+    ),
+    GoRoute(
+      path: Paths.passwordReset,
+      builder: (context, state) => const PasswordResetPage(),
     ),
     StatefulShellRoute.indexedStack(
       parentNavigatorKey: _rootNavigatorKey,
@@ -142,13 +147,15 @@ final GoRouter router = GoRouter(
         !FirebaseAuth.instance.currentUser!.isAnonymous &&
         auth_service.isLoggedIn.value;
     final bool loggingIn = state.matchedLocation == Paths.logIn ||
-        state.matchedLocation == Paths.signUp;
+        state.matchedLocation == Paths.signUp ||
+        state.matchedLocation == Paths.passwordReset;
 
     AppLogger.d(
         "IN REDIRECT loggedIn = $loggedIn and loggingIn = $loggingIn  and isLoggedIn = ${auth_service.isLoggedIn.value} and state.matchedlocation = ${state.matchedLocation}");
 
     if (!loggedIn && !loggingIn) return Paths.logIn;
-    if (loggedIn && loggingIn) return Paths.play; // TODO: replace with homepage once its done
+    if (loggedIn && loggingIn)
+      return Paths.play; // TODO: replace with homepage once its done
     return null;
   },
 );

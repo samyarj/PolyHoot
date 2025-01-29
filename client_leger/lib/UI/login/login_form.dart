@@ -142,7 +142,9 @@ class _LoginFormState extends State<LoginForm> {
               ),
               // Forgot Password Link
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  context.go(Paths.passwordReset);
+                },
                 child: Text(
                   "Forgot your password? Reset Password",
                   style: TextStyle(
