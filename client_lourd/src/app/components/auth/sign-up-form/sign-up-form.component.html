@@ -1,204 +1,154 @@
 <div class="sign-up-container">
-  <h2 class="text-center mb-4">Sign Up</h2>
+    <h2 class="text-center mb-4">Sign Up</h2>
 
-  <form [formGroup]="signUpForm">
-    <!-- Username Field -->
-    <div class="form-group mb-3">
-      <label for="username" class="form-label">Username</label>
-      <input
-        id="username"
-        type="text"
-        placeholder="Enter your username"
-        formControlName="username"
-        class="form-control"
-        (blur)="checkUsername()"
-        (input)="onInputEvent('username')"
-      />
-      <div class="d-flex align-items-center">
-        <!-- Error Message -->
-        <small
-          *ngIf="
-            signUpForm.get('username')?.invalid &&
-            signUpForm.get('username')?.touched &&
-            !signUpForm.get('username')?.hasError('pattern')
-          "
-          class="text-danger"
-        >
-          Username is required.
-        </small>
-        <small
-          *ngIf="
-            signUpForm.get('username')?.hasError('pattern') &&
-            signUpForm.get('username')?.touched
-          "
-          class="text-danger"
-        >
-          Username must be 3-20 characters and can only contain letters,
-          numbers, dots, underscores, or hyphens.
-        </small>
+    <form [formGroup]="signUpForm">
+        <!-- Username Field -->
+        <div class="form-group mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input
+                id="username"
+                type="text"
+                placeholder="Enter your username"
+                formControlName="username"
+                class="form-control"
+                (blur)="checkUsername()"
+                (input)="onInputEvent('username')"
+            />
+            <div class="d-flex align-items-center">
+                <!-- Error Message -->
+                <small
+                    *ngIf="
+                        signUpForm.get('username')?.invalid && signUpForm.get('username')?.touched && !signUpForm.get('username')?.hasError('pattern')
+                    "
+                    class="text-danger"
+                >
+                    Username is required.
+                </small>
+                <small *ngIf="signUpForm.get('username')?.hasError('pattern') && signUpForm.get('username')?.touched" class="text-danger">
+                    Username must be 3-20 characters and can only contain letters, numbers, dots, underscores, or hyphens.
+                </small>
 
-        <small
-          *ngIf="isUsernameTaken && !isCheckingUsername && !isTypingUsername"
-          class="text-danger"
-        >
-          This username is already taken.
-        </small>
+                <small
+                    *ngIf="
+                        !signUpForm.get('username')?.invalid &&
+                        isUsernameTaken &&
+                        !isCheckingUsername &&
+                        !isTypingUsername &&
+                        !signUpForm.get('username')?.hasError('pattern')
+                    "
+                    class="text-danger"
+                >
+                    This username is already taken.
+                </small>
 
-        <!-- Loading Spinner -->
-        <div *ngIf="isCheckingUsername" class="ms-2">
-          <div
-            class="spinner-border spinner-border-sm text-secondary"
-            role="status"
-          >
-            <span class="visually-hidden">Loading...</span>
-          </div>
+                <!-- Loading Spinner -->
+                <div *ngIf="isCheckingUsername" class="ms-2">
+                    <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Email Field -->
-    <div class="form-group mb-3">
-      <label for="email" class="form-label">Email</label>
-      <input
-        id="email"
-        type="email"
-        placeholder="Enter your email"
-        formControlName="email"
-        class="form-control"
-        (blur)="checkEmail()"
-        (input)="onInputEvent('email')"
-      />
-      <div class="d-flex align-items-center">
-        <!-- Error Message -->
-        <small
-          *ngIf="
-            signUpForm.get('email')?.invalid &&
-            signUpForm.get('email')?.touched &&
-            !signUpForm.get('email')?.hasError('pattern')
-          "
-          class="text-danger"
-        >
-          Email is required.
-        </small>
-        <small
-          *ngIf="
-            signUpForm.get('email')?.hasError('pattern') &&
-            signUpForm.get('email')?.touched
-          "
-          class="text-danger"
-        >
-          Please enter a valid email address.
-        </small>
-        <small
-          *ngIf="isEmailTaken && !isCheckingEmail && !isTypingEmail"
-          class="text-danger"
-        >
-          This email is already in use.
-        </small>
-        <!-- Loading Spinner -->
-        <div *ngIf="isCheckingEmail" class="ms-2">
-          <div
-            class="spinner-border spinner-border-sm text-secondary"
-            role="status"
-          >
-            <span class="visually-hidden">Loading...</span>
-          </div>
+        <!-- Email Field -->
+        <div class="form-group mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                formControlName="email"
+                class="form-control"
+                (blur)="checkEmail()"
+                (input)="onInputEvent('email')"
+            />
+            <div class="d-flex align-items-center">
+                <!-- Error Message -->
+                <small
+                    *ngIf="signUpForm.get('email')?.invalid && signUpForm.get('email')?.touched && !signUpForm.get('email')?.hasError('pattern')"
+                    class="text-danger"
+                >
+                    Email is required.
+                </small>
+                <small *ngIf="signUpForm.get('email')?.hasError('pattern') && signUpForm.get('email')?.touched" class="text-danger">
+                    Please enter a valid email address.
+                </small>
+                <small
+                    *ngIf="
+                        !signUpForm.get('email')?.invalid &&
+                        isEmailTaken &&
+                        !isCheckingEmail &&
+                        !isTypingEmail &&
+                        !signUpForm.get('email')?.hasError('pattern')
+                    "
+                    class="text-danger"
+                >
+                    This email is already in use.
+                </small>
+                <!-- Loading Spinner -->
+                <div *ngIf="isCheckingEmail" class="ms-2">
+                    <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Password Field -->
-    <div class="form-group mb-3">
-      <label for="password" class="form-label">Password</label>
-      <input
-        id="password"
-        type="password"
-        placeholder="Enter your password"
-        formControlName="password"
-        class="form-control"
-      />
-      <small
-        *ngIf="
-          signUpForm.get('password')?.invalid &&
-          signUpForm.get('password')?.touched
-        "
-        class="text-danger"
-      >
-        Password must be at least 6 characters long.
-      </small>
-    </div>
+        <!-- Password Field -->
+        <div class="form-group mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input id="password" type="password" placeholder="Enter your password" formControlName="password" class="form-control" />
+            <small *ngIf="signUpForm.get('password')?.invalid && signUpForm.get('password')?.touched" class="text-danger">
+                Password must be at least 6 characters long.
+            </small>
+        </div>
 
-    <!-- Confirm Password Field -->
-    <div class="form-group mb-3">
-      <label for="confirmPassword" class="form-label">Confirm Password</label>
-      <input
-        id="confirmPassword"
-        type="password"
-        placeholder="Confirm your password"
-        formControlName="confirmPassword"
-        class="form-control"
-      />
-      <small
-        *ngIf="
-          signUpForm.get('confirmPassword')?.invalid &&
-          signUpForm.get('confirmPassword')?.touched
-        "
-        class="text-danger"
-      >
-        Confirm Password is required.
-      </small>
-    </div>
+        <!-- Confirm Password Field -->
+        <div class="form-group mb-3">
+            <label for="confirmPassword" class="form-label">Confirm Password</label>
+            <input id="confirmPassword" type="password" placeholder="Confirm your password" formControlName="confirmPassword" class="form-control" />
+            <small *ngIf="signUpForm.get('confirmPassword')?.invalid && signUpForm.get('confirmPassword')?.touched" class="text-danger">
+                Confirm Password is required.
+            </small>
+        </div>
 
-    <!-- Terms and Privacy -->
-    <p class="form-text text-muted mb-3">
-      By creating an account, you agree to the
-      <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
-    </p>
+        <!-- Terms and Privacy -->
+        <p class="form-text text-muted mb-3">
+            By creating an account, you agree to the
+            <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+        </p>
 
-    <!-- Submit Button -->
-    <div class="form-group position-relative">
-      <button
-        (click)="signUp()"
-        type="submit"
-        [disabled]="invalidFormStatus()"
-        class="btn btn-primary w-100"
-      >
-        Create a new account
-      </button>
-      <!-- Form Loading Spinner -->
-      <div
-        *ngIf="isLoading"
-        class="spinner-border text-light position-absolute bottom-0 end-0"
-        style="width: 1.5rem; height: 1.5rem"
-        role="status"
-      >
-        <span class="visually-hidden">Loading...</span>
-      </div>
-    </div>
-  </form>
+        <!-- Submit Button -->
+        <div class="form-group position-relative">
+            <button (click)="signUp()" type="submit" [disabled]="invalidFormStatus()" class="btn btn-primary w-100">Create a new account</button>
+            <!-- Form Loading Spinner -->
+            <div
+                *ngIf="isLoading"
+                class="spinner-border text-light position-absolute bottom-0 end-0"
+                style="width: 1.5rem; height: 1.5rem"
+                role="status"
+            >
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </form>
 
-  <!-- Sign In Link -->
-  <p class="text-center mt-3">
-    Have an account? <a [routerLink]="'/login'">Login</a>
-  </p>
+    <!-- Sign In Link -->
+    <p class="text-center mt-3">Have an account? <a [routerLink]="'/login'">Login</a></p>
 
-  <!-- Divider -->
-  <hr />
-  <p class="divider-text text-center">or</p>
+    <!-- Divider -->
+    <hr />
+    <p class="divider-text text-center">or</p>
 
-  <!-- Google Sign up -->
-  <button
-    (click)="signUpWithGoogle()"
-    [disabled]="isLoading"
-    class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center"
-  >
-    <div class="d-flex align-items-center gap-2">
-      <span
-        class="iconify"
-        data-icon="logos:google-icon"
-        style="font-size: 20px"
-      ></span>
-      <span>Sign up with Google</span>
-    </div>
-  </button>
+    <!-- Google Sign up -->
+    <button
+        (click)="signUpWithGoogle()"
+        [disabled]="isLoading"
+        class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center"
+    >
+        <div class="d-flex align-items-center gap-2">
+            <span class="iconify" data-icon="logos:google-icon" style="font-size: 20px"></span>
+            <span>Sign up with Google</span>
+        </div>
+    </button>
 </div>
