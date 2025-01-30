@@ -15,6 +15,7 @@ const String createUserUrl = '$baseUrl/create-user';
 const String logOutUrl = '$baseUrl/logout';
 const String checkEmailUrl = '$baseUrl/check-email';
 const String googleSignInUrl = '$baseUrl/signin-google';
+const String checkUsernameUrl = '$baseUrl/check-username';
 const String googleProvider = "google.com";
 const String passwordProvider = 'password';
 
@@ -92,7 +93,7 @@ Future<user_model.User?> signUp(
   String email,
   String password,
 ) async {
-  AppLogger.d("in signUp");
+  AppLogger.d("in signUp auth_service");
 
   UserCredential userCredential = await FirebaseAuth.instance
       .createUserWithEmailAndPassword(email: email, password: password);
@@ -135,7 +136,7 @@ Future<user_model.User?> signIn(String email, String password) async {
 }
 
 Future<bool> isUserOnline(String email) async {
-  AppLogger.d("in isUserOnline");
+  AppLogger.d("in isUserOnline here is the url $baseUrl/check-online-status");
 
   final http.Response response = await http.get(
     Uri.parse('$baseUrl/check-online-status').replace(
@@ -150,6 +151,34 @@ Future<bool> isUserOnline(String email) async {
     AppLogger.e('isUserOnline : Internal server error');
     return false;
   }
+}
+
+Future<bool> isUsernameTaken(String username) async {
+  final http.Response response = await http.get(
+    Uri.parse(checkUsernameUrl).replace(
+      queryParameters: {'username': username},
+    ),
+  );
+
+  final jsonResponse = jsonDecode(response.body);
+  AppLogger.d("in isUsernameTaken json response is $jsonResponse");
+  return jsonResponse['usernameExists'] as bool? ?? false;
+}
+
+Future<bool> isEmailTaken(String email) async {
+  // for signUp
+  final http.Response response = await http.get(
+    Uri.parse(checkEmailUrl).replace(
+      queryParameters: {'email': email},
+    ),
+  );
+  bool emailTaken = false;
+  if (response.statusCode == 200) {
+    final responseJson = jsonDecode(response.body);
+    AppLogger.d('responseJson of isEmailTaken is $responseJson');
+    emailTaken = responseJson['emailExists'];
+  }
+  return emailTaken;
 }
 
 void logout() async {
@@ -196,6 +225,9 @@ Future<void> forgotPassword(String email) async {
 }
 
 Future<bool> emailCheck(String email) async {
+  // for the forgot password functionality
+  AppLogger.d("in emailCheck");
+
   final http.Response response = await http.get(
     Uri.parse(checkEmailUrl).replace(
       queryParameters: {'email': email},
@@ -203,8 +235,7 @@ Future<bool> emailCheck(String email) async {
   );
   if (response.statusCode == 200) {
     final responseJson = jsonDecode(response.body);
-    AppLogger.d(
-        'responseJson of emailCheck is $responseJson'); // {emailExists: false, provider: null}
+    AppLogger.d('responseJson of emailCheck is $responseJson');
     final bool emailExists = responseJson['emailExists'];
     final String? provider = responseJson['provider'];
     if (emailExists && provider == passwordProvider) {

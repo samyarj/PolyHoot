@@ -1,4 +1,5 @@
 import 'package:client_leger/UI/router/routes.dart';
+import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
@@ -37,6 +38,8 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   Future signIn() async {
+    AppLogger.d("in signIn (login_form.dart)");
+
     setState(() {
       _isLoading = true;
     });

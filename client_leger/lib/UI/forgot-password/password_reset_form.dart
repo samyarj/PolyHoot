@@ -1,4 +1,5 @@
 import 'package:client_leger/UI/router/routes.dart';
+import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
@@ -30,6 +31,7 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
   );
   bool _isLoading = false;
   String? _emailError;
+  String _previousValue = '';
 
   @override
   void initState() {
@@ -37,7 +39,10 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
 
     _emailFocusNode.addListener(() {
       if (!_emailFocusNode.hasFocus) {
-        checkEmailExists(_emailController.text.trim());
+        if (_emailController.text.trim() != _previousValue) {
+          _previousValue = _emailController.text.trim();
+          checkEmailExists(_emailController.text.trim());
+        }
       }
     });
   }

@@ -20,6 +20,9 @@ class _SignUpFormState extends State<SignUpForm> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
+  String _usernamePreviousValue = '';
+  String _emailPreviousValue = '';
+
   final FocusNode _usernameFocusNode = FocusNode();
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
@@ -46,8 +49,8 @@ class _SignUpFormState extends State<SignUpForm> {
     ),
   );
 
-  bool isUsernameTaken = false;
-  bool isEmailTaken = false;
+  String? _usernameError;
+  String? _emailError;
 
   @override
   void initState() {
@@ -55,13 +58,23 @@ class _SignUpFormState extends State<SignUpForm> {
 
     _usernameFocusNode.addListener(() {
       if (!_usernameFocusNode.hasFocus) {
-        _usernameFieldKey.currentState?.validate();
+        if (_usernameController.text.trim() != _usernamePreviousValue) {
+          _usernamePreviousValue = _usernameController.text.trim();
+          if (_usernameFieldKey.currentState!.validate()) {
+            isUsernameTaken(_usernameController.text.trim());
+          }
+        }
       }
     });
 
     _emailFocusNode.addListener(() {
       if (!_emailFocusNode.hasFocus) {
-        _emailFieldKey.currentState?.validate();
+        if (_emailController.text.trim() != _emailPreviousValue) {
+          _emailPreviousValue = _emailController.text.trim();
+          if (_emailFieldKey.currentState!.validate()) {
+            isEmailTaken(_emailController.text.trim());
+          }
+        }
       }
     });
 
@@ -80,6 +93,13 @@ class _SignUpFormState extends State<SignUpForm> {
   }
 
   Future signUp() async {
+    await isUsernameTaken(_usernameController.text.trim());
+    await isEmailTaken(_emailController.text.trim());
+
+    if (_usernameError != null || _emailError != null) {
+      return;
+    }
+
     try {
       await auth_service.signUp(_usernameController.text.trim(),
           _emailController.text.trim(), _passwordController.text.trim());
@@ -142,10 +162,21 @@ class _SignUpFormState extends State<SignUpForm> {
     if (!usernameRegex.hasMatch(value)) {
       return 'Username must be 3-20 characters and can only contain letters, numbers, dots, underscores, or hyphens.';
     }
-    if (isUsernameTaken) {
-      return 'This username is already taken.';
-    }
+
     return null;
+  }
+
+  isUsernameTaken(String username) async {
+    final bool isTaken = await auth_service.isUsernameTaken(username);
+    if (isTaken) {
+      setState(() {
+        _usernameError = 'This username is already taken.';
+      });
+    } else {
+      setState(() {
+        _usernameError = null;
+      });
+    }
   }
 
   String? validateEmail(String? value) {
@@ -159,10 +190,21 @@ class _SignUpFormState extends State<SignUpForm> {
     if (!emailRegex.hasMatch(value)) {
       return 'Please enter a valid email address.';
     }
-    if (isEmailTaken) {
-      return 'This email is already in use.';
-    }
+
     return null;
+  }
+
+  isEmailTaken(String email) async {
+    final bool isTaken = await auth_service.isEmailTaken(email);
+    if (isTaken) {
+      setState(() {
+        _emailError = 'This email is already taken.';
+      });
+    } else {
+      setState(() {
+        _emailError = null;
+      });
+    }
   }
 
   String? validatePassword(String? value) {
@@ -207,6 +249,7 @@ class _SignUpFormState extends State<SignUpForm> {
                 decoration: InputDecoration(
                   labelText: 'Username',
                   hintText: 'Enter your username',
+                  errorText: _usernameError,
                   border: OutlineInputBorder(),
                 ),
                 validator: validateUsername,
@@ -220,6 +263,7 @@ class _SignUpFormState extends State<SignUpForm> {
                 decoration: InputDecoration(
                   labelText: 'Email',
                   hintText: 'Enter your email',
+                  errorText: _emailError,
                   border: OutlineInputBorder(),
                 ),
                 validator: validateEmail,
