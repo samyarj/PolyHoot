@@ -1,9 +1,9 @@
 import 'package:client_leger/UI/router/routes.dart';
+import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
+    as auth_service;
 import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
-    as auth_service;
 
 class SignUpForm extends StatefulWidget {
   const SignUpForm({super.key});

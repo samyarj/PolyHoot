@@ -1,9 +1,8 @@
 import 'package:client_leger/UI/router/routes.dart';
-import 'package:client_leger/utilities/logger.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class PasswordResetForm extends StatefulWidget {
   const PasswordResetForm({super.key});
@@ -77,6 +76,7 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
           _emailError = null;
         });
       } catch (e) {
+        if (!mounted) return;
         setState(() {
           _emailError = e.toString();
         });

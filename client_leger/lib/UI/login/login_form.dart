@@ -1,9 +1,9 @@
 import 'package:client_leger/UI/router/routes.dart';
+import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
+    as auth_service;
 import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
-    as auth_service;
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -14,7 +14,7 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _identifierController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final greyBorder = OutlineInputBorder(
     borderRadius: BorderRadius.circular(8),
@@ -32,7 +32,7 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _identifierController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -45,7 +45,7 @@ class _LoginFormState extends State<LoginForm> {
     });
     try {
       await auth_service.signIn(
-        _emailController.text.trim(),
+        _identifierController.text.trim(),
         _passwordController.text.trim(),
       );
     } catch (e) {
@@ -63,6 +63,7 @@ class _LoginFormState extends State<LoginForm> {
         ),
       );
     } finally {
+      // ignore: control_flow_in_finally
       if (!mounted) return;
       setState(() {
         _isLoading = false;
@@ -72,7 +73,7 @@ class _LoginFormState extends State<LoginForm> {
 
   void loginWithGoogle() async {
     try {
-      await auth_service.signInWithGoogle();
+      await auth_service.signWithGoogle();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -103,21 +104,21 @@ class _LoginFormState extends State<LoginForm> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "Sign In",
+                "Login",
                 style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 32),
               TextFormField(
-                controller: _emailController,
+                controller: _identifierController,
                 decoration: InputDecoration(
-                  labelText: 'Email',
+                  labelText: 'Pseudonyme ou Email',
                   enabledBorder: greyBorder,
                   focusedBorder: blueBorder,
                   errorBorder: greyBorder,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
+                    return 'SVP entrez votre pseudonyme ou votre email';
                   }
                   return null;
                 },
@@ -126,7 +127,7 @@ class _LoginFormState extends State<LoginForm> {
               TextFormField(
                 controller: _passwordController,
                 decoration: InputDecoration(
-                  labelText: 'Password',
+                  labelText: 'Mot de passe',
                   enabledBorder: greyBorder,
                   focusedBorder: blueBorder,
                   errorBorder: greyBorder,
@@ -134,7 +135,7 @@ class _LoginFormState extends State<LoginForm> {
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your password';
+                    return 'SVP entrez votre mot de passe';
                   }
                   return null;
                 },
@@ -172,7 +173,7 @@ class _LoginFormState extends State<LoginForm> {
                   context.go(Paths.signUp);
                 },
                 child: Text(
-                  "Don't have an account? Sign Up",
+                  "Pas de compte ? S'inscrire",
                   style: TextStyle(
                     fontSize: 16,
                   ),
@@ -185,7 +186,7 @@ class _LoginFormState extends State<LoginForm> {
                   context.go(Paths.passwordReset);
                 },
                 child: Text(
-                  "Forgot your password? Reset Password",
+                  "Mot de passe oublié ?",
                   style: TextStyle(
                     fontSize: 16,
                   ),
@@ -199,7 +200,7 @@ class _LoginFormState extends State<LoginForm> {
                   Expanded(child: Divider()),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text('or'),
+                    child: Text('ou'),
                   ),
                   Expanded(child: Divider()),
                 ],
@@ -210,7 +211,7 @@ class _LoginFormState extends State<LoginForm> {
                 onPressed: loginWithGoogle,
                 icon: Icon(Icons.account_circle, size: 20),
                 label: Text(
-                  'Login with Google',
+                  'Login avec Google',
                   style: TextStyle(fontSize: 18),
                 ),
                 style: OutlinedButton.styleFrom(
