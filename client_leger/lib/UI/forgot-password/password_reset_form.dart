@@ -1,8 +1,8 @@
 import 'package:client_leger/UI/router/routes.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class PasswordResetForm extends StatefulWidget {
   const PasswordResetForm({super.key});
@@ -30,6 +30,7 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
   );
   bool _isLoading = false;
   String? _emailError;
+  String _previousValue = '';
 
   @override
   void initState() {
@@ -37,7 +38,10 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
 
     _emailFocusNode.addListener(() {
       if (!_emailFocusNode.hasFocus) {
-        checkEmailExists(_emailController.text.trim());
+        if (_emailController.text.trim() != _previousValue) {
+          _previousValue = _emailController.text.trim();
+          checkEmailExists(_emailController.text.trim());
+        }
       }
     });
   }
@@ -72,6 +76,7 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
           _emailError = null;
         });
       } catch (e) {
+        if (!mounted) return;
         setState(() {
           _emailError = e.toString();
         });

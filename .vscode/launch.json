@@ -12,7 +12,7 @@
             "skipFiles": ["<node_internals>/**"],
             "restart": true,
             "sourceMaps": true,
-            "localRoot": "${workspaceFolder}/server",
+            "localRoot": "${workspaceFolder}/serveur",
             "type": "pwa-node"
         },
         {
@@ -21,6 +21,26 @@
             "type": "pwa-chrome",
             "url": "http://localhost:4200",
             "webRoot": "${workspaceFolder}/client"
+        },
+        {
+            "name": "client_leger",
+            "cwd": "client_leger",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "client_leger (profile mode)",
+            "cwd": "client_leger",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "client_leger (release mode)",
+            "cwd": "client_leger",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
         }
     ]
 }

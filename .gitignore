@@ -1,6 +1,8 @@
 #ignoring .vscode folder but we keep some files for debuging
 /.vscode/chrome
 /.vs/
+.vscode/settings.json
+
 
 package-lock.json
 .DS_Store

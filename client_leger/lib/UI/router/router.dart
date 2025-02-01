@@ -9,12 +9,12 @@ import 'package:client_leger/UI/quiz/quiz_page.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/UI/sidebar/sidebar.dart';
 import 'package:client_leger/UI/signup/signup_page.dart';
-import 'package:client_leger/utilities/logger.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
-import 'package:go_router/go_router.dart';
+import 'package:client_leger/utilities/logger.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _playShellNavigatorKey = GlobalKey<NavigatorState>();
@@ -154,8 +154,7 @@ final GoRouter router = GoRouter(
         "IN REDIRECT loggedIn = $loggedIn and loggingIn = $loggingIn  and isLoggedIn = ${auth_service.isLoggedIn.value} and state.matchedlocation = ${state.matchedLocation}");
 
     if (!loggedIn && !loggingIn) return Paths.logIn;
-    if (loggedIn && loggingIn)
-      return Paths.play; // TODO: replace with homepage once its done
+    if (loggedIn && loggingIn) return Paths.play;
     return null;
   },
 );
