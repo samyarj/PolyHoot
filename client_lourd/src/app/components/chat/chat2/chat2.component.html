@@ -3,28 +3,34 @@
     <mat-icon id="chatBubble" color="white" title="clavardage">forum</mat-icon>
 </div>
 
-<div #previousMessages id="previous-messages">
+<!-- Chat Messages Container with Scroll Event -->
+<div #previousMessages id="previous-messages" (scroll)="onScroll()">
+    <!-- Loader when fetching messages -->
     <div *ngIf="chatMessagesLoading" class="loading-container">
         <div class="spinner-border text-primary" role="status"></div>
         <div>Chat is loading...</div>
     </div>
 
-    <div *ngIf="!chatMessagesLoading">
+    <!-- Chat Messages -->
+    <div class="message-list" *ngIf="!chatMessagesLoading">
         <div
             *ngFor="let chatmessage of chatMessages"
-            [ngClass]="{
-                user: name === chatmessage.author,
-                systemMessage: chatmessage.author === 'System',
-                otherUser: name !== chatmessage.author
-            }"
+            [ngClass]="{ systemMessage: chatmessage.username === 'System' }"
+            class="chat-message user otherUser"
         >
-            <div class="message">{{ chatmessage.author + ' : ' + chatmessage.message }}</div>
-            <div class="spacer"></div>
-            <div class="time">{{ chatmessage.date | date: "HH'h'mm" }}</div>
+            <div class="chat-header">
+                <img [src]="chatmessage.avatar" alt="User Avatar" class="chat-avatar" />
+                <span class="chat-username">{{ chatmessage.username }}</span>
+            </div>
+            <div class="message">{{ chatmessage.message }}</div>
+            <div class="date-container">
+                <div class="time">{{ chatmessage.date | date: 'MMM d, HH:mm' }}</div>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- Chat Input -->
 <div id="chat-message-input-div">
     <textarea id="myTextInput" (keydown)="onKeyDown($event)" placeholder="Entrez votre message." [(ngModel)]="inputMessage"></textarea>
     <button type="button" id="send-button" (click)="handleSendMessage()">Envoyer</button>

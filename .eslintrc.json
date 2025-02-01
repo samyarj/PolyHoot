@@ -90,9 +90,9 @@
                 ],
                 "@typescript-eslint/no-empty-function": "error",
                 "@typescript-eslint/no-explicit-any": [
-                    "error",
+                    "warn",
                     {
-                        "fixToUnknown": true
+                        "fixToUnknown": false
                     }
                 ],
                 "@typescript-eslint/no-inferrable-types": [

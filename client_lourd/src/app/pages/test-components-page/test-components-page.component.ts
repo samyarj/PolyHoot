@@ -13,21 +13,47 @@ export class TestComponentsPageComponent implements OnInit, OnDestroy {
     chatMessagesLoading: boolean = true;
     name = 'General Chat';
     private messagesSubscription: Subscription;
+    private lastMessageDate: number | null = null; // Track last message date for pagination
+    isFetchingOlderMessages: boolean = false; // Prevent multiple fetches at once
 
     constructor(private firebaseChatService: FirebaseChatService) {}
 
     ngOnInit(): void {
-        // Get the user's name from AuthService
-
-        // Subscribe to the chat messages from FirebaseChatService
+        // Subscribe to live chat messages
         this.messagesSubscription = this.firebaseChatService.getMessages().subscribe({
             next: (messages) => {
                 this.chatMessages = messages;
+                if (messages.length > 0) {
+                    this.lastMessageDate = messages[0].date; // Track oldest message date
+                }
                 this.chatMessagesLoading = false;
             },
             error: (err) => {
                 console.error('Error while fetching messages:', err);
                 this.chatMessagesLoading = false;
+            },
+        });
+    }
+
+    /**
+     * Load older messages when scrolling to the top.
+     */
+    loadOlderMessages(): void {
+        if (this.isFetchingOlderMessages || !this.lastMessageDate) return;
+
+        this.isFetchingOlderMessages = true;
+        this.firebaseChatService.loadOlderMessages(this.lastMessageDate).subscribe({
+            next: (olderMessages) => {
+                if (olderMessages.length > 0) {
+                    // Merge older messages while maintaining order
+                    this.chatMessages = [...olderMessages, ...this.chatMessages];
+                    this.lastMessageDate = olderMessages[0].date; // Update last loaded message date
+                }
+                this.isFetchingOlderMessages = false;
+            },
+            error: (err) => {
+                console.error('Error loading older messages:', err);
+                this.isFetchingOlderMessages = false;
             },
         });
     }
