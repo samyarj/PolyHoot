@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:client_leger/backend-communication-services/environment.dart';
 import 'package:client_leger/backend-communication-services/models/user.dart'
     as user_model;
@@ -21,9 +20,9 @@ const String getEmailUrl = '$baseUrl/get-email';
 const String googleProvider = "google.com";
 const String passwordProvider = 'password';
 
-Completer<user_model.User?> currentSignedInUserCompleter =
-    Completer<user_model.User?>();
-Future<user_model.User?> get currentSignedInUser =>
+Completer<user_model.User> currentSignedInUserCompleter =
+    Completer<user_model.User>();
+Future<user_model.User> get currentSignedInUser =>
     currentSignedInUserCompleter.future;
 ValueNotifier<bool> isLoggedIn = ValueNotifier<bool>(false);
 
@@ -215,7 +214,7 @@ void logout() async {
     AppLogger.d(
         "token is null but still signing out and about to refresh the listenable");
     isLoggedIn.value = false;
-    currentSignedInUserCompleter = Completer<user_model.User?>();
+    currentSignedInUserCompleter = Completer<user_model.User>();
     return;
   }
 
@@ -230,7 +229,7 @@ void logout() async {
     AppLogger.d("logging out successfully on server");
     await FirebaseAuth.instance.signOut();
     isLoggedIn.value = false;
-    currentSignedInUserCompleter = Completer<user_model.User?>();
+    currentSignedInUserCompleter = Completer<user_model.User>();
   } else {
     AppLogger.e(
         "Error during backend logout ${response.reasonPhrase} ${response.statusCode}");
