@@ -1,5 +1,6 @@
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
+import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/models/chat_message.dart';
 import 'package:client_leger/backend-communication-services/models/user.dart'
     as user_model;
@@ -26,109 +27,131 @@ class FirebaseChatService {
   static const int messagesLimit = 50;
 
   Future<void> sendMessage(String message) async {
-    final user = await auth_service.currentSignedInUser;
+    try {
+      final user = await auth_service.currentSignedInUser;
 
-    final chatMessage = {
-      'uid': user.uid,
-      'message': message,
-      'date': DateTime.now().millisecondsSinceEpoch,
-    };
+      final chatMessage = {
+        'uid': user.uid,
+        'message': message,
+        'date': DateTime.now().millisecondsSinceEpoch,
+      };
 
-    await _globalChatCollection.add(chatMessage);
+      await _globalChatCollection.add(chatMessage);
+    } catch (e) {
+      AppLogger.e("In sendMessage of FirebaseChatService ${e.toString()}");
+      throw Exception(getCustomError(e));
+    }
   }
 
   /// Get a real-time stream of the latest 50 messages from the global chat.
   Stream<List<ChatMessage>> getMessages() {
     AppLogger.d("getMessages");
+    try {
+      final messagesQuery = _globalChatCollection
+          .orderBy('date', descending: true)
+          .limit(messagesLimit);
 
-    final messagesQuery = _globalChatCollection
-        .orderBy('date', descending: true)
-        .limit(messagesLimit);
+      return messagesQuery.snapshots().asyncMap((snapshot) async {
+        // returns a stream of updates
 
-    return messagesQuery.snapshots().asyncMap((snapshot) async {
-      // returns a stream of updates
-      List<ChatMessage> newMessages = [];
-      Set<String> userIds = {};
-      AppLogger.d("In the asyncMap");
+        List<ChatMessage> newMessages = [];
+        Set<String> userIds = {};
+        AppLogger.d("In the asyncMap");
 
-      for (final change in snapshot.docChanges) {
-        if (change.type == DocumentChangeType.added) {
-          final ChatMessage message =
-              ChatMessage.fromJson(change.doc.data() as Map<String, dynamic>);
-          newMessages.add(message);
-          userIds.add(message.uid);
+        for (final change in snapshot.docChanges) {
+          if (change.type == DocumentChangeType.added) {
+            final ChatMessage message =
+                ChatMessage.fromJson(change.doc.data() as Map<String, dynamic>);
+            newMessages.add(message);
+            userIds.add(message.uid);
+          }
         }
-      }
 
-      if (newMessages.isEmpty) return [];
+        if (newMessages.isEmpty) return [];
 
-      // Fetch user details for unique UIDs
-      final users = await _fetchUserDetails(userIds.toList());
+        // Fetch user details for unique UIDs
+        final users = await _fetchUserDetails(userIds.toList());
 
-      // Attach user details to messages
-      for (ChatMessage msg in newMessages) {
-        msg.username = users[msg.uid]?.username ?? 'Unknown';
-        msg.avatar =
-            users[msg.uid]?.avatarEquipped ?? 'assets/default-avatar.png';
-      }
+        // Attach user details to messages
+        for (ChatMessage msg in newMessages) {
+          msg.username = users[msg.uid]?.username ?? 'Unknown';
+          msg.avatar =
+              users[msg.uid]?.avatarEquipped ?? 'assets/default-avatar.png';
+        }
 
-      newMessages
-          .sort((ChatMessage a, ChatMessage b) => a.date.compareTo(b.date));
+        newMessages
+            .sort((ChatMessage a, ChatMessage b) => a.date.compareTo(b.date));
 
-      AppLogger.i("newmessage length is: ${newMessages.length}");
+        AppLogger.i("newmessage length is: ${newMessages.length}");
 
-      return newMessages;
-    });
+        return newMessages;
+      });
+    } catch (e) {
+      AppLogger.e("In getMessages of FirebaseChatService ${e.toString()}");
+      throw Exception(getCustomError(e));
+    }
   }
 
   Future<Map<String, user_model.User>> _fetchUserDetails(
       List<String> userIds) async {
     AppLogger.d("In fetchUserDetails");
 
-    final userDetails = <String, user_model.User>{};
+    try {
+      final userDetails = <String, user_model.User>{};
 
-    final userFetches = userIds.map(
-      (uid) async {
-        final userDoc = await _usersCollection.doc(uid).get();
-        if (userDoc.exists) {
-          userDetails[uid] =
-              user_model.User.fromJson(userDoc.data() as Map<String, dynamic>);
-        }
-      },
-    );
+      final userFetches = userIds.map(
+        (uid) async {
+          final userDoc = await _usersCollection.doc(uid).get();
+          if (userDoc.exists) {
+            userDetails[uid] = user_model.User.fromJson(
+                userDoc.data() as Map<String, dynamic>);
+          }
+        },
+      );
 
-    await Future.wait(userFetches);
-    return userDetails;
+      await Future.wait(userFetches);
+      return userDetails;
+    } catch (e) {
+      AppLogger.e(
+          "In _fetchUserDetails of FirebaseChatService ${e.toString()}");
+      throw Exception(getCustomError(e));
+    }
   }
 
   Future<List<ChatMessage>> loadOlderMessages(int lastMessageDate) async {
-    final olderMessagesQuery = _globalChatCollection
-        .orderBy('date', descending: true)
-        .startAfter([lastMessageDate]).limit(50);
+    try {
+      final olderMessagesQuery = _globalChatCollection
+          .orderBy('date', descending: true)
+          .startAfter([lastMessageDate]).limit(50);
 
-    final snapshot =
-        await olderMessagesQuery.get(); // Fetch once, not as a stream
+      final snapshot =
+          await olderMessagesQuery.get(); // Fetch once, not as a stream
 
-    final olderMessages = snapshot.docs
-        .map((doc) => ChatMessage.fromJson(doc.data() as Map<String, dynamic>))
-        .toList();
+      final olderMessages = snapshot.docs
+          .map(
+              (doc) => ChatMessage.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
 
-    final userIds = olderMessages.map((msg) => msg.uid).toSet();
+      final userIds = olderMessages.map((msg) => msg.uid).toSet();
 
-    final users = await _fetchUserDetails(userIds.toList());
+      final users = await _fetchUserDetails(userIds.toList());
 
-    // Attach user details to messages
-    for (ChatMessage msg in olderMessages) {
-      msg.username = users[msg.uid]?.username ?? 'Unknown';
-      msg.avatar =
-          users[msg.uid]?.avatarEquipped ?? 'assets/default-avatar.png';
+      // Attach user details to messages
+      for (ChatMessage msg in olderMessages) {
+        msg.username = users[msg.uid]?.username ?? 'Unknown';
+        msg.avatar =
+            users[msg.uid]?.avatarEquipped ?? 'assets/default-avatar.png';
+      }
+
+      olderMessages
+          .sort((ChatMessage a, ChatMessage b) => a.date.compareTo(b.date));
+
+      AppLogger.i("oldermessage length is: ${olderMessages.length}");
+
+      return olderMessages;
+    } catch (e) {
+      AppLogger.e("In FirebaseChatService loadOlderMessages ${e.toString()}");
+      throw Exception(getCustomError(e));
     }
-
-    olderMessages
-        .sort((ChatMessage a, ChatMessage b) => a.date.compareTo(b.date));
-
-    AppLogger.i("oldermessage length is: ${olderMessages.length}");
-
-    return olderMessages;
   }
 }

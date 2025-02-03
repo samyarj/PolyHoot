@@ -36,9 +36,9 @@ class ChannelManager {
     return Stream.value([]);
   }
 
-  void sendMessage(String channel, String message) {
+  Future<void> sendMessage(String channel, String message) async {
     if (channel == 'General') {
-      _firebaseChatService.sendMessage(message);
+      await _firebaseChatService.sendMessage(message);
     }
   }
 

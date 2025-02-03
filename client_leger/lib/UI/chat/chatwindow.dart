@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
+import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/models/chat_message.dart';
 import 'package:client_leger/backend-communication-services/models/user.dart';
 import 'package:client_leger/business/channel_manager.dart';
@@ -46,32 +48,48 @@ class _ChatWindowState extends State<ChatWindow> {
   }
 
   void _subscribeToMessages() {
-    _messagesSubscription = _channelManager
-        .getMessagesForChannel(widget.channel)
-        .listen((newMessages) {
-      setState(() {
-        _allMessagesDisplayed = [..._allMessagesDisplayed, ...newMessages];
-        isLoadingInitialMessages = false;
+    try {
+      _messagesSubscription = _channelManager
+          .getMessagesForChannel(widget.channel)
+          .listen((newMessages) {
+        setState(() {
+          _allMessagesDisplayed = [..._allMessagesDisplayed, ...newMessages];
+          isLoadingInitialMessages = false;
+        });
+        if (_allMessagesDisplayed.isNotEmpty) {
+          _scrollToBottom();
+          lastMessageDate =
+              _allMessagesDisplayed.first.date.millisecondsSinceEpoch;
+        }
+      }, onError: (error) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showErrorDialog(context, getCustomError(error));
+        });
       });
-      if (_allMessagesDisplayed.isNotEmpty) {
-        _scrollToBottom();
-        lastMessageDate =
-            _allMessagesDisplayed.first.date.millisecondsSinceEpoch;
-      }
-    });
+    } catch (e) {
+      // if the exception is not thrown in the stream
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showErrorDialog(context, e.toString());
+      });
+    }
   }
 
   Future<void> _onRefresh() async {
     if (lastMessageDate != null) {
-      final oneFetch = await _channelManager.loadOlderMessages(
-          widget.channel, lastMessageDate!);
+      try {
+        final oneFetch = await _channelManager.loadOlderMessages(
+            widget.channel, lastMessageDate!);
 
-      if (oneFetch.isNotEmpty) {
-        lastMessageDate = oneFetch.first.date.millisecondsSinceEpoch;
+        if (oneFetch.isNotEmpty) {
+          lastMessageDate = oneFetch.first.date.millisecondsSinceEpoch;
 
-        setState(() {
-          _allMessagesDisplayed = [...oneFetch, ..._allMessagesDisplayed];
-        });
+          setState(() {
+            _allMessagesDisplayed = [...oneFetch, ..._allMessagesDisplayed];
+          });
+        }
+      } catch (e) {
+        if (!mounted) return;
+        showErrorDialog(context, e.toString());
       }
     }
   }
@@ -85,20 +103,27 @@ class _ChatWindowState extends State<ChatWindow> {
   }
 
   void _scrollToBottom() {
-    Future.delayed(Duration(milliseconds: 300), () {
-      if (_listViewScrollController.hasClients) {
-        _listViewScrollController.animateTo(
-          _listViewScrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 1000),
-          curve: Curves.elasticOut,
-        );
-      }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(Duration(milliseconds: 500), () {
+        if (_listViewScrollController.hasClients) {
+          _listViewScrollController.animateTo(
+            _listViewScrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 2000),
+            curve: Curves.elasticOut,
+          );
+        }
+      });
     });
   }
 
-  void sendMessage() {
+  void sendMessage() async {
     if (_textController.text.trim().isNotEmpty) {
-      _channelManager.sendMessage(widget.channel, _textController.text);
+      try {
+        await _channelManager.sendMessage(widget.channel, _textController.text);
+      } catch (e) {
+        if (!mounted) return;
+        showErrorDialog(context, e.toString());
+      }
       _textController.clear();
       _focusNode.requestFocus();
     }
