@@ -55,14 +55,14 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
 
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Email is required.';
+      return 'Un email est requis.';
     }
 
     final emailRegex =
         RegExp(r'^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$');
 
     if (!emailRegex.hasMatch(value)) {
-      return 'Please enter a valid email address.';
+      return 'Veuillez entrez une adresse email valide SVP.';
     }
 
     return null;
@@ -97,7 +97,7 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Success! Password reset email sent.',
+              "Succès ! Un email de réinitialisation de mot de passe a été envoyé.",
             ),
           ),
         );
@@ -138,14 +138,14 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Reset Password',
+                'Réinitialiser le mot de passe',
                 style: TextStyle(
                   fontSize: 18,
                 ),
               ),
               SizedBox(height: 16),
               Text(
-                'Please enter the email address that you used to register, and we will send you a link to reset your password via Email.',
+                "Veuillez entrer l'adresse e-mail que vous avez utilisée pour vous inscrire, et nous vous enverrons un lien pour réinitialiser votre mot de passe par e-mail.",
                 style: TextStyle(
                     fontSize: 16, color: const Color.fromARGB(255, 78, 77, 77)),
               ),
@@ -157,7 +157,7 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
                 controller: _emailController,
                 focusNode: _emailFocusNode,
                 decoration: InputDecoration(
-                  hintText: 'Enter your email',
+                  hintText: 'Entrez votre email',
                   enabledBorder: greyBorder,
                   focusedBorder: blueBorder,
                   errorBorder: greyBorder,
@@ -188,7 +188,7 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       )
                     : Text(
-                        'Reset my password',
+                        'Réinitialiser mon mot de passe',
                         style: TextStyle(
                           fontSize: 18,
                         ),
@@ -200,7 +200,7 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
                   context.go(Paths.logIn);
                 },
                 child: Text(
-                  'Return to Sign In',
+                  'Retour à la connexion',
                   style: TextStyle(
                     fontSize: 18,
                     color: const Color.fromARGB(255, 19, 99, 236),

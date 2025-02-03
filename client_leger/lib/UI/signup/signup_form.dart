@@ -156,11 +156,11 @@ class _SignUpFormState extends State<SignUpForm> {
 
   String? validateUsername(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Username is required.';
+      return 'Un pseudonyme est requis.';
     }
     final usernameRegex = RegExp(r'^[a-zA-Z0-9._]{3,20}$');
     if (!usernameRegex.hasMatch(value)) {
-      return 'Username must be 3-20 characters and can only contain letters, numbers, dots, underscores, or hyphens.';
+      return "Le nom d'utilisateur doit comporter entre 3 et 20 caractères et ne peut contenir que des lettres, des chiffres, des points, des underscores ou des tirets.";
     }
 
     return null;
@@ -170,7 +170,7 @@ class _SignUpFormState extends State<SignUpForm> {
     final bool isTaken = await auth_service.isUsernameTaken(username);
     if (isTaken) {
       setState(() {
-        _usernameError = 'This username is already taken.';
+        _usernameError = 'Ce pseudonyme est déjà pris.';
       });
     } else {
       setState(() {
@@ -181,14 +181,14 @@ class _SignUpFormState extends State<SignUpForm> {
 
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Email is required.';
+      return 'Un email est requis.';
     }
 
     final emailRegex =
         RegExp(r'^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$');
 
     if (!emailRegex.hasMatch(value)) {
-      return 'Please enter a valid email address.';
+      return 'Veuillez entrez une adresse email valide SVP.';
     }
 
     return null;
@@ -198,7 +198,7 @@ class _SignUpFormState extends State<SignUpForm> {
     final bool isTaken = await auth_service.isEmailTaken(email);
     if (isTaken) {
       setState(() {
-        _emailError = 'This email is already taken.';
+        _emailError = 'Ce email est déjà pris.';
       });
     } else {
       setState(() {
@@ -209,14 +209,14 @@ class _SignUpFormState extends State<SignUpForm> {
 
   String? validatePassword(String? value) {
     if (value == null || value.isEmpty || value.length < 6) {
-      return 'Password must be at least 6 characters long.';
+      return 'Le mot de passe doit avoir au moins 6 caractères.';
     }
     return null;
   }
 
   String? validateConfirmPassword(String? value) {
     if (value == null || value != _passwordController.text) {
-      return 'Passwords do not match.';
+      return 'Les mots de passe ne correspondent pas.';
     }
     return null;
   }
@@ -234,7 +234,7 @@ class _SignUpFormState extends State<SignUpForm> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Sign Up',
+                "S'inscrire",
                 style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
@@ -247,8 +247,9 @@ class _SignUpFormState extends State<SignUpForm> {
                 controller: _usernameController,
                 focusNode: _usernameFocusNode,
                 decoration: InputDecoration(
-                  labelText: 'Username',
-                  hintText: 'Enter your username',
+                  errorMaxLines: 3,
+                  labelText: 'Pseudonyme',
+                  hintText: 'Entrez votre pseudonyme',
                   errorText: _usernameError,
                   border: OutlineInputBorder(),
                 ),
@@ -262,7 +263,7 @@ class _SignUpFormState extends State<SignUpForm> {
                 focusNode: _emailFocusNode,
                 decoration: InputDecoration(
                   labelText: 'Email',
-                  hintText: 'Enter your email',
+                  hintText: 'Entrez votre email',
                   errorText: _emailError,
                   border: OutlineInputBorder(),
                 ),
@@ -276,8 +277,8 @@ class _SignUpFormState extends State<SignUpForm> {
                 focusNode: _passwordFocusNode,
                 obscureText: true,
                 decoration: InputDecoration(
-                  labelText: 'Password',
-                  hintText: 'Enter your password',
+                  labelText: 'Mot de passe',
+                  hintText: 'Entrez votre mot de passe',
                   border: OutlineInputBorder(),
                 ),
                 validator: validatePassword,
@@ -290,8 +291,8 @@ class _SignUpFormState extends State<SignUpForm> {
                 focusNode: _confirmPasswordFocusNode,
                 obscureText: true,
                 decoration: InputDecoration(
-                  labelText: 'Confirm Password',
-                  hintText: 'Confirm your password',
+                  labelText: 'Confirmer le mot de passe',
+                  hintText: 'Confirmer le mot de passe',
                   border: OutlineInputBorder(),
                 ),
                 validator: validateConfirmPassword,
@@ -299,7 +300,7 @@ class _SignUpFormState extends State<SignUpForm> {
               SizedBox(height: 16),
               // Terms and Privacy
               Text(
-                'By creating an account, you agree to the Terms of Service and Privacy Policy.',
+                "En créant un compte, vous acceptez les Conditions d'utilisation et la Politique de confidentialité.",
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey, fontSize: 14),
               ),
@@ -316,7 +317,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: Text('Create a new account',
+                child: Text('Créer un nouveau compte',
                     style: TextStyle(fontSize: 18)),
               ),
               SizedBox(height: 16),
@@ -324,7 +325,7 @@ class _SignUpFormState extends State<SignUpForm> {
                 onPressed: () {
                   context.go(Paths.logIn);
                 },
-                child: Text('Have an account? Login',
+                child: Text('Vous avez un compte ? Connexion',
                     style: TextStyle(fontSize: 18)),
               ),
               Divider(),
@@ -333,8 +334,8 @@ class _SignUpFormState extends State<SignUpForm> {
               OutlinedButton.icon(
                 onPressed: signUpWithGoogle,
                 icon: Icon(Icons.account_circle),
-                label:
-                    Text('Sign up with Google', style: TextStyle(fontSize: 18)),
+                label: Text("S'inscrire avec Google",
+                    style: TextStyle(fontSize: 18)),
                 style: OutlinedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),

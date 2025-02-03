@@ -104,7 +104,7 @@ class _LoginFormState extends State<LoginForm> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "Login",
+                "Connexion",
                 style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 32),
@@ -118,7 +118,7 @@ class _LoginFormState extends State<LoginForm> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'SVP entrez votre pseudonyme ou votre email';
+                    return 'Entrez votre pseudonyme ou votre email SVP';
                   }
                   return null;
                 },
@@ -135,7 +135,7 @@ class _LoginFormState extends State<LoginForm> {
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'SVP entrez votre mot de passe';
+                    return 'Entrez votre mot de passe SVP';
                   }
                   return null;
                 },
@@ -164,7 +164,7 @@ class _LoginFormState extends State<LoginForm> {
                           valueColor:
                               AlwaysStoppedAnimation<Color>(Colors.white),
                         )
-                      : Text('Login'),
+                      : Text('Connexion'),
                 ),
               ),
               SizedBox(height: 16),
@@ -211,7 +211,7 @@ class _LoginFormState extends State<LoginForm> {
                 onPressed: loginWithGoogle,
                 icon: Icon(Icons.account_circle, size: 20),
                 label: Text(
-                  'Login avec Google',
+                  'Connexion avec Google',
                   style: TextStyle(fontSize: 18),
                 ),
                 style: OutlinedButton.styleFrom(
