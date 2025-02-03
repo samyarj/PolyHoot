@@ -59,6 +59,7 @@ export enum GameEvents {
     QuestionEndByTimer = 'questionEndByTimer',
     FinalizePlayerAnswer = 'finalizePlayerAnswer',
     StartGameCountdown = 'startGameCountdown',
+    StartGame = 'startGame',
     Title = 'gameTitle',
     ToggleLock = 'toggleGameLock',
     AlertLockToggled = 'onToggleGameLock',

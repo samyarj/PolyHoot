@@ -1,4 +1,4 @@
-export interface ChatMessage {
+export interface FirebaseChatMessage {
     message: string;
     username?: string;
     avatar?: string;

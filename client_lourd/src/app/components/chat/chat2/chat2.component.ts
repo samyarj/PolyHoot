@@ -1,7 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { MAX_CHAR, MESSAGES_LIMIT } from '@app/constants/constants';
-import { ChatMessage } from '@app/interfaces/chat-message';
-
+import { FirebaseChatMessage } from '@app/interfaces/chat-message';
+import { AuthService } from '@app/services/auth/auth.service';
 @Component({
     selector: 'app-chat2',
     templateUrl: './chat2.component.html',
@@ -9,7 +9,7 @@ import { ChatMessage } from '@app/interfaces/chat-message';
 })
 export class Chat2Component implements OnChanges {
     @Input() name: string = ''; // Chat name
-    @Input() chatMessages: ChatMessage[] = [];
+    @Input() chatMessages: FirebaseChatMessage[] = [];
     @Input() chatMessagesLoading: boolean = true;
     @Output() sendMessageToRoom = new EventEmitter<string>(); // Emits sent messages
     @Output() loadOlderMessages = new EventEmitter<void>(); // Emits when loading older messages
@@ -18,6 +18,12 @@ export class Chat2Component implements OnChanges {
     isNearTop: boolean = false;
     wasAtBottom: boolean = true; // Track if user was at bottom before update
     inputMessage = '';
+
+    constructor(private authService: AuthService) {}
+
+    get user() {
+        return this.authService.user$;
+    }
 
     /**
      * Detect changes in messages and handle scroll behavior

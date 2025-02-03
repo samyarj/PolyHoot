@@ -40,3 +40,4 @@ export const EMAIL_REGEX = /^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
 export const USERNAME_REGEX = /^[a-zA-Z0-9._]{3,20}$/;
 export const PASSWORD_MIN_LENGTH = 6;
 export const MESSAGES_LIMIT = 50;
+export const MIN_LOADING_TIME = 600;

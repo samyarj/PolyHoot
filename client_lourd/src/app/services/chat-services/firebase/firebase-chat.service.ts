@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Firestore, addDoc, collection, doc, getDoc, limit, onSnapshot, orderBy, query, startAfter } from '@angular/fire/firestore';
 import { MESSAGES_LIMIT } from '@app/constants/constants';
-import { ChatMessage } from '@app/interfaces/chat-message';
+import { FirebaseChatMessage } from '@app/interfaces/chat-message';
 import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
 import { Observable } from 'rxjs';
@@ -27,7 +27,7 @@ export class FirebaseChatService {
             throw new Error('User is not authenticated');
         }
 
-        const chatMessage: ChatMessage = {
+        const chatMessage: FirebaseChatMessage = {
             uid: user.uid,
             message,
             date: Date.now(),
@@ -39,21 +39,21 @@ export class FirebaseChatService {
     /**
      * Get a real-time stream of the latest 50 messages from the global chat.
      */
-    getMessages(): Observable<ChatMessage[]> {
+    getMessages(): Observable<FirebaseChatMessage[]> {
         const messagesQuery = query(
             this.globalChatCollection,
             orderBy('date', 'desc'), // Fetch latest messages first
             limit(MESSAGES_LIMIT), // Load only the last 50 messages
         );
 
-        return new Observable<ChatMessage[]>((observer) => {
-            let messagesCache: ChatMessage[] = []; // Store messages
+        return new Observable<FirebaseChatMessage[]>((observer) => {
+            let messagesCache: FirebaseChatMessage[] = []; // Store messages
             const unsubscribe = onSnapshot(messagesQuery, async (snapshot) => {
-                const newMessages: ChatMessage[] = [];
+                const newMessages: FirebaseChatMessage[] = [];
                 const userIds: Set<string> = new Set();
 
                 snapshot.docChanges().forEach((change) => {
-                    const message = change.doc.data() as ChatMessage;
+                    const message = change.doc.data() as FirebaseChatMessage;
 
                     if (change.type === 'added') {
                         newMessages.push(message); // Collect new messages
@@ -86,7 +86,7 @@ export class FirebaseChatService {
     /**
      * Load older messages (pagination).
      */
-    loadOlderMessages(lastMessageDate: number): Observable<ChatMessage[]> {
+    loadOlderMessages(lastMessageDate: number): Observable<FirebaseChatMessage[]> {
         const olderMessagesQuery = query(
             this.globalChatCollection,
             orderBy('date', 'desc'),
@@ -94,14 +94,14 @@ export class FirebaseChatService {
             limit(MESSAGES_LIMIT),
         );
 
-        return new Observable<ChatMessage[]>((observer) => {
-            let messagesCache: ChatMessage[] = []; // Store older messages
+        return new Observable<FirebaseChatMessage[]>((observer) => {
+            let messagesCache: FirebaseChatMessage[] = []; // Store older messages
             const unsubscribe = onSnapshot(olderMessagesQuery, async (snapshot) => {
-                const newMessages: ChatMessage[] = [];
+                const newMessages: FirebaseChatMessage[] = [];
                 const userIds: Set<string> = new Set();
 
                 snapshot.docChanges().forEach((change) => {
-                    const message = change.doc.data() as ChatMessage;
+                    const message = change.doc.data() as FirebaseChatMessage;
 
                     if (change.type === 'added') {
                         newMessages.push(message); // Add new messages only

@@ -1,1 +1,12 @@
-<router-outlet></router-outlet>
+<ng-container *ngIf="(showSpinner$ | async) === false; else loadingTemplate">
+    <router-outlet></router-outlet>
+</ng-container>
+
+<ng-template #loadingTemplate>
+    <div class="loading-container">
+        <div class="spinner-border text-light" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p>Chargement...</p>
+    </div>
+</ng-template>

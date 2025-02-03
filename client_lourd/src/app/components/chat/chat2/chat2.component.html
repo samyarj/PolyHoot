@@ -12,20 +12,22 @@
     </div>
 
     <!-- Chat Messages -->
-    <div class="message-list" *ngIf="!chatMessagesLoading">
-        <div
-            *ngFor="let chatmessage of chatMessages"
-            [ngClass]="{ systemMessage: chatmessage.username === 'System' }"
-            class="chat-message user otherUser"
-        >
-            <div class="chat-header">
-                <img [src]="chatmessage.avatar" alt="User Avatar" class="chat-avatar" />
-                <span class="chat-username">{{ chatmessage.username }}</span>
-            </div>
-            <div class="message">{{ chatmessage.message }}</div>
-            <div class="date-container">
-                <div class="time">{{ chatmessage.date | date: 'MMM d, HH:mm' }}</div>
-            </div>
+    <div
+        *ngFor="let chatmessage of chatMessages"
+        [ngClass]="{
+            systemMessage: chatmessage.username === 'System',
+            user: (user | async)?.username === chatmessage.username,
+            otherUser: (user | async)?.username !== chatmessage.username
+        }"
+        class="chat-message user otherUser"
+    >
+        <div class="chat-header">
+            <img [src]="chatmessage.avatar" alt="User Avatar" class="chat-avatar" />
+            <span class="chat-username">{{ chatmessage.username }}</span>
+        </div>
+        <div class="message">{{ chatmessage.message }}</div>
+        <div class="date-container">
+            <div class="time">{{ chatmessage.date | date: 'HH:MM:SS' }}</div>
         </div>
     </div>
 </div>

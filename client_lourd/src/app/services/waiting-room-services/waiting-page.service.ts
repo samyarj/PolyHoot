@@ -61,7 +61,7 @@ export class WaitingPageService {
     }
 
     startGame() {
-        this.socketService.send('startGame');
+        this.socketService.send(GameEvents.StartGame);
     }
 
     startGameCountdown(time: number) {

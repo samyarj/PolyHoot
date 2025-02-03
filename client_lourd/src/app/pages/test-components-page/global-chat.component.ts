@@ -1,15 +1,15 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ChatMessage } from '@app/interfaces/chat-message';
+import { FirebaseChatMessage } from '@app/interfaces/chat-message';
 import { FirebaseChatService } from '@app/services/chat-services/firebase/firebase-chat.service';
 import { Subscription } from 'rxjs';
 
 @Component({
-    selector: 'app-test-components-page',
-    templateUrl: './test-components-page.component.html',
-    styleUrls: ['./test-components-page.component.scss'],
+    selector: 'app-global-chat',
+    templateUrl: './global-chat.component.html',
+    styleUrls: ['./global-chat.component.scss'],
 })
-export class TestComponentsPageComponent implements OnInit, OnDestroy {
-    chatMessages: ChatMessage[] = [];
+export class GlobalChatComponent implements OnInit, OnDestroy {
+    chatMessages: FirebaseChatMessage[] = [];
     chatMessagesLoading: boolean = true;
     name = 'General Chat';
     private messagesSubscription: Subscription;

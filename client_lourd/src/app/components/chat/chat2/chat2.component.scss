@@ -33,13 +33,10 @@
     box-shadow: 0 6px 12px rgba(74, 105, 187, 0.5);
 }
 
-.message-list {
-    width: 100%;
-}
-
 .user,
 .otherUser {
-    width: 70%;
+    min-width: 50%;
+    max-width: 70%;
     word-wrap: break-word;
     font-family: 'Lato', sans-serif;
     position: relative;
@@ -49,8 +46,6 @@
     padding: 12px;
     margin-bottom: 15px;
     transition: transform 0.3s ease-in-out;
-    display: flex;
-    flex-direction: column;
 }
 .systemMessage {
     max-width: 100%;
@@ -198,7 +193,7 @@ div.time {
 .chat-header {
     display: flex;
     align-items: center;
-    margin-bottom: 3px;
+    margin-bottom: 5px;
 }
 
 .chat-avatar {
@@ -206,11 +201,11 @@ div.time {
     height: 30px;
     border-radius: 50%;
     object-fit: cover;
-    margin-right: 10px;
+    margin-right: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .chat-username {
     font-weight: bold;
-    font-size: 14px;
+    font-size: 15px;
 }

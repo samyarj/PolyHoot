@@ -50,7 +50,7 @@ import { JoinGamePageComponent } from './pages/game-related/join-game-page/join-
 import { OrganizerPageComponent } from './pages/game-related/organizer-page/organizer-page.component';
 import { ResultsPageComponent } from './pages/game-related/results-page/results-page.component';
 import { TestGamePageComponent } from './pages/game-related/test-page/test-game-page.component';
-import { TestComponentsPageComponent } from './pages/test-components-page/test-components-page.component';
+import { GlobalChatComponent } from './pages/test-components-page/global-chat.component';
 import { WaitingPageComponent } from './pages/waiting-page/waiting-page.component';
 import { QuestionService } from './services/back-end-communication-services/question-service/question.service';
 import { QuizService } from './services/back-end-communication-services/quiz-service/quiz.service';
@@ -98,7 +98,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         MenuBarComponent,
         ForgotPasswordComponent,
         ForgotPasswordFormComponent,
-        TestComponentsPageComponent,
+        GlobalChatComponent,
         Chat2Component,
     ],
     providers: [

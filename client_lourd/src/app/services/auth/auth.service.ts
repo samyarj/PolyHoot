@@ -10,11 +10,13 @@ import {
     updateProfile,
     UserCredential,
 } from '@angular/fire/auth';
+import { Firestore } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { User } from '@app/interfaces/user';
 import { handleErrorsGlobally } from '@app/utils/rxjs-operators';
+import { collection, doc, getDocs, query, updateDoc, where } from '@firebase/firestore';
 import { User as FirebaseUser, onIdTokenChanged, sendPasswordResetEmail } from 'firebase/auth';
-import { BehaviorSubject, catchError, from, map, Observable, of, switchMap, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, finalize, from, map, Observable, of, switchMap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -24,13 +26,16 @@ export class AuthService {
     private readonly baseUrl = `${environment.serverUrl}/users`;
     private userBS: BehaviorSubject<User | null> = new BehaviorSubject<User | null>(null);
     private googleProvider = new GoogleAuthProvider();
+    private loadingTokenBS = new BehaviorSubject<boolean>(true);
     user$ = this.userBS.asObservable();
+    loadingToken$ = this.loadingTokenBS.asObservable();
 
     constructor(
         private auth: Auth,
         private http: HttpClient,
         private injector: Injector,
         private router: Router,
+        private firestore: Firestore,
     ) {
         this.monitorTokenChanges();
     }
@@ -87,19 +92,25 @@ export class AuthService {
     }
 
     logout(): void {
-        this.http.post<void>(`${this.baseUrl}/logout`, {}, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }).subscribe({
-            next: () => {
-                this.signOutAndClearSession();
-            },
-            error: (err) => {
-                console.error('Error during backend logout:', err);
-                this.signOutAndClearSession();
-            },
-        });
+        const currentUser = this.auth.currentUser;
+        console.log('logout called');
+        if (currentUser) {
+            const userDocRef = doc(this.firestore, `users/${currentUser.uid}`);
+
+            from(updateDoc(userDocRef, { isOnline: false }))
+                .pipe(
+                    handleErrorsGlobally(this.injector),
+                    finalize(() => this.signOutAndClearSession()),
+                )
+                .subscribe();
+        } else {
+            this.signOutAndClearSession();
+        }
     }
 
     isAuthenticated(): boolean {
-        return !!localStorage.getItem('token');
+        // return !!localStorage.getItem('token');
+        return !!this.userBS.value;
     }
 
     setUser(user: User): void {
@@ -132,7 +143,7 @@ export class AuthService {
     private handleAuthAndFetchUser(userCredential: UserCredential, endpoint: string, method: 'GET' | 'POST' = 'GET'): Observable<User> {
         return from(userCredential.user.getIdToken()).pipe(
             switchMap((idToken) => {
-                localStorage.setItem('token', idToken);
+                // localStorage.setItem('token', idToken);
                 const options = { headers: { Authorization: `Bearer ${idToken}` } };
 
                 switch (method) {
@@ -148,47 +159,47 @@ export class AuthService {
     }
 
     private monitorTokenChanges(): void {
-        onIdTokenChanged(this.auth, (firebaseUser) => {
-            if (firebaseUser) {
-                firebaseUser
-                    .getIdToken()
-                    .then((idToken) => {
-                        // Save token in memory or localStorage
-                        localStorage.setItem('token', idToken);
+        this.loadingTokenBS.next(true);
 
-                        // Fetch user profile using the token
-                        this.http
-                            .get<User>(`${this.baseUrl}/profile`, {
-                                headers: { Authorization: `Bearer ${idToken}` },
-                            })
-                            .subscribe({
-                                next: (user) => this.userBS.next(user), // Update the user BehaviorSubject
-                                error: () => this.clearSession(), // Clear session if fetching the profile fails
-                            });
-                    })
-                    .catch(() => {
-                        this.clearSession(); // Clear session if getting the token fails
-                    });
+        onIdTokenChanged(this.auth, async (firebaseUser) => {
+            if (firebaseUser) {
+                try {
+                    const idToken = await firebaseUser.getIdToken();
+                    if (!idToken) throw new Error('Invalid token');
+
+                    this.http
+                        .get<User>(`${this.baseUrl}/profile`, {
+                            headers: { Authorization: `Bearer ${idToken}` },
+                        })
+                        .pipe(finalize(() => this.loadingTokenBS.next(false)))
+                        .subscribe({
+                            next: (user) => this.userBS.next(user),
+                            error: () => this.logout(),
+                        });
+                } catch {
+                    this.loadingTokenBS.next(false);
+                    this.logout();
+                }
             } else {
-                this.clearSession(); // Clear session if no Firebase user is found
+                this.userBS.next(null);
+                this.loadingTokenBS.next(false);
             }
         });
     }
 
-    private clearSession(): void {
-        localStorage.removeItem('token');
-        this.userBS.next(null);
-        this.router.navigate(['/login']);
+    private signOutAndClearSession(): void {
+        from(this.auth.signOut())
+            .pipe(
+                handleErrorsGlobally(this.injector),
+                finalize(() => this.clearSession()),
+            )
+            .subscribe();
     }
 
-    private signOutAndClearSession(): void {
-        from(this.auth.signOut()).subscribe({
-            next: () => this.clearSession(),
-            error: (err) => {
-                console.error('Error during Firebase sign out:', err);
-                this.clearSession();
-            },
-        });
+    private clearSession(): void {
+        // localStorage.removeItem('token');
+        this.userBS.next(null);
+        this.router.navigate(['/login']);
     }
 
     private isUserOnline(email: string | null): Observable<boolean> {
@@ -196,17 +207,20 @@ export class AuthService {
             return of(false);
         }
 
-        return this.http
-            .get<{ isOnline: boolean }>(`${this.baseUrl}/check-online-status`, {
-                params: { email },
-            })
-            .pipe(
-                map((response) => response.isOnline),
-                catchError((error) => {
-                    console.error('Error checking online status from backend:', error);
-                    return of(false);
-                }),
-            );
+        const usersCollection = collection(this.firestore, 'users');
+        const emailQuery = query(usersCollection, where('email', '==', email));
+
+        return from(getDocs(emailQuery)).pipe(
+            map((querySnapshot) => {
+                if (querySnapshot.empty) {
+                    return false;
+                }
+
+                const userDoc = querySnapshot.docs[0];
+                return userDoc.data()?.isOnline === true;
+            }),
+            catchError(() => of(false)),
+        );
     }
 
     private signInWithGoogleSDK(): Observable<UserCredential> {

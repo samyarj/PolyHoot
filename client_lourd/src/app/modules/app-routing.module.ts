@@ -15,7 +15,7 @@ import { OrganizerPageComponent } from '@app/pages/game-related/organizer-page/o
 import { ResultsPageComponent } from '@app/pages/game-related/results-page/results-page.component';
 import { TestGamePageComponent } from '@app/pages/game-related/test-page/test-game-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
-import { TestComponentsPageComponent } from '@app/pages/test-components-page/test-components-page.component';
+import { GlobalChatComponent } from '@app/pages/test-components-page/global-chat.component';
 import { WaitingPageComponent } from '@app/pages/waiting-page/waiting-page.component';
 
 const routes: Routes = [
@@ -41,7 +41,7 @@ const routes: Routes = [
     { path: 'organizer', component: OrganizerPageComponent, canActivate: [authGuard] },
     { path: 'joinGame', component: JoinGamePageComponent, canActivate: [authGuard] },
 
-    { path: 'test-components', component: TestComponentsPageComponent, canActivate: [authGuard] },
+    { path: 'global-chat', component: GlobalChatComponent, canActivate: [authGuard] },
 
     { path: '**', redirectTo: '/home' },
 ];
