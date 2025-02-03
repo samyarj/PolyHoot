@@ -1,4 +1,5 @@
 import 'package:client_leger/UI/sidebar/joined_channels_carousel.dart';
+import 'package:client_leger/business/channel_manager.dart';
 import 'package:flutter/material.dart';
 
 class JoinChannelSearch extends StatefulWidget {
@@ -10,32 +11,25 @@ class JoinChannelSearch extends StatefulWidget {
 
 class _JoinChannelSearchState extends State<JoinChannelSearch> {
   String? _selectedChannel;
-
+  late ChannelManager _channelManager;
   final TextEditingController _textEditingController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   final GlobalKey _autocompleteKey = GlobalKey();
 
-  final List<String> _channelsAvailable = [
-    'General',
-    'The BIRDS',
-    'Music Lovers',
-    'Foodies',
-    '3.5+ only',
-    "Test1",
-    "Test2",
-    "Test3",
-  ]..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
-
-  final List<String> _joinedChannels = ['General', "Test1", "Test2", "Test3"];
+  @override
+  void initState() {
+    _channelManager = ChannelManager();
+    super.initState();
+  }
 
   void _joinChannel() {
-    if (!_joinedChannels.contains(_selectedChannel)) {
+    if (!_channelManager.joinedChannels.contains(_selectedChannel)) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Canal $_selectedChannel rejoint !')),
       );
       setState(() {
-        _joinedChannels.add(_selectedChannel!);
+        _channelManager.joinedChannels.add(_selectedChannel!);
       });
     } else {
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -62,7 +56,7 @@ class _JoinChannelSearchState extends State<JoinChannelSearch> {
       SnackBar(content: Text('Canal $channel quitté !')),
     );
     setState(() {
-      _joinedChannels.remove(channel);
+      _channelManager.joinedChannels.remove(channel);
     });
   }
 
@@ -91,7 +85,7 @@ class _JoinChannelSearchState extends State<JoinChannelSearch> {
                       textEditingController: _textEditingController,
                       optionsViewOpenDirection: OptionsViewOpenDirection.up,
                       optionsBuilder: (TextEditingValue textEditingValue) {
-                        return _channelsAvailable
+                        return _channelManager.channelsAvailable
                             .where((channel) => channel.toLowerCase().contains(
                                   textEditingValue.text.toLowerCase(),
                                 ))
@@ -161,7 +155,7 @@ class _JoinChannelSearchState extends State<JoinChannelSearch> {
               ),
               SizedBox(height: 32),
               JoinedChannelsCarousel(
-                joinedChannels: _joinedChannels,
+                joinedChannels: _channelManager.joinedChannels,
                 callback: removeJoinedChannel,
               ),
             ],

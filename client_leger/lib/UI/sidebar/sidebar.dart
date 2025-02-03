@@ -1,4 +1,3 @@
-import 'package:client_leger/UI/mockdata/mockdata.dart';
 import 'package:client_leger/UI/sidebar/channel_search.dart';
 import 'package:flutter/material.dart';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
@@ -58,11 +57,9 @@ class _SideBarState extends State<SideBar> {
             children: [
               CircleAvatar(
                 radius: 40,
-                backgroundImage: NetworkImage(
-                  user?.avatarEquipped ??
-                      mockUser[
-                          'avatar_equipped'], // TODO: remplacer par l'avatar du joueur
-                ),
+                backgroundImage: user?.avatarEquipped != null
+                    ? NetworkImage(user!.avatarEquipped!)
+                    : AssetImage('assets/default_avatar.png'),
               ),
               const SizedBox(width: 16),
               Text(
