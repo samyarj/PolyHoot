@@ -41,4 +41,12 @@ class ChannelManager {
       _firebaseChatService.sendMessage(message);
     }
   }
+
+  Future<List<ChatMessage>> loadOlderMessages(
+      String channel, int lastMessageDate) async {
+    if (channel == 'General') {
+      return await _firebaseChatService.loadOlderMessages(lastMessageDate);
+    }
+    return [];
+  }
 }

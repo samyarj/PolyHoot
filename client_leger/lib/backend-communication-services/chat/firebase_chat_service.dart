@@ -25,14 +25,8 @@ class FirebaseChatService {
 
   static const int messagesLimit = 50;
 
-  List<ChatMessage> globalMessagesCache = [];
-
   Future<void> sendMessage(String message) async {
     final user = await auth_service.currentSignedInUser;
-
-    if (user == null) {
-      throw Exception('User is not authenticated');
-    }
 
     final chatMessage = {
       'uid': user.uid,
@@ -46,8 +40,6 @@ class FirebaseChatService {
   /// Get a real-time stream of the latest 50 messages from the global chat.
   Stream<List<ChatMessage>> getMessages() {
     AppLogger.d("getMessages");
-    globalMessagesCache =
-        []; // clear cache if it is a new subscription (chat window just opened)
 
     final messagesQuery = _globalChatCollection
         .orderBy('date', descending: true)
@@ -68,7 +60,7 @@ class FirebaseChatService {
         }
       }
 
-      if (newMessages.isEmpty) return globalMessagesCache;
+      if (newMessages.isEmpty) return [];
 
       // Fetch user details for unique UIDs
       final users = await _fetchUserDetails(userIds.toList());
@@ -80,15 +72,12 @@ class FirebaseChatService {
             users[msg.uid]?.avatarEquipped ?? 'assets/default-avatar.png';
       }
 
-      // Merge new messages into cache and sort
-      globalMessagesCache = [...globalMessagesCache, ...newMessages];
-      globalMessagesCache
+      newMessages
           .sort((ChatMessage a, ChatMessage b) => a.date.compareTo(b.date));
 
-      AppLogger.d(
-          "globalMessagesCache length is: ${globalMessagesCache.length}");
+      AppLogger.i("newmessage length is: ${newMessages.length}");
 
-      return globalMessagesCache;
+      return newMessages;
     });
   }
 
@@ -112,26 +101,34 @@ class FirebaseChatService {
     return userDetails;
   }
 
-  // Stream<List<ChatMessage>> loadOlderMessages(int lastMessageDate) {
-  //   final olderMessagesQuery = _globalChatCollection
-  //       .orderBy('date', descending: true)
-  //       .startAfter([lastMessageDate]).limit(50);
+  Future<List<ChatMessage>> loadOlderMessages(int lastMessageDate) async {
+    final olderMessagesQuery = _globalChatCollection
+        .orderBy('date', descending: true)
+        .startAfter([lastMessageDate]).limit(50);
 
-  //   return olderMessagesQuery.snapshots().asyncMap((snapshot) async {
-  //     final newMessages = snapshot.docs
-  //         .map((doc) => ChatMessage.fromMap(doc.data() as Map<String, dynamic>))
-  //         .toList();
-  //     final userIds = newMessages.map((msg) => msg.uid).toSet();
+    final snapshot =
+        await olderMessagesQuery.get(); // Fetch once, not as a stream
 
-  //     final users = await _fetchUserDetails(userIds.toList());
+    final olderMessages = snapshot.docs
+        .map((doc) => ChatMessage.fromJson(doc.data() as Map<String, dynamic>))
+        .toList();
 
-  //     return newMessages.map((msg) {
-  //       final user = users[msg.uid];
-  //       return msg.copyWith(
-  //         username: user?.username ?? 'Unknown',
-  //         avatar: user?.avatarEquipped ?? 'assets/default-avatar.png',
-  //       );
-  //     }).toList();
-  //   });
-  // }
+    final userIds = olderMessages.map((msg) => msg.uid).toSet();
+
+    final users = await _fetchUserDetails(userIds.toList());
+
+    // Attach user details to messages
+    for (ChatMessage msg in olderMessages) {
+      msg.username = users[msg.uid]?.username ?? 'Unknown';
+      msg.avatar =
+          users[msg.uid]?.avatarEquipped ?? 'assets/default-avatar.png';
+    }
+
+    olderMessages
+        .sort((ChatMessage a, ChatMessage b) => a.date.compareTo(b.date));
+
+    AppLogger.i("oldermessage length is: ${olderMessages.length}");
+
+    return olderMessages;
+  }
 }

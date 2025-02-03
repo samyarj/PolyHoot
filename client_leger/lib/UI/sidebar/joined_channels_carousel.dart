@@ -22,6 +22,7 @@ class JoinedChannelsCarousel extends StatelessWidget {
               showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
+                enableDrag: false,
                 builder: (BuildContext context) {
                   return ChatWindow(channel: channel);
                 },
