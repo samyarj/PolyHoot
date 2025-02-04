@@ -23,6 +23,7 @@ class JoinedChannelsCarousel extends StatelessWidget {
                 context: context,
                 isScrollControlled: true,
                 enableDrag: false,
+                isDismissible: false,
                 builder: (BuildContext context) {
                   return ChatWindow(channel: channel);
                 },

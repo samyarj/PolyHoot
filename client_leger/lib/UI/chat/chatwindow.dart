@@ -101,9 +101,8 @@ class _ChatWindowState extends State<ChatWindow> {
         if (!mounted) return;
         showErrorDialog(context, e.toString());
       }
-      _textController.clear();
-      _focusNode.requestFocus();
     }
+    _textController.clear();
   }
 
   @override
@@ -139,6 +138,10 @@ class _ChatWindowState extends State<ChatWindow> {
                         ),
                         Spacer(),
                         Text(widget.channel, style: TextStyle(fontSize: 18)),
+                        IconButton(
+                          icon: Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                        ),
                       ],
                     ),
                     Divider(),
@@ -228,20 +231,23 @@ class _ChatWindowState extends State<ChatWindow> {
                               ),
                             ),
                     ),
-                    TextField(
-                      controller: _textController,
-                      focusNode: _focusNode,
-                      minLines: 1,
-                      maxLines: null,
-                      decoration: InputDecoration(
-                        hintText: 'Écrivez un message...',
-                        suffixIcon: IconButton(
-                          icon: Icon(Icons.send),
-                          onPressed: () => sendMessage(),
+                    TapRegion(
+                      onTapOutside: (_) => FocusScope.of(context).unfocus(),
+                      child: TextField(
+                        controller: _textController,
+                        focusNode: _focusNode,
+                        minLines: 1,
+                        maxLines: null,
+                        decoration: InputDecoration(
+                          hintText: 'Écrivez un message...',
+                          suffixIcon: IconButton(
+                            icon: Icon(Icons.send),
+                            onPressed: () => sendMessage(),
+                          ),
                         ),
+                        textInputAction: TextInputAction.done,
+                        onEditingComplete: sendMessage,
                       ),
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: (_) => sendMessage(),
                     ),
                   ],
                 ),

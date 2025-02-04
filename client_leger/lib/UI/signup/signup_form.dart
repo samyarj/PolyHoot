@@ -340,7 +340,7 @@ class _SignUpFormState extends State<SignUpForm> {
               SizedBox(height: 16),
               // Google Sign-Up
               OutlinedButton.icon(
-                onPressed: signUpWithGoogle,
+                onPressed: null,
                 icon: Icon(Icons.account_circle),
                 label: Text("S'inscrire avec Google",
                     style: TextStyle(fontSize: 18)),
