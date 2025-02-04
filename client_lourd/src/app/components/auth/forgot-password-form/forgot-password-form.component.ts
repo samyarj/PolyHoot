@@ -29,7 +29,7 @@ export class ForgotPasswordFormComponent {
 
     onSubmit(): void {
         if (this.forgotPasswordForm.invalid) {
-            this.toastr.error('Please provide a valid email.', 'Error');
+            this.toastr.error('Veuillez fournir une adresse e-mail valide.', 'Erreur');
             return;
         }
 
@@ -38,11 +38,11 @@ export class ForgotPasswordFormComponent {
 
         this.authService.forgotPassword(email).subscribe({
             next: () => {
-                this.toastr.success('Password reset email sent.', 'Success');
+                this.toastr.success('E-mail de réinitialisation du mot de passe envoyé.', 'Succès');
                 this.isSubmitting = false;
             },
             error: (err) => {
-                this.toastr.error(err.message, 'Error');
+                this.toastr.error(err.message, 'Erreur');
                 this.isSubmitting = false;
             },
         });

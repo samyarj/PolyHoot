@@ -193,7 +193,7 @@ export class AuthService {
             } else {
                 this.userBS.next(null);
                 this.loadingTokenBS.next(false);
-                this.router.navigate(['/login']);
+                // this.router.navigate(['/login']);
             }
         });
     }

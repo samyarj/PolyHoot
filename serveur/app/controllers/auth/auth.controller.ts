@@ -28,10 +28,10 @@ export class AuthController {
             const user = await this.userService.createUserInFirestore(request.user.uid, request.user.displayName, request.user.email);
             response.status(HttpStatus.CREATED).json(user);
         } catch (error) {
-            if (error.message.includes('Username is already taken') || error.message.includes('Email is already in use')) {
+            if (error.message.includes('Ce pseudonyme est déjà pris') || error.message.includes('Cette adresse e-mail est déjà utilisée')) {
                 response.status(HttpStatus.CONFLICT).send({ message: error.message });
             } else {
-                response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Internal server error' });
+                response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
             }
         }
     }
@@ -46,10 +46,10 @@ export class AuthController {
             const user = await this.userService.signInWithGoogle(request.user.uid, request.user.email, request.user.displayName);
             response.status(HttpStatus.CREATED).json(user);
         } catch (error) {
-            if (error.message.includes('Username is already taken') || error.message.includes('Email is already in use')) {
+            if (error.message.includes('Ce pseudonyme est déjà pris') || error.message.includes('Cette adresse e-mail est déjà utilisée')) {
                 response.status(HttpStatus.CONFLICT).send({ message: error.message });
             } else {
-                response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Internal server error' });
+                response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
             }
         }
     }
@@ -63,7 +63,7 @@ export class AuthController {
             const user = await this.userService.getUserByUid(req.user.uid);
             response.status(HttpStatus.OK).json(user);
         } catch (error) {
-            response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Internal server error' });
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
         }
     }
 
@@ -73,13 +73,13 @@ export class AuthController {
     async isUserOnline(@Query('email') email: string, @Res() res: Response) {
         try {
             if (!email) {
-                return res.status(HttpStatus.BAD_REQUEST).json({ message: 'Email is required.' });
+                return res.status(HttpStatus.BAD_REQUEST).json({ message: "L'adresse e-mail est requise." });
             }
 
             const isOnline = await this.userService.isUserOnline(email);
             return res.status(HttpStatus.OK).json({ isOnline });
         } catch (error) {
-            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Failed to check online status.' });
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Échec de la vérification du statut en ligne.' });
         }
     }
 
@@ -91,7 +91,7 @@ export class AuthController {
             const results = await this.userService.isEmailTaken(email);
             response.status(HttpStatus.OK).json(results);
         } catch (error) {
-            response.status(HttpStatus.BAD_REQUEST).send({ message: error.message || 'Invalid email' });
+            response.status(HttpStatus.BAD_REQUEST).send({ message: error.message || 'Adresse e-mail invalide' });
         }
     }
 
@@ -103,7 +103,7 @@ export class AuthController {
             const exists = await this.userService.isUsernameTaken(username);
             response.status(HttpStatus.OK).json({ usernameExists: exists });
         } catch (error) {
-            response.status(HttpStatus.BAD_REQUEST).send({ message: error.message || 'Invalid username' });
+            response.status(HttpStatus.BAD_REQUEST).send({ message: error.message || 'Pseudonyme invalide' });
         }
     }
 
@@ -113,7 +113,7 @@ export class AuthController {
     async getEmailByUsername(@Query('username') username: string, @Res() res: Response) {
         try {
             if (!username) {
-                return res.status(HttpStatus.BAD_REQUEST).json({ message: 'Username is required.' });
+                return res.status(HttpStatus.BAD_REQUEST).json({ message: 'Pseudonyme est requis.' });
             }
 
             const email = await this.userService.getEmailByUsername(username);
@@ -130,9 +130,9 @@ export class AuthController {
     async logout(@Req() req: AuthenticatedRequest, @Res() response: Response) {
         try {
             await this.userService.logout(req.user.uid);
-            response.status(HttpStatus.OK).send({ message: 'User successfully logged out' });
+            response.status(HttpStatus.OK).send({ message: 'Déconnexion réussie.' });
         } catch (error) {
-            response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Internal server error' });
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
         }
     }
 }

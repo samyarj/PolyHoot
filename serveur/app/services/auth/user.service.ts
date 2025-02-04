@@ -47,7 +47,7 @@ export class UserService {
                 return newUser;
             }
         } catch (error) {
-            throw new Error('Failed to handle Google sign-in.');
+            throw new Error('Échec de la gestion de la connexion Google.');
         }
     }
 
@@ -72,7 +72,7 @@ export class UserService {
             if ((error as { code: string }).code === 'auth/user-not-found') {
                 return { emailExists: false, provider: null };
             }
-            throw new Error('Failed to check email availability.');
+            throw new Error('Échec de la vérification de la disponibilité de l’e-mail.');
         }
     }
 
@@ -97,14 +97,14 @@ export class UserService {
 
             // Check if a document is found
             if (querySnapshot.empty) {
-                throw new Error(`User with username "${username}" not found.`);
+                throw new Error(`Utilisateur avec le Pseudonyme "${username}" introuvable.`);
             }
 
             // Extract the email from the document
             const userDoc = querySnapshot.docs[0].data();
             return userDoc.email;
         } catch (error) {
-            throw new Error('Invalid username or password.');
+            throw new Error('Email/Pseudonyme ou mot de passe invalide.');
         }
     }
 
@@ -122,13 +122,13 @@ export class UserService {
             const userDoc = querySnapshot.docs[0].data();
             return userDoc.isOnline || false; // Return true/false based on the `isOnline` field
         } catch (error) {
-            throw new Error('Failed to check user online status.');
+            throw new Error('Échec de la vérification du statut en ligne de l’utilisateur.');
         }
     }
 
     private async getUserFromFirestore(uid: string): Promise<admin.firestore.DocumentData> {
         const userDoc = await this.firestore.collection('users').doc(uid).get();
-        if (!userDoc.exists) throw new UnauthorizedException('User does not exist.');
+        if (!userDoc.exists) throw new UnauthorizedException("L'utilisateur n'existe pas.");
         return userDoc.data();
     }
 

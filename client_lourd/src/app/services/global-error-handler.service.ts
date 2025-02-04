@@ -11,8 +11,8 @@ export class GlobalErrorHandlerService extends ErrorHandler {
     }
 
     handleError(error: unknown): void {
-        const toastr = this.injector.get(ToastrService); // Lazy-load ToastrService
-        const authService = this.injector.get(AuthService); // Lazy-load AuthService
+        const toastr = this.injector.get(ToastrService);
+        const authService = this.injector.get(AuthService);
 
         if (error instanceof HttpErrorResponse) {
             return;
@@ -20,45 +20,45 @@ export class GlobalErrorHandlerService extends ErrorHandler {
         if (error instanceof FirebaseError) {
             const message = this.getFirebaseErrorMessage(error);
             if (message) {
-                toastr.error(message, 'Firebase Error');
+                toastr.error(message, 'Erreur Firebase');
             }
-            console.error('Firebase Error:', error);
+            console.error('Erreur Firebase :', error);
         } else if (error instanceof Error) {
-            // Handle general JavaScript errors
-            toastr.error(error.message || 'An unexpected error occurred.', 'Application Error');
+            // Gérer les erreurs JavaScript générales
+            toastr.error(error.message || "Une erreur inattendue s'est produite.", "Erreur d'application");
 
-            // Optional: Perform logout for critical errors
-            if (error.message === 'Critical error') {
+            // Déconnexion en cas d'erreur critique
+            if (error.message === 'Erreur critique') {
                 authService.logout();
             }
 
-            console.error('Global Non-HTTP Error:', error);
+            console.error('Erreur globale non liée à HTTP :', error);
         } else {
-            // Handle other types of unknown errors
-            toastr.error('An unknown error occurred.', 'Application Error');
-            console.error('Unknown error type:', error);
+            // Gérer les autres types d'erreurs inconnues
+            toastr.error("Une erreur inconnue s'est produite.", "Erreur d'application");
+            console.error("Type d'erreur inconnu :", error);
         }
 
-        // Call the default Angular error handler
+        // Appeler le gestionnaire d'erreurs Angular par défaut
         super.handleError(error);
     }
 
     private getFirebaseErrorMessage(error: FirebaseError): string {
         switch (error.code) {
             case 'auth/user-not-found':
-                return 'The user does not exist.';
+                return "Cet utilisateur n'existe pas.";
             case 'auth/invalid-credential':
-                return 'Invalid username or password.';
+                return 'Email/Pseudonyme ou mot de passe invalide.';
             case 'auth/email-already-in-use':
-                return 'This email is already in use.';
+                return 'Cet email est déjà utilisé.';
             case 'auth/wrong-password':
-                return 'The password is incorrect.';
+                return 'Le mot de passe est incorrect.';
             case 'auth/network-request-failed':
-                return 'A network error occurred. Please try again.';
+                return 'Une erreur réseau est survenue. Veuillez réessayer.';
             case 'auth/popup-closed-by-user':
                 return '';
             default:
-                return error.message || 'An error occurred with Firebase.';
+                return error.message || 'Une erreur est survenue avec Firebase.';
         }
     }
 }

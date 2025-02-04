@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 export class GlobalChatComponent implements OnInit, OnDestroy {
     chatMessages: FirebaseChatMessage[] = [];
     chatMessagesLoading: boolean = true;
-    name = 'General Chat';
+    name = 'Chat Général';
     private messagesSubscription: Subscription;
     private lastMessageDate: number | null = null; // Track last message date for pagination
     isFetchingOlderMessages: boolean = false; // Prevent multiple fetches at once

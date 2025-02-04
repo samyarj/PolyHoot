@@ -1,14 +1,14 @@
 <div class="sign-up-container">
-    <h2 class="text-center mb-4">Sign Up</h2>
+    <h2 class="text-center mb-4">Créer un compte</h2>
 
     <form [formGroup]="signUpForm">
         <!-- Username Field -->
         <div class="form-group mb-3">
-            <label for="username" class="form-label">Username</label>
+            <label for="username" class="form-label">Pseudonyme</label>
             <input
                 id="username"
                 type="text"
-                placeholder="Enter your username"
+                placeholder="Entrez votre pseudonyme"
                 formControlName="username"
                 class="form-control"
                 (blur)="checkUsername()"
@@ -22,10 +22,11 @@
                     "
                     class="text-danger"
                 >
-                    Username is required.
+                    Pseudonyme est requis.
                 </small>
                 <small *ngIf="signUpForm.get('username')?.hasError('pattern') && signUpForm.get('username')?.touched" class="text-danger">
-                    Username must be 3-20 characters and can only contain letters, numbers, dots, underscores, or hyphens.
+                    Le pseudonyme doit contenir entre 3 et 20 caractères et ne peut inclure que des lettres, des chiffres, des points, des underscores
+                    ou des tirets.
                 </small>
 
                 <small
@@ -38,7 +39,7 @@
                     "
                     class="text-danger"
                 >
-                    This username is already taken.
+                    Ce pseudonyme est déjà utilisé.
                 </small>
 
                 <!-- Loading Spinner -->
@@ -56,7 +57,7 @@
             <input
                 id="email"
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Entrez votre email"
                 formControlName="email"
                 class="form-control"
                 (blur)="checkEmail()"
@@ -68,10 +69,10 @@
                     *ngIf="signUpForm.get('email')?.invalid && signUpForm.get('email')?.touched && !signUpForm.get('email')?.hasError('pattern')"
                     class="text-danger"
                 >
-                    Email is required.
+                    Email est requis.
                 </small>
                 <small *ngIf="signUpForm.get('email')?.hasError('pattern') && signUpForm.get('email')?.touched" class="text-danger">
-                    Please enter a valid email address.
+                    Veuillez entrer une adresse email valide.
                 </small>
                 <small
                     *ngIf="
@@ -83,7 +84,7 @@
                     "
                     class="text-danger"
                 >
-                    This email is already in use.
+                    Cet email est déjà utilisé.
                 </small>
                 <!-- Loading Spinner -->
                 <div *ngIf="isCheckingEmail" class="ms-2">
@@ -96,31 +97,31 @@
 
         <!-- Password Field -->
         <div class="form-group mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input id="password" type="password" placeholder="Enter your password" formControlName="password" class="form-control" />
+            <label for="password" class="form-label">Mot de passe</label>
+            <input id="password" type="password" placeholder="Entez votre mot de passe" formControlName="password" class="form-control" />
             <small *ngIf="signUpForm.get('password')?.invalid && signUpForm.get('password')?.touched" class="text-danger">
-                Password must be at least 6 characters long.
+                Le mot de passe doit contenir au moins 6 caractères.
             </small>
         </div>
 
         <!-- Confirm Password Field -->
         <div class="form-group mb-3">
-            <label for="confirmPassword" class="form-label">Confirm Password</label>
-            <input id="confirmPassword" type="password" placeholder="Confirm your password" formControlName="confirmPassword" class="form-control" />
+            <label for="confirmPassword" class="form-label">Confirmer le mot de passe</label>
+            <input
+                id="confirmPassword"
+                type="password"
+                placeholder="Confirmez votre mot de passe"
+                formControlName="confirmPassword"
+                class="form-control"
+            />
             <small *ngIf="signUpForm.get('confirmPassword')?.invalid && signUpForm.get('confirmPassword')?.touched" class="text-danger">
-                Confirm Password is required.
+                La confirmation du mot de passe est requise.
             </small>
         </div>
 
-        <!-- Terms and Privacy -->
-        <p class="form-text text-muted mb-3">
-            By creating an account, you agree to the
-            <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
-        </p>
-
         <!-- Submit Button -->
         <div class="form-group position-relative">
-            <button (click)="signUp()" type="submit" [disabled]="invalidFormStatus()" class="btn btn-primary w-100">Create a new account</button>
+            <button (click)="signUp()" type="submit" [disabled]="invalidFormStatus()" class="btn btn-primary w-100">Créer un nouveau compte</button>
             <!-- Form Loading Spinner -->
             <div
                 *ngIf="isLoading"
@@ -134,11 +135,11 @@
     </form>
 
     <!-- Sign In Link -->
-    <p class="text-center mt-3">Have an account? <a [routerLink]="'/login'">Login</a></p>
+    <p class="text-center mt-3">Vous avez déjà un compte ? <a [routerLink]="'/login'">Se connecter</a></p>
 
     <!-- Divider -->
     <hr />
-    <p class="divider-text text-center">or</p>
+    <p class="divider-text text-center">ou</p>
 
     <!-- Google Sign up -->
     <button
@@ -148,7 +149,7 @@
     >
         <div class="d-flex align-items-center gap-2">
             <span class="iconify" data-icon="logos:google-icon" style="font-size: 20px"></span>
-            <span>Sign up with Google</span>
+            <span>S'inscrire avec Google</span>
         </div>
     </button>
 </div>
