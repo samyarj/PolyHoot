@@ -3,18 +3,20 @@
 
     <!-- Login Form -->
     <form [formGroup]="loginForm" (ngSubmit)="login()">
-        <!-- Email or Username Field -->
+        <!-- email or Username Field -->
         <div class="form-group mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input id="email" type="text" placeholder="Enter your email or username" formControlName="email" class="form-control" />
+            <label for="identifier" class="form-label">Email or Username</label>
+            <input id="identifier" type="text" placeholder="Enter your identifier or username" formControlName="identifier" class="form-control" />
             <small
-                *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched && !loginForm.get('email')?.hasError('pattern')"
+                *ngIf="
+                    loginForm.get('identifier')?.invalid && loginForm.get('identifier')?.touched && !loginForm.get('identifier')?.hasError('pattern')
+                "
                 class="text-danger"
             >
-                email is required.
+                this field is required.
             </small>
-            <small *ngIf="loginForm.get('email')?.hasError('pattern') && loginForm.get('email')?.touched" class="text-danger">
-                Please enter a valid email address.
+            <small *ngIf="loginForm.get('identifier')?.hasError('pattern') && loginForm.get('identifier')?.touched" class="text-danger">
+                Please enter a valid identifier address.
             </small>
         </div>
 

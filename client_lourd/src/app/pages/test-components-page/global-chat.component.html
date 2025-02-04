@@ -1,4 +1,7 @@
-<div class="page-container d-flex justify-content-center align-items-center vh-100">
+<div class="page-container d-flex justify-content-center align-items-center vh-100 position-relative">
+    <!-- Back to Home Button -->
+    <button class="btn btn-light back-home-btn position-absolute" [routerLink]="['/home']"><i class="bi bi-arrow-left"></i> Home</button>
+
     <div class="chat-container">
         <app-chat2
             [name]="name"

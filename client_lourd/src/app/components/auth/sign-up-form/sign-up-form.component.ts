@@ -155,7 +155,7 @@ export class SignUpFormComponent implements OnInit {
             username: ['', [Validators.required, Validators.pattern(USERNAME_REGEX)]],
             email: ['', [Validators.required, Validators.pattern(EMAIL_REGEX)]],
             password: ['', [Validators.required, Validators.minLength(PASSWORD_MIN_LENGTH)]],
-            confirmPassword: ['', [Validators.required]],
+            confirmPassword: ['', [Validators.required, Validators.minLength(PASSWORD_MIN_LENGTH)]],
         });
     }
 

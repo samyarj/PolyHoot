@@ -69,8 +69,9 @@ export class FirebaseChatService {
                 // Attach user details to messages
                 const enrichedMessages = newMessages.map((msg) => ({
                     ...msg,
-                    username: users[msg.uid]?.username || 'Unknown',
-                    avatar: users[msg.uid]?.avatarEquipped || 'assets/default-avatar.png',
+                    username: users[msg.uid]?.username || 'Inconnu',
+                    avatar:
+                        users[msg.uid]?.avatarEquipped || 'https://res.cloudinary.com/dtu6fkkm9/image/upload/v1737478954/default-avatar_qcaycl.jpg',
                 }));
 
                 // 🔥 **Ensure messages are always in ascending order**

@@ -27,6 +27,7 @@ export class AuthService {
     private userBS: BehaviorSubject<User | null> = new BehaviorSubject<User | null>(null);
     private googleProvider = new GoogleAuthProvider();
     private loadingTokenBS = new BehaviorSubject<boolean>(true);
+    private isAuthenticating = false;
     user$ = this.userBS.asObservable();
     loadingToken$ = this.loadingTokenBS.asObservable();
 
@@ -41,59 +42,66 @@ export class AuthService {
     }
 
     signUp(username: string, email: string, password: string): Observable<User> {
+        this.isAuthenticating = true;
         return this.createUser(email, password).pipe(
+            switchMap((userCredential) => this.updateUserProfile(userCredential.user, { displayName: username }).pipe(map(() => userCredential))),
             switchMap((userCredential) =>
-                this.updateUserProfile(userCredential.user, {
-                    displayName: username,
-                }).pipe(map(() => userCredential)),
-            ),
-            switchMap((userCredential) => this.handleAuthAndFetchUser(userCredential, `${this.baseUrl}/create-user`, 'POST')),
-            handleErrorsGlobally(this.injector),
-        );
-    }
-
-    login(email: string, password: string): Observable<User> {
-        return this.isUserOnline(email).pipe(
-            switchMap((isOnline) => {
-                if (isOnline) {
-                    throw new Error('User is already logged in on another device.');
-                }
-                return this.signInUser(email, password);
-            }),
-            switchMap((userCredential) => this.handleAuthAndFetchUser(userCredential, `${this.baseUrl}/profile`)),
-            catchError((error) => {
-                console.error('Error in login function:', error);
-                return throwError(() => error); // Pass errors up the chain
-            }),
-            handleErrorsGlobally(this.injector),
-        );
-    }
-
-    signWithGoogle(): Observable<User> {
-        return this.signInWithGoogleSDK().pipe(
-            switchMap((userCredential) =>
-                // Check if the user is online
-                this.isUserOnline(userCredential.user.email).pipe(
-                    switchMap((isOnline) => {
-                        if (isOnline) throw new Error('User is already logged in on another device.');
-
-                        // Update user profile
-                        return this.updateUserProfile(userCredential.user, {
-                            displayName: userCredential.user.displayName,
-                        }).pipe(
-                            // Fetch or create user from backend
-                            switchMap(() => this.handleAuthAndFetchUser(userCredential, `${this.baseUrl}/signin-google`, 'POST')),
-                        );
-                    }),
+                this.handleAuthAndFetchUser(userCredential, `${this.baseUrl}/create-user`, 'POST').pipe(
+                    finalize(() => (this.isAuthenticating = false)),
                 ),
             ),
             handleErrorsGlobally(this.injector),
         );
     }
 
+    login(identifier: string, password: string): Observable<User> {
+        this.isAuthenticating = true;
+        return this.getEmailFromIdentifier(identifier).pipe(
+            switchMap((email) =>
+                this.signInUser(email, password).pipe(
+                    switchMap((userCredential) =>
+                        this.isUserOnline(userCredential.user.uid).pipe(
+                            switchMap((isOnline) => {
+                                if (isOnline) {
+                                    return from(this.auth.signOut()).pipe(
+                                        switchMap(() => throwError(() => new Error("L'utilisateur est déjà connecté sur un autre appareil. "))),
+                                    );
+                                }
+                                return this.handleAuthAndFetchUser(userCredential, `${this.baseUrl}/profile`);
+                            }),
+                        ),
+                    ),
+                ),
+            ),
+            finalize(() => (this.isAuthenticating = false)),
+            handleErrorsGlobally(this.injector),
+        );
+    }
+
+    signWithGoogle(): Observable<User> {
+        this.isAuthenticating = true;
+        return this.signInWithGoogleSDK().pipe(
+            switchMap((userCredential) =>
+                this.isUserOnline(userCredential.user.uid).pipe(
+                    switchMap((isOnline) => {
+                        if (isOnline) {
+                            return from(this.auth.signOut()).pipe(
+                                switchMap(() => throwError(() => new Error("L'utilisateur est déjà connecté sur un autre appareil. "))),
+                            );
+                        }
+                        return this.updateUserProfile(userCredential.user, {
+                            displayName: userCredential.user.displayName,
+                        }).pipe(switchMap(() => this.handleAuthAndFetchUser(userCredential, `${this.baseUrl}/signin-google`, 'POST')));
+                    }),
+                ),
+            ),
+            finalize(() => (this.isAuthenticating = false)),
+            handleErrorsGlobally(this.injector),
+        );
+    }
+
     logout(): void {
         const currentUser = this.auth.currentUser;
-        console.log('logout called');
         if (currentUser) {
             const userDocRef = doc(this.firestore, `users/${currentUser.uid}`);
 
@@ -109,7 +117,6 @@ export class AuthService {
     }
 
     isAuthenticated(): boolean {
-        // return !!localStorage.getItem('token');
         return !!this.userBS.value;
     }
 
@@ -143,7 +150,6 @@ export class AuthService {
     private handleAuthAndFetchUser(userCredential: UserCredential, endpoint: string, method: 'GET' | 'POST' = 'GET'): Observable<User> {
         return from(userCredential.user.getIdToken()).pipe(
             switchMap((idToken) => {
-                // localStorage.setItem('token', idToken);
                 const options = { headers: { Authorization: `Bearer ${idToken}` } };
 
                 switch (method) {
@@ -162,10 +168,14 @@ export class AuthService {
         this.loadingTokenBS.next(true);
 
         onIdTokenChanged(this.auth, async (firebaseUser) => {
+            console.log('Token changed', firebaseUser);
+            if (this.isAuthenticating) {
+                return;
+            }
             if (firebaseUser) {
                 try {
                     const idToken = await firebaseUser.getIdToken();
-                    if (!idToken) throw new Error('Invalid token');
+                    if (!idToken) throw new Error('Votre session a expiré. Veuillez vous reconnecter.');
 
                     this.http
                         .get<User>(`${this.baseUrl}/profile`, {
@@ -183,6 +193,7 @@ export class AuthService {
             } else {
                 this.userBS.next(null);
                 this.loadingTokenBS.next(false);
+                this.router.navigate(['/login']);
             }
         });
     }
@@ -197,20 +208,18 @@ export class AuthService {
     }
 
     private clearSession(): void {
-        // localStorage.removeItem('token');
-        this.userBS.next(null);
         this.router.navigate(['/login']);
     }
 
-    private isUserOnline(email: string | null): Observable<boolean> {
-        if (!email) {
+    private isUserOnline(uid: string | null): Observable<boolean> {
+        if (!uid) {
             return of(false);
         }
 
         const usersCollection = collection(this.firestore, 'users');
-        const emailQuery = query(usersCollection, where('email', '==', email));
+        const uidQuery = query(usersCollection, where('uid', '==', uid));
 
-        return from(getDocs(emailQuery)).pipe(
+        return from(getDocs(uidQuery)).pipe(
             map((querySnapshot) => {
                 if (querySnapshot.empty) {
                     return false;
@@ -221,6 +230,21 @@ export class AuthService {
             }),
             catchError(() => of(false)),
         );
+    }
+
+    private getEmailFromIdentifier(identifier: string): Observable<string> {
+        if (identifier.includes('@')) {
+            return new Observable((observer) => {
+                observer.next(identifier);
+                observer.complete();
+            });
+        }
+
+        return this.http
+            .get<{ email: string }>(`${this.baseUrl}/get-email`, {
+                params: { username: identifier },
+            })
+            .pipe(map((response) => response.email));
     }
 
     private signInWithGoogleSDK(): Observable<UserCredential> {

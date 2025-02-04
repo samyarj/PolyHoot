@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EMAIL_REGEX } from '@app/constants/constants';
 import { AuthService } from '@app/services/auth/auth.service';
 
 @Component({
@@ -21,7 +20,7 @@ export class LoginFormComponent {
         private route: ActivatedRoute,
     ) {
         this.loginForm = this.fb.group({
-            email: ['', [Validators.required, Validators.pattern(EMAIL_REGEX)]],
+            identifier: ['', [Validators.required]],
             password: ['', Validators.required],
         });
     }
@@ -34,11 +33,11 @@ export class LoginFormComponent {
             return;
         }
 
-        const { email, password } = this.loginForm.value;
+        const { identifier, password } = this.loginForm.value;
         this.isSubmitting = true;
         this.loginForm.disable();
 
-        this.authService.login(email, password).subscribe({
+        this.authService.login(identifier, password).subscribe({
             next: (user) => {
                 const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
                 this.router.navigateByUrl(returnUrl);
