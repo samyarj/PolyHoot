@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:client_leger/backend-communication-services/environment.dart';
+import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/models/user.dart'
     as user_model;
 import 'package:client_leger/utilities/logger.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -35,22 +38,22 @@ Future<user_model.User?> fetchUser(
     'Authorization': 'Bearer $idToken',
   };
 
-  final http.Response response =
-      await http.get(Uri.parse(getProfileUrl), headers: headers);
+  final http.Response response = await http.get(Uri.parse(getProfileUrl),
+      headers: headers); // it puts isOnline: true
 
   if (response.statusCode == 200) {
     final userJson = jsonDecode(response.body);
-    AppLogger.i("userJson successfully fetched: $userJson");
     try {
       currentSignedInUserCompleter.complete(user_model.User.fromJson(userJson));
     } catch (e) {
       AppLogger.e("Error while parsing userJson: $e");
-      throw Exception("Error while parsing userJson: $e");
+      throw Exception(
+          "Une erreur est survenue en essayant de traiter l'utilisateur courant");
     }
-    AppLogger.d("just updated the currentSignedInUser");
     return currentSignedInUser;
   } else {
-    throw Exception('Failed to fetch user: ${response.reasonPhrase}');
+    throw Exception(
+        'Une erreur est survenue au niveau du serveur : ${response.reasonPhrase}');
   }
 }
 
@@ -126,48 +129,51 @@ Future<String> getEmailFromIdentifier(String identifier) async {
 Future<user_model.User?> signIn(String identifier, String password) async {
   AppLogger.d("in signIn");
 
-  final email = await getEmailFromIdentifier(identifier);
-
-  final isOnline = await isUserOnline(email);
-
-  if (isOnline) {
-    AppLogger.e("User is already logged in on another device.");
-    throw Exception('User is already logged in on another device.');
-  }
-
   try {
+    final email = await getEmailFromIdentifier(identifier);
+
     final userCredential =
         await FirebaseAuth.instance.signInWithEmailAndPassword(
       email: email,
       password: password,
     );
 
+    final isOnline = await isUserOnline(email);
+
+    if (isOnline) {
+      AppLogger.e("Cet utilisateur est déjà connecté.");
+      throw Exception('Cet utilisateur est déjà connecté.');
+    }
+
     final user = await fetchUser(userCredential);
     AppLogger.d("About to change the listenable");
     isLoggedIn.value = true;
     return user;
-  } on Exception catch (e) {
-    logout();
-    AppLogger.e("Failed to sign in user: ${e.toString()}  ");
-    throw Exception("Failed to sign in user: ${e.toString()}");
+  } catch (e) {
+    await FirebaseAuth.instance.signOut();
+    AppLogger.e("Erreur de sign in : ${e.toString()}  ");
+    throw Exception(getCustomError(e));
   }
 }
 
 Future<bool> isUserOnline(String email) async {
-  AppLogger.d("in isUserOnline here is the url $baseUrl/check-online-status");
+  try {
+    // Reference the `users` collection and query by email
+    final usersRef = FirebaseFirestore.instance.collection('users');
+    final querySnapshot =
+        await usersRef.where('email', isEqualTo: email).limit(1).get();
 
-  final http.Response response = await http.get(
-    Uri.parse('$baseUrl/check-online-status').replace(
-      queryParameters: {'email': email},
-    ),
-  );
+    if (querySnapshot.docs.isEmpty) {
+      return false; // User not found, return false
+    }
 
-  if (response.statusCode == 200) {
-    final jsonResponse = jsonDecode(response.body);
-    return jsonResponse['isOnline'] as bool? ?? false;
-  } else {
-    AppLogger.e('isUserOnline : Internal server error');
-    return false;
+    // Extract the `isOnline` field from the user document
+    final userDoc = querySnapshot.docs.first.data();
+    AppLogger.d("in isUserOnline = ${userDoc['isOnline']}");
+    return userDoc['isOnline'] ?? false;
+  } catch (e) {
+    AppLogger.e(e.toString());
+    throw Exception(getCustomError(e));
   }
 }
 
@@ -200,40 +206,26 @@ Future<bool> isEmailTaken(String email) async {
 }
 
 void logout() async {
-  AppLogger.d("in logout");
+  try {
+    AppLogger.d("in logout");
 
-  User? currentUser = FirebaseAuth.instance.currentUser;
+    User? currentUser = FirebaseAuth.instance.currentUser;
 
-  if (currentUser == null) throw Exception("No current user identified");
+    if (currentUser == null) {
+      throw Exception("Utilisateur courant non identifié");
+    }
 
-  final idToken = await currentUser.getIdToken();
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(currentUser.uid)
+        .update({'isOnline': false});
 
-  if (idToken == null) {
-    AppLogger.e("idToken is null");
     await FirebaseAuth.instance.signOut();
-    AppLogger.d(
-        "token is null but still signing out and about to refresh the listenable");
+  } catch (e) {
+    throw Exception(getCustomError(e));
+  } finally {
     isLoggedIn.value = false;
     currentSignedInUserCompleter = Completer<user_model.User>();
-    return;
-  }
-
-  final headers = {
-    'Authorization': 'Bearer $idToken',
-  };
-
-  final http.Response response =
-      await http.post(Uri.parse(logOutUrl), headers: headers);
-
-  if (response.statusCode == 200) {
-    AppLogger.d("logging out successfully on server");
-    await FirebaseAuth.instance.signOut();
-    isLoggedIn.value = false;
-    currentSignedInUserCompleter = Completer<user_model.User>();
-  } else {
-    AppLogger.e(
-        "Error during backend logout ${response.reasonPhrase} ${response.statusCode}");
-    throw Exception("Error during backend logout");
   }
 }
 
