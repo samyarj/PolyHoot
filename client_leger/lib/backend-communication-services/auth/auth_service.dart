@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:client_leger/backend-communication-services/environment.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/models/user.dart'

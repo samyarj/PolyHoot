@@ -196,7 +196,7 @@ class _LoginFormState extends State<LoginForm> {
               SizedBox(height: 16),
               // Google Login
               OutlinedButton.icon(
-                onPressed: loginWithGoogle,
+                onPressed: null,
                 icon: Icon(Icons.account_circle, size: 20),
                 label: Text(
                   'Connexion avec Google',
