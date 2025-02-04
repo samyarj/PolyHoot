@@ -1,7 +1,8 @@
+import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
-import 'package:client_leger/utilities/logger.dart';
+import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -51,6 +52,7 @@ class _SignUpFormState extends State<SignUpForm> {
 
   String? _usernameError;
   String? _emailError;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -93,30 +95,32 @@ class _SignUpFormState extends State<SignUpForm> {
   }
 
   Future signUp() async {
+    setState(() {
+      _isLoading = true;
+    });
     await isUsernameTaken(_usernameController.text.trim());
     await isEmailTaken(_emailController.text.trim());
 
     if (_usernameError != null || _emailError != null) {
+      setState(() {
+        _isLoading = false;
+      });
       return;
     }
 
     try {
       await auth_service.signUp(_usernameController.text.trim(),
           _emailController.text.trim(), _passwordController.text.trim());
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e.toString(),
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onErrorContainer,
-            ),
-          ),
-          backgroundColor: Theme.of(context).colorScheme.errorContainer,
-        ),
-      );
+      showErrorDialog(context, getCustomError(e));
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -125,19 +129,7 @@ class _SignUpFormState extends State<SignUpForm> {
       await auth_service.signInWithGoogle();
     } catch (e) {
       if (!mounted) return;
-      AppLogger.e(e.toString());
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e.toString(),
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onErrorContainer,
-            ),
-          ),
-          backgroundColor: Theme.of(context).colorScheme.errorContainer,
-        ),
-      );
+      showErrorDialog(context, getCustomError(e));
     }
   }
 
@@ -167,15 +159,20 @@ class _SignUpFormState extends State<SignUpForm> {
   }
 
   isUsernameTaken(String username) async {
-    final bool isTaken = await auth_service.isUsernameTaken(username);
-    if (isTaken) {
-      setState(() {
-        _usernameError = 'Ce pseudonyme est déjà pris.';
-      });
-    } else {
-      setState(() {
-        _usernameError = null;
-      });
+    try {
+      final bool isTaken = await auth_service.isUsernameTaken(username);
+      if (isTaken) {
+        setState(() {
+          _usernameError = 'Ce pseudonyme est déjà pris.';
+        });
+      } else {
+        setState(() {
+          _usernameError = null;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      showErrorDialog(context, getCustomError(e));
     }
   }
 
@@ -195,15 +192,20 @@ class _SignUpFormState extends State<SignUpForm> {
   }
 
   isEmailTaken(String email) async {
-    final bool isTaken = await auth_service.isEmailTaken(email);
-    if (isTaken) {
-      setState(() {
-        _emailError = 'Ce email est déjà pris.';
-      });
-    } else {
-      setState(() {
-        _emailError = null;
-      });
+    try {
+      final bool isTaken = await auth_service.isEmailTaken(email);
+      if (isTaken) {
+        setState(() {
+          _emailError = 'Ce email est déjà pris.';
+        });
+      } else {
+        setState(() {
+          _emailError = null;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      showErrorDialog(context, getCustomError(e));
     }
   }
 
@@ -306,19 +308,25 @@ class _SignUpFormState extends State<SignUpForm> {
               ),
               SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    await signUp();
-                  }
-                },
+                onPressed: _isLoading
+                    ? null
+                    : () async {
+                        if (_formKey.currentState!.validate()) {
+                          await signUp();
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: Text('Créer un nouveau compte',
-                    style: TextStyle(fontSize: 18)),
+                child: _isLoading
+                    ? CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      )
+                    : Text('Créer un nouveau compte',
+                        style: TextStyle(fontSize: 18)),
               ),
               SizedBox(height: 16),
               TextButton(

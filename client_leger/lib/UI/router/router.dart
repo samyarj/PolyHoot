@@ -2,12 +2,11 @@ import 'package:client_leger/UI/coins/coins_page.dart';
 import 'package:client_leger/UI/equipped/equipped_page.dart';
 import 'package:client_leger/UI/forgot-password/password_reset_page.dart';
 import 'package:client_leger/UI/login/login_page.dart';
+import 'package:client_leger/UI/main-view/main_scaffold.dart';
 import 'package:client_leger/UI/play/creategamepage.dart';
-import 'package:client_leger/UI/play/playbutton.dart';
 import 'package:client_leger/UI/play/playpage.dart';
 import 'package:client_leger/UI/quiz/quiz_page.dart';
 import 'package:client_leger/UI/router/routes.dart';
-import 'package:client_leger/UI/sidebar/sidebar.dart';
 import 'package:client_leger/UI/signup/signup_page.dart';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
@@ -40,64 +39,7 @@ final GoRouter router = GoRouter(
     StatefulShellRoute.indexedStack(
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state, statefulNavigationShell) {
-        return Scaffold(
-          appBar: AppBar(
-            flexibleSpace: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF00115A), Color(0xFF004080)],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
-              ),
-            ),
-            title: Row(children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Image.asset(
-                  'assets/logo.png',
-                  width: 50,
-                  height: 50,
-                ),
-              ),
-              PlayButton(
-                onPressed: () => statefulNavigationShell.goBranch(
-                    0), // Go to the Play branch (without clearing nav stack; saves the state!)
-              ),
-            ]),
-            iconTheme: const IconThemeData(color: Colors.white),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.edit),
-                iconSize: 34,
-                onPressed: () => context.go(Paths.quiz),
-              ),
-              IconButton(
-                icon: const Icon(Icons.backpack),
-                iconSize: 34,
-                onPressed: () => context.go(Paths.equipped),
-              ),
-              IconButton(
-                icon: const Icon(Icons.attach_money),
-                iconSize: 34,
-                onPressed: () => context.go(Paths.coins),
-              ),
-              IconButton(
-                  icon: const Icon(Icons.logout),
-                  iconSize: 34,
-                  onPressed: () => {
-                        auth_service.logout(),
-                      }),
-            ],
-          ),
-          body: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(child: statefulNavigationShell),
-              const SideBar(),
-            ],
-          ),
-        );
+        return MainScaffold(statefulNavigationShell: statefulNavigationShell);
       },
       branches: [
         StatefulShellBranch(

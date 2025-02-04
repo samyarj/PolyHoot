@@ -1,4 +1,4 @@
-import 'package:client_leger/UI/sidebar/joined_channels_carousel.dart';
+import 'package:client_leger/UI/main-view/sidebar/joined_channels_carousel.dart';
 import 'package:client_leger/business/channel_manager.dart';
 import 'package:flutter/material.dart';
 
