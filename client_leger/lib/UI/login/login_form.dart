@@ -1,6 +1,8 @@
+import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
+import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -40,6 +42,8 @@ class _LoginFormState extends State<LoginForm> {
   Future signIn() async {
     AppLogger.d("in signIn (login_form.dart)");
 
+    FocusManager.instance.primaryFocus?.unfocus();
+
     setState(() {
       _isLoading = true;
     });
@@ -50,18 +54,7 @@ class _LoginFormState extends State<LoginForm> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e.toString(),
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onErrorContainer,
-            ),
-          ),
-          backgroundColor: Theme.of(context).colorScheme.errorContainer,
-        ),
-      );
+      showErrorDialog(context, getCustomError(e));
     } finally {
       // ignore: control_flow_in_finally
       if (!mounted) return;
@@ -76,18 +69,7 @@ class _LoginFormState extends State<LoginForm> {
       await auth_service.signWithGoogle();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e.toString(),
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onErrorContainer,
-            ),
-          ),
-          backgroundColor: Theme.of(context).colorScheme.errorContainer,
-        ),
-      );
+      showErrorDialog(context, getCustomError(e));
     }
   }
 
@@ -126,6 +108,7 @@ class _LoginFormState extends State<LoginForm> {
               SizedBox(height: 32),
               TextFormField(
                 controller: _passwordController,
+                textInputAction: TextInputAction.done,
                 decoration: InputDecoration(
                   labelText: 'Mot de passe',
                   enabledBorder: greyBorder,
@@ -138,6 +121,11 @@ class _LoginFormState extends State<LoginForm> {
                     return 'Entrez votre mot de passe SVP';
                   }
                   return null;
+                },
+                onFieldSubmitted: (_) async {
+                  if (_formKey.currentState!.validate()) {
+                    await signIn();
+                  }
                 },
               ),
               SizedBox(height: 20),

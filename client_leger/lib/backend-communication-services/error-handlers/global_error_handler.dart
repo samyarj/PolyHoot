@@ -1,15 +1,22 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart';
 
 String getCustomError(error) {
   if (error is FirebaseAuthException) {
     return getFirebaseAuthError(error);
   } else if (error is FirebaseException) {
     return getCustomFirestoreError(error);
+  } else if (error is SocketException) {
+    return "Impossible de se connecter au serveur. Vérifiez votre connexion Internet.";
+  } else if (error is ClientException) {
+    return "Une erreur avec une requête est survenue. Vérifier votre connexion Internet";
   } else if (error.toString().contains("Détails:") ||
-      error.toString().contains("avec")) {
-    return error.toString();
+      error.toString().contains("Une")) {
+    return error.toString().replaceAll("Exception: ", "");
   } else {
-    return "Une erreur est survenue. Détails: ${error.toString()}";
+    return "Une erreur est survenue. Détails: ${error.toString().replaceAll("Exception: ", "")}";
   }
 }
 

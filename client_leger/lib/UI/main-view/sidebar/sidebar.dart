@@ -1,4 +1,4 @@
-import 'package:client_leger/UI/sidebar/channel_search.dart';
+import 'package:client_leger/UI/main-view/sidebar/channel_search.dart';
 import 'package:flutter/material.dart';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;

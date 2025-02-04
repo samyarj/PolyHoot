@@ -33,7 +33,7 @@ Future<user_model.User?> fetchUser(
   UserCredential userCredential,
 ) async {
   AppLogger.d("in fetchUser");
-  final idToken = await userCredential.user!.getIdToken();
+  final idToken = await userCredential.user?.getIdToken();
   final headers = {
     'Authorization': 'Bearer $idToken',
   };
@@ -62,7 +62,8 @@ Future<user_model.User?> createAndFetchUser(
   // with email or Google
   AppLogger.d("in createAndFetchUser");
 
-  final idToken = await userCredential.user!.getIdToken();
+  final idToken = await userCredential.user?.getIdToken();
+
   final headers = {
     'Authorization': 'Bearer $idToken',
   };
@@ -79,16 +80,16 @@ Future<user_model.User?> createAndFetchUser(
       AppLogger.d("just updated the currentSignedInUser $currentSignedInUser");
     } catch (e) {
       AppLogger.e("Error while parsing userJson: $e");
-      logout();
-      throw Exception("Error while parsing userJson: $e");
+      throw Exception(
+          "Une erreur est survenue en essayant de traiter l'utilisateur courant");
     }
 
     return currentSignedInUser;
   } else {
-    await userCredential.user!.delete();
     AppLogger.e(
         "Failed to fetch/create user: ${response.reasonPhrase} ${response.statusCode}");
-    throw Exception('Failed to fetch/create user: ${response.reasonPhrase}');
+    throw Exception(
+        "Une erreur serveur est survenue lors de la création de l'utilisateur");
   }
 }
 
@@ -102,13 +103,19 @@ Future<user_model.User?> signUp(
   UserCredential userCredential = await FirebaseAuth.instance
       .createUserWithEmailAndPassword(email: email, password: password);
 
-  await userCredential.user!.updateProfile(displayName: username);
+  try {
+    await userCredential.user!.updateProfile(displayName: username);
 
-  final user = await createAndFetchUser(userCredential, createUserUrl);
+    final user = await createAndFetchUser(userCredential, createUserUrl);
 
-  AppLogger.d("About to refresh the listenable");
-  isLoggedIn.value = true;
-  return user;
+    AppLogger.d("About to refresh the listenable");
+    isLoggedIn.value = true;
+    return user;
+  } catch (e) {
+    await userCredential.user
+        ?.delete(); // on annule la creation du compte avec FireBase
+    rethrow;
+  }
 }
 
 Future<String> getEmailFromIdentifier(String identifier) async {
@@ -121,8 +128,14 @@ Future<String> getEmailFromIdentifier(String identifier) async {
       queryParameters: {'username': identifier},
     ),
   );
+
+  if (response.statusCode != 200) {
+    throw Exception(
+        "Une erreur serveur est survenue lors de la récupération de l'email à partir de l'identifiant.");
+  }
+
   final jsonResponse = jsonDecode(response.body);
-  AppLogger.d("getEmailFromIdentifier response is $jsonResponse");
+
   return jsonResponse['email'];
 }
 
@@ -151,7 +164,7 @@ Future<user_model.User?> signIn(String identifier, String password) async {
     return user;
   } catch (e) {
     await FirebaseAuth.instance.signOut();
-    AppLogger.e("Erreur de sign in : ${e.toString()}  ");
+    AppLogger.e("Erreur de sign in : ${e.toString()}");
     throw Exception(getCustomError(e));
   }
 }
@@ -184,9 +197,14 @@ Future<bool> isUsernameTaken(String username) async {
     ),
   );
 
+  if (response.statusCode != 200) {
+    throw Exception(
+        "Une erreur serveur a eu lieu lors de la vérification du pseudonyme.");
+  }
+
   final jsonResponse = jsonDecode(response.body);
   AppLogger.d("in isUsernameTaken json response is $jsonResponse");
-  return jsonResponse['usernameExists'] as bool? ?? false;
+  return jsonResponse['usernameExists'] ?? false;
 }
 
 Future<bool> isEmailTaken(String email) async {
@@ -196,23 +214,24 @@ Future<bool> isEmailTaken(String email) async {
       queryParameters: {'email': email},
     ),
   );
-  bool emailTaken = false;
   if (response.statusCode == 200) {
     final responseJson = jsonDecode(response.body);
     AppLogger.d('responseJson of isEmailTaken is $responseJson');
-    emailTaken = responseJson['emailExists'];
+    return responseJson['emailExists'] ?? false;
+  } else {
+    throw Exception(
+        "Une erreur serveur a eu lieu lors de la verification de l'email.");
   }
-  return emailTaken;
 }
 
-void logout() async {
+Future<void> logout() async {
   try {
     AppLogger.d("in logout");
 
     User? currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
-      throw Exception("Utilisateur courant non identifié");
+      throw Exception("Utilisateur courant non identifié.");
     }
 
     await FirebaseFirestore.instance
