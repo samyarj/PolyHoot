@@ -22,7 +22,6 @@ class ChatWindow extends StatefulWidget {
 
 class _ChatWindowState extends State<ChatWindow> {
   final TextEditingController _textController = TextEditingController();
-  final ScrollController _listViewScrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
   late ChannelManager _channelManager;
   late Future<User> _user;
@@ -38,12 +37,6 @@ class _ChatWindowState extends State<ChatWindow> {
 
     _subscribeToMessages();
 
-    _focusNode.addListener(() {
-      if (_focusNode.hasFocus) {
-        _scrollToBottom();
-      }
-    });
-
     super.initState();
   }
 
@@ -53,13 +46,12 @@ class _ChatWindowState extends State<ChatWindow> {
           .getMessagesForChannel(widget.channel)
           .listen((newMessages) {
         setState(() {
-          _allMessagesDisplayed = [..._allMessagesDisplayed, ...newMessages];
+          _allMessagesDisplayed = [...newMessages, ..._allMessagesDisplayed];
           isLoadingInitialMessages = false;
         });
         if (_allMessagesDisplayed.isNotEmpty) {
-          _scrollToBottom();
           lastMessageDate =
-              _allMessagesDisplayed.first.date.millisecondsSinceEpoch;
+              _allMessagesDisplayed.last.date.millisecondsSinceEpoch;
         }
       }, onError: (error) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -81,10 +73,10 @@ class _ChatWindowState extends State<ChatWindow> {
             widget.channel, lastMessageDate!);
 
         if (oneFetch.isNotEmpty) {
-          lastMessageDate = oneFetch.first.date.millisecondsSinceEpoch;
+          lastMessageDate = oneFetch.last.date.millisecondsSinceEpoch;
 
           setState(() {
-            _allMessagesDisplayed = [...oneFetch, ..._allMessagesDisplayed];
+            _allMessagesDisplayed = [..._allMessagesDisplayed, ...oneFetch];
           });
         }
       } catch (e) {
@@ -97,23 +89,8 @@ class _ChatWindowState extends State<ChatWindow> {
   @override
   void dispose() {
     _textController.dispose();
-    _listViewScrollController.dispose();
     _messagesSubscription?.cancel();
     super.dispose();
-  }
-
-  void _scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(Duration(milliseconds: 500), () {
-        if (_listViewScrollController.hasClients) {
-          _listViewScrollController.animateTo(
-            _listViewScrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 2000),
-            curve: Curves.elasticOut,
-          );
-        }
-      });
-    });
   }
 
   void sendMessage() async {
@@ -173,7 +150,7 @@ class _ChatWindowState extends State<ChatWindow> {
                           : RefreshIndicator(
                               onRefresh: _onRefresh,
                               child: ListView.builder(
-                                controller: _listViewScrollController,
+                                reverse: true,
                                 itemCount: _allMessagesDisplayed.length,
                                 itemBuilder: (context, index) {
                                   final message = _allMessagesDisplayed[index];

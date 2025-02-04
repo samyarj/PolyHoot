@@ -80,7 +80,7 @@ class FirebaseChatService {
         }
 
         newMessages
-            .sort((ChatMessage a, ChatMessage b) => a.date.compareTo(b.date));
+            .sort((ChatMessage a, ChatMessage b) => b.date.compareTo(a.date));
 
         AppLogger.i("newmessage length is: ${newMessages.length}");
 
@@ -144,7 +144,7 @@ class FirebaseChatService {
       }
 
       olderMessages
-          .sort((ChatMessage a, ChatMessage b) => a.date.compareTo(b.date));
+          .sort((ChatMessage a, ChatMessage b) => b.date.compareTo(a.date));
 
       AppLogger.i("oldermessage length is: ${olderMessages.length}");
 
