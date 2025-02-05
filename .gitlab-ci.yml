@@ -1,8 +1,7 @@
 image: registry.gitlab.com/nikolayradoev/docker-images/chrome-mongo-node:20233
 
 cache:
-    key: '${CI_COMMIT_REF_SLUG}-client'
-    key: "${CI_COMMIT_REF_SLUG}-server"
+    key: '${CI_COMMIT_REF_SLUG}-server'
     paths:
         - server/node_modules/
     policy: pull
@@ -65,7 +64,6 @@ test:server:
     stage: test
     needs: ['install:server']
     <<: *only-server
-    needs: ["install:server"]
     only:
         refs:
             - main
