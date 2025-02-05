@@ -3,7 +3,7 @@ image: registry.gitlab.com/nikolayradoev/docker-images/chrome-mongo-node:20233
 cache:
     key: "${CI_COMMIT_REF_SLUG}-client"
     paths:
-        - client/node_modules/
+        - client_lourd/node_modules/
         - server/node_modules/
     policy: pull
 
@@ -13,12 +13,12 @@ cache:
             - master
             - merge_requests
         changes:
-            - client/**/*
+            - client_lourd/**/*
             - common/**/*
     cache:
         key: "${CI_COMMIT_REF_SLUG}-client"
         paths:
-            - client/node_modules/
+            - client_lourd/node_modules/
         policy: pull
 
 .only-server: &only-server
@@ -45,13 +45,13 @@ install:client:
     stage: install
     <<: *only-client
     script:
-        - cd client
+        - cd client_lourd
         - npm ci --cache .npm --prefer-offline
     cache:
         key: "${CI_COMMIT_REF_SLUG}-client"
         paths:
-            - client/node_modules/
-            - client/.npm/
+            - client_lourd/node_modules/
+            - client_lourd/.npm/
         policy: pull-push
 
 install:server:
@@ -73,7 +73,7 @@ lint:client:
     allow_failure: true
     <<: *only-client
     script:
-        - cd client
+        - cd client_lourd
         - npm run lint
 
 lint:server:
@@ -91,13 +91,13 @@ test:client:
     <<: *only-client
     script:
         - Xvfb :99 -ac -screen 0 1920x1080x24 &
-        - cd client
+        - cd client_lourd
         - npm run coverage -- --browsers=ChromeHeadlessNoSandbox --watch=false
     dependencies:
         - install:client
     artifacts:
         paths:
-            - client/coverage/
+            - client_lourd/coverage/
 
 test:server:
     stage: test
@@ -118,11 +118,11 @@ pages:
         - if: "$CI_COMMIT_TAG =~ /deploy/"
           when: manual
     script:
-        - cd client
+        - cd client_lourd
         - npm ci --cache .npm --prefer-offline
         - npm run deploy -- --base-href $BASE_HREF
         - mkdir ../public
-        - mv dist/client/* ../public/
+        - mv dist/client_lourd/* ../public/
     artifacts:
         paths:
             - public
