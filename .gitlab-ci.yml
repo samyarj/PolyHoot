@@ -10,7 +10,7 @@ cache:
 .only-server: &only-server
     only:
         refs:
-            - master
+            - main
             - merge_requests
         changes:
             - server/**/*
@@ -52,7 +52,7 @@ lint:server:
     allow_failure: true
     only:
         refs:
-            - master
+            - main
             - merge_requests
         changes:
             - server/**/*
@@ -68,7 +68,7 @@ test:server:
     needs: ["install:server"]
     only:
         refs:
-            - master
+            - main
             - merge_requests
         changes:
             - server/**/*
