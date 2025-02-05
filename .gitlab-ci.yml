@@ -16,7 +16,7 @@ install:server:
     stage: install
     only:
         refs:
-            - master
+            - main
             - merge_requests
         changes:
             - server/**/*
