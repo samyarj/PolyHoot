@@ -1,4 +1,4 @@
-#image: registry.gitlab.com/nikolayradoev/docker-images/chrome-mongo-node:20233
+image: registry.gitlab.com/nikolayradoev/docker-images/chrome-mongo-node:20233
 
 cache:
     key: "${CI_COMMIT_REF_SLUG}-client"
