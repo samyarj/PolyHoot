@@ -12,7 +12,7 @@
             "skipFiles": ["<node_internals>/**"],
             "restart": true,
             "sourceMaps": true,
-            "localRoot": "${workspaceFolder}/serveur",
+            "localRoot": "${workspaceFolder}/server",
             "type": "pwa-node"
         },
         {
