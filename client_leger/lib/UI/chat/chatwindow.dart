@@ -29,6 +29,7 @@ class _ChatWindowState extends State<ChatWindow> {
   List<ChatMessage> _allMessagesDisplayed = [];
   bool isLoadingInitialMessages = true;
   StreamSubscription<List<ChatMessage>>? _messagesSubscription;
+  bool _isSending = false;
 
   @override
   void initState() {
@@ -94,8 +95,9 @@ class _ChatWindowState extends State<ChatWindow> {
   }
 
   void sendMessage() async {
-    if (_textController.text.trim().isNotEmpty) {
+    if (_textController.text.trim().isNotEmpty && !_isSending) {
       try {
+        _isSending = true;
         await _channelManager.sendMessage(widget.channel, _textController.text);
       } catch (e) {
         if (!mounted) return;
@@ -103,6 +105,7 @@ class _ChatWindowState extends State<ChatWindow> {
       }
     }
     _textController.clear();
+    _isSending = false;
   }
 
   @override
@@ -207,19 +210,30 @@ class _ChatWindowState extends State<ChatWindow> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                '${message.username}: ${message.message}',
+                                                message.username ?? "Unknown",
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 18,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                              Text(
+                                                message.message,
                                                 softWrap: true,
                                                 style: TextStyle(
                                                     color: Colors.white,
                                                     fontSize: 18),
                                               ),
-                                              Text(
-                                                DateFormat(
-                                                        'd MMM HH:mm:ss', 'fr')
-                                                    .format(message.date),
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 16),
+                                              Align(
+                                                alignment:
+                                                    Alignment.bottomRight,
+                                                child: Text(
+                                                  DateFormat('HH:mm:ss')
+                                                      .format(message.date),
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 16),
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -245,7 +259,7 @@ class _ChatWindowState extends State<ChatWindow> {
                             onPressed: () => sendMessage(),
                           ),
                         ),
-                        textInputAction: TextInputAction.done,
+                        textInputAction: TextInputAction.send,
                         onEditingComplete: sendMessage,
                       ),
                     ),
