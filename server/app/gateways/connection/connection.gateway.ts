@@ -68,7 +68,10 @@ export class ConnectionGateway implements OnGatewayDisconnect {
     handleDisconnect(client: Socket) {
         if (this.userService.isMobileClient(client.id)) {
             const clientUid = this.userService.getMobileClientUid(client.id);
-            if (clientUid) this.userService.logout(clientUid);
+            if (clientUid) {
+                this.userService.logout(clientUid);
+                this.userService.removeMobileClientFromMap(client.id);
+            }
         }
         const roomId = this.gameManager.socketRoomsMap.get(client);
         const game = this.gameManager.getGameByRoomId(roomId);

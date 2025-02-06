@@ -22,6 +22,10 @@ export class UserService {
         return this.mobileClientMap.get(socketClientId);
     }
 
+    removeMobileClientFromMap(socketClientId: string) {
+        this.mobileClientMap.delete(socketClientId);
+    }
+
     // Sign up a new user and return user data with token
     async createUserInFirestore(uid: string, username: string, email: string): Promise<User> {
         // Check if the username or email already exists in Firestore
