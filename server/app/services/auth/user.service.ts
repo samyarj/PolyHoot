@@ -8,6 +8,19 @@ import { UserCredential } from 'firebase/auth';
 export class UserService {
     private adminAuth = admin.auth();
     private firestore = admin.firestore();
+    private mobileClientMap = new Map<string, string>();
+
+    addMobileClientToMap(socketClientId: string, uid: string) {
+        this.mobileClientMap.set(socketClientId, uid);
+    }
+
+    isMobileClient(socketClientId: string): boolean {
+        return this.mobileClientMap.has(socketClientId);
+    }
+
+    getMobileClientUid(socketClientId: string): string | undefined {
+        return this.mobileClientMap.get(socketClientId);
+    }
 
     // Sign up a new user and return user data with token
     async createUserInFirestore(uid: string, username: string, email: string): Promise<User> {

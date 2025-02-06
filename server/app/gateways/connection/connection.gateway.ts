@@ -1,6 +1,7 @@
 import { Game } from '@app/classes/game/game';
 import { Player } from '@app/classes/player/player';
 import { ChatEvents, ConnectEvents, DisconnectEvents, GameEvents, GameState } from '@app/constants/enum-classes';
+import { UserService } from '@app/services/auth/user.service';
 import { ChatService } from '@app/services/chat/chat.service';
 import { GameManagerService } from '@app/services/game-manager/game-manager.service';
 import { HistoryManagerService } from '@app/services/history-manager/history-manager.service';
@@ -17,7 +18,18 @@ export class ConnectionGateway implements OnGatewayDisconnect {
         private chatService: ChatService,
         private gameManager: GameManagerService,
         private historyManager: HistoryManagerService,
+        private userService: UserService,
     ) {}
+
+
+    @SubscribeMessage(ConnectEvents.identifyMobileClient)
+    handleIdentify(
+        @MessageBody() uid: string,
+        @ConnectedSocket() client: Socket
+    ) {
+        this.userService.addMobileClientToMap(client.id, uid);
+    }
+
 
     @SubscribeMessage(ConnectEvents.UserToGame)
     handleUserConnectedToGamePage(@ConnectedSocket() client: Socket) {
@@ -50,8 +62,14 @@ export class ConnectionGateway implements OnGatewayDisconnect {
         if (playerName && game) game.removePlayer(playerName);
     }
     /* Nous avons géré le cas où un organisateur ou un joueur ''refresh'' sa page
-    contrairement à une deconnexion en utilisant les boutons à cet effet ou le retour arrière du navigateur */
+    contrairement à une deconnexion en utilisant les boutons à cet effet ou le retour arrière du navigateur
+    Appelé quand l'utilisateur fait close all sur le client léger
+    */
     handleDisconnect(client: Socket) {
+        if (this.userService.isMobileClient(client.id)) {
+            const clientUid = this.userService.getMobileClientUid(client.id);
+            if (clientUid) this.userService.logout(clientUid);
+        }
         const roomId = this.gameManager.socketRoomsMap.get(client);
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {

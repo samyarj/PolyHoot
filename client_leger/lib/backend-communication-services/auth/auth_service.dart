@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:client_leger/backend-communication-services/environment.dart';
+
+import 'package:client_leger/backend-communication-services/environment_prod.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/models/user.dart'
     as user_model;
@@ -11,7 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 
-const String baseUrl = '${Environment.serverUrl}/users';
+const String baseUrl = '${EnvironmentProd.serverUrl}/users';
 const String getProfileUrl = '$baseUrl/profile';
 const String createUserUrl = '$baseUrl/create-user';
 const String logOutUrl = '$baseUrl/logout';
