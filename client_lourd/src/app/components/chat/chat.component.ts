@@ -44,7 +44,6 @@ export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
     }
 
     ngAfterViewChecked() {
-        console.log('ngAfterViewChecked');
         if (this.containerHasChanged) {
             this.scrollToBottom();
             this.containerHasChanged = false;

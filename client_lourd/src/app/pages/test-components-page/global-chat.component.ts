@@ -22,7 +22,6 @@ export class GlobalChatComponent implements OnInit, OnDestroy {
         // Subscribe to live chat messages
         this.messagesSubscription = this.firebaseChatService.getMessages().subscribe({
             next: (messages) => {
-                console.log('Received messages:', messages);
                 this.chatMessages = messages;
                 if (messages.length > 0) {
                     this.lastMessageDate = messages[0].date; // Track oldest message date

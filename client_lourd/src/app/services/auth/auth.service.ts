@@ -168,7 +168,6 @@ export class AuthService {
         this.loadingTokenBS.next(true);
 
         onIdTokenChanged(this.auth, async (firebaseUser) => {
-            console.log('Token changed', firebaseUser);
             if (this.isAuthenticating) {
                 return;
             }
@@ -193,7 +192,7 @@ export class AuthService {
             } else {
                 this.userBS.next(null);
                 this.loadingTokenBS.next(false);
-                // this.router.navigate(['/login']);
+                this.router.navigate(['/login']);
             }
         });
     }

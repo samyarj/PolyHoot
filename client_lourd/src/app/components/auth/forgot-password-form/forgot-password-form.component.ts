@@ -67,8 +67,6 @@ export class ForgotPasswordFormComponent {
             next: ({ emailExists, provider }) => {
                 this.isCheckingEmail = false;
                 this.isTypingEmail = false;
-                console.log('emailExists:', emailExists);
-                console.log('provider:', provider);
                 this.isEmailAvailable = emailExists && provider === 'password';
 
                 this.forgotPasswordForm.get('email')?.enable();
