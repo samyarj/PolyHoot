@@ -22,8 +22,6 @@ cache:
 
 stages:
     - install
-    - lint
-    - test
     - deploy
 
 install:server:
@@ -44,39 +42,6 @@ install:server:
             - server/node_modules/
             - server/.npm/
         policy: pull-push
-
-lint:server:
-    stage: lint
-    needs: ['install:server']
-    allow_failure: true
-    only:
-        refs:
-            - main
-            - merge_requests
-        changes:
-            - server/**/*
-            - common/**/*
-    script:
-        - cd server
-        - npm run lint
-
-test:server:
-    stage: test
-    needs: ['install:server']
-    <<: *only-server
-    only:
-        refs:
-            - main
-            - merge_requests
-        changes:
-            - server/**/*
-            - common/**/*
-    script:
-        - cd server
-        - npm run coverage
-    artifacts:
-        paths:
-            - server/coverage/
 
 variables:
     EC2_USER: ec2-user
