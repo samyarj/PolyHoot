@@ -23,7 +23,7 @@
         <!-- Password Field -->
         <div class="form-group mb-3">
             <label for="password" class="form-label">Mot de passe</label>
-            <input id="password" type="password" placeholder="Entrez votre mot de passe" formControlName="password" class="form-control" />
+            <input id="password" type="password" placeholder="Entrez votre mot de passe " formControlName="password" class="form-control" />
             <small *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="text-danger">
                 Le mot de passe est requis.
             </small>
