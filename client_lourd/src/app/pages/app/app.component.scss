@@ -16,16 +16,6 @@
     margin-bottom: 1rem;
 }
 
-.main-aside {
-    height: 100vh;
-    width: 380px;
-    background-color: #010a13bb;
-    position: fixed;
-    right: 0;
-    top: 0;
-    z-index: 2;
-}
-
 .main-content {
     height: 100vh;
     width: calc(100vw - 380px);

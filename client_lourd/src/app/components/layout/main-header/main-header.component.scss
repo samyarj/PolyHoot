@@ -38,7 +38,15 @@
                 align-items: center;
                 padding: 10px 15px; // Adds internal spacing
             }
-
+            .end-category::after {
+                content: '';
+                position: absolute;
+                right: 0;
+                top: 15%; /* Adjusts starting position */
+                height: 70%; /* Makes the border 80% of the parent UL */
+                width: 1px;
+                background-color: rgba(255, 255, 255, 0.3); /* Adjust color and opacity */
+            }
             li:nth-last-child(2)::after {
                 content: '';
                 position: absolute;
