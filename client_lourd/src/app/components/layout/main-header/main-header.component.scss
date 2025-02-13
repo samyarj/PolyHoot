@@ -1,0 +1,92 @@
+.main-header {
+    width: calc(100vw - 380px);
+    height: 100px;
+    //background-color: transparent;
+    z-index: 4;
+    position: fixed;
+
+    .logo {
+        height: 50px;
+        width: auto;
+    }
+
+    nav {
+        background: linear-gradient(to bottom, #000000 0%, rgba(0, 2, 4, 0.8) 100%);
+        height: 100%;
+        width: 100%;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        justify-content: space-between;
+
+        ul {
+            display: flex;
+            justify-content: space-between;
+            display: flex;
+            align-items: center;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            height: 100%;
+
+            li {
+                height: 100%;
+                display: flex;
+                position: relative;
+                color: aliceblue;
+                justify-content: center;
+                align-items: center;
+                padding: 10px 15px; // Adds internal spacing
+            }
+
+            li:nth-last-child(2)::after {
+                content: '';
+                position: absolute;
+                right: 0;
+                top: 15%; /* Adjusts starting position */
+                height: 70%; /* Makes the border 80% of the parent UL */
+                width: 1px;
+                background-color: rgba(255, 255, 255, 0.3); /* Adjust color and opacity */
+            }
+            li:last-child {
+                border-right: none; // Removes border from the last item
+            }
+
+            .divider {
+                border-right: none; // Ensures the divider doesn't have extra borders
+                font-weight: bold;
+                padding: 0 10px;
+            }
+        }
+
+        .left-list {
+            li:first-child {
+                border-right: none; // Removes border from the last item
+            }
+        }
+    }
+}
+
+.item-background-active {
+    background: rgb(235, 235, 244);
+    background: -moz-linear-gradient(0deg, rgba(235, 235, 244, 0.13489145658263302) 0%, rgba(255, 255, 255, 0) 70%);
+    background: -webkit-linear-gradient(0deg, rgba(235, 235, 244, 0.13489145658263302) 0%, rgba(255, 255, 255, 0) 70%);
+    background: linear-gradient(0deg, rgba(235, 235, 244, 0.13489145658263302) 0%, rgba(255, 255, 255, 0) 70%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#ebebf4",endColorstr="#ffffff",GradientType=1);
+    cursor: pointer;
+    transition-duration: 0.2s;
+
+    a {
+        color: #f0e6d2 !important;
+    }
+}
+
+.item-background-hover:hover {
+    background: rgb(235, 235, 244);
+    background: -moz-linear-gradient(0deg, rgba(235, 235, 244, 0.13489145658263302) 0%, rgba(255, 255, 255, 0) 70%);
+    background: -webkit-linear-gradient(0deg, rgba(235, 235, 244, 0.13489145658263302) 0%, rgba(255, 255, 255, 0) 70%);
+    background: linear-gradient(0deg, rgba(235, 235, 244, 0.13489145658263302) 0%, rgba(255, 255, 255, 0) 70%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#ebebf4",endColorstr="#ffffff",GradientType=1);
+    cursor: pointer;
+    transition-duration: 0.2s;
+}

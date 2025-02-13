@@ -5,11 +5,11 @@ import { AuthService } from '@app/services/auth/auth.service';
 import { Observable } from 'rxjs';
 
 @Component({
-    selector: 'app-menu-bar',
-    templateUrl: './menu-bar.component.html',
-    styleUrls: ['./menu-bar.component.scss'],
+    selector: 'app-side-bar',
+    templateUrl: './side-bar.component.html',
+    styleUrls: ['./side-bar.component.scss'],
 })
-export class MenuBarComponent {
+export class SideBarComponent {
     user$: Observable<User | null>;
 
     constructor(

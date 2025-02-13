@@ -1,0 +1,25 @@
+<!-- User Menu -->
+<aside class="main-aside">
+    <div class="user-menu dropdown" *ngIf="user$ | async as user">
+        <!-- User Avatar (Trigger) -->
+        <img [src]="user.avatarEquipped" alt="User Avatar" class="avatar dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" />
+
+        <!-- Dropdown Menu -->
+        <ul class="dropdown-menu">
+            <!-- Dropdown Header -->
+            <li class="dropdown-header text-center">
+                <img [src]="user.avatarEquipped" alt="User Avatar" class="dropdown-avatar mb-2" />
+                <div class="dropdown-info">
+                    <strong>{{ user.username }}</strong>
+                    <br />
+                    <small class="text-muted">{{ user.email }}</small>
+                </div>
+            </li>
+            <hr class="dropdown-divider" />
+
+            <li class="logout-container">
+                <a (click)="logout()">Déconnexion <i class="fa-solid fa-right-from-bracket"></i></a>
+            </li>
+        </ul>
+    </div>
+</aside>

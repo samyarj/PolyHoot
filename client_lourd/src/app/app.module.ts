@@ -29,7 +29,8 @@ import { ConfirmationDialogComponent } from './components/general-elements/confi
 import { ErrorDialogComponent } from './components/general-elements/error-dialog/error-dialog.component';
 import { HeaderGameComponent } from './components/general-elements/header-game/header-game.component';
 import { PopUpCreationComponent } from './components/general-elements/pop-up-creation/pop-up-creation.component';
-import { MenuBarComponent } from './components/menu-bar/menu-bar.component';
+import { MainHeaderComponent } from './components/layout/main-header/main-header.component';
+import { SideBarComponent } from './components/layout/side-bar/side-bar.component';
 import { PlayerListComponent } from './components/player-list/player-list.component';
 import { BankPanelComponent } from './components/quiz-related/bank-related/bank-panel/bank-panel.component';
 import { QuestionBankComponent } from './components/quiz-related/bank-related/question-bank/question-bank.component';
@@ -95,11 +96,12 @@ import { SocketClientService } from './services/websocket-services/general/socke
         SignUpFormComponent,
         SignUpComponent,
         LoginFormComponent,
-        MenuBarComponent,
         ForgotPasswordComponent,
         ForgotPasswordFormComponent,
         GlobalChatComponent,
         Chat2Component,
+        SideBarComponent,
+        MainHeaderComponent,
     ],
     providers: [
         QuizService,
