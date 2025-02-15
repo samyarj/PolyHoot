@@ -24,6 +24,10 @@ $question-qrl-color: #194e80;
     width: 25%;
     text-align: center;
     align-items: center;
+
+    h2 {
+        color: var(--text-color);
+    }
 }
 
 .truncate-text {
@@ -122,6 +126,7 @@ $question-qrl-color: #194e80;
 
 label {
     font-weight: bold;
+    color: var(--text-color);
 }
 
 .submit-game-section {

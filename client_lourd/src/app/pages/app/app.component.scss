@@ -19,11 +19,12 @@
 .main-content {
     height: 100vh;
     width: calc(100vw - 380px);
-    overflow-x: auto;
+    max-width: calc(100vw - 380px);
+    overflow-x: hidden;
     background-repeat: no-repeat;
     background-size: cover;
     background-blend-mode: color;
     position: relative;
     z-index: 0;
-    background-color: aqua;
+    background-color: var(--primary-color);
 }

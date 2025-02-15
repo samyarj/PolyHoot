@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ChatComponent } from '@app/components/chat/chat.component';
-import { HeaderGameComponent } from '@app/components/general-elements/header-game/header-game.component';
+import { HeaderGameComponent } from '@app/components/layout/filler/header-game/header-game.component';
 import { MOCK_QUIZ } from '@app/constants/mock-constants';
 import { TestClientService } from '@app/services/game-services/test-client/test-client.service';
 import { Subject } from 'rxjs';

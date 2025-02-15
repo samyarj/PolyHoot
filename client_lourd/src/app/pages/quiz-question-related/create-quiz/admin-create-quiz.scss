@@ -1,7 +1,10 @@
 .page-container {
     display: flex;
     flex-direction: column;
-    max-height: 650px;
+    max-height: 80%;
+    top: 50px;
+    overflow: auto;
+    position: relative;
 }
 
 .create-quiz-container {

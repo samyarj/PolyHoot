@@ -11,7 +11,7 @@ $primary-color: #00115a;
     flex-direction: column;
     justify-content: space-between;
     padding: 1.2rem;
-    
+
     .question-info-section {
         display: flex;
         flex-direction: row;
@@ -26,12 +26,13 @@ $primary-color: #00115a;
         }
         #options {
             font-size: medium;
-            position: relative; 
+            position: relative;
             top: 8%;
         }
     }
     label {
         font-weight: bold;
+        color: var(--text-color);
     }
 }
 
@@ -120,7 +121,7 @@ $primary-color: #00115a;
 
 .cdk-drag-placeholder {
     opacity: 0.3;
-    transition: transform 0.1s ease; 
+    transition: transform 0.1s ease;
 }
 
 .cdk-drag-preview {

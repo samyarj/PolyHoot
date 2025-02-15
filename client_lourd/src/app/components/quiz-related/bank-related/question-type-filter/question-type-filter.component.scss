@@ -2,19 +2,20 @@
     display: flex;
     align-items: center;
     margin-bottom: 10%;
-  }
+}
 
 .filter-label {
     display: flex;
-    align-items: center; 
+    align-items: center;
     white-space: nowrap;
     margin-right: 2%;
-  }
-  
-  .filter-label mat-icon {
-    margin-right: 2%; 
-  }
+    color: var(--text-color);
+}
 
-  #question-type {
-    flex: 1; 
-  }
+.filter-label mat-icon {
+    margin-right: 2%;
+}
+
+#question-type {
+    flex: 1;
+}

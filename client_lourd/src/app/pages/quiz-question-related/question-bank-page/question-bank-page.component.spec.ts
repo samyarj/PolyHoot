@@ -4,7 +4,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
-import { HeaderGameComponent } from '@app/components/general-elements/header-game/header-game.component';
+import { HeaderGameComponent } from '@app/components/layout/filler/header-game/header-game.component';
 import { BankPanelComponent } from '@app/components/quiz-related/bank-related/bank-panel/bank-panel.component';
 import { QuestionTypeFilterComponent } from '@app/components/quiz-related/bank-related/question-type-filter/question-type-filter.component';
 import { AppRoute } from '@app/constants/enum-class';

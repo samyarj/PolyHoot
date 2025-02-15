@@ -1,15 +1,9 @@
-<app-header-game title="Administration"></app-header-game>
 <div id="outerContainer">
     <div id="options" @backInLeft>
         <mat-icon id="settingsIcon">settings</mat-icon>
         <div class="buttons-section">
-            <button class="custom-button custom-width btn" id="questionBankButton" (click)="navigate('/admin/questionBank')">
-                Banque de questions
-            </button>
-            <button class="custom-button custom-width btn" id="createQuizButton" (click)="navigate('/admin/createQuiz')">Créer un jeu</button>
-            <button class="custom-button custom-width btn" (click)="inputFile.click()">Importer un jeu</button>
+            <button class="custom-button-medium" (click)="inputFile.click()">Importer un jeu</button>
             <input #inputFile type="file" accept="application/json" (change)="handleFileImport($event)" style="display: none" />
-            <button class="custom-button custom-width btn" (click)="navigate('/admin/history')">Historique</button>
             <dialog #dialog>
                 <form>
                     <div id="titleContainer">
@@ -64,5 +58,4 @@
             </div>
         </div>
     </div>
-    <button id="logout" class="custom-button-cancel custom-width btn" (click)="logOut()" @backInRight>Déconnexion</button>
 </div>

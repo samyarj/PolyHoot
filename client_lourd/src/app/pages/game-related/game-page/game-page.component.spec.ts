@@ -5,7 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ChatComponent } from '@app/components/chat/chat.component';
-import { HeaderGameComponent } from '@app/components/general-elements/header-game/header-game.component';
+import { HeaderGameComponent } from '@app/components/layout/filler/header-game/header-game.component';
 import { AppRoute, ChoiceFeedback } from '@app/constants/enum-class';
 import { MOCK_QUESTIONS, MOCK_QUESTION_GAME_PAGE } from '@app/constants/mock-constants';
 import { GameClientService } from '@app/services/game-services/game-client/game-client.service';

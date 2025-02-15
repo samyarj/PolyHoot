@@ -27,9 +27,11 @@ import { ChatComponent } from './components/chat/chat.component';
 import { Chat2Component } from './components/chat/chat2/chat2.component';
 import { ConfirmationDialogComponent } from './components/general-elements/confirmation-dialog/confirmation-dialog.component';
 import { ErrorDialogComponent } from './components/general-elements/error-dialog/error-dialog.component';
-import { HeaderGameComponent } from './components/general-elements/header-game/header-game.component';
 import { PopUpCreationComponent } from './components/general-elements/pop-up-creation/pop-up-creation.component';
+import { HeaderGameComponent } from './components/layout/filler/header-game/header-game.component';
+import { SecondaryHeaderGameComponent } from './components/layout/filler/secondary-header-game/secondary-header-game.component';
 import { MainHeaderComponent } from './components/layout/main-header/main-header.component';
+import { SecondaryHeaderComponent } from './components/layout/secondary-header/secondary-header.component';
 import { SideBarComponent } from './components/layout/side-bar/side-bar.component';
 import { PlayerListComponent } from './components/player-list/player-list.component';
 import { BankPanelComponent } from './components/quiz-related/bank-related/bank-panel/bank-panel.component';
@@ -39,18 +41,20 @@ import { CreateQuizComponent } from './components/quiz-related/quiz-creation/cre
 import { QuestionFormComponent } from './components/quiz-related/quiz-creation/question-form/question-form.component';
 import { ErrorInterceptor } from './interceptors/error.interceptor';
 import { AppRoutingModule } from './modules/app-routing.module';
-import { AdminPageComponent } from './pages/admin-related/admin-page/admin-page.component';
-import { AdminQuizCreateComponent } from './pages/admin-related/create-quiz/admin-create-quiz';
-import { HistoryPageComponent } from './pages/admin-related/history/history.component';
-import { QuestionBankPageComponent } from './pages/admin-related/question-bank-page/question-bank-page.component';
 import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-password.component';
 import { LoginPageComponent } from './pages/auth/login-page/login-page.component';
 import { SignUpComponent } from './pages/auth/sign-up/sign-up.component';
 import { CreatePageComponent } from './pages/create-page/create-page.component';
+import { GameMainPageComponent } from './pages/game-related/game-main-page/game-main-page.component';
 import { JoinGamePageComponent } from './pages/game-related/join-game-page/join-game-page.component';
 import { OrganizerPageComponent } from './pages/game-related/organizer-page/organizer-page.component';
 import { ResultsPageComponent } from './pages/game-related/results-page/results-page.component';
 import { TestGamePageComponent } from './pages/game-related/test-page/test-game-page.component';
+import { AdminPageComponent } from './pages/quiz-question-related/admin-page/admin-page.component';
+import { AdminQuizCreateComponent } from './pages/quiz-question-related/create-quiz/admin-create-quiz';
+import { HistoryPageComponent } from './pages/quiz-question-related/history/history.component';
+import { QuestionBankPageComponent } from './pages/quiz-question-related/question-bank-page/question-bank-page.component';
+import { QuizManagementMainPageComponent } from './pages/quiz-question-related/quiz-management-main-page/quiz-management-main-page.component';
 import { GlobalChatComponent } from './pages/test-components-page/global-chat.component';
 import { WaitingPageComponent } from './pages/waiting-page/waiting-page.component';
 import { QuestionService } from './services/back-end-communication-services/question-service/question.service';
@@ -102,6 +106,10 @@ import { SocketClientService } from './services/websocket-services/general/socke
         Chat2Component,
         SideBarComponent,
         MainHeaderComponent,
+        GameMainPageComponent,
+        SecondaryHeaderComponent,
+        SecondaryHeaderGameComponent,
+        QuizManagementMainPageComponent,
     ],
     providers: [
         QuizService,

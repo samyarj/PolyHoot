@@ -1,13 +1,12 @@
-<app-header-game [title]="title"></app-header-game>
-<div>
+<div class="question-bank-container">
     <div class="buttons">
         <div class="show-logo-button">
-            <button class="custom-button-cancel custom-width bank-page-button btn" (click)="redirectToPage('\admin')">Retour</button>
+            <button class="custom-button-cancel-medium" (click)="redirectToPage('\admin')">Retour</button>
             <img src="assets/pictures/button-owl.png" class="character" />
         </div>
         <app-question-type-filter (filterQuestionTypeChange)="updateSelectedQuestions($event, true)"></app-question-type-filter>
         <div class="show-logo-button">
-            <button class="custom-button custom-width bank-page-button btn" (click)="addNewQuestion()">Ajouter une question</button>
+            <button class="custom-button-medium" (click)="addNewQuestion()">Ajouter une question</button>
             <img src="assets/pictures/button-owl.png" class="character" />
         </div>
     </div>

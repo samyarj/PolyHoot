@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { HeaderGameComponent } from '@app/components/general-elements/header-game/header-game.component';
+import { HeaderGameComponent } from '@app/components/layout/filler/header-game/header-game.component';
 import { AppRoute, ConfirmationMessage } from '@app/constants/enum-class';
 import { MOCK_QUIZZES_ADMIN } from '@app/constants/mock-constants';
 import { Quiz } from '@app/interfaces/quiz';

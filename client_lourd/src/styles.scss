@@ -9,6 +9,10 @@
 // Be sure that you only ever include this mixin once!
 @include mat.core();
 
+:root {
+    --navbar-font-size: 16px;
+    --navbar-separator-size: 2px;
+}
 // ******************************
 // Tutorial for themes
 // primary-color:
@@ -20,8 +24,8 @@
 // active-bg: for active header
 [data-theme='dark'] {
     --primary-color: #000729;
-    --secondary-color: #011b8e;
-    --tertiary-color: #4263f8;
+    --secondary-color: #71cdff;
+    --tertiary-color: #ffffff;
     --text-color: aliceblue;
 
     // Header colors
@@ -31,8 +35,8 @@
 }
 
 [data-theme='light'] {
-    --primary-color: #6dceff;
-    --secondary-color: #c1e9ff;
+    --primary-color: #ffffff;
+    --secondary-color: #71cdff;
     --tertiary-color: #000729;
     --text-color: #101010;
 
@@ -44,25 +48,91 @@
 
 /* You can add global styles to this file, and also import other style files */
 
-.custom-button {
-    background-color: var(--primary-color);
-    color: white;
-    border: 3px solid var(--primary-color);
+/* BUTTONS IN GENERAL */
 
+.custom-button {
+    display: flex;
+    align-items: center; /* Vertical centering */
+    justify-content: center; /* Horizontal centering */
+    text-align: center;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border: 3px solid var(--tertiary-color);
+    border-radius: 50px;
+    transition: transform 0.2s ease-in-out;
     &:hover {
-        background-color: white;
-        color: var(--primary-color);
-        border: 3px solid var(--primary-color);
+        background: linear-gradient(0deg, var(--secondary-color) 0%, var(--primary-color) 47.5%);
+        cursor: pointer;
+        border: 3px solid var(--secondary-color);
     }
 }
 
 .custom-button-cancel {
-    background-color: white;
+    display: flex;
+    align-items: center; /* Vertical centering */
+    justify-content: center; /* Horizontal centering */
+    text-align: center;
+    background-color: var(--tertiary-color);
     color: var(--primary-color);
-    border: 3px solid var(--primary-color);
-
+    border: 3px solid var(--secondary-color);
+    border-radius: 50px;
+    transition: transform 0.2s ease-in-out;
     &:hover {
-        background-color: var(--primary-color);
-        color: white;
+        background: linear-gradient(0deg, var(--primary-color) 0%, var(--tertiary-color) 47.5%);
+        cursor: pointer;
+        border: 3px solid var(--primary-color);
     }
 }
+
+.custom-button:hover,
+.custom-button-cancel:hover {
+    // box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.3);
+    //transform: translateY(-2px);
+}
+
+.custom-button:active,
+.custom-button-cancel:active {
+    // box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
+    // transform: translateY(-1px);
+}
+
+.custom-button:hover,
+.custom-button-cancel:hover {
+    // transform: scaleX(1.1) scaleY(1.1);
+}
+
+.custom-button-big {
+    @extend .custom-button;
+    font-size: 1.5rem;
+    padding: 1rem 2rem;
+    height: 70px;
+}
+
+.custom-button-cancel-big {
+    @extend .custom-button-cancel;
+    font-size: 1.5rem;
+    padding: 1rem 2rem;
+    height: 70px;
+}
+
+.custom-button-medium {
+    @extend .custom-button;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    height: 50px;
+}
+
+.custom-button-cancel-medium {
+    @extend .custom-button-cancel;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    height: 50px;
+}
+
+.btn-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+/* SECONDARY NAVBAR */

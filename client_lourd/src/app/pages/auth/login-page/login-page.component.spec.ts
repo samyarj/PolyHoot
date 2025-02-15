@@ -9,7 +9,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { HeaderGameComponent } from '@app/components/general-elements/header-game/header-game.component';
+import { HeaderGameComponent } from '@app/components/layout/filler/header-game/header-game.component';
 import { AppRoute } from '@app/constants/enum-class';
 import { AdminPageComponent } from '@app/pages/admin-related/admin-page/admin-page.component';
 import { AuthentificationService } from '@app/services/admin-services/authentification-service/authentification.service';

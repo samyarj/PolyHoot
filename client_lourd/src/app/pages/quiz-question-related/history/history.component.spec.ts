@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
-import { HeaderGameComponent } from '@app/components/general-elements/header-game/header-game.component';
+import { HeaderGameComponent } from '@app/components/layout/filler/header-game/header-game.component';
 import { ConfirmationMessage } from '@app/constants/enum-class';
 import { MOCK_GAMES } from '@app/constants/mock-constants';
 import { HistoryService } from '@app/services/back-end-communication-services/history-service/history.service';

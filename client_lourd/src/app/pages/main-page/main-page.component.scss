@@ -243,14 +243,6 @@ body {
     top: -90px;
 }
 
-*,
-*::after,
-*::before {
-    margin: 0;
-    padding: 0;
-    box-sizing: inherit;
-}
-
 html {
     font-size: 62.5%;
 }
@@ -303,87 +295,6 @@ img {
     overflow: hidden;
     position: relative;
     margin: 0 auto;
-}
-
-.theme-btn {
-    color: #000;
-    font-family: 'Lato';
-    min-width: 170px;
-    min-height: 30px;
-}
-
-.theme-btn:hover {
-    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2);
-    transform: translatey(-3px);
-    color: $text-color;
-}
-.theme-btn:active {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
-    transform: translatey(-1px);
-    color: $text-color;
-}
-
-.theme-btn::after {
-    content: '';
-    display: inline-block;
-    height: 100%;
-    width: 100%;
-    border-radius: 10rem;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: -1;
-    transition: all 0.4s;
-    background: #fff;
-    color: $text-color;
-}
-.theme-btn:hover::after {
-    transform: scaleX(1.4) scaleY(1.6);
-    opacity: 0;
-}
-
-.btn-animated {
-    animation: moveInBottom 0.5s ease-out 0.75s;
-    animation-fill-mode: backwards;
-}
-
-@mixin button-style($color) {
-    background: $color;
-    padding: 1.5rem 4rem;
-    display: inline-block;
-    margin-top: 3rem;
-    text-decoration: none;
-    border-radius: 10rem;
-    transition: all 0.2s;
-    position: relative;
-    backface-visibility: hidden;
-}
-
-.btn-container {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-}
-.theme-btn {
-    @include button-style($light-color);
-    cursor: pointer;
-}
-
-.play-btn {
-    @extend .theme-btn;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    font-size: 2rem;
-}
-
-.create-btn {
-    @extend .theme-btn;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    font-size: 1.5rem;
-}
-.admin-btn {
-    @extend .theme-btn;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    font-size: 1.5rem;
 }
 
 %feature-content-styles {

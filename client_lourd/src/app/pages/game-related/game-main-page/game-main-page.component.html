@@ -1,0 +1,10 @@
+<div class="content">
+    <div class="header-distancer"></div>
+    <app-secondary-header
+        [buttonData]="[
+            { nameofButton: 'Jouer une partie', address: 'joinGame', endCategory: true },
+            { nameofButton: 'Créer une partie', address: 'create', endCategory: false }
+        ]"
+    ></app-secondary-header>
+    <router-outlet></router-outlet>
+</div>

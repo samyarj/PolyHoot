@@ -13,7 +13,7 @@
     }
 
     nav {
-        background: linear-gradient(to bottom, var(--nav-bg) 20%, color-mix(in srgb, var(--nav-bg), transparent 50%) 100%);
+        background: linear-gradient(to bottom, var(--nav-bg) 30%, color-mix(in srgb, var(--nav-bg), transparent 90%) 100%);
         color: var(--text-color);
         height: 100%;
         width: 100%;
@@ -36,6 +36,7 @@
                 height: 100%;
                 display: flex;
                 position: relative;
+                font-size: var(--navbar-font-size);
                 justify-content: center;
                 align-items: center;
                 padding: 10px 25px; // Adds internal spacing
@@ -52,20 +53,18 @@
                 content: '';
                 position: absolute;
                 right: 0;
-                top: 15%; /* Adjusts starting position */
-                height: 70%; /* Makes the border 80% of the parent UL */
-                width: 1px;
-                background-color: var(--text-color); /* Adjust color and opacity */
+                top: 5%; /* Adjusts starting position */
+                height: 90%; /* Makes the border 80% of the parent UL */
+                width: var(--navbar-separator-size);
+                background: linear-gradient(
+                    to top,
+                    #ffffff00 10%,
+                    var(--text-color) 30%,
+                    var(--text-color) 70%,
+                    #ffffff00 90%
+                ); /* Adjust color and opacity */
             }
-            li:nth-last-child(2)::after {
-                content: '';
-                position: absolute;
-                right: 0;
-                top: 15%; /* Adjusts starting position */
-                height: 70%; /* Makes the border 80% of the parent UL */
-                width: 1px;
-                background-color: var(--text-color); /* Adjust color and opacity */
-            }
+
             li:last-child {
                 border-right: none; // Removes border from the last item
             }

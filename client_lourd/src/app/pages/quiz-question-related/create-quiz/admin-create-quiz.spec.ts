@@ -9,7 +9,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { HeaderGameComponent } from '@app/components/general-elements/header-game/header-game.component';
+import { HeaderGameComponent } from '@app/components/layout/filler/header-game/header-game.component';
 import { QuestionBankComponent } from '@app/components/quiz-related/bank-related/question-bank/question-bank.component';
 import { QuestionTypeFilterComponent } from '@app/components/quiz-related/bank-related/question-type-filter/question-type-filter.component';
 import { CreateQuizComponent } from '@app/components/quiz-related/quiz-creation/create-quiz/create-quiz.component';
