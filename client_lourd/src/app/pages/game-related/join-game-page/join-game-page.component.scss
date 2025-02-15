@@ -9,7 +9,7 @@ body {
 }
 
 .page-wrapper {
-    background: linear-gradient(to bottom, $primary-color, $second-color, $second-color);
+    background: linear-gradient(to bottom, var(--primary-color), var(--primary-color), var(--secondary-color));
     height: 100%;
     display: flex;
     flex-direction: column;

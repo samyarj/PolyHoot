@@ -11,6 +11,9 @@ import { JoinGamePageComponent } from '@app/pages/game-related/join-game-page/jo
 import { OrganizerPageComponent } from '@app/pages/game-related/organizer-page/organizer-page.component';
 import { ResultsPageComponent } from '@app/pages/game-related/results-page/results-page.component';
 import { TestGamePageComponent } from '@app/pages/game-related/test-page/test-game-page.component';
+import { CoinFlipPageComponent } from '@app/pages/luck-related/coin-flip-page/coin-flip-page.component';
+import { LootBoxPageComponent } from '@app/pages/luck-related/loot-box-page/loot-box-page.component';
+import { LuckMainPageComponent } from '@app/pages/luck-related/luck-main-page/luck-main-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { AdminPageComponent } from '@app/pages/quiz-question-related/admin-page/admin-page.component';
 import { AdminQuizCreateComponent } from '@app/pages/quiz-question-related/create-quiz/admin-create-quiz';
@@ -52,6 +55,18 @@ const routes: Routes = [
             { path: 'create', component: CreatePageComponent, canActivate: [authGuard] },
         ],
     },
+
+    {
+        path: 'luck',
+        component: LuckMainPageComponent,
+        canActivate: [authGuard],
+        children: [
+            { path: '', redirectTo: 'lootBox', pathMatch: 'full' },
+            { path: 'lootBox', component: LootBoxPageComponent, canActivate: [authGuard] },
+            { path: 'coinFlip', component: CoinFlipPageComponent, canActivate: [authGuard] },
+        ],
+    },
+
     { path: 'game', component: GamePageComponent, canActivate: [authGuard] },
     { path: 'test-game/:id', component: TestGamePageComponent, canActivate: [authGuard] },
     { path: 'results', component: ResultsPageComponent, canActivate: [authGuard] },

@@ -1,0 +1,359 @@
+.page-wrapper {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--primary-color), var(--primary-color), var(--secondary-color));
+}
+
+.content-wrapper {
+    // for secondary-header
+    top: 50px;
+    width: 95%;
+    height: calc(97% - 50px);
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    background: #fffb0000;
+    color: var(--text-color);
+    padding: 2%;
+    gap: 2%;
+    border-radius: 30px;
+    transform: perspective(500px);
+    box-shadow: inset 0px 0px 10px color-mix(in srgb, var(--tertiary-color) 80%, transparent);
+
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+    .coin-history {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 30%;
+        min-width: 320px;
+        background: var(--primary-color);
+        padding: 10px;
+        border-radius: 30px;
+
+        circle {
+            min-height: 15px;
+            max-height: 20px;
+            margin-bottom: 0px;
+        }
+
+        transform: perspective(500px);
+        box-shadow: inset 0px 0px 6px color-mix(in srgb, var(--tertiary-color) 80%, transparent);
+
+        transition:
+            transform 0.3s ease,
+            box-shadow 0.3s ease;
+    }
+
+    .coin-animation-area {
+        width: 80%;
+        height: 18%;
+        //min-height: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 30px;
+        transform: perspective(500px);
+        box-shadow: inset 0px 0px 10px color-mix(in srgb, var(--tertiary-color) 80%, transparent);
+
+        transition:
+            transform 0.3s ease,
+            box-shadow 0.3s ease;
+
+        .coin-container {
+            width: 70px;
+            height: 70px;
+            position: relative;
+            perspective: 600px;
+
+            .coin {
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                transform-style: preserve-3d;
+                animation: flip 1s linear infinite;
+            }
+
+            .heads,
+            .tails {
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                backface-visibility: hidden;
+            }
+
+            .tails {
+                transform: rotateY(180deg);
+            }
+
+            @keyframes flip {
+                0% {
+                    transform: rotateY(0deg);
+                }
+                50% {
+                    transform: rotateY(180deg);
+                }
+                100% {
+                    transform: rotateY(360deg);
+                }
+            }
+        }
+
+        .side-selection-container {
+            width: 100%;
+            height: 100%;
+            min-height: 150px;
+            display: flex;
+            flex-direction: row;
+            position: relative;
+            align-items: center;
+
+            > div {
+                width: 50%;
+                height: 100%;
+                border-radius: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+            }
+
+            .pile:hover {
+                background: radial-gradient(circle, rgba(255, 215, 0, 0.5) 0%, transparent 20%);
+            }
+
+            .face:hover {
+                background: radial-gradient(circle, rgba(123, 123, 123, 0.715) 0%, transparent 20%);
+            }
+
+            .pile::after {
+                content: '';
+                position: absolute;
+                right: -1px;
+                width: 1px;
+                height: 80%;
+                background: linear-gradient(
+                    to bottom,
+                    color-mix(in srgb, var(--tertiary-color), transparent 100%) 5%,
+                    var(--tertiary-color) 40%,
+                    var(--tertiary-color) 60%,
+                    color-mix(in srgb, var(--tertiary-color), transparent 100%) 95%
+                );
+            }
+        }
+    }
+
+    .place-bet-area {
+        display: flex;
+        gap: 10px;
+        width: 25%;
+        min-width: 300px;
+        align-items: center;
+        padding: 5px;
+        flex-direction: column;
+        border-radius: 30px;
+        transform: perspective(500px);
+        box-shadow: 0px 0px 10px color-mix(in srgb, var(--tertiary-color) 80%, transparent);
+
+        transition:
+            transform 0.3s ease,
+            box-shadow 0.3s ease;
+
+        .manual-input-area {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            position: relative;
+            .bet-input {
+                width: 160px;
+                height: 40px;
+                padding: 8px;
+                border: 2px solid #333;
+                border-radius: 30px;
+                font-size: 16px;
+                outline: none;
+
+                &:focus {
+                    border-color: #007bff;
+                }
+            }
+
+            .bet-button {
+                height: 40px;
+                padding: 8px 15px;
+                font-size: 16px;
+                cursor: pointer;
+                //transition: background 0.3s;
+
+                &:hover {
+                    background-color: #0056b3;
+                }
+
+                &:active {
+                    background-color: #004494;
+                }
+            }
+        }
+
+        .automatic-input-area {
+            display: flex;
+            width: 100%;
+            justify-content: space-around;
+            position: relative;
+            button {
+                height: 40px;
+            }
+        }
+        .manual-input-area {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            margin-bottom: 5px;
+            position: relative;
+            padding-bottom: 10px; /* Adds spacing before the line */
+        }
+
+        .manual-input-area::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -1px;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(
+                to right,
+                color-mix(in srgb, var(--tertiary-color), transparent 100%) 5%,
+                var(--tertiary-color) 40%,
+                var(--tertiary-color) 60%,
+                color-mix(in srgb, var(--tertiary-color), transparent 100%) 95%
+            );
+        }
+    }
+
+    .leaderboard-area {
+        border-radius: 30px;
+        transform: perspective(500px);
+        box-shadow: inset 0px 0px 10px color-mix(in srgb, var(--tertiary-color) 80%, transparent);
+
+        transition:
+            transform 0.3s ease,
+            box-shadow 0.3s ease;
+
+        width: 90%;
+        height: 50%;
+        padding: 20px;
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+
+        .loser {
+            color: red;
+            border-radius: 40px;
+            transform: perspective(500px);
+            box-shadow: inset 0px 0px 40px #ff000082;
+
+            transition:
+                transform 0.3s ease,
+                box-shadow 0.3s ease;
+        }
+
+        .winner {
+            color: rgb(0, 255, 0);
+            border-radius: 30px;
+            transform: perspective(500px);
+            box-shadow: inset 0px 0px 40px #00ff2f82;
+
+            transition:
+                transform 0.3s ease,
+                box-shadow 0.3s ease;
+        }
+
+        & > div {
+            position: relative;
+            height: 100%;
+            width: 50%;
+            //background: color-mix(in srgb, var(--secondary-color) 80%, transparent);
+            border-radius: 30px;
+            transform: perspective(500px);
+            box-shadow: inset 0px 0px 10px color-mix(in srgb, var(--tertiary-color) 80%, transparent);
+            background: var(--primary-color);
+            transition:
+                transform 0.3s ease,
+                box-shadow 0.3s ease;
+
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: var(--text-color);
+
+            .better-list {
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                height: 70%;
+                align-items: center;
+                gap: 6px;
+                overflow-y: auto;
+                &::-webkit-scrollbar {
+                    width: 3px;
+                }
+
+                &::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+
+                &::-webkit-scrollbar-thumb {
+                    background: color-mix(in srgb, var(--tertiary-color) 80%, transparent);
+                    border-radius: 4px;
+
+                    &:hover {
+                        background: color-mix(in srgb, var(--tertiary-color) 100%, transparent);
+                    }
+                }
+
+                scroll-behavior: smooth;
+
+                .better {
+                    position: relative;
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-between;
+                    align-items: center;
+                    width: 90%;
+                    height: 40px;
+                    min-height: 40px;
+                    background: var(--primary-color);
+                    border-radius: 10px;
+                    padding: 3px;
+                    padding-right: 10px;
+                    padding-left: 10px;
+                    margin-top: 2px; //so that overflow isnt fucked up
+                    margin-bottom: 2px;
+                    border-radius: 30px;
+                    transform: perspective(500px);
+                    box-shadow: 0px 0px 5px color-mix(in srgb, var(--tertiary-color) 80%, transparent);
+
+                    transition:
+                        transform 0.3s ease,
+                        box-shadow 0.3s ease;
+                }
+            }
+        }
+    }
+}
