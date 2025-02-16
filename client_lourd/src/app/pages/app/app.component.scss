@@ -18,6 +18,7 @@
 
 .main-content {
     height: 100vh;
+    max-height: 100vh;
     width: calc(100vw - 380px);
     max-width: calc(100vw - 380px);
     overflow-x: hidden;

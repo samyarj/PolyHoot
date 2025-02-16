@@ -7,9 +7,14 @@ $primary-color: #00115a;
 $setting-color: #00115a;
 
 #outerContainer {
+    position: relative;
+    top: 50px;
     display: flex;
     align-items: center;
+    height: calc(100% - 50px);
     padding: 0 2rem;
+    overflow: hidden;
+    background: linear-gradient(to bottom, var(--primary-color), var(--primary-color), var(--secondary-color));
 }
 
 #options {

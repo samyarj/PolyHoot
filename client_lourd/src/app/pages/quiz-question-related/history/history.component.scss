@@ -8,15 +8,15 @@ body {
 
 .page-container {
     top: 70px;
-    height: 80%;
-    width: 90%;
+    height: calc(100% - 70px);
+    width: 100%;
     padding: 30px 30px;
-    margin-left: 1rem;
     display: flex;
     grid-template-columns: 13% 70% 17%;
     align-items: first baseline;
     justify-content: space-between;
     position: relative;
+    background: linear-gradient(to bottom, var(--primary-color), var(--primary-color), var(--secondary-color));
 }
 
 .delete-button-container {

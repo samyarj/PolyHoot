@@ -3,12 +3,13 @@ $primary-color: #00115a;
 .question-bank-container {
     top: 50px;
     position: relative;
-    height: 70%;
+    height: calc(100% - 50px);
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 50px;
+    background: linear-gradient(to bottom, var(--primary-color), var(--primary-color), var(--secondary-color));
 }
 
 .questions-from-bank {
