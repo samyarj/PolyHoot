@@ -11,7 +11,9 @@ import { JoinGamePageComponent } from '@app/pages/game-related/join-game-page/jo
 import { OrganizerPageComponent } from '@app/pages/game-related/organizer-page/organizer-page.component';
 import { ResultsPageComponent } from '@app/pages/game-related/results-page/results-page.component';
 import { TestGamePageComponent } from '@app/pages/game-related/test-page/test-game-page.component';
+import { InventoryPageComponent } from '@app/pages/inventory-page/inventory-page.component';
 import { CoinFlipPageComponent } from '@app/pages/luck-related/coin-flip-page/coin-flip-page.component';
+import { DailyFreePageComponent } from '@app/pages/luck-related/daily-free-page/daily-free-page.component';
 import { LootBoxPageComponent } from '@app/pages/luck-related/loot-box-page/loot-box-page.component';
 import { LuckMainPageComponent } from '@app/pages/luck-related/luck-main-page/luck-main-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
@@ -44,7 +46,7 @@ const routes: Routes = [
             { path: 'history', component: HistoryPageComponent, canActivate: [authGuard] },
         ],
     },
-
+    { path: 'inventory', component: InventoryPageComponent, canActivate: [authGuard] },
     {
         path: 'game-home',
         component: GameMainPageComponent,
@@ -64,6 +66,7 @@ const routes: Routes = [
             { path: '', redirectTo: 'lootBox', pathMatch: 'full' },
             { path: 'lootBox', component: LootBoxPageComponent, canActivate: [authGuard] },
             { path: 'coinFlip', component: CoinFlipPageComponent, canActivate: [authGuard] },
+            { path: 'dailyFree', component: DailyFreePageComponent, canActivate: [authGuard] },
         ],
     },
 

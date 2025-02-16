@@ -59,7 +59,7 @@ body {
         align-items: center;
         background-color: var(--primary-color);
         padding: 20px 50px 30px;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        box-shadow: 0px 0px 20px color-mix(in srgb, var(--tertiary-color), transparent 10%);
         border-radius: 5px;
         margin-top: 200px;
         input {

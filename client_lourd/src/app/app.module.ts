@@ -50,7 +50,9 @@ import { JoinGamePageComponent } from './pages/game-related/join-game-page/join-
 import { OrganizerPageComponent } from './pages/game-related/organizer-page/organizer-page.component';
 import { ResultsPageComponent } from './pages/game-related/results-page/results-page.component';
 import { TestGamePageComponent } from './pages/game-related/test-page/test-game-page.component';
+import { InventoryPageComponent } from './pages/inventory-page/inventory-page.component';
 import { CoinFlipPageComponent } from './pages/luck-related/coin-flip-page/coin-flip-page.component';
+import { DailyFreePageComponent } from './pages/luck-related/daily-free-page/daily-free-page.component';
 import { LootBoxPageComponent } from './pages/luck-related/loot-box-page/loot-box-page.component';
 import { LuckMainPageComponent } from './pages/luck-related/luck-main-page/luck-main-page.component';
 import { AdminPageComponent } from './pages/quiz-question-related/admin-page/admin-page.component';
@@ -116,6 +118,8 @@ import { SocketClientService } from './services/websocket-services/general/socke
         LuckMainPageComponent,
         LootBoxPageComponent,
         CoinFlipPageComponent,
+        DailyFreePageComponent,
+        InventoryPageComponent,
     ],
     providers: [
         QuizService,
