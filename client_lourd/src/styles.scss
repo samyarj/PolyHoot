@@ -84,23 +84,6 @@
     }
 }
 
-.custom-button:hover,
-.custom-button-cancel:hover {
-    // box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.3);
-    //transform: translateY(-2px);
-}
-
-.custom-button:active,
-.custom-button-cancel:active {
-    // box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
-    // transform: translateY(-1px);
-}
-
-.custom-button:hover,
-.custom-button-cancel:hover {
-    // transform: scaleX(1.1) scaleY(1.1);
-}
-
 .custom-button-big {
     @extend .custom-button;
     font-size: 1.5rem;
@@ -113,6 +96,22 @@
     font-size: 1.5rem;
     padding: 1rem 2rem;
     height: 70px;
+}
+
+.custom-button-big-disabled {
+    @extend .custom-button-big;
+    cursor: not-allowed !important;
+    opacity: 0.6;
+
+    &:hover {
+        background: var(--primary-color);
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        border: 3px solid var(--tertiary-color);
+        box-shadow: none !important; /* Remove any hover shadows */
+        filter: none !important; /* Remove brightness or other effects */
+        transform: none !important; /* Disable animations */
+    }
 }
 
 .custom-button-medium {

@@ -22,6 +22,9 @@ import { AdminQuizCreateComponent } from '@app/pages/quiz-question-related/creat
 import { HistoryPageComponent } from '@app/pages/quiz-question-related/history/history.component';
 import { QuestionBankPageComponent } from '@app/pages/quiz-question-related/question-bank-page/question-bank-page.component';
 import { QuizManagementMainPageComponent } from '@app/pages/quiz-question-related/quiz-management-main-page/quiz-management-main-page.component';
+import { ShopMainPageComponent } from '@app/pages/shop-related/shop-main-page/shop-main-page.component';
+import { ShopPageComponent } from '@app/pages/shop-related/shop-page/shop-page.component';
+import { TransferPageComponent } from '@app/pages/shop-related/transfer-page/transfer-page.component';
 import { GlobalChatComponent } from '@app/pages/test-components-page/global-chat.component';
 import { WaitingPageComponent } from '@app/pages/waiting-page/waiting-page.component';
 
@@ -57,7 +60,16 @@ const routes: Routes = [
             { path: 'create', component: CreatePageComponent, canActivate: [authGuard] },
         ],
     },
-
+    {
+        path: 'shop-home',
+        component: ShopMainPageComponent,
+        canActivate: [authGuard],
+        children: [
+            { path: '', redirectTo: 'shop', pathMatch: 'full' },
+            { path: 'shop', component: ShopPageComponent, canActivate: [authGuard] },
+            { path: 'transfer', component: TransferPageComponent, canActivate: [authGuard] },
+        ],
+    },
     {
         path: 'luck',
         component: LuckMainPageComponent,

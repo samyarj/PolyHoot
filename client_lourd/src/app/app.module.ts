@@ -60,6 +60,9 @@ import { AdminQuizCreateComponent } from './pages/quiz-question-related/create-q
 import { HistoryPageComponent } from './pages/quiz-question-related/history/history.component';
 import { QuestionBankPageComponent } from './pages/quiz-question-related/question-bank-page/question-bank-page.component';
 import { QuizManagementMainPageComponent } from './pages/quiz-question-related/quiz-management-main-page/quiz-management-main-page.component';
+import { ShopMainPageComponent } from './pages/shop-related/shop-main-page/shop-main-page.component';
+import { ShopPageComponent } from './pages/shop-related/shop-page/shop-page.component';
+import { TransferPageComponent } from './pages/shop-related/transfer-page/transfer-page.component';
 import { GlobalChatComponent } from './pages/test-components-page/global-chat.component';
 import { WaitingPageComponent } from './pages/waiting-page/waiting-page.component';
 import { QuestionService } from './services/back-end-communication-services/question-service/question.service';
@@ -120,6 +123,9 @@ import { SocketClientService } from './services/websocket-services/general/socke
         CoinFlipPageComponent,
         DailyFreePageComponent,
         InventoryPageComponent,
+        ShopPageComponent,
+        ShopMainPageComponent,
+        TransferPageComponent,
     ],
     providers: [
         QuizService,
