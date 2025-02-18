@@ -31,7 +31,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
-
+    transform: perspective(500px);
+    box-shadow: inset 0px 0px 10px color-mix(in srgb, var(--tertiary-color) 80%, transparent);
+    padding: 0px;
     .price {
         position: absolute;
         bottom: 10px; /* Adjust the spacing from the bottom */
@@ -49,7 +51,7 @@
 .interaction-div {
     width: 100%;
     right: 0px;
-    background-color: var(--secondary-color);
+    //background-color: var(--secondary-color);
     position: absolute;
     z-index: 0;
     border-radius: 30px;
