@@ -1,0 +1,216 @@
+.container {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    border-radius: 30px;
+    transform: perspective(500px);
+    box-shadow: 0px 0px 10px color-mix(in srgb, var(--tertiary-color) 80%, transparent);
+    padding: 0px;
+    transition:
+        transform 1s ease,
+        box-shadow 1s ease;
+}
+
+.presentation-div,
+.interaction-div {
+    height: 100%;
+    transition:
+        transform 1s ease-in-out,
+        width 1s ease-in-out;
+}
+
+.presentation-div {
+    width: 100%;
+    background-color: var(--primary-color);
+    position: relative;
+    z-index: 5;
+    border-radius: 30px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .price {
+        position: absolute;
+        bottom: 10px; /* Adjust the spacing from the bottom */
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+        justify-content: center;
+        transition: color 1s ease-in-out;
+        &.text-moved {
+            color: var(--primary-color);
+        }
+    }
+}
+
+.interaction-div {
+    width: 100%;
+    right: 0px;
+    background-color: var(--secondary-color);
+    position: absolute;
+    z-index: 0;
+    border-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: right;
+
+    .interaction-div-content {
+        height: 100%;
+        width: 100%;
+        position: relative;
+        justify-content: space-between;
+        .preview-items-wrapper {
+            position: relative;
+            height: 60%;
+            width: 100%;
+            border-radius: 30px 30px 0 0;
+
+            .preview-items {
+                position: relative;
+                width: calc(70% - 30px);
+                height: 100%;
+                left: 30%;
+                display: flex;
+                align-items: center;
+                justify-content: space-around;
+                margin-left: 10px;
+                gap: 10px;
+                overflow-x: auto;
+                overflow-y: hidden;
+
+                flex-wrap: nowrap;
+                white-space: nowrap;
+
+                .item {
+                    height: 80%;
+                    aspect-ratio: 1 / 1;
+                    background: var(--primary-color);
+                    flex-shrink: 0;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    position: relative;
+                    border-radius: 30px;
+                    transform: perspective(500px);
+                    box-shadow: 0px 0px 10px color-mix(in srgb, var(--tertiary-color) 80%, transparent);
+                    padding: 0px;
+                    transition:
+                        transform 1s ease,
+                        box-shadow 1s ease;
+                    .item-img {
+                        width: 70%;
+                        aspect-ratio: 1 / 1;
+                        background: var(--primary-color);
+                        border-radius: 500px;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                }
+                .very-rare {
+                    background: linear-gradient(135deg, #ffcc00 10%, #ff66ff 50%, #6600ff 90%);
+                    box-shadow:
+                        inset 0 0 10px rgba(255, 215, 0, 0.8),
+                        inset 0 0 15px rgba(255, 105, 180, 0.5);
+                    font-weight: bold;
+                    text-transform: uppercase;
+                    text-align: center;
+                }
+
+                .rare {
+                    background: linear-gradient(135deg, #0099ff 10%, #0066cc 50%, #003399 90%);
+                    box-shadow: inset 0 0 10px rgba(0, 204, 255, 0.6);
+                    font-weight: bold;
+                    text-transform: uppercase;
+                    text-align: center;
+                }
+
+                .common {
+                    background: linear-gradient(135deg, #bbbbbb 10%, #999999 50%, #777777 90%);
+                    box-shadow: inset 0 0 10px rgba(170, 170, 170, 0.3);
+                    font-weight: normal;
+                    text-align: center;
+                }
+
+                .divider {
+                    position: relative;
+                    width: var(--navbar-separator-size);
+                    top: 5%; /* Adjusts starting position */
+                    width: 2px;
+                    flex-shrink: 0;
+                    height: 90%; /* Makes the border 90% of the parent */
+                    background: linear-gradient(
+                        to top,
+                        #ffffff00 5%,
+                        var(--text-color) 20%,
+                        var(--text-color) 80%,
+                        #ffffff00 95%
+                    ); /* Adjust color and opacity */
+                }
+            }
+
+            .preview-items::-webkit-scrollbar {
+                height: 4px;
+            }
+
+            .preview-items::-webkit-scrollbar-thumb {
+                background-color: var(--text-color);
+                border-radius: 4px;
+            }
+
+            .preview-items::-webkit-scrollbar-track {
+                background-color: #ffcc0000;
+                border-radius: 4px;
+                margin-left: 10px;
+                margin-right: 10px;
+            }
+        }
+        .section-divider {
+            content: '';
+            position: relative;
+            bottom: -1px;
+            width: 70%;
+            justify-self: right;
+            height: 3px;
+            background: linear-gradient(
+                to right,
+                color-mix(in srgb, var(--tertiary-color), transparent 100%) 4%,
+                var(--tertiary-color) 7%,
+                var(--tertiary-color) 93%,
+                color-mix(in srgb, var(--tertiary-color), transparent 100%) 96%
+            );
+        }
+        .buy-zone-wrapper {
+            position: relative;
+            height: 40%;
+            width: 100%;
+            right: 0px;
+            bottom: 0px;
+            border-radius: 0 0 30px 30px;
+
+            .buy-zone {
+                position: relative;
+                width: 70%;
+                height: 100%;
+                justify-self: right;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                button {
+                    margin: 0px;
+                }
+            }
+        }
+    }
+}
+
+.move-to-side {
+    width: 30%;
+    // transform: translateX(-30%);
+}

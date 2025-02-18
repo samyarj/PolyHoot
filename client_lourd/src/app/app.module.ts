@@ -33,6 +33,7 @@ import { SecondaryHeaderGameComponent } from './components/layout/filler/seconda
 import { MainHeaderComponent } from './components/layout/main-header/main-header.component';
 import { SecondaryHeaderComponent } from './components/layout/secondary-header/secondary-header.component';
 import { SideBarComponent } from './components/layout/side-bar/side-bar.component';
+import { LootBoxComponent } from './components/loot-box/loot-box.component';
 import { PlayerListComponent } from './components/player-list/player-list.component';
 import { BankPanelComponent } from './components/quiz-related/bank-related/bank-panel/bank-panel.component';
 import { QuestionBankComponent } from './components/quiz-related/bank-related/question-bank/question-bank.component';
@@ -126,6 +127,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         ShopPageComponent,
         ShopMainPageComponent,
         TransferPageComponent,
+        LootBoxComponent,
     ],
     providers: [
         QuizService,
