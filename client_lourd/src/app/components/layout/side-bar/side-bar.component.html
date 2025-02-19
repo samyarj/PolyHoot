@@ -2,24 +2,69 @@
 <aside class="main-aside">
     <div class="user-menu dropdown" *ngIf="user$ | async as user">
         <!-- User Avatar (Trigger) -->
-        <img [src]="user.avatarEquipped" alt="User Avatar" class="avatar dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" />
+        <div class="avatar-container dropdown">
+            <img [src]="user.avatarEquipped" alt="User Avatar" class="avatar dropdown-toggle" 
+            data-bs-toggle="dropdown" aria-expanded="false" />
+            <span class="username">{{ user.username }}</span>
+            <ul class="dropdown-menu">
+                <!-- Dropdown Header -->
+                <li class="dropdown-header text-center">
+                    <img [src]="user.avatarEquipped" alt="User Avatar" class="dropdown-avatar mb-2" />
+                    <div class="dropdown-info">
+                        <strong>{{ user.username }}</strong>
+                        <br />
+                        <small class="text-muted">{{ user.email }}</small>
+                    </div>
+                </li>
+                <hr class="dropdown-divider" />
+                <li class="logout-container">
+                    <a (click)="logout()">Déconnexion <i class="fa-solid fa-right-from-bracket"></i></a>
+                </li>
+            </ul>
+        </div>
+        <div class="notification-container">
+            <button class="notification-button">
+                <i class="fa-solid fa-bell"></i>
+            </button>
+        </div>
+    </div>
 
-        <!-- Dropdown Menu -->
-        <ul class="dropdown-menu">
-            <!-- Dropdown Header -->
-            <li class="dropdown-header text-center">
-                <img [src]="user.avatarEquipped" alt="User Avatar" class="dropdown-avatar mb-2" />
-                <div class="dropdown-info">
-                    <strong>{{ user.username }}</strong>
-                    <br />
-                    <small class="text-muted">{{ user.email }}</small>
-                </div>
+    <!--social menu -->
+    <div class="social-menu">
+        <span class="social-menu-title">SOCIAL</span>
+        <ul class="friend-menu">
+            <li class="add-friend">
+                <button class="add-friend-button">
+                    <img src="assets/icons/add-friend.svg" alt="Add Friend" class="add-friend-icon"/>
+                </button>
             </li>
-            <hr class="dropdown-divider" />
-
-            <li class="logout-container">
-                <a (click)="logout()">Déconnexion <i class="fa-solid fa-right-from-bracket"></i></a>
+            <li class="friend-list">
+                <button class="friend-list-button">
+                    <img src="assets/icons/friend-list.svg" alt="Add Friend" class="friend-list-icon"/>
+                </button>
             </li>
         </ul>
+        <div class="friend-request">
+            <button class="friend-request-button">
+                <li class="friend-request-icon">
+                    <span>Demande d'ami</span>
+                </li>
+                <li class="friend-request-number">
+                    <span>5</span>
+                </li>
+            </button>
+        </div>
+    </div>
+
+    <!-- chat menu -->
+    <div class="chat-menu">
+        <span class="chat-menu-title">CLAVARDAGE</span>
+        <app-chat2
+            [name]="'Chat Général'"
+            [chatMessagesLoading]="chatMessagesLoading"
+            [chatMessages]="chatMessages"
+            (sendMessageToRoom)="handleSendMessage($event)"
+            (loadOlderMessages)="loadOlderMessages()"
+        ></app-chat2>
     </div>
 </aside>
