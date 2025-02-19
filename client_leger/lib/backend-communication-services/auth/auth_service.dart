@@ -304,29 +304,21 @@ signWithGoogle({bool isLogin = true}) async {
 }
 
 Future<UserCredential> signInWithGoogle({bool isLogin = true}) async {
-  GoogleSignInAccount? googleUser;
-
   await GoogleSignIn().signOut();
 
-  if (isLogin) {
-    googleUser = await GoogleSignIn().signInSilently();
-  }
+  GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
   if (googleUser == null) {
-    googleUser = await GoogleSignIn().signIn();
-
-    if (googleUser == null) {
-      throw Exception("La connexion avec Google a été annulée.");
-    }
+    throw Exception("La connexion avec Google a été annulée.");
   }
 
-  if (!isLogin) {
-    // when we are signing up, we need to make sure user email is not already associated with an existing account
-    bool isTaken = await isEmailTaken(googleUser.email);
-    if (isTaken) {
-      throw Exception(
-          "Ce email est déjà associé avec un compte. Veuillez choisir un autre email.");
-    }
+  bool isTaken = await isEmailTaken(googleUser.email);
+  if (!isLogin && isTaken) {
+    throw Exception(
+        "Ce email est déjà associé avec un compte. Veuillez choisir un autre email.");
+  } else if (isLogin && !isTaken) {
+    throw Exception(
+        "Ce email n'est pas associé avec un compte. Veuillez créer un compte.");
   }
 
   final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
