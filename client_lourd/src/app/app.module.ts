@@ -72,6 +72,7 @@ import { FirebaseChatService } from './services/chat-services/firebase/firebase-
 import { FrenchPaginatorIntlService } from './services/general-services/french-paginator/french-paginator-intl.service';
 import { GlobalErrorHandlerService } from './services/global-error-handler.service';
 import { SocketClientService } from './services/websocket-services/general/socket-client-manager.service';
+import { ProfilePageComponent } from './pages/profile-page/profile-page.component';
 
 /**
  * Main module that is used in main.ts.
@@ -128,6 +129,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         ShopMainPageComponent,
         TransferPageComponent,
         LootBoxComponent,
+        ProfilePageComponent,
     ],
     providers: [
         QuizService,

@@ -17,6 +17,7 @@ import { DailyFreePageComponent } from '@app/pages/luck-related/daily-free-page/
 import { LootBoxPageComponent } from '@app/pages/luck-related/loot-box-page/loot-box-page.component';
 import { LuckMainPageComponent } from '@app/pages/luck-related/luck-main-page/luck-main-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
+import { ProfilePageComponent } from '@app/pages/profile-page/profile-page.component';
 import { AdminPageComponent } from '@app/pages/quiz-question-related/admin-page/admin-page.component';
 import { AdminQuizCreateComponent } from '@app/pages/quiz-question-related/create-quiz/admin-create-quiz';
 import { HistoryPageComponent } from '@app/pages/quiz-question-related/history/history.component';
@@ -89,7 +90,7 @@ const routes: Routes = [
     { path: 'organizer', component: OrganizerPageComponent, canActivate: [authGuard] },
 
     { path: 'global-chat', component: GlobalChatComponent, canActivate: [authGuard] },
-
+    { path: 'profile', component: ProfilePageComponent, canActivate: [authGuard] },
     { path: '**', redirectTo: '/home' },
 ];
 
