@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:client_leger/backend-communication-services/environment_prod.dart';
+import 'package:client_leger/backend-communication-services/environment.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/models/user.dart'
     as user_model;
@@ -12,7 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 
-const String baseUrl = '${EnvironmentProd.serverUrl}/users';
+const String baseUrl = '${Environment.serverUrl}/users';
 const String getProfileUrl = '$baseUrl/profile';
 const String createUserUrl = '$baseUrl/create-user';
 const String logOutUrl = '$baseUrl/logout';
@@ -283,8 +283,8 @@ Future<bool> emailCheck(String email) async {
   return false;
 }
 
-signWithGoogle() async {
-  final userCredential = await signInWithGoogle();
+signWithGoogle({bool isLogin = true}) async {
+  final userCredential = await signInWithGoogle(isLogin: isLogin);
 
   bool isOnline = false;
   if (userCredential.user?.email != null) {
@@ -292,7 +292,7 @@ signWithGoogle() async {
     isOnline = await isUserOnline(userCredential.user!.email!);
   }
 
-  if (isOnline) throw Exception("User is already logged in on another device.");
+  if (isOnline) throw Exception("Vous êtes déjà connecté ailleurs.");
 
   AppLogger.d("about to update profile");
 
@@ -303,11 +303,30 @@ signWithGoogle() async {
   isLoggedIn.value = true;
 }
 
-Future<UserCredential> signInWithGoogle() async {
-  final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+Future<UserCredential> signInWithGoogle({bool isLogin = true}) async {
+  GoogleSignInAccount? googleUser;
+
+  await GoogleSignIn().signOut();
+
+  if (isLogin) {
+    googleUser = await GoogleSignIn().signInSilently();
+  }
 
   if (googleUser == null) {
-    throw Exception("Google Sign-In aborted");
+    googleUser = await GoogleSignIn().signIn();
+
+    if (googleUser == null) {
+      throw Exception("La connexion avec Google a été annulée.");
+    }
+  }
+
+  if (!isLogin) {
+    // when we are signing up, we need to make sure user email is not already associated with an existing account
+    bool isTaken = await isEmailTaken(googleUser.email);
+    if (isTaken) {
+      throw Exception(
+          "Ce email est déjà associé avec un compte. Veuillez choisir un autre email.");
+    }
   }
 
   final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
