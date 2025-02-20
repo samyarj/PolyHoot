@@ -30,7 +30,16 @@ import { WaitingPageComponent } from '@app/pages/waiting-page/waiting-page.compo
 
 const routes: Routes = [
     { path: '', redirectTo: '/home', pathMatch: 'full' },
-    { path: 'home', component: MainPageComponent, canActivate: [authGuard] },
+    {
+        path: 'home',
+        component: MainPageComponent,
+        canActivate: [authGuard],
+        // children: [
+        //     { path: '', redirectTo: 'patch-notes', pathMatch: 'full' },
+        //     { path: 'patch-notes', component: PatchNotesComponent, canActivate: [authGuard] },
+        //     { path: 'game-info', component: GameInfoComponent, canActivate: [authGuard] },
+        // ],
+    },
 
     { path: 'login', component: LoginPageComponent },
     { path: 'signup', component: SignUpComponent },
