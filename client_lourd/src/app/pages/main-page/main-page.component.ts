@@ -71,7 +71,7 @@ export class MainPageComponent implements AfterViewInit, AfterViewChecked, OnDes
             ],
         },
         {
-            title: 'Administrer les quiz',
+            title: 'Administrer les quiz', // Administrer les quiz
             description: 'Gérez et créez des quiz pour les utilisateurs!',
             screenshots: [
                 {
