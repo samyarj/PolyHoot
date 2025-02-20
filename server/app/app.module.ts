@@ -2,6 +2,7 @@ import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthController } from './controllers/auth/auth.controller';
+import { ChatChannelsController } from './controllers/chat-channels/chat-channels.controller';
 import { HistoryController } from './controllers/history/history.controller';
 import { PasswordValidationController } from './controllers/password-validation/password-validation.controller';
 import { QuestionController } from './controllers/question/question.controller';
@@ -14,6 +15,7 @@ import { Question, questionSchema } from './model/schema/question/question';
 import { Quiz, quizSchema } from './model/schema/quiz/quiz';
 import { FirebaseModule } from './modules/firebase.module';
 import { UserService } from './services/auth/user.service';
+import { ChatChannelsService } from './services/chat-channels/chat-channels.service';
 import { ChatService } from './services/chat/chat.service';
 import { GameManagerService } from './services/game-manager/game-manager.service';
 import { GameRecordService } from './services/game-record/game-record.service';
@@ -50,8 +52,9 @@ import { QuizService } from './services/quiz/quiz.service';
         GameManagerService,
         HistoryManagerService,
         UserService,
+        ChatChannelsService,
     ],
 
-    controllers: [QuestionController, QuizController, AuthController, PasswordValidationController, HistoryController],
+    controllers: [QuestionController, QuizController, AuthController, PasswordValidationController, HistoryController, ChatChannelsController],
 })
 export class AppModule {}

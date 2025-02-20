@@ -1,15 +1,17 @@
 import 'package:client_leger/UI/chat/chatwindow.dart';
+import 'package:client_leger/backend-communication-services/models/chat_channels.dart';
 import 'package:flutter/material.dart';
 
 class JoinedChannelsCarousel extends StatelessWidget {
   const JoinedChannelsCarousel(
       {super.key, required this.joinedChannels, required this.callback});
 
-  final List<String> joinedChannels;
+  final List<ChatChannel> joinedChannels;
   final Function callback;
 
   @override
   Widget build(BuildContext context) {
+    joinedChannels.add(ChatChannel(name: "General", isUserInChannel: true));
     return SizedBox(
       height: 50,
       child: ListView.builder(
@@ -25,7 +27,7 @@ class JoinedChannelsCarousel extends StatelessWidget {
                 enableDrag: false,
                 isDismissible: false,
                 builder: (BuildContext context) {
-                  return ChatWindow(channel: channel);
+                  return ChatWindow(channel: channel.name);
                 },
               );
             },
@@ -42,14 +44,14 @@ class JoinedChannelsCarousel extends StatelessWidget {
               child: Row(
                 children: [
                   Text(
-                    channel,
+                    channel.name,
                     style: const TextStyle(color: Colors.white),
                   ),
                   const SizedBox(width: 4),
-                  if (channel != "General")
+                  if (channel.name != "General")
                     GestureDetector(
                       onTap: () {
-                        callback(channel);
+                        callback(channel.name);
                       },
                       child: const Icon(
                         Icons.close,

@@ -162,6 +162,64 @@ class _ChatWindowState extends State<ChatWindow> {
                                   final message = _allMessagesDisplayed[index];
                                   final isUserMessage =
                                       message.uid == user!.uid;
+                                  final isSystemMessage =
+                                      message.username == 'System';
+                                  if (isSystemMessage) {
+                                    return Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Align(
+                                        alignment: Alignment.center,
+                                        child: LayoutBuilder(
+                                            builder: (context, constraints) {
+                                          return Container(
+                                            constraints: BoxConstraints(
+                                                maxWidth:
+                                                    constraints.maxWidth * 0.7),
+                                            padding: EdgeInsets.all(12),
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFF4F5487),
+                                              borderRadius:
+                                                  BorderRadius.circular(15),
+                                            ),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  message.username!,
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                Text(
+                                                  message.message,
+                                                  softWrap: true,
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 18,
+                                                    fontStyle: FontStyle.italic,
+                                                  ),
+                                                ),
+                                                Align(
+                                                  alignment:
+                                                      Alignment.bottomRight,
+                                                  child: Text(
+                                                    DateFormat('HH:mm:ss')
+                                                        .format(message.date),
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 16),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }),
+                                      ),
+                                    );
+                                  }
                                   return Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Align(
