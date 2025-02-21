@@ -91,14 +91,14 @@ export class WaitingPageService {
     }
 
     private handlePlayerLeft() {
-        this.socketService.on<string[]>(GameEvents.PlayerLeft, (playersNames) => {
-            this.players = playersNames;
+        this.socketService.on<{ playerNames: string[]; roomId: string }>(GameEvents.PlayerLeft, ({ playerNames }) => {
+            this.players = playerNames;
         });
     }
 
     private handleJoinGameSuccess() {
-        this.socketService.on<string[]>(JoinEvents.JoinSuccess, (playersNames) => {
-            this.players = playersNames;
+        this.socketService.on<{ playerNames: string[]; roomId: string }>(JoinEvents.JoinSuccess, ({ playerNames }) => {
+            this.players = playerNames;
         });
     }
 
@@ -118,7 +118,7 @@ export class WaitingPageService {
     }
 
     private handleToggleGameLock() {
-        this.socketService.on<boolean>(GameEvents.AlertLockToggled, (isLocked) => {
+        this.socketService.on<{ isLocked: boolean; roomId: string }>(GameEvents.AlertLockToggled, ({ isLocked }) => {
             this.gameLocked = isLocked;
         });
     }

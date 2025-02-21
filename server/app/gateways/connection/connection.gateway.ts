@@ -101,6 +101,7 @@ export class ConnectionGateway implements OnGatewayDisconnect {
 
     private disconnectOrganizerFromOtherPages(roomId: string, clientIds: Set<string>) {
         this.server.to(roomId).emit(DisconnectEvents.OrganizerHasLeft);
+        this.server.emit(GameEvents.End, roomId);
         clientIds?.forEach((clientId) => {
             const clientSocket = this.server.sockets.sockets.get(clientId);
             this.gameManager.socketRoomsMap.delete(clientSocket);
@@ -159,7 +160,7 @@ export class ConnectionGateway implements OnGatewayDisconnect {
         if (game.isRandomMode && playerNames.length === 0) {
             this.gameManager.endGame(game.roomId);
         }
-        this.server.to(roomId).emit(GameEvents.PlayerLeft, playerNames);
+        this.server.emit(GameEvents.PlayerLeft, { playerNames, roomId});
     }
 
     private disconnectPlayerFromGamePage(game: Game, player: Player) {

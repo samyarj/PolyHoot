@@ -75,6 +75,21 @@ export class GameGateway {
         }
     }
 
+    @SubscribeMessage(GameEvents.GetCurrentGames)
+    handleGetCurrentGames(@ConnectedSocket() client: Socket) {
+        const currentGamesInfos = [];
+        this.gameManager.currentGames.forEach((game) => {
+            currentGamesInfos.push({
+                title: game.quiz.title,
+                nbPlayers: game.players.length,
+                roomId: game.roomId,
+                isLocked: game.isLocked,
+            });
+        });
+        console.log('currentGameInfos: ', currentGamesInfos);
+        this.server.emit(GameEvents.GetCurrentGames, currentGamesInfos);
+    }
+
     @SubscribeMessage(JoinEvents.Create)
     handleCreateGame(@ConnectedSocket() client: Socket, @MessageBody() data: { quiz: Quiz; isRandomMode: boolean }) {
         const { quiz, isRandomMode } = data;
@@ -83,6 +98,8 @@ export class GameGateway {
         const game = this.gameManager.getGameByRoomId(roomId);
         game.gameState = GameState.WAITING;
         this.gameManager.socketRoomsMap.set(client, roomId);
+        const lobbyInfos = { title: quiz.title, nbPlayers: game.players.length, roomId: roomId };
+        this.server.emit(JoinEvents.LobbyCreated, lobbyInfos);
         return roomId;
     }
 
@@ -125,10 +142,9 @@ export class GameGateway {
         const game = this.gameManager.getGameByRoomId(gameId);
         if (canJoinGame) {
             const playerNames = game.players.map((player) => player.name);
-
             client.emit(JoinEvents.CanJoin);
             const roomId = Array.from(client.rooms.values())[1];
-            this.server.to(roomId).emit(JoinEvents.JoinSuccess, playerNames);
+            this.server.emit(JoinEvents.JoinSuccess,{ playerNames, roomId});
             this.gameManager.socketRoomsMap.set(client, data.gameId);
         } else if (game.playerExists(playerName)) {
             client.emit(JoinErrors.ExistingName);
@@ -164,8 +180,8 @@ export class GameGateway {
     handleGameLock(@ConnectedSocket() client: Socket) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
-        const gameLocked = game.toggleGameLock();
-        this.server.to(roomId).emit(GameEvents.AlertLockToggled, gameLocked);
+        const isLocked = game.toggleGameLock();
+        this.server.emit(GameEvents.AlertLockToggled, {isLocked, roomId});
     }
     @SubscribeMessage(GameEvents.PlayerBan)
     handleBanPlayer(@ConnectedSocket() client: Socket, @MessageBody() playerName: string) {
@@ -176,7 +192,7 @@ export class GameGateway {
             game.removePlayer(playerName);
         }
         const playerNames = this.gameManager.getGameByRoomId(roomId).players.map((player) => player.name);
-        this.server.to(roomId).emit(GameEvents.PlayerLeft, playerNames);
+        this.server.emit(GameEvents.PlayerLeft, { playerNames, roomId});
     }
     @SubscribeMessage(GameEvents.PlayerInteraction)
     handlePlayerInteraction(@ConnectedSocket() client: Socket) {

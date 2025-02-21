@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { TIMER_VALUE } from '@app/constants/constants';
-import { JoinErrors, JoinEvents } from '@app/constants/enum-class';
+import { GameEvents, JoinErrors, JoinEvents } from '@app/constants/enum-class';
+import { Lobby } from '@app/interfaces/lobby';
 import { SocketClientService } from '@app/services/websocket-services/general/socket-client-manager.service';
+import { Observable, Subject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -11,11 +13,19 @@ export class JoinGameService {
     popUpMessage: string = '';
     gameIdValidated: boolean = false;
     wrongPin: boolean = false;
+    gameLocked = false;
+    lobbys: Lobby[] = [];
+    lobbysSource: Subject<Lobby[]>;
+    lobbysObservable: Observable<Lobby[]>;
 
     constructor(
         private socketService: SocketClientService,
         private router: Router,
-    ) {}
+    ) {
+        this.lobbysSource = new Subject<Lobby[]>();
+        this.lobbysObservable = this.lobbysSource.asObservable();
+        this.handleLobbys();
+    }
 
     validGameId(gameId: string) {
         this.socketService.send(JoinEvents.ValidateGameId, gameId);
@@ -41,7 +51,16 @@ export class JoinGameService {
         this.gameIdValidated = false;
         this.wrongPin = false;
     }
-
+    getAllLobbys() {
+        this.socketService.send(GameEvents.GetCurrentGames);
+    }
+    private handleLobbys() {
+        this.handleLobbyCreation();
+        this.handleLobbyDeletion();
+        this.displayActiveLobbys();
+        this.handleLockedLobby();
+        this.handleUpdateLobby();
+    }
     private handleIdValidation() {
         this.handleValidId();
         this.handleInvalidId();
@@ -116,6 +135,47 @@ export class JoinGameService {
         this.socketService.on(JoinErrors.Generic, () => {
             this.popUpMessage = 'Ce nom est invalide. Veuillez choisir un autre nom.';
             this.showPopUp();
+        });
+    }
+
+    private handleLobbyCreation() {
+        this.socketService.on(JoinEvents.LobbyCreated, (lobbyInfos: Lobby) => {
+            this.lobbys.push(lobbyInfos);
+            this.lobbysSource.next(this.lobbys);
+        });
+    }
+
+    private handleLobbyDeletion() {
+        this.socketService.on(GameEvents.End, (roomId: string) => {
+            this.lobbys = this.lobbys.filter((lobby) => lobby.roomId !== roomId);
+            this.lobbysSource.next(this.lobbys);
+        });
+    }
+
+    private displayActiveLobbys() {
+        this.socketService.on(GameEvents.GetCurrentGames, (currentGames: []) => {
+            console.log('Dans displayActiveLobbys dans le on');
+            this.lobbys = currentGames;
+            this.lobbysSource.next(this.lobbys);
+        });
+    }
+
+    private handleLockedLobby() {
+        this.socketService.on<{ isLocked: boolean; roomId: string }>(GameEvents.AlertLockToggled, ({ isLocked, roomId }) => {
+            this.lobbys = this.lobbys.map((lobby) => (lobby.roomId === roomId ? { ...lobby, isLocked } : lobby));
+            this.lobbysSource.next(this.lobbys);
+        });
+    }
+
+    private handleUpdateLobby() {
+        this.socketService.on<{ playerNames: string[]; roomId: string }>(JoinEvents.JoinSuccess, ({ roomId }) => {
+            console.log("ecq ca a marché: ", roomId);
+            this.lobbys = this.lobbys.map((lobby) => (lobby.roomId === roomId ? { ...lobby, nbPlayers: lobby.nbPlayers + 1 } : lobby));
+            this.lobbysSource.next(this.lobbys);
+        });
+        this.socketService.on<{ playerNames: string[]; roomId: string }>(GameEvents.PlayerLeft, ({ roomId }) => {
+            this.lobbys = this.lobbys.map((lobby) => (lobby.roomId === roomId ? { ...lobby, nbPlayers: lobby.nbPlayers - 1 } : lobby));
+            this.lobbysSource.next(this.lobbys);
         });
     }
 
