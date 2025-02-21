@@ -1,3 +1,4 @@
+import 'package:client_leger/UI/main-view/sidebar/channel_creation.dart';
 import 'package:client_leger/UI/main-view/sidebar/channel_search.dart';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
@@ -97,8 +98,9 @@ class _SideBarState extends State<SideBar> {
           Spacer(),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8),
-            child: const Icon(
-              Icons.add,
+            child: IconButton(
+              icon: Icon(Icons.add),
+              onPressed: () => showChatroomModal(context),
               color: Colors.white,
             ),
           )
