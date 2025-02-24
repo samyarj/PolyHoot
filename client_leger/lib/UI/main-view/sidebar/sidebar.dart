@@ -1,27 +1,40 @@
-import 'package:client_leger/UI/main-view/sidebar/channel_creation.dart';
-import 'package:client_leger/UI/main-view/sidebar/channel_search.dart';
-import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
-    as auth_service;
+import 'package:client_leger/UI/chat/chatwindow.dart';
+import 'package:client_leger/UI/main-view/sidebar/channels.dart';
 import 'package:client_leger/backend-communication-services/models/user.dart'
     as user_model;
-import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:flutter/material.dart';
 
 class SideBar extends StatefulWidget {
-  const SideBar({super.key});
+  const SideBar({super.key, required this.user});
+
+  final user_model.User? user;
 
   @override
   State<SideBar> createState() => _SideBarState();
 }
 
-class _SideBarState extends State<SideBar> {
-  late Future<user_model.User?> _user;
+class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  String? _currentChannel;
 
   @override
   void initState() {
-    _user = auth_service.currentSignedInUser;
-    WebSocketManager.instance.initializeSocketConnection();
+    _tabController = TabController(length: 4, vsync: this);
     super.initState();
+  }
+
+  void _changeTabAndChannel(int index, String channel) {
+    setState(() {
+      _currentChannel = channel;
+    });
+    print("_current channel is $_currentChannel");
+    _tabController.animateTo(index);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
@@ -37,77 +50,61 @@ class _SideBarState extends State<SideBar> {
             end: Alignment.bottomCenter, // End at the bottom
           ),
         ),
-        child: FutureBuilder<user_model.User?>(
-            future: _user,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else {
-                WebSocketManager.instance.webSocketSender(
-                    "identifyMobileClient", snapshot.data?.uid);
-
-                return _buildDrawerContent(context, snapshot.data);
-              }
-            }),
+        child: Column(
+          children: [
+            TabBar(
+              controller: _tabController,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white,
+              labelStyle: TextStyle(fontSize: 18),
+              tabs: [
+                Tab(text: 'Partie'),
+                Tab(text: 'Général'),
+                Tab(text: 'Récent'),
+                Tab(text: 'Canaux'),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildIngameChat(),
+                  _buildGeneralChat(),
+                  _buildCurrentChat(),
+                  _buildChannels(),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildDrawerContent(BuildContext context, user_model.User? user) {
-    return ListView(
-      children: [
-        DrawerHeader(
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 40,
-                backgroundImage: user?.avatarEquipped != null
-                    ? NetworkImage(user!.avatarEquipped!)
-                    : AssetImage('assets/default_avatar.png'),
-              ),
-              const SizedBox(width: 16),
-              Text(
-                user?.username ?? 'Guest',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
+  Widget _buildIngameChat() {
+    return Center(
+        child: Text('Ingame Chat', style: TextStyle(color: Colors.white)));
+  }
+
+  Widget _buildGeneralChat() {
+    return ChatWindow(channel: "General");
+  }
+
+  Widget _buildCurrentChat() {
+    if (_currentChannel == null) {
+      return Center(
+        child: Text(
+          'Aucun canal courant.',
+          style: TextStyle(color: Colors.white),
         ),
-        SizedBox(height: 250),
-        Row(children: [
-          SizedBox(width: 16),
-          const Text(
-            "Messagerie",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          SizedBox(width: 8),
-          const Icon(
-            Icons.messenger_outline_outlined,
-            color: Colors.white,
-          ),
-          Spacer(),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8),
-            child: IconButton(
-              icon: Icon(Icons.add),
-              onPressed: () => showChatroomModal(context),
-              color: Colors.white,
-            ),
-          )
-        ]),
-        Divider(),
-        JoinChannelSearch(),
-      ],
-    );
+      );
+    }
+    print("_current channel is $_currentChannel before calling chatwindow");
+
+    return ChatWindow(channel: _currentChannel!);
+  }
+
+  Widget _buildChannels() {
+    return Channels(onChannelPicked: _changeTabAndChannel);
   }
 }

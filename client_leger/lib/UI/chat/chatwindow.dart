@@ -11,10 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class ChatWindow extends StatefulWidget {
-  const ChatWindow(
-      {super.key, required this.channel}); // faudrait avoir aussi le username
-
-  final String channel; // selon le nom du channel on montre la liste de message
+  const ChatWindow({super.key, required this.channel});
+  final String channel;
 
   @override
   State<ChatWindow> createState() => _ChatWindowState();
@@ -33,6 +31,8 @@ class _ChatWindowState extends State<ChatWindow> {
 
   @override
   void initState() {
+    print(
+        "_current channel is ${widget.channel} in chatwindow INITSTATE"); // to fix: always late...
     _channelManager = ChannelManager();
     _user = auth_service.currentSignedInUser;
 
@@ -126,29 +126,8 @@ class _ChatWindowState extends State<ChatWindow> {
                 // sinon overflow on focus when keyboard appears
                 child: Column(
                   children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundImage: user?.avatarEquipped != null
-                              ? NetworkImage(user!.avatarEquipped!)
-                              : AssetImage('assets/default_avatar.png'),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          user?.username ?? 'Inconnu',
-                          style: TextStyle(fontSize: 18),
-                        ),
-                        Spacer(),
-                        Text(widget.channel, style: TextStyle(fontSize: 18)),
-                        IconButton(
-                          icon: Icon(Icons.close),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                      ],
-                    ),
+                    Text(widget.channel, style: TextStyle(fontSize: 18)),
                     Divider(),
-                    const SizedBox(height: 10),
                     SizedBox(
                       height: 500,
                       child: isLoadingInitialMessages
