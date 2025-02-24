@@ -52,7 +52,7 @@
 
 /* Avatar */
 .username{
-    color: white;
+    color: var(--text-color);
     font-size: 1.5rem;
     margin-left: 10px;
     flex-grow: 1;
@@ -96,7 +96,7 @@
         border: none;
     }
     i{
-        color: grey;
+        color: var(--tertiary-color);
         font-size: 2rem;
     }
 }
@@ -110,11 +110,18 @@
 }
 
 .social-menu-title{
-    color: rgb(156, 156, 156);
+    color: var(--tertiary-color);
     font-style: italic;
     font-weight: bold;
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     flex-grow: 1;
+}
+
+.social-menu-content{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
 }
 
 // friend menu list configuration
@@ -143,10 +150,9 @@ ul.friend-menu {
         background: none;
         border: none;
     }
-
-    .add-friend-icon {
-        width: 35px; 
-        height: 35px;
+    i{
+        color: var(--tertiary-color);
+        font-size: 1.3rem;
     }
 }
 
@@ -156,9 +162,9 @@ ul.friend-menu {
         background: none;
         border: none;
     }
-    .friend-list-icon {
-        width: 35px; 
-        height: 35px;
+    i{
+        color: var(--tertiary-color);
+        font-size: 1.3rem;
     }
 }
 
@@ -168,6 +174,8 @@ div.friend-request {
     align-items: center;
     list-style: none;
     width: 100%;
+    border: var(--tertiary-color) 1px solid;
+    border-radius: 5%;
     
     .friend-request-button {
         background: none;
@@ -188,17 +196,17 @@ div.friend-request {
         padding: 10px 15px; 
     }
     span{
-        color: rgb(192, 142, 43);
-        font-size: 1.5rem;
+        color: var(--tertiary-color);
+        font-size: 1.3rem;
         flex-grow: 1;
     }
     .friend-request-number{
-        background-color: rgb(192, 142, 43);
+        background-color: var(--tertiary-color);
         border-radius: 20%;
         margin-right: 20px;
         span{
             color: var(--primary-color);
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: bold;
             flex-grow: 1;
         }
@@ -213,10 +221,10 @@ div.friend-request {
 }
 
 .chat-menu-title{
-    color: rgb(156, 156, 156);
+    color: var(--tertiary-color);
     font-style: italic;
     font-weight: bold;
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     flex-grow: 1;
 }
 
