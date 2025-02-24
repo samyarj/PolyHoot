@@ -32,39 +32,80 @@
     <!--social menu -->
     <div class="social-menu">
         <span class="social-menu-title">SOCIAL</span>
-        <ul class="friend-menu">
-            <li class="add-friend">
-                <button class="add-friend-button">
-                    <img src="assets/icons/add-friend.svg" alt="Add Friend" class="add-friend-icon"/>
-                </button>
-            </li>
-            <li class="friend-list">
-                <button class="friend-list-button">
-                    <img src="assets/icons/friend-list.svg" alt="Add Friend" class="friend-list-icon"/>
-                </button>
-            </li>
-        </ul>
-        <div class="friend-request">
-            <button class="friend-request-button">
-                <li class="friend-request-icon">
-                    <span>Demande d'ami</span>
+        <div class="social-menu-content">
+            <ul class="friend-menu">
+                <li class="add-friend">
+                    <button class="add-friend-button">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </button>
                 </li>
-                <li class="friend-request-number">
-                    <span>5</span>
+                <li class="friend-list">
+                    <button class="friend-list-button">
+                        <i class="fa-solid fa-users"></i>
+                    </button>
                 </li>
-            </button>
+            </ul>
+            <div class="friend-request">
+                <button class="friend-request-button">
+                    <li class="friend-request-icon">
+                        <span>Demande d'ami</span>
+                    </li>
+                    <li class="friend-request-number">
+                        <span>5</span>
+                    </li>
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- chat menu -->
     <div class="chat-menu">
         <span class="chat-menu-title">CLAVARDAGE</span>
-        <app-chat2
-            [name]="'Chat Général'"
-            [chatMessagesLoading]="chatMessagesLoading"
-            [chatMessages]="chatMessages"
-            (sendMessageToRoom)="handleSendMessage($event)"
-            (loadOlderMessages)="loadOlderMessages()"
-        ></app-chat2>
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" data-bs-toggle="tab" href="#tab1" title="Canal de discussion global">
+                    <i class="fa-solid fa-globe"></i>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#tab2" title="Clavardage de partie">
+                    <i class="fa-solid fa-gamepad"></i>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#tab3" title="Canal de discussion actuel">
+                    <i class="fa-solid fa-comments"></i>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#tab4" title="Mes canaux de discussion">
+                    <i class="fa-solid fa-table-list"></i>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#tab5" title="Canaux de discussion disponible">
+                    <i class="fa-solid fa-list"></i>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" title="Créer un canal de discussion">
+                    <i class="fa-solid fa-plus"></i>
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="tab1">
+                <app-chat2
+                    [chatMessagesLoading]="chatMessagesLoading"
+                    [chatMessages]="chatMessages"
+                    (sendMessageToRoom)="handleSendMessage($event)"
+                    (loadOlderMessages)="loadOlderMessages()"
+                ></app-chat2>
+            </div>
+            <div class="tab-pane fade" id="tab2">Tab 2 content</div>
+            <div class="tab-pane fade" id="tab3">Tab 3 content</div>
+            <div class="tab-pane fade" id="tab4">Tab 4 content</div>
+            <div class="tab-pane fade" id="tab5">Tab 5 content</div>
+        </div>
     </div>
 </aside>
