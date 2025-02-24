@@ -1,0 +1,10 @@
+<header class="secondary-header">
+    <nav>
+        <ul>
+            <ng-container *ngFor="let button of buttonData; let last = last">
+                <li routerLink="{{ button.address }}" routerLinkActive="active-link">{{ button.nameofButton }}</li>
+                <div *ngIf="!last" class="separator"></div>
+            </ng-container>
+        </ul>
+    </nav>
+</header>

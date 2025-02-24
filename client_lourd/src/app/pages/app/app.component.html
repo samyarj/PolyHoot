@@ -1,5 +1,9 @@
 <ng-container *ngIf="(showSpinner$ | async) === false; else loadingTemplate">
-    <router-outlet></router-outlet>
+    <app-main-header></app-main-header>
+    <app-side-bar></app-side-bar>
+    <div class="main-content">
+        <router-outlet></router-outlet>
+    </div>
 </ng-container>
 
 <ng-template #loadingTemplate>

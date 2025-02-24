@@ -4,9 +4,12 @@ let appWindow;
 
 function initWindow() {
     appWindow = new BrowserWindow({
-        // fullscreen: true,
-        height: 800,
-        width: 1000,
+        //fullscreen: true,
+        height: 1080,
+        width: 1920,
+        resizable: false, // Prevent resizing
+        minimizable: false, // Prevent minimizing
+        maximizable: false, // Prevent maximizing
         webPreferences: {
             nodeIntegration: true,
         },

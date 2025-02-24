@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css?family=Lato:400,400i,700');
+
+$primary-color: #00115a;
+$secondary-color: #000000;
+$text-color: #000000;
+$light-color: #fff;
+
+body {
+    margin: 0;
+    font-family: 'Lato', sans-serif;
+    background-color: #00115a;
+}
+
+#header {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: black;
+    height: 100px;
+}
+
+#header > p {
+    position: absolute;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-weight: 700;
+    line-height: 1.5;
+    font-size: 24px;
+    margin: 0;
+}
+
+.logo {
+    width: 80px;
+    padding: 10px;
+    margin-left: 20px;
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.site-title {
+    width: 150px;
+    margin-right: 20px;
+}

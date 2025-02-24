@@ -2,7 +2,7 @@ import { ElementRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { ChatComponent } from '@app/components/chat/chat.component';
-import { HeaderGameComponent } from '@app/components/general-elements/header-game/header-game.component';
+import { HeaderGameComponent } from '@app/components/layout/filler/header-game/header-game.component';
 import { JoinGameService } from '@app/services/game-services/join-game-service/join-game.service';
 import { JoinGamePageComponent } from './join-game-page.component';
 

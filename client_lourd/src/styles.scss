@@ -9,85 +9,129 @@
 // Be sure that you only ever include this mixin once!
 @include mat.core();
 
-$primary-color: #00115a;
+:root {
+    --navbar-font-size: 16px;
+    --navbar-separator-size: 2px;
+}
+// ******************************
+// Tutorial for themes
+// primary-color:
+// secondary-color:
+// tertiary-color:
+// nav-bg: header back ground
+// text-color:
+// hover-bg: for hovering header
+// active-bg: for active header
+[data-theme='dark'] {
+    --primary-color: #000729;
+    --secondary-color: #71cdff;
+    --tertiary-color: #ffffff;
+    --text-color: aliceblue;
 
-$indigo-pink-theme: mat.define-light-theme(
-    (
-        color: (
-            primary: mat.define-palette(mat.$indigo-palette),
-            accent: mat.define-palette(mat.$pink-palette, A200, A100, A400),
-            warn: mat.define-palette(mat.$red-palette),
-        ),
-    )
-);
-
-// Include theme styles for core and each component used in your app.
-// Alternatively, you can import and @include the theme mixins for each component
-// that you are using.
-@include mat.all-component-themes($indigo-pink-theme);
-
-.deeppurple-amber-theme {
-    $deeppurple-amber-theme: mat.define-light-theme(
-        (
-            color: (
-                primary: mat.define-palette(mat.$deep-purple-palette),
-                accent: mat.define-palette(mat.$amber-palette, A200, A100, A400),
-            ),
-        )
-    );
-    @include mat.all-component-colors($deeppurple-amber-theme);
+    // Header colors
+    --nav-bg: #1e1e2e;
+    --hover-bg: rgba(235, 235, 244, 0.2);
+    --active-bg: rgba(255, 255, 255, 0.4);
 }
 
-.pink-bluegrey-theme {
-    $pink-bluegrey-theme: mat.define-dark-theme(
-        (
-            color: (
-                primary: mat.define-palette(mat.$pink-palette, 700, 500, 900),
-                accent: mat.define-palette(mat.$blue-grey-palette, A200, A100, A400),
-            ),
-        )
-    );
-    @include mat.all-component-colors($pink-bluegrey-theme);
-}
+[data-theme='light'] {
+    --primary-color: #ffffff;
+    --secondary-color: #71cdff;
+    --tertiary-color: #000729;
+    --text-color: #101010;
 
-.purple-green-theme {
-    $purple-green-theme: mat.define-dark-theme(
-        (
-            color: (
-                primary: mat.define-palette(mat.$purple-palette, 700, 500, 800),
-                accent: mat.define-palette(mat.$green-palette, A200, A100, A400),
-            ),
-        )
-    );
-    @include mat.all-component-colors($purple-green-theme);
+    // Header colors
+    --nav-bg: #ffffff;
+    --hover-bg: rgba(0, 0, 0, 0.2);
+    --active-bg: rgba(0, 0, 0, 0.4);
 }
 
 /* You can add global styles to this file, and also import other style files */
 
-body {
-    margin: 0;
-    font-family: Roboto, 'Helvetica Neue', sans-serif;
-}
+/* BUTTONS IN GENERAL */
 
 .custom-button {
-    background-color: $primary-color;
-    color: white;
-    border: 3px solid $primary-color;
-
+    display: flex;
+    align-items: center; /* Vertical centering */
+    justify-content: center; /* Horizontal centering */
+    text-align: center;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border: 3px solid var(--tertiary-color);
+    border-radius: 50px;
+    transition: transform 0.2s ease-in-out;
     &:hover {
-        background-color: white;
-        color: $primary-color;
-        border: 3px solid $primary-color;
+        background: linear-gradient(0deg, var(--secondary-color) 0%, var(--primary-color) 47.5%);
+        cursor: pointer;
+        border: 3px solid var(--secondary-color);
     }
 }
 
 .custom-button-cancel {
-    background-color: white;
-    color: $primary-color;
-    border: 3px solid $primary-color;
-
+    display: flex;
+    align-items: center; /* Vertical centering */
+    justify-content: center; /* Horizontal centering */
+    text-align: center;
+    background-color: var(--tertiary-color);
+    color: var(--primary-color);
+    border: 3px solid var(--secondary-color);
+    border-radius: 50px;
+    transition: transform 0.2s ease-in-out;
     &:hover {
-        background-color: $primary-color;
-        color: white;
+        background: linear-gradient(0deg, var(--primary-color) 0%, var(--tertiary-color) 47.5%);
+        cursor: pointer;
+        border: 3px solid var(--primary-color);
     }
 }
+
+.custom-button-big {
+    @extend .custom-button;
+    font-size: 1.5rem;
+    padding: 1rem 2rem;
+    height: 70px;
+}
+
+.custom-button-cancel-big {
+    @extend .custom-button-cancel;
+    font-size: 1.5rem;
+    padding: 1rem 2rem;
+    height: 70px;
+}
+
+.custom-button-big-disabled {
+    @extend .custom-button-big;
+    cursor: not-allowed !important;
+    opacity: 0.6;
+
+    &:hover {
+        background: var(--primary-color);
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        border: 3px solid var(--tertiary-color);
+        box-shadow: none !important; /* Remove any hover shadows */
+        filter: none !important; /* Remove brightness or other effects */
+        transform: none !important; /* Disable animations */
+    }
+}
+
+.custom-button-medium {
+    @extend .custom-button;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    height: 50px;
+}
+
+.custom-button-cancel-medium {
+    @extend .custom-button-cancel;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    height: 50px;
+}
+
+.btn-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+/* SECONDARY NAVBAR */

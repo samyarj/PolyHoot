@@ -9,8 +9,23 @@
     background-color: #00115a;
     color: white;
 }
+
 .spinner-border {
     width: 3rem;
     height: 3rem;
     margin-bottom: 1rem;
+}
+
+.main-content {
+    height: 100vh;
+    max-height: 100vh;
+    width: calc(100vw - 380px);
+    max-width: calc(100vw - 380px);
+    overflow-x: hidden;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-blend-mode: color;
+    position: relative;
+    z-index: 0;
+    background-color: var(--primary-color);
 }
