@@ -1,6 +1,8 @@
 import 'package:client_leger/UI/confirmation/confirmation_dialog.dart';
 import 'package:client_leger/UI/confirmation/confirmation_messages.dart';
+import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/main-view/sidebar/channel_search.dart';
+import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/models/chat_channels.dart';
 import 'package:client_leger/business/channel_manager.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +38,8 @@ class Channels extends StatelessWidget {
           }
 
           if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
+            showErrorDialog(context, getCustomError(snapshot.error));
+            return Text(getCustomError(snapshot.error));
           }
 
           final channels = snapshot.data ?? [];
