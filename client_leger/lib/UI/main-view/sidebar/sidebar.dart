@@ -1,113 +1,128 @@
-import 'package:client_leger/UI/main-view/sidebar/channel_creation.dart';
-import 'package:client_leger/UI/main-view/sidebar/channel_search.dart';
-import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
-    as auth_service;
+import 'package:client_leger/UI/chat/chatwindow.dart';
+import 'package:client_leger/UI/main-view/sidebar/channels.dart';
 import 'package:client_leger/backend-communication-services/models/user.dart'
     as user_model;
-import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:flutter/material.dart';
 
 class SideBar extends StatefulWidget {
-  const SideBar({super.key});
+  const SideBar({super.key, required this.user});
+
+  final user_model.User? user;
 
   @override
   State<SideBar> createState() => _SideBarState();
 }
 
-class _SideBarState extends State<SideBar> {
-  late Future<user_model.User?> _user;
+class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  final ValueNotifier<String?> _recentChannelNotifier =
+      ValueNotifier<String?>(null);
 
   @override
   void initState() {
-    _user = auth_service.currentSignedInUser;
-    WebSocketManager.instance.initializeSocketConnection();
+    _tabController = TabController(length: 4, vsync: this);
     super.initState();
+  }
+
+  void _changeTabAndChannel(int index, String channel) {
+    _recentChannelNotifier.value = channel;
+    _tabController.animateTo(index);
+  }
+
+  String? _getRecentChannel() {
+    // edge case: if the recent channel gets deleted by user
+    return _recentChannelNotifier.value;
+  }
+
+  void _nullifyRecentChannel() {
+    // edge case: if the recent channel gets deleted by user
+    _recentChannelNotifier.value = null;
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      child: Container(
-        margin: EdgeInsets.only(top: 2),
-        decoration: BoxDecoration(
-          shape: BoxShape.rectangle,
-          gradient: LinearGradient(
-            colors: [Color(0xFF00115A), Color(0xFF004080)], // Gradient colors
-            begin: Alignment.topCenter, // Start at the top
-            end: Alignment.bottomCenter, // End at the bottom
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.rectangle,
+        gradient: LinearGradient(
+          colors: [Color(0xFF00115A), Color(0xFF004080)], // Gradient colors
+          begin: Alignment.topCenter, // Start at the top
+          end: Alignment.bottomCenter, // End at the bottom
         ),
-        child: FutureBuilder<user_model.User?>(
-            future: _user,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else {
-                WebSocketManager.instance.webSocketSender(
-                    "identifyMobileClient", snapshot.data?.uid);
-
-                return _buildDrawerContent(context, snapshot.data);
-              }
-            }),
+      ),
+      child: Column(
+        children: [
+          TabBar(
+            controller: _tabController,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white,
+            labelStyle: TextStyle(fontSize: 18),
+            indicator: BoxDecoration(
+              color: const Color.fromARGB(
+                  164, 68, 137, 255), // Highlight color for the selected tab
+            ),
+            indicatorSize: TabBarIndicatorSize
+                .tab, // Make the indicator cover the entire tab
+            tabs: [
+              Tab(text: 'Partie'),
+              Tab(text: 'Général'),
+              Tab(text: 'Récent'),
+              Tab(text: 'Canaux'),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildIngameChat(),
+                _buildGeneralChat(),
+                _buildRecentChat(),
+                _buildChannels(),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildDrawerContent(BuildContext context, user_model.User? user) {
-    return ListView(
-      children: [
-        DrawerHeader(
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 40,
-                backgroundImage: user?.avatarEquipped != null
-                    ? NetworkImage(user!.avatarEquipped!)
-                    : AssetImage('assets/default_avatar.png'),
-              ),
-              const SizedBox(width: 16),
-              Text(
-                user?.username ?? 'Guest',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(height: 250),
-        Row(children: [
-          SizedBox(width: 16),
-          const Text(
-            "Messagerie",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+  Widget _buildIngameChat() {
+    return Center(
+        child: Text('Ingame Chat', style: TextStyle(color: Colors.white)));
+  }
+
+  Widget _buildGeneralChat() {
+    return ChatWindow(channel: "General");
+  }
+
+  Widget _buildRecentChat() {
+    return ValueListenableBuilder<String?>(
+      valueListenable: _recentChannelNotifier,
+      builder: (context, recentChannel, child) {
+        if (recentChannel == null) {
+          return Center(
+            child: Text(
+              'Aucun canal courant.',
+              style: TextStyle(color: Colors.white, fontSize: 18),
             ),
-          ),
-          SizedBox(width: 8),
-          const Icon(
-            Icons.messenger_outline_outlined,
-            color: Colors.white,
-          ),
-          Spacer(),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8),
-            child: IconButton(
-              icon: Icon(Icons.add),
-              onPressed: () => showChatroomModal(context),
-              color: Colors.white,
-            ),
-          )
-        ]),
-        Divider(),
-        JoinChannelSearch(),
-      ],
+          );
+        }
+        return ChatWindow(channel: recentChannel);
+      },
+    );
+  }
+
+  Widget _buildChannels() {
+    return Channels(
+      onChannelPicked: _changeTabAndChannel,
+      getRecentChannel: _getRecentChannel,
+      nullifyRecentChannel: _nullifyRecentChannel,
     );
   }
 }
