@@ -86,7 +86,6 @@ export class GameGateway {
                 isLocked: game.isLocked,
             });
         });
-        console.log('currentGameInfos: ', currentGamesInfos);
         this.server.emit(GameEvents.GetCurrentGames, currentGamesInfos);
     }
 

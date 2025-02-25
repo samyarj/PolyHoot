@@ -17,7 +17,6 @@ export class JoinGamePageComponent implements OnDestroy, OnInit, AfterContentChe
     lobbys: Lobby[];
     lobbyObserver: Partial<Observer<Lobby[]>> = {
         next: (lobbys: Lobby[]) => {
-            console.log(lobbys);
             this.lobbys = lobbys;
         },
     };

@@ -342,13 +342,10 @@ export class OrganizerService {
     }
 
     private handleGameEnded() {
-        this.socketHandlerService.on(GameEvents.End, (roomId) => {
-            console.log('roomId: ', roomId);
-            // if (roomId === undefined) {
+        this.socketHandlerService.on(GameEvents.End, () => {
             this.router.navigate([AppRoute.CREATE]);
             this.messageHandlerService.popUpErrorDialog('Les joueurs ont tous quitté la partie!');
             this.alertSoundPlayer.stop();
-            // }
         });
     }
 }

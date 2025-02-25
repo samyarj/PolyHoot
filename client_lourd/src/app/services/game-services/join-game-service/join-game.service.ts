@@ -154,7 +154,6 @@ export class JoinGameService {
 
     private displayActiveLobbys() {
         this.socketService.on(GameEvents.GetCurrentGames, (currentGames: []) => {
-            console.log('Dans displayActiveLobbys dans le on');
             this.lobbys = currentGames;
             this.lobbysSource.next(this.lobbys);
         });
@@ -169,7 +168,6 @@ export class JoinGameService {
 
     private handleUpdateLobby() {
         this.socketService.on<{ playerNames: string[]; roomId: string }>(JoinEvents.JoinSuccess, ({ roomId }) => {
-            console.log("ecq ca a marché: ", roomId);
             this.lobbys = this.lobbys.map((lobby) => (lobby.roomId === roomId ? { ...lobby, nbPlayers: lobby.nbPlayers + 1 } : lobby));
             this.lobbysSource.next(this.lobbys);
         });
