@@ -47,44 +47,47 @@ class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      child: Container(
-        margin: EdgeInsets.only(top: 2),
-        decoration: BoxDecoration(
-          shape: BoxShape.rectangle,
-          gradient: LinearGradient(
-            colors: [Color(0xFF00115A), Color(0xFF004080)], // Gradient colors
-            begin: Alignment.topCenter, // Start at the top
-            end: Alignment.bottomCenter, // End at the bottom
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.rectangle,
+        gradient: LinearGradient(
+          colors: [Color(0xFF00115A), Color(0xFF004080)], // Gradient colors
+          begin: Alignment.topCenter, // Start at the top
+          end: Alignment.bottomCenter, // End at the bottom
         ),
-        child: Column(
-          children: [
-            TabBar(
+      ),
+      child: Column(
+        children: [
+          TabBar(
+            controller: _tabController,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white,
+            labelStyle: TextStyle(fontSize: 18),
+            indicator: BoxDecoration(
+              color: const Color.fromARGB(
+                  164, 68, 137, 255), // Highlight color for the selected tab
+            ),
+            indicatorSize: TabBarIndicatorSize
+                .tab, // Make the indicator cover the entire tab
+            tabs: [
+              Tab(text: 'Partie'),
+              Tab(text: 'Général'),
+              Tab(text: 'Récent'),
+              Tab(text: 'Canaux'),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
               controller: _tabController,
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.white,
-              labelStyle: TextStyle(fontSize: 18),
-              tabs: [
-                Tab(text: 'Partie'),
-                Tab(text: 'Général'),
-                Tab(text: 'Récent'),
-                Tab(text: 'Canaux'),
+              children: [
+                _buildIngameChat(),
+                _buildGeneralChat(),
+                _buildRecentChat(),
+                _buildChannels(),
               ],
             ),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildIngameChat(),
-                  _buildGeneralChat(),
-                  _buildRecentChat(),
-                  _buildChannels(),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

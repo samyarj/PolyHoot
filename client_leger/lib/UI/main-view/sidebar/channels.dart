@@ -55,10 +55,7 @@ class Channels extends StatelessWidget {
             length: 2,
             child: Padding(
               padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
                 bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-                top: 16,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -67,6 +64,12 @@ class Channels extends StatelessWidget {
                     labelColor: Colors.white,
                     unselectedLabelColor: Colors.white,
                     labelStyle: TextStyle(fontSize: 18),
+                    indicator: BoxDecoration(
+                      color: const Color.fromARGB(164, 68, 137,
+                          255), // Highlight color for the selected tab
+                    ),
+                    indicatorSize:
+                        TabBarIndicatorSize.tab, // Make the indicator cove
                     tabs: [
                       Tab(
                         text: 'Vos canaux',
