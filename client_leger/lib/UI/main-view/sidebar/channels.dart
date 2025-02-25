@@ -1,13 +1,28 @@
+import 'package:client_leger/UI/confirmation/confirmation_dialog.dart';
+import 'package:client_leger/UI/confirmation/confirmation_messages.dart';
 import 'package:client_leger/UI/main-view/sidebar/channel_search.dart';
 import 'package:client_leger/backend-communication-services/models/chat_channels.dart';
 import 'package:client_leger/business/channel_manager.dart';
 import 'package:flutter/material.dart';
 
 class Channels extends StatelessWidget {
-  Channels({super.key, required this.onChannelPicked});
+  Channels(
+      {super.key,
+      required this.onChannelPicked,
+      required this.getRecentChannel,
+      required this.nullifyRecentChannel});
   final TextEditingController channelController = TextEditingController();
   final ChannelManager channelManager = ChannelManager();
   final Function(int, String) onChannelPicked;
+  final String? Function() getRecentChannel;
+  final void Function() nullifyRecentChannel;
+
+  Future<void> onDeleteChannel(String channel) async {
+    await channelManager.deleteChannel(channel);
+    if (getRecentChannel() == channel) {
+      nullifyRecentChannel();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,13 +116,21 @@ class Channels extends StatelessWidget {
                 IconButton(
                   icon: Icon(Icons.exit_to_app, size: 30, color: Colors.white),
                   onPressed: () async {
-                    await channelManager.quitChannel(channel.name);
+                    await showConfirmationDialog(
+                      context,
+                      "$quitChannel ${channel.name} ?",
+                      () => channelManager.quitChannel(channel.name),
+                    );
                   },
                 ),
                 IconButton(
                   icon: Icon(Icons.delete, size: 30, color: Colors.white),
                   onPressed: () async {
-                    await channelManager.deleteChannel(channel.name);
+                    await showConfirmationDialog(
+                      context,
+                      "$deleteChannel ${channel.name} ?",
+                      () => onDeleteChannel(channel.name),
+                    );
                   },
                 ),
               ],
@@ -122,6 +145,7 @@ class Channels extends StatelessWidget {
     return ChannelSearch(
       key: ValueKey(joinableChannels),
       joinableChannels: joinableChannels,
+      onDeleteChannel: onDeleteChannel,
     );
   }
 }

@@ -15,7 +15,8 @@ class SideBar extends StatefulWidget {
 
 class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  String? _currentChannel;
+  final ValueNotifier<String?> _recentChannelNotifier =
+      ValueNotifier<String?>(null);
 
   @override
   void initState() {
@@ -24,11 +25,18 @@ class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
   }
 
   void _changeTabAndChannel(int index, String channel) {
-    setState(() {
-      _currentChannel = channel;
-    });
-    print("_current channel is $_currentChannel");
+    _recentChannelNotifier.value = channel;
     _tabController.animateTo(index);
+  }
+
+  String? _getRecentChannel() {
+    // edge case: if the recent channel gets deleted by user
+    return _recentChannelNotifier.value;
+  }
+
+  void _nullifyRecentChannel() {
+    // edge case: if the recent channel gets deleted by user
+    _recentChannelNotifier.value = null;
   }
 
   @override
@@ -70,7 +78,7 @@ class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
                 children: [
                   _buildIngameChat(),
                   _buildGeneralChat(),
-                  _buildCurrentChat(),
+                  _buildRecentChat(),
                   _buildChannels(),
                 ],
               ),
@@ -90,21 +98,28 @@ class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
     return ChatWindow(channel: "General");
   }
 
-  Widget _buildCurrentChat() {
-    if (_currentChannel == null) {
-      return Center(
-        child: Text(
-          'Aucun canal courant.',
-          style: TextStyle(color: Colors.white),
-        ),
-      );
-    }
-    print("_current channel is $_currentChannel before calling chatwindow");
-
-    return ChatWindow(channel: _currentChannel!);
+  Widget _buildRecentChat() {
+    return ValueListenableBuilder<String?>(
+      valueListenable: _recentChannelNotifier,
+      builder: (context, recentChannel, child) {
+        if (recentChannel == null) {
+          return Center(
+            child: Text(
+              'Aucun canal courant.',
+              style: TextStyle(color: Colors.white, fontSize: 18),
+            ),
+          );
+        }
+        return ChatWindow(channel: recentChannel);
+      },
+    );
   }
 
   Widget _buildChannels() {
-    return Channels(onChannelPicked: _changeTabAndChannel);
+    return Channels(
+      onChannelPicked: _changeTabAndChannel,
+      getRecentChannel: _getRecentChannel,
+      nullifyRecentChannel: _nullifyRecentChannel,
+    );
   }
 }
