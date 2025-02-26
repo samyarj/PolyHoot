@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Firestore, addDoc, collection, doc, getDoc, limit, onSnapshot, orderBy, query, startAfter } from '@angular/fire/firestore';
+import { Firestore, addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, setDoc, startAfter, updateDoc } from '@angular/fire/firestore';
 import { MESSAGES_LIMIT } from '@app/constants/constants';
 import { FirebaseChatMessage } from '@app/interfaces/chat-message';
 import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
+import { ChatChannel, chatChannelFromJson } from '@app/services/chat-services/chat-channels';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -11,6 +12,7 @@ import { Observable } from 'rxjs';
 })
 export class FirebaseChatService {
     private globalChatCollection = collection(this.firestore, 'globalChat');
+    private chatChannelsCollection = collection(this.firestore, 'chatChannels'); // Firestore chat channels collection
     private usersCollection = collection(this.firestore, 'users'); // Firestore users collection
 
     constructor(
@@ -21,7 +23,7 @@ export class FirebaseChatService {
     /**
      * Send a message to the global chat.
      */
-    async sendMessage(message: string): Promise<void> {
+    async sendMessage(channel: string, message: string): Promise<void> {
         const user = this.authService.getUser(); // Get logged-in user from AuthService
         if (!user) {
             throw new Error('User is not authenticated');
@@ -33,15 +35,21 @@ export class FirebaseChatService {
             date: Date.now(),
         };
 
-        await addDoc(this.globalChatCollection, chatMessage); // Add message to Firestore
+        if (channel === 'General') {
+            await addDoc(this.globalChatCollection, chatMessage); // Add message to global chat
+        } else {
+            const channelMessagesCollection = collection(this.firestore, `chatChannels/${channel}/messages`);
+            await addDoc(channelMessagesCollection, chatMessage); // Add message to specific channel
+        }
     }
 
     /**
      * Get a real-time stream of the latest 50 messages from the global chat.
      */
-    getMessages(): Observable<FirebaseChatMessage[]> {
+    getMessages(channel: string): Observable<FirebaseChatMessage[]> {
+        const messagesCollection = channel === 'General' ? this.globalChatCollection : collection(this.firestore, `chatChannels/${channel}/messages`);
         const messagesQuery = query(
-            this.globalChatCollection,
+            messagesCollection,
             orderBy('date', 'desc'), // Fetch latest messages first
             limit(MESSAGES_LIMIT), // Load only the last 50 messages
         );
@@ -87,12 +95,13 @@ export class FirebaseChatService {
     /**
      * Load older messages (pagination).
      */
-    loadOlderMessages(lastMessageDate: number): Observable<FirebaseChatMessage[]> {
+    loadOlderMessages(channel: string,lastMessageDate: number): Observable<FirebaseChatMessage[]> {
+        const messagesCollection = channel === 'General' ? this.globalChatCollection : collection(this.firestore, `chatChannels/${channel}/messages`);
         const olderMessagesQuery = query(
-            this.globalChatCollection,
+            messagesCollection,
             orderBy('date', 'desc'),
             startAfter(lastMessageDate), // Load older messages before the last known message
-            limit(MESSAGES_LIMIT),
+            limit(50),
         );
 
         return new Observable<FirebaseChatMessage[]>((observer) => {
@@ -156,5 +165,97 @@ export class FirebaseChatService {
 
         await Promise.all(userFetches);
         return userDetails;
+    }
+
+    async createChannel(channel: string): Promise<void> {
+        try {
+            const channelDocRef = doc(this.chatChannelsCollection, channel);
+            const channelDoc = await getDoc(channelDocRef);
+
+            if (channelDoc.exists()) {
+                throw new Error('A channel with the same name already exists.');
+            }
+
+            const newChannelData = {
+                name: channel,
+                users: [],
+            };
+
+            await setDoc(channelDocRef, newChannelData);
+        } catch (error) {
+            console.error('Error creating channel:', error);
+            throw new Error('Failed to create channel.');
+        }
+    }
+
+    fetchAllChannels(): Observable<ChatChannel[]> {
+        return new Observable<ChatChannel[]>((observer) => {
+            const currentUserId = this.authService.getUser()?.uid || '';
+            const unsubscribe = onSnapshot(this.chatChannelsCollection, (snapshot) => {
+                const channels: ChatChannel[] = snapshot.docs.map((doc) => {
+                    const data = doc.data();
+                    return chatChannelFromJson(data, currentUserId);
+                });
+                observer.next(channels);
+            });
+
+            return () => unsubscribe();
+        });
+    }
+
+    async joinChannel(channel: string): Promise<void> {
+        try {
+            const user = this.authService.getUser();
+            if (!user) {
+                throw new Error('User is not authenticated');
+            }
+
+            const currentUserUid = user.uid;
+            const channelDocRef = doc(this.chatChannelsCollection, channel);
+
+            await updateDoc(channelDocRef, {
+                users: arrayUnion(currentUserUid),
+            });
+        } catch (error) {
+            console.error('Error joining channel:', error);
+            throw new Error('Failed to join channel.');
+        }
+    }
+
+    async quitChannel(channel: string): Promise<void> {
+        try {
+            const user = this.authService.getUser();
+            if (!user) {
+                throw new Error('User is not authenticated');
+            }
+
+            const currentUserUid = user.uid;
+            const channelDocRef = doc(this.chatChannelsCollection, channel);
+
+            await updateDoc(channelDocRef, {
+                users: arrayRemove(currentUserUid),
+            });
+        } catch (error) {
+            console.error('Error quitting channel:', error);
+            throw new Error('Failed to quit channel.');
+        }
+    }
+
+    async deleteChannel(channelName: string): Promise<void> {
+        try {
+            const channelDocRef = doc(this.chatChannelsCollection, channelName);
+            const messagesCollectionRef = collection(channelDocRef, 'messages');
+
+            // Delete all documents in the messages subcollection
+            const messagesSnapshot = await getDocs(messagesCollectionRef);
+            const deletePromises = messagesSnapshot.docs.map((doc) => deleteDoc(doc.ref));
+            await Promise.all(deletePromises);
+
+            // Delete the channel document
+            await deleteDoc(channelDocRef);
+        } catch (error) {
+            console.error('Error deleting channel:', error);
+            throw new Error('Failed to delete channel.');
+        }
     }
 }
