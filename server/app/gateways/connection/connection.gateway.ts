@@ -168,6 +168,7 @@ export class ConnectionGateway implements OnGatewayDisconnect {
             game.organizer.socket.emit(GameEvents.PlayerStatusUpdate, { name: player.name, isInGame: false });
             game.removePlayer(player.name);
             if (game.players.length === 0) {
+                this.server.to(game.roomId).emit(ConnectEvents.AllPlayersLeft);
                 this.disconnectOrganizer(game.roomId, game.organizer.socket);
             } else {
                 game.checkAndPrepareForNextQuestion();
