@@ -130,7 +130,7 @@ export class GameGateway {
         } else if (isRoomLocked) {
             client.emit(JoinErrors.RoomLocked);
         } else {
-            client.emit(JoinEvents.ValidId);
+            client.emit(JoinEvents.ValidId, data);
         }
     }
 

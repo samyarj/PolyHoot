@@ -38,6 +38,7 @@ export class JoinGamePageComponent implements OnDestroy, OnInit, AfterContentChe
     ngOnInit() {
         this.lobbysSubscription = this.joinGameService.lobbysObservable.subscribe(this.lobbyObserver);
         this.joinGameService.getAllLobbys();
+        this.gameId = '';
     }
 
     ngOnDestroy() {

@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { TIMER_VALUE } from '@app/constants/constants';
 import { GameEvents, JoinErrors, JoinEvents } from '@app/constants/enum-class';
 import { Lobby } from '@app/interfaces/lobby';
+import { User } from '@app/interfaces/user';
+import { AuthService } from '@app/services/auth/auth.service';
 import { SocketClientService } from '@app/services/websocket-services/general/socket-client-manager.service';
 import { Observable, Subject } from 'rxjs';
 
@@ -17,19 +19,28 @@ export class JoinGameService {
     lobbys: Lobby[] = [];
     lobbysSource: Subject<Lobby[]>;
     lobbysObservable: Observable<Lobby[]>;
+    user$: Observable<User | null>;
+    private username: string;
 
     constructor(
         private socketService: SocketClientService,
         private router: Router,
+        private authService: AuthService,
     ) {
         this.lobbysSource = new Subject<Lobby[]>();
         this.lobbysObservable = this.lobbysSource.asObservable();
         this.handleLobbys();
+        this.user$ = this.authService.user$;
+        this.user$.subscribe((user) => {
+            if (user) {
+                this.username = user.username;
+            }
+        });
     }
 
     validGameId(gameId: string) {
         this.socketService.send(JoinEvents.ValidateGameId, gameId);
-        this.handleIdValidation();
+        this.handleIdValidation(gameId);
     }
 
     joinGame(gameId: string, playerName: string) {
@@ -61,8 +72,8 @@ export class JoinGameService {
         this.handleLockedLobby();
         this.handleUpdateLobby();
     }
-    private handleIdValidation() {
-        this.handleValidId();
+    private handleIdValidation(gameId: string) {
+        this.handleValidId(gameId);
         this.handleInvalidId();
         this.handleRoomLocked();
     }
@@ -76,11 +87,12 @@ export class JoinGameService {
         this.handleRoomLocked();
     }
 
-    private handleValidId() {
+    private handleValidId(gameId: string) {
         this.socketService.on(JoinEvents.ValidId, () => {
             this.gameIdValidated = true;
             this.wrongPin = false;
             this.popUpMessage = '';
+            this.joinGame(gameId, this.username);
         });
     }
 

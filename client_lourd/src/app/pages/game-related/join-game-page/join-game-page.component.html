@@ -52,27 +52,5 @@
                 </button>
             </div>
         </div>
-        <div *ngIf="gameIdValidated" class="pin-valid-container">
-            <div *ngIf="wrongPin" class="wrong-input">
-                <p>{{ popUpMessage }}</p>
-            </div>
-            <form (ngSubmit)="joinGame()">
-                <h1>Entrez votre nom de joueur</h1>
-                <label for="playerName"></label>
-                <input #playerNameField id="playerName" type="text" maxlength="20" name="playerName" [(ngModel)]="playerName" required />
-                <h3>maximum de 20 caractères</h3>
-                <div class="buttons">
-                    <button
-                        id="homebutton"
-                        type="button"
-                        class="btn custom-width custom-button-cancel login-back-button"
-                        (click)="redirectToGameAcces()"
-                    >
-                        Retour
-                    </button>
-                    <button type="submit" class="btn custom-width custom-button">Allons-y !</button>
-                </div>
-            </form>
-        </div>
     </div>
 </div>
