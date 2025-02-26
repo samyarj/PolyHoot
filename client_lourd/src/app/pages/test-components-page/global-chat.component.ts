@@ -20,7 +20,7 @@ export class GlobalChatComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         // Subscribe to live chat messages
-        this.messagesSubscription = this.firebaseChatService.getMessages().subscribe({
+        this.messagesSubscription = this.firebaseChatService.getMessages('General').subscribe({
             next: (messages) => {
                 this.chatMessages = messages;
                 if (messages.length > 0) {
@@ -42,7 +42,7 @@ export class GlobalChatComponent implements OnInit, OnDestroy {
         if (this.isFetchingOlderMessages || !this.lastMessageDate) return;
 
         this.isFetchingOlderMessages = true;
-        this.firebaseChatService.loadOlderMessages(this.lastMessageDate).subscribe({
+        this.firebaseChatService.loadOlderMessages('General', this.lastMessageDate).subscribe({
             next: (olderMessages) => {
                 if (olderMessages.length > 0) {
                     // Merge older messages while maintaining order
@@ -63,7 +63,7 @@ export class GlobalChatComponent implements OnInit, OnDestroy {
      */
     async handleSendMessage(message: string): Promise<void> {
         try {
-            await this.firebaseChatService.sendMessage(message);
+            await this.firebaseChatService.sendMessage('General', message);
         } catch (error) {
             console.error('Failed to send message:', error);
         }
