@@ -1,5 +1,5 @@
-$primary-color: #00115a;
-$second-color: #7ac97a;
+$primary-color: var(--primary-color);
+$second-color: var(--secondary-color);
 
 html,
 body {
@@ -9,8 +9,8 @@ body {
 }
 
 .page-wrapper {
-    background: linear-gradient(to bottom, #c1ccff, #c1ccff, $second-color);
-    min-height: 100vh;
+    background: linear-gradient(to bottom, var(--primary-color), var(--primary-color), var(--secondary-color));
+    height: 100%;
     display: flex;
     flex-direction: column;
 }
@@ -61,16 +61,16 @@ body {
     h1 {
         font-size: 1.5rem;
         margin-bottom: 20px;
-        color: $primary-color;
+        color: var(--text-color);
         font-weight: bold;
     }
     form {
         display: flex;
         flex-direction: column;
         align-items: center;
-        background-color: #ebeeff;
+        background-color: var(--primary-color);
         padding: 20px 50px 30px;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        box-shadow: 0px 0px 20px color-mix(in srgb, var(--tertiary-color), transparent 10%);
         border-radius: 5px;
         margin-top: 200px;
         input {
@@ -91,8 +91,8 @@ body {
             justify-content: space-between;
             width: 100%;
             margin-top: 10px;
-            button {
-                margin: 0px 30px 0px;
+            .custom-button-medium {
+                min-width: 40%;
             }
         }
     }

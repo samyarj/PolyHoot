@@ -5,7 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { ChatComponent } from '@app/components/chat/chat.component';
-import { HeaderGameComponent } from '@app/components/general-elements/header-game/header-game.component';
+import { HeaderGameComponent } from '@app/components/layout/filler/header-game/header-game.component';
 import { AppRoute } from '@app/constants/enum-class';
 import { QuestionType } from '@app/interfaces/question-type';
 import { ResultsService } from '@app/services/game-services/results-service/results-service.service';

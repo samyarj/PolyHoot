@@ -1,4 +1,5 @@
 import 'package:client_leger/backend-communication-services/chat/firebase_chat_service.dart';
+import 'package:client_leger/backend-communication-services/models/chat_channels.dart';
 import 'package:client_leger/backend-communication-services/models/chat_message.dart';
 
 class ChannelManager {
@@ -15,38 +16,37 @@ class ChannelManager {
 
   late FirebaseChatService _firebaseChatService;
 
-  final List<String> channelsAvailable = [
-    // TODO: fetch when implemented
-    'General',
-    'The BIRDS',
-    'Music Lovers',
-    'Foodies',
-    '3.5+ only',
-    "Test1",
-    "Test2",
-    "Test3",
-  ]..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
-
-  final List<String> joinedChannels = ['General', "Test1", "Test2", "Test3"];
-
   Stream<List<ChatMessage>> getMessagesForChannel(String channel) {
-    if (channel == 'General') {
-      return _firebaseChatService.getMessages();
-    }
-    return Stream.value([]);
+    return _firebaseChatService.getMessages(channel);
+  }
+
+  Stream<List<ChatChannel>> fetchAllChannels() {
+    return _firebaseChatService.fetchAllChannels();
+  }
+
+  Future<void> joinChannel(String channel) async {
+    await _firebaseChatService.joinChannel(channel);
+  }
+
+  Future<void> quitChannel(String channel) async {
+    await _firebaseChatService.quitChannel(channel);
   }
 
   Future<void> sendMessage(String channel, String message) async {
-    if (channel == 'General') {
-      await _firebaseChatService.sendMessage(message);
-    }
+    await _firebaseChatService.sendMessage(channel, message);
+  }
+
+  Future<void> createChannel(String channel) async {
+    await _firebaseChatService.createChannel(channel);
   }
 
   Future<List<ChatMessage>> loadOlderMessages(
       String channel, int lastMessageDate) async {
-    if (channel == 'General') {
-      return await _firebaseChatService.loadOlderMessages(lastMessageDate);
-    }
-    return [];
+    return await _firebaseChatService.loadOlderMessages(
+        channel, lastMessageDate);
+  }
+
+  Future<void> deleteChannel(String channel) async {
+    await _firebaseChatService.deleteChannel(channel);
   }
 }

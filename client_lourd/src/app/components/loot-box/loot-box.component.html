@@ -1,0 +1,44 @@
+<div class="container" (mouseenter)="toggleMove()" (mouseleave)="toggleMove()">
+    <div class="presentation-div" [ngClass]="{ 'move-to-side': isMoved }">
+        <div class="lootbox-image">IMAGE DE LA LOOTBOX</div>
+        <div class="price" [ngClass]="{ 'text-moved': isMoved }">10 COINS</div>
+    </div>
+    <div class="interaction-div" [ngClass]="{ show: isMoved }">
+        <div class="interaction-div-content">
+            <div class="preview-items-wrapper">
+                <div class="preview-items">
+                    <div class="item very-rare">
+                        <div class="item-img">Item-img</div>
+                        <div class="item-chances">5%</div>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="item rare">
+                        <div class="item-img">Item-img</div>
+                        <div class="item-chances">25%</div>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="item common">
+                        <div class="item-img">Item-img</div>
+                        <div class="item-chances">20%</div>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="item common">
+                        <div class="item-img">Item-img</div>
+                        <div class="item-chances">20%</div>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="item common">
+                        <div class="item-img">Item-img</div>
+                        <div class="item-chances">30%</div>
+                    </div>
+                </div>
+            </div>
+            <div class="section-divider"></div>
+            <div class="buy-zone-wrapper">
+                <div class="buy-zone">
+                    <button class="custom-button-medium">Ouvrir pour 10 coins</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -7,7 +7,7 @@ import { Router, RouterModule } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { SoundPlayer } from '@app/classes/sound-player/sound-player.class';
 import { ChatComponent } from '@app/components/chat/chat.component';
-import { HeaderGameComponent } from '@app/components/general-elements/header-game/header-game.component';
+import { HeaderGameComponent } from '@app/components/layout/filler/header-game/header-game.component';
 import { PlayerListComponent } from '@app/components/player-list/player-list.component';
 import { AppRoute, GameStatus, QRLGrade } from '@app/constants/enum-class';
 import { MOCK_QUESTIONS } from '@app/constants/mock-constants';

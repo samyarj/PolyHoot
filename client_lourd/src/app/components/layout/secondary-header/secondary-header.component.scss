@@ -1,0 +1,66 @@
+.secondary-header {
+    padding: 10px;
+    width: 100%;
+    height: 50px;
+    z-index: 99;
+    position: fixed;
+    * {
+        transition-duration: 0.1s;
+    }
+    nav {
+        position: relative;
+        height: 100%;
+        ul {
+            position: relative;
+            height: 100%;
+            display: flex;
+            list-style: none;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 0;
+            padding-left: 40px;
+            gap: 40px;
+            li {
+                position: relative;
+                display: inline-block;
+                text-decoration: none;
+                font-size: var(--navbar-font-size);
+                color: var(--text-color); // Gold text
+                padding-bottom: 5px;
+                transition: color 0.3s ease-in-out;
+
+                &:hover {
+                    cursor: pointer;
+                    text-shadow: 0px 0px 1px currentColor; // Gives a subtle bold look
+                    transition: text-shadow 0.1s ease-in-out;
+                }
+
+                &.active-link {
+                    text-shadow: 0px 0px 1px currentColor;
+                    transition: text-shadow 0.1s ease-in-out;
+                }
+                &.active-link::after {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    bottom: -2px;
+                    width: 100%;
+                    height: var(--navbar-separator-size);
+                    background: linear-gradient(
+                        to right,
+                        color-mix(in srgb, var(--text-color), transparent 100%) 5%,
+                        var(--text-color) 40%,
+                        var(--text-color) 60%,
+                        color-mix(in srgb, var(--text-color), transparent 100%) 95%
+                    );
+                }
+            }
+            .separator {
+                position: relative;
+                width: var(--navbar-separator-size);
+                height: 100%;
+                background: linear-gradient(to top, #ffffff00 10%, var(--text-color) 30%, var(--text-color) 70%, #ffffff00 90%);
+            }
+        }
+    }
+}

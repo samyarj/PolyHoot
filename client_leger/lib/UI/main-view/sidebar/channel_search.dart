@@ -1,167 +1,214 @@
-import 'package:client_leger/UI/main-view/sidebar/joined_channels_carousel.dart';
+import 'package:client_leger/UI/confirmation/confirmation_dialog.dart';
+import 'package:client_leger/UI/confirmation/confirmation_messages.dart';
+import 'package:client_leger/UI/error/error_dialog.dart';
+import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
+import 'package:client_leger/backend-communication-services/models/chat_channels.dart';
 import 'package:client_leger/business/channel_manager.dart';
 import 'package:flutter/material.dart';
 
-class JoinChannelSearch extends StatefulWidget {
-  const JoinChannelSearch({super.key});
+class ChannelSearch extends StatefulWidget {
+  const ChannelSearch(
+      {super.key,
+      required this.joinableChannels,
+      required this.onDeleteChannel});
+  final List<ChatChannel> joinableChannels;
+  final Future<void> Function(String) onDeleteChannel;
 
   @override
-  State<JoinChannelSearch> createState() => _JoinChannelSearchState();
+  State<ChannelSearch> createState() => _ChannelSearchState();
 }
 
-class _JoinChannelSearchState extends State<JoinChannelSearch> {
-  String? _selectedChannel;
+class _ChannelSearchState extends State<ChannelSearch> {
   late ChannelManager _channelManager;
-  final TextEditingController _textEditingController = TextEditingController();
+  final TextEditingController _searchChannelTextController =
+      TextEditingController();
+  final TextEditingController _textChannelController = TextEditingController();
+
   final FocusNode _focusNode = FocusNode();
-  final GlobalKey _autocompleteKey = GlobalKey();
+  List<ChatChannel> _filteredChannels = [];
 
   @override
   void initState() {
     _channelManager = ChannelManager();
+    _filteredChannels = widget.joinableChannels;
     super.initState();
   }
 
-  void _joinChannel() {
-    if (!_channelManager.joinedChannels.contains(_selectedChannel)) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Canal $_selectedChannel rejoint !')),
-      );
-      setState(() {
-        _channelManager.joinedChannels.add(_selectedChannel!);
-      });
-    } else {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Vous êtes déjà dans le canal $_selectedChannel !',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onErrorContainer,
-            ),
-          ),
-          backgroundColor: Theme.of(context).colorScheme.errorContainer,
-        ),
-      );
-    }
-    _textEditingController.clear();
-    _focusNode.unfocus();
-    _selectedChannel = null;
-  }
-
-  void removeJoinedChannel(String channel) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Canal $channel quitté !')),
-    );
+  void _filterChannels(String query) {
     setState(() {
-      _channelManager.joinedChannels.remove(channel);
+      _filteredChannels = widget.joinableChannels
+          .where((channel) =>
+              channel.name.toLowerCase().contains(query.toLowerCase()))
+          .toList();
     });
   }
 
   @override
   void dispose() {
-    _textEditingController.dispose();
+    _searchChannelTextController.dispose();
+    _textChannelController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _focusNode.unfocus(), // Dismiss keyboard on tap outside
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
+    return widget.joinableChannels.isEmpty
+        ? Column(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: RawAutocomplete<String>(
-                      key: _autocompleteKey,
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Center(
+                  child: Text(
+                    'Aucun canal trouvé',
+                    style: TextStyle(color: Colors.white, fontSize: 18),
+                  ),
+                ),
+              ),
+              addChannel()
+            ],
+          )
+        : SingleChildScrollView(
+            physics:
+                const AlwaysScrollableScrollPhysics(), // to prevent a bug, do not remove
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TapRegion(
+                  onTapOutside: (_) => FocusScope.of(context).unfocus(),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: TextField(
+                      controller: _searchChannelTextController,
                       focusNode: _focusNode,
-                      textEditingController: _textEditingController,
-                      optionsViewOpenDirection: OptionsViewOpenDirection.up,
-                      optionsBuilder: (TextEditingValue textEditingValue) {
-                        return _channelManager.channelsAvailable
-                            .where((channel) => channel.toLowerCase().contains(
-                                  textEditingValue.text.toLowerCase(),
-                                ))
-                            .toList();
-                      },
-                      onSelected: (String selectedChannel) {
-                        setState(() {
-                          _selectedChannel = selectedChannel;
-                        });
-                      },
-                      optionsViewBuilder: (context, onSelected, options) {
-                        return Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Material(
-                            elevation: 4.0,
-                            child: SizedBox(
-                              height: 200.0,
-                              child: ListView.separated(
-                                  itemBuilder: (context, index) {
-                                    final option = options.elementAt(index);
-                                    return ListTile(
-                                        title: Text(option),
-                                        onTap: () {
-                                          onSelected(option);
-                                        });
-                                  },
-                                  separatorBuilder: (context, index) =>
-                                      const Divider(),
-                                  itemCount: options.length),
-                            ),
-                          ),
-                        );
-                      },
-                      fieldViewBuilder:
-                          (context, controller, focusNode, onEditingComplete) {
-                        return TextField(
-                          controller: _textEditingController,
-                          focusNode: _focusNode,
-                          decoration: InputDecoration(
-                            suffixIcon: IconButton(
-                              icon: Icon(Icons.clear, color: Colors.white),
-                              onPressed: () {
-                                setState(() {
-                                  _textEditingController.clear();
-                                  _selectedChannel = null;
-                                });
-                              },
-                            ),
-                            labelText: 'Choisir un canal',
-                            labelStyle: TextStyle(color: Colors.white),
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(),
-                          ),
-                          style: TextStyle(color: Colors.white),
-                        );
-                      },
+                      decoration: InputDecoration(
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.clear, color: Colors.white),
+                          onPressed: () {
+                            setState(() {
+                              _searchChannelTextController.clear();
+                              _filteredChannels = widget.joinableChannels;
+                            });
+                          },
+                        ),
+                        labelText: 'Chercher un canal',
+                        labelStyle: TextStyle(color: Colors.white),
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(),
+                      ),
+                      style: TextStyle(color: Colors.white),
+                      onChanged: _filterChannels,
                     ),
                   ),
-                  SizedBox(width: 8),
-                  IconButton(
-                    onPressed: _selectedChannel == null ? null : _joinChannel,
-                    icon: Icon(Icons.group_add),
-                    color: Colors.white,
-                    tooltip: 'Joindre',
+                ),
+                SizedBox(
+                  height: 300,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: _filteredChannels.length,
+                    itemBuilder: (context, index) {
+                      final channel = _filteredChannels[index];
+                      return ListTile(
+                        title: Text(
+                          channel.name,
+                          style: TextStyle(color: Colors.white, fontSize: 18),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                Icons.add_circle,
+                                color: Colors.white,
+                                size: 30,
+                              ),
+                              onPressed: () async {
+                                await _channelManager.joinChannel(channel.name);
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.delete,
+                                size: 30,
+                                color: Colors.white,
+                              ),
+                              onPressed: () async {
+                                await showConfirmationDialog(
+                                  context,
+                                  "$deleteChannel ${channel.name} ?",
+                                  () => widget.onDeleteChannel(channel.name),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                ],
+                ),
+                addChannel(),
+              ],
+            ),
+          );
+  }
+
+  Widget addChannel() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TapRegion(
+          onTapOutside: (_) => FocusScope.of(context).unfocus(),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              style: TextStyle(color: Colors.white),
+              controller: _textChannelController,
+              decoration: InputDecoration(
+                labelText: "Nom du nouveau canal",
+                labelStyle: TextStyle(color: Colors.white),
+                fillColor: Colors.white,
+                border: OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.clear, color: Colors.white),
+                  onPressed: () {
+                    _textChannelController.clear();
+                  },
+                ),
               ),
-              SizedBox(height: 32),
-              JoinedChannelsCarousel(
-                joinedChannels: _channelManager.joinedChannels,
-                callback: removeJoinedChannel,
-              ),
-            ],
+            ),
           ),
         ),
-      ),
+        ElevatedButton(
+          onPressed: () async {
+            final channelName = _textChannelController.text.trim();
+            if (channelName.isEmpty) return;
+            try {
+              await _channelManager
+                  .createChannel(_textChannelController.text.trim());
+              _textChannelController.clear();
+            } catch (e) {
+              if (!mounted) return;
+              showErrorDialog(context, getCustomError(e));
+            }
+          },
+          style: TextButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            backgroundColor: const Color.fromARGB(87, 21, 3, 87),
+            foregroundColor: Colors.white,
+            elevation: 2.0,
+          ),
+          child: Text(
+            "Créer le canal",
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -9,7 +9,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ChatComponent } from '@app/components/chat/chat.component';
-import { HeaderGameComponent } from '@app/components/general-elements/header-game/header-game.component';
+import { HeaderGameComponent } from '@app/components/layout/filler/header-game/header-game.component';
 import { START_GAME_COUNTDOWN } from '@app/constants/constants';
 import { AppRoute, ConfirmationMessage } from '@app/constants/enum-class';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
