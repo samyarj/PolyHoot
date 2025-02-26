@@ -88,24 +88,42 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#" title="Créer un canal de discussion">
+                <a class="nav-link" data-bs-toggle="tab" href="#tab6" title="Créer un canal de discussion">
                     <i class="fa-solid fa-plus"></i>
                 </a>
             </li>
         </ul>
         <div class="tab-content">
             <div class="tab-pane fade show active" id="tab1">
+                <h2>Canal de discussion global</h2>
                 <app-chat2
-                    [chatMessagesLoading]="chatMessagesLoading"
-                    [chatMessages]="chatMessages"
+                    [chatMessagesLoading]="globalChatMessagesLoading"
+                    [chatMessages]="globalChatMessages"
                     (sendMessageToRoom)="handleSendMessage($event)"
                     (loadOlderMessages)="loadOlderMessages()"
                 ></app-chat2>
             </div>
             <div class="tab-pane fade" id="tab2">Tab 2 content</div>
-            <div class="tab-pane fade" id="tab3">Tab 3 content</div>
+            <div class="tab-pane fade" id="tab3">
+                <h2>Canal : {{ selectedChannel }}</h2>
+                <app-chat2
+                    *ngIf="selectedChannel"
+                    [chatMessagesLoading]="selectedChannelMessagesLoading"
+                    [chatMessages]="selectedChannelMessages"
+                    (sendMessageToRoom)="handleSendMessageToChannel($event)"
+                    (loadOlderMessages)="loadOlderMessages()"
+                ></app-chat2>
+            </div>
             <div class="tab-pane fade" id="tab4">Tab 4 content</div>
-            <div class="tab-pane fade" id="tab5">Tab 5 content</div>
+            <div class="tab-pane fade" id="tab5">
+                <h2>Canaux de discussion disponible</h2>
+                <ul class="channel-list">
+                    <li *ngFor="let channel of channels" (click)="selectChannel(channel.name)" class="channels">
+                        {{ channel.name }}
+                    </li>
+                </ul>
+            </div>
+            <div class="tab-pane fade" id="tab6">Tab 6 content</div>
         </div>
     </div>
 </aside>
