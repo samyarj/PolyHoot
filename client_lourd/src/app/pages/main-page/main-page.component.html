@@ -105,7 +105,7 @@
                 </h1>
                 <div class="info-description">{{ this.navInfo[activeSlideIndex].description }}</div>
             </div>
-            <div class="screenshot-with-links-diagram">
+            <div class="screenshot-with-links-diagram" #parentElement>
                 <ng-container *ngFor="let screenshot of navInfo[activeSlideIndex].screenshots; let i = index">
                     <ng-container *ngIf="screenshot.image; else textContent">
                         <img
