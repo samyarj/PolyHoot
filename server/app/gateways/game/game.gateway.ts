@@ -20,7 +20,7 @@ export class GameGateway {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         const choiceSignal = game.handleChoiceChange(client, data.choice);
-        if (!game.isRandomMode) game.organizer.socket.emit(GameEvents.PlayerChoiceToOrganizer, choiceSignal);
+        //if (!game.isRandomMode) game.organizer.socket.emit(GameEvents.PlayerChoiceToOrganizer, choiceSignal);
     }
 
     @SubscribeMessage(TimerEvents.Pause)
@@ -48,12 +48,12 @@ export class GameGateway {
             game.startQuestionCountdown();
         }
     }
-    @SubscribeMessage(GameEvents.ModifyUpdate)
+/*     @SubscribeMessage(GameEvents.ModifyUpdate)
     handleModifiedAnswer(@ConnectedSocket() client: Socket, @MessageBody() data: { playerName: string; modified: boolean }) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         game.organizer.socket.emit(GameEvents.ModifyUpdate, data);
-    }
+    } */
     @SubscribeMessage(JoinEvents.TitleRequest)
     handleGetTitleForPlayer(@ConnectedSocket() client: Socket): string {
         const roomId = Array.from(client.rooms.values())[1];

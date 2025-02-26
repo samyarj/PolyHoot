@@ -19,24 +19,9 @@
             </div>
             <div class="general-info-section">
                 <div *ngIf="question.type === 'QCM'" class="histogram-section">
-                    <div class="option-counter-container">
-                        <div *ngFor="let noAnswers of noAnswersArray">{{ noAnswers }}</div>
-                    </div>
-                    <div class="bands-container">
-                        <div *ngFor="let noAnswers of noAnswersArray; let i = index" class="band-container">
-                            <img *ngIf="this.isCorrectAnswersArray[i]" src="assets/pictures/organizer-page/histogram-owl-green.png" />
-                            <img *ngIf="!this.isCorrectAnswersArray[i]" src="assets/pictures/organizer-page/histogram-owl-red.png" />
-                            <div
-                                class="band"
-                                [ngClass]="'band-' + (i + 1)"
-                                [style.background]="this.isCorrectAnswersArray[i] ? '#2ecc71' : '#f04159'"
-                                [style.height.%]="(noAnswers / playersInGame) * 100 - 10"
-                            ></div>
-                        </div>
-                    </div>
                     <div class="options-container">
                         <div
-                            *ngFor="let noAnswers of noAnswersArray; let index = index"
+                            *ngFor="let choice of isCorrectAnswersArray; let index = index"
                             class="option"
                             [style.background]="this.isCorrectAnswersArray[index] ? '#2ecc71' : '#f04159'"
                         >
@@ -45,25 +30,6 @@
                     </div>
                 </div>
                 <div *ngIf="question.type === 'QRL' && gameStatus === 'waitingForAnswers'" class="histogram-section">
-                    <div class="option-counter-container">
-                        <div>{{ this.peopleModifyingQuestion.length }}</div>
-                        <div>{{ this.peopleNotModifyingQuestion.length }}</div>
-                    </div>
-                    <div class="bands-container">
-                        <div *ngFor="let noAnswers of modifyAnswerArray; let i = index" class="band-container">
-                            <img *ngIf="!(i % 2 === 0)" src="assets/pictures/organizer-page/histogram-owl-green.png" />
-                            <img *ngIf="i % 2 === 0" src="assets/pictures/organizer-page/histogram-owl-red.png" />
-                            <div
-                                class="band"
-                                [style.background]="i % 2 === 0 ? '#f04159' : '#2ecc71'"
-                                [style.height.%]="(noAnswers / playersInGame) * 100 - 10"
-                            ></div>
-                        </div>
-                    </div>
-                    <div class="options-container">
-                        <p>Ont modifié leur réponse dans les 5 dernières secondes</p>
-                        <p>N'ont pas modifié leur réponse dans les 5 dernières secondes</p>
-                    </div>
                 </div>
                 <div *ngIf="question.type === 'QRL' && gameStatus === 'organizerCorrecting'" class="histogram-section">
                     <div class="option-counter-container">

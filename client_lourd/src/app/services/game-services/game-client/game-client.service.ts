@@ -17,7 +17,6 @@ import { Question } from '@app/interfaces/question';
 import { ResultsService } from '@app/services/game-services/results-service/results-service.service';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
 import { SocketClientService } from '@app/services/websocket-services/general/socket-client-manager.service';
-import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -25,7 +24,6 @@ import { BehaviorSubject } from 'rxjs';
 export class GameClientService {
     alertSoundPlayer: SoundPlayer = new SoundPlayer(ALERT_SOUND_PATH);
     choiceFeedback: ChoiceFeedback = ChoiceFeedback.Idle;
-    clearAnswer = new BehaviorSubject<boolean>(false);
     currentQuestion: Question;
     currentQuestionIndex = 0;
     gamePaused: boolean = false;
@@ -35,6 +33,7 @@ export class GameClientService {
     quizTitle: string;
     shouldDisconnect: boolean = true;
     time: number = 0;
+    answer: string = '';
     private finalAnswer: boolean;
     private realShowAnswers: boolean;
     private socketsInitialized: boolean = false;
@@ -79,13 +78,13 @@ export class GameClientService {
         return false;
     }
 
-    sendModifyUpdate(modified: boolean) {
+    /*     sendModifyUpdate(modified: boolean) {
         if (!this.interacted) {
             this.interacted = true;
             this.socketHandler.send(GameEvents.PlayerInteraction);
         }
         this.socketHandler.send(GameEvents.ModifyUpdate, { playerName: this.socketHandler.playerName, modified });
-    }
+    } */
 
     finalizeAnswer() {
         this.playerInfo.submitted = true;
@@ -113,7 +112,7 @@ export class GameClientService {
 
     resetAttributes() {
         this.choiceFeedback = ChoiceFeedback.Idle;
-        this.clearAnswer.next(false);
+        this.answer = '';
         this.interacted = false;
         this.gamePaused = false;
         this.finalAnswer = false;
@@ -198,7 +197,6 @@ export class GameClientService {
     private goToNextQuestion() {
         this.socketHandler.on(GameEvents.NextQuestion, (nextQuestion: { question: Question; index: number }) => {
             if (nextQuestion && nextQuestion.index != null) {
-                this.clearAnswer.next(true);
                 this.resetAttributes();
                 this.playerInfo.submitted = false;
                 this.currentQuestionIndex = nextQuestion.index;

@@ -1,29 +1,29 @@
 import { Location } from '@angular/common';
 import { Component, HostListener, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { PlayingComponent } from '@app/components/playing/playing.component';
-import { LAST_MODIFIED_INTERVAL } from '@app/constants/constants';
-import { AppRoute } from '@app/constants/enum-class';
+import { AppRoute, ChoiceFeedback } from '@app/constants/enum-class';
+import { Question } from '@app/interfaces/question';
+import { QuestionType } from '@app/interfaces/question-type';
 import { GameClientService } from '@app/services/game-services/game-client/game-client.service';
-import { Subject, Subscription, debounceTime, takeUntil } from 'rxjs';
 
 @Component({
     selector: 'app-game-page',
-    templateUrl: '../../../components/playing/playing.component.html',
-    styleUrls: ['../../../components/playing/playing.component.scss'],
+    templateUrl: 'game-page.component.html',
+    styleUrls: ['game-page.component.scss'],
 })
-export class GamePageComponent extends PlayingComponent implements OnDestroy {
-    private lastModified = new Subject<void>();
-    private subscriptions = new Subscription();
-    private unsubscribe$ = new Subject<void>();
-    private typingHasStopped = true;
+export class GamePageComponent implements OnDestroy {
+    // private lastModified = new Subject<void>();
+    // private subscriptions = new Subscription();
+    // private unsubscribe$ = new Subject<void>();
+    // private typingHasStopped = true;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    readonly MAX_CHARACTERS = 200;
+    isKeyAlreadyPressed: boolean = false;
     constructor(
         private router: Router,
         private gameClientService: GameClientService,
         private location: Location,
     ) {
-        super();
-        this.service = gameClientService;
         // cette fonction est appelee a chaque fois que la page est rechargee
         if (localStorage.getItem('navigatedFromUnload') === 'true') {
             this.onUnload();
@@ -35,33 +35,37 @@ export class GamePageComponent extends PlayingComponent implements OnDestroy {
         this.gameClientService.resetAttributes();
         this.gameClientService.playerPoints = 0;
         this.gameClientService.signalUserConnect();
-        this.lastModified.pipe(debounceTime(LAST_MODIFIED_INTERVAL), takeUntil(this.unsubscribe$)).subscribe(() => {
-            this.gameClientService.sendModifyUpdate(false);
-            this.typingHasStopped = true;
-        });
-        const resetAnswer = this.gameClientService.clearAnswer.subscribe((clear) => {
-            if (clear) {
-                this.answer = '';
-            }
-        });
-        this.subscriptions.add(resetAnswer);
+    }
+    get choiceFeedback(): ChoiceFeedback {
+        return this.gameClientService.choiceFeedback;
+    }
+    get time(): number {
+        return this.gameClientService.time;
     }
 
-    override get isTesting() {
-        return false;
+    get currentQuestion(): Question {
+        return this.gameClientService.currentQuestion;
     }
 
-    override get quizReady() {
+    get currentIndex(): number {
+        return this.gameClientService.currentQuestionIndex;
+    }
+
+    get playerPoints(): number {
+        return this.gameClientService.playerPoints;
+    }
+
+    get quizReady() {
         return true;
     }
 
-    override get gamePaused() {
+    get gamePaused() {
         return this.gameClientService.gamePaused;
     }
-    override get submitted() {
+    get submitted() {
         return this.gameClientService.playerInfo.submitted;
     }
-    override get quizTitle(): string {
+    get quizTitle(): string {
         return this.gameClientService.quizTitle;
     }
 
@@ -77,12 +81,18 @@ export class GamePageComponent extends PlayingComponent implements OnDestroy {
         return this.gameClientService.playerInfo.userFirst;
     }
 
-    override get waitingForQuestion(): boolean {
+    get waitingForQuestion(): boolean {
         return this.gameClientService.playerInfo.waitingForQuestion;
     }
 
-    override get choiceSelected(): boolean[] {
+    get choiceSelected(): boolean[] {
         return this.gameClientService.playerInfo.choiceSelected;
+    }
+    get answer(): string {
+        return this.gameClientService.answer;
+    }
+    set answer(value: string) {
+        this.gameClientService.answer = value;
     }
     // J'ai remplace le window:unload par window:beforeunload pour que le localStorage soit modifie avant que la page soit dechargee
     @HostListener('window:beforeunload')
@@ -112,9 +122,42 @@ export class GamePageComponent extends PlayingComponent implements OnDestroy {
             this.router.navigate([AppRoute.HOME]);
         }
         this.gameClientService.resetAttributes();
-        this.unsubscribe$.next();
+        /*         this.unsubscribe$.next();
         this.unsubscribe$.complete();
-        this.subscriptions.unsubscribe();
+        this.subscriptions.unsubscribe(); */
+    }
+    defaultKeyDownHandler(event: KeyboardEvent): void {
+        if (this.isKeyAlreadyPressed) {
+            return;
+        }
+
+        this.isKeyAlreadyPressed = true;
+
+        if (event.key === 'Enter') {
+            this.finalizeAnswer();
+        }
+        if (this.gameClientService.currentQuestion.type === QuestionType.QCM) {
+            switch (event.key) {
+                case '1':
+                    this.selectChoice(0);
+                    break;
+                case '2':
+                    this.selectChoice(1);
+                    break;
+                case '3':
+                    this.selectChoice(2);
+                    break;
+                case '4':
+                    this.selectChoice(3);
+                    break;
+            }
+        }
+    }
+
+    defaultKeyUpHandler(event: KeyboardEvent): void {
+        if (event.key === 'Enter' || (event.key >= '1' && event.key <= '4')) {
+            this.isKeyAlreadyPressed = false;
+        }
     }
 
     selectChoice(indexChoice: number) {
@@ -125,7 +168,7 @@ export class GamePageComponent extends PlayingComponent implements OnDestroy {
         if (!this.submitted) {
             this.gameClientService.finalizeAnswer();
             if (this.currentQuestion.type === 'QRL') {
-                this.gameClientService.sendAnswerForCorrection(this.answer);
+                this.gameClientService.sendAnswerForCorrection(this.gameClientService.answer);
             }
         }
     }
@@ -134,13 +177,13 @@ export class GamePageComponent extends PlayingComponent implements OnDestroy {
         this.gameClientService.abandonGame();
     }
 
-    textAreaModified(): void {
+    /* textAreaModified(): void {
         if (this.typingHasStopped) {
             this.typingHasStopped = false;
             this.gameClientService.sendModifyUpdate(true);
         }
         this.lastModified.next();
-    }
+    } */
 
     private onUnload() {
         localStorage.removeItem('navigatedFromUnload');
