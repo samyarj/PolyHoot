@@ -7,6 +7,7 @@ import 'package:client_leger/backend-communication-services/error-handlers/globa
 import 'package:client_leger/backend-communication-services/models/chat_message.dart';
 import 'package:client_leger/backend-communication-services/models/user.dart';
 import 'package:client_leger/business/channel_manager.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -23,7 +24,7 @@ class _ChatWindowState extends State<ChatWindow> {
   final FocusNode _focusNode = FocusNode();
   late ChannelManager _channelManager;
   late Future<User> _user;
-  late int? lastMessageDate; // Track last message date for pagination
+  late Timestamp? lastMessageDate; // Track last message date for pagination
   List<ChatMessage> _allMessagesDisplayed = [];
   bool isLoadingInitialMessages = true;
   StreamSubscription<List<ChatMessage>>? _messagesSubscription;
@@ -49,8 +50,7 @@ class _ChatWindowState extends State<ChatWindow> {
           isLoadingInitialMessages = false;
         });
         if (_allMessagesDisplayed.isNotEmpty) {
-          lastMessageDate =
-              _allMessagesDisplayed.last.date.millisecondsSinceEpoch;
+          lastMessageDate = _allMessagesDisplayed.last.timestamp;
         }
       }, onError: (error) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -72,7 +72,7 @@ class _ChatWindowState extends State<ChatWindow> {
             widget.channel, lastMessageDate!);
 
         if (oneFetch.isNotEmpty) {
-          lastMessageDate = oneFetch.last.date.millisecondsSinceEpoch;
+          lastMessageDate = oneFetch.last.timestamp;
 
           setState(() {
             _allMessagesDisplayed = [..._allMessagesDisplayed, ...oneFetch];
@@ -104,6 +104,11 @@ class _ChatWindowState extends State<ChatWindow> {
     }
     _textController.clear();
     _isSending = false;
+  }
+
+  String formatDate(Timestamp timestamp) {
+    return DateFormat('HH:mm:ss').format(
+        timestamp.toDate().subtract(Duration(hours: 5))); // UTF --> UTF-5
   }
 
   @override
@@ -192,8 +197,8 @@ class _ChatWindowState extends State<ChatWindow> {
                                                         alignment: Alignment
                                                             .bottomRight,
                                                         child: Text(
-                                                          message.date
-                                                              .toString(),
+                                                          formatDate(message
+                                                              .timestamp),
                                                           style: TextStyle(
                                                               color:
                                                                   Colors.white,
@@ -278,9 +283,8 @@ class _ChatWindowState extends State<ChatWindow> {
                                                       alignment:
                                                           Alignment.bottomRight,
                                                       child: Text(
-                                                        DateFormat('HH:mm:ss')
-                                                            .format(
-                                                                message.date),
+                                                        formatDate(
+                                                            message.timestamp),
                                                         style: TextStyle(
                                                             color: Colors.white,
                                                             fontSize: 16),

@@ -122,8 +122,8 @@ class FirebaseChatService {
               users[msg.uid]?.avatarEquipped ?? 'assets/default-avatar.png';
         }
 
-        newMessages
-            .sort((ChatMessage a, ChatMessage b) => b.date.compareTo(a.date));
+        newMessages.sort((ChatMessage a, ChatMessage b) =>
+            b.timestamp.compareTo(a.timestamp));
 
         AppLogger.i("newmessage length is: ${newMessages.length}");
 
@@ -162,7 +162,7 @@ class FirebaseChatService {
   }
 
   Future<List<ChatMessage>> loadOlderMessages(
-      String channel, int lastMessageDate) async {
+      String channel, Timestamp lastMessageDate) async {
     try {
       final olderMessagesQuery = channel == "General"
           ? _globalChatCollection
@@ -193,8 +193,8 @@ class FirebaseChatService {
             users[msg.uid]?.avatarEquipped ?? 'assets/default-avatar.png';
       }
 
-      olderMessages
-          .sort((ChatMessage a, ChatMessage b) => b.date.compareTo(a.date));
+      olderMessages.sort(
+          (ChatMessage a, ChatMessage b) => b.timestamp.compareTo(a.timestamp));
 
       AppLogger.i("oldermessage length is: ${olderMessages.length}");
 

@@ -5,12 +5,12 @@ class ChatMessage {
   final String message;
   String? username;
   String? avatar;
-  final DateTime date;
+  final Timestamp timestamp;
   final String uid; // user uid
 
   ChatMessage({
     required this.message,
-    required this.date,
+    required this.timestamp,
     required this.uid,
     this.username,
     this.avatar,
@@ -21,9 +21,7 @@ class ChatMessage {
 
     return ChatMessage(
       message: json['message'] as String,
-      date: (json['date'] as Timestamp)
-          .toDate()
-          .subtract(Duration(hours: 5)), // UTF --> UTF-5
+      timestamp: json['date'] as Timestamp,
       uid: json['uid'] as String,
       username: json['author'] as String?,
       avatar: json['avatar'] as String?,
