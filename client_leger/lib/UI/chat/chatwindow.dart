@@ -192,9 +192,8 @@ class _ChatWindowState extends State<ChatWindow> {
                                                         alignment: Alignment
                                                             .bottomRight,
                                                         child: Text(
-                                                          DateFormat('HH:mm:ss')
-                                                              .format(
-                                                                  message.date),
+                                                          message.date
+                                                              .toString(),
                                                           style: TextStyle(
                                                               color:
                                                                   Colors.white,

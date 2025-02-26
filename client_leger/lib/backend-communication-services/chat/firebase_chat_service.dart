@@ -39,7 +39,7 @@ class FirebaseChatService {
       final chatMessage = {
         'uid': user.uid,
         'message': message,
-        'date': DateTime.now().millisecondsSinceEpoch,
+        'date': FieldValue.serverTimestamp(),
       };
 
       if (channel == "General") {
@@ -98,9 +98,13 @@ class FirebaseChatService {
         AppLogger.d("In the asyncMap");
 
         for (final change in snapshot.docChanges) {
-          if (change.type == DocumentChangeType.added) {
-            final ChatMessage message =
-                ChatMessage.fromJson(change.doc.data() as Map<String, dynamic>);
+          Map<String, dynamic> jsonMessage =
+              change.doc.data() as Map<String, dynamic>;
+          if (change.type == DocumentChangeType.modified ||
+              change.type == DocumentChangeType.added &&
+                  jsonMessage['date'] != null) {
+            // when server adds the timestamp the document change type is modified and not added
+            final ChatMessage message = ChatMessage.fromJson(jsonMessage);
             newMessages.add(message);
             userIds.add(message.uid);
           }
