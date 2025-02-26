@@ -78,7 +78,7 @@ class FirebaseChatService {
   }
 
   Stream<List<ChatMessage>> getMessages(String channel) {
-    AppLogger.d("getMessages");
+    AppLogger.d("getMessages for channel $channel");
     try {
       final messagesQuery = channel == "General"
           ? _globalChatCollection

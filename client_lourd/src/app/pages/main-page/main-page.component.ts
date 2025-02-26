@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { AfterViewChecked, AfterViewInit, Component, ElementRef, OnDestroy, QueryList, ViewChildren } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, ElementRef, OnDestroy, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { DEFAULT_HOVER_INDEX } from '@app/constants/constants';
@@ -24,6 +24,7 @@ interface NavItem {
 export class MainPageComponent implements AfterViewInit, AfterViewChecked, OnDestroy {
     @ViewChildren('button') buttons: QueryList<ElementRef>;
     @ViewChildren('img') screenshots: QueryList<ElementRef>;
+    @ViewChild('parentElement', { static: true }) parentElement: ElementRef;
 
     activeSlideIndex: number = 0;
     hoverIndex: number = DEFAULT_HOVER_INDEX;
@@ -162,11 +163,11 @@ export class MainPageComponent implements AfterViewInit, AfterViewChecked, OnDes
 
     calculateWidth(index: number, length: number): number {
         if (length === 1) {
-            return 55; // Full width for single element
+            return 30; // Full width for single element
         } else if (length === 2) {
-            return 70 - 20 * index; // Adjust width for two elements
+            return 50 - 15 * index; // Adjust width for two elements
         } else {
-            return 85 - 15 * index; // Default width for three elements
+            return 60 - 15 * index; // Default width for three elements
         }
     }
 
@@ -176,7 +177,7 @@ export class MainPageComponent implements AfterViewInit, AfterViewChecked, OnDes
         } else if (length === 2) {
             return 40; // Half width for two elements
         } else {
-            return 33.33; // Default width for three elements
+            return 35; // Default width for three elements
         }
     }
 
@@ -193,7 +194,7 @@ export class MainPageComponent implements AfterViewInit, AfterViewChecked, OnDes
     calculateRightPosition(index: number, length: number): string {
         const width = this.calculateWidth(index, length);
         const rightPosition = width;
-        return `calc(${rightPosition}% - 200px)`;
+        return `calc(${rightPosition}%)`;
     }
 
     private addVisualEventListeners(): void {
