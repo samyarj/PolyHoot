@@ -25,7 +25,7 @@ export class ChatGateway {
         return this.chatService.getHistory(clientRoomId);
     }
 
-    @SubscribeMessage(ChatEvents.ChatStatusChange)
+    /* @SubscribeMessage(ChatEvents.ChatStatusChange)
     changeChatStatus(clientSocket: Socket, playerData: { playerName: string; canChat: boolean }) {
         let message = {
             message: '',
@@ -49,4 +49,4 @@ export class ChatGateway {
         const clientRoomId: string = Array.from(clientSocket.rooms.values())[1];
         this.server.to(clientRoomId).emit(ChatEvents.ChatStatusChange, chatData);
     }
-}
+} */

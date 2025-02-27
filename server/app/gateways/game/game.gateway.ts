@@ -20,7 +20,7 @@ export class GameGateway {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         const choiceSignal = game.handleChoiceChange(client, data.choice);
-        //if (!game.isRandomMode) game.organizer.socket.emit(GameEvents.PlayerChoiceToOrganizer, choiceSignal);
+       game.organizer.socket.emit(GameEvents.PlayerChoiceToOrganizer, choiceSignal);
     }
 
     @SubscribeMessage(TimerEvents.Pause)
@@ -48,12 +48,6 @@ export class GameGateway {
             game.startQuestionCountdown();
         }
     }
-/*     @SubscribeMessage(GameEvents.ModifyUpdate)
-    handleModifiedAnswer(@ConnectedSocket() client: Socket, @MessageBody() data: { playerName: string; modified: boolean }) {
-        const roomId = Array.from(client.rooms.values())[1];
-        const game = this.gameManager.getGameByRoomId(roomId);
-        game.organizer.socket.emit(GameEvents.ModifyUpdate, data);
-    } */
     @SubscribeMessage(JoinEvents.TitleRequest)
     handleGetTitleForPlayer(@ConnectedSocket() client: Socket): string {
         const roomId = Array.from(client.rooms.values())[1];
@@ -66,13 +60,7 @@ export class GameGateway {
     handleQuestionEndByTimer(@ConnectedSocket() client: Socket) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
-        if (game) {
-            if (game.isRandomMode) {
-                game.checkAndPrepareForNextQuestion(client);
-            } else {
-                game.preparePlayersForNextQuestion();
-            }
-        }
+        if (game) game.preparePlayersForNextQuestion();
     }
 
     @SubscribeMessage(GameEvents.GetCurrentGames)
@@ -90,9 +78,9 @@ export class GameGateway {
     }
 
     @SubscribeMessage(JoinEvents.Create)
-    handleCreateGame(@ConnectedSocket() client: Socket, @MessageBody() data: { quiz: Quiz; isRandomMode: boolean }) {
-        const { quiz, isRandomMode } = data;
-        const roomId = this.gameManager.createGame(quiz, client, isRandomMode);
+    handleCreateGame(@ConnectedSocket() client: Socket, @MessageBody() data: Quiz) {
+        const quiz = data;
+        const roomId = this.gameManager.createGame(quiz, client);
         client.join(roomId);
         const game = this.gameManager.getGameByRoomId(roomId);
         game.gameState = GameState.WAITING;
@@ -192,14 +180,6 @@ export class GameGateway {
         }
         const playerNames = this.gameManager.getGameByRoomId(roomId).players.map((player) => player.name);
         this.server.emit(GameEvents.PlayerLeft, { playerNames, roomId});
-    }
-    @SubscribeMessage(GameEvents.PlayerInteraction)
-    handlePlayerInteraction(@ConnectedSocket() client: Socket) {
-        const roomId = Array.from(client.rooms.values())[1];
-        const game = this.gameManager.getGameByRoomId(roomId);
-        const player = game.findTargetedPlayer(client);
-        player.interacted = true;
-        if (!game.isRandomMode) game.organizer.socket.emit(GameEvents.PlayerInteraction, player.name);
     }
 
     @SubscribeMessage(GameEvents.CorrectionFinished)

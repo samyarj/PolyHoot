@@ -21,15 +21,10 @@ export class ConnectionGateway implements OnGatewayDisconnect {
         private userService: UserService,
     ) {}
 
-
     @SubscribeMessage(ConnectEvents.identifyMobileClient)
-    handleIdentify(
-        @MessageBody() uid: string,
-        @ConnectedSocket() client: Socket
-    ) {
+    handleIdentify(@MessageBody() uid: string, @ConnectedSocket() client: Socket) {
         this.userService.addMobileClientToMap(client.id, uid);
     }
-
 
     @SubscribeMessage(ConnectEvents.UserToGame)
     handleUserConnectedToGamePage(@ConnectedSocket() client: Socket) {
@@ -76,7 +71,7 @@ export class ConnectionGateway implements OnGatewayDisconnect {
         const roomId = this.gameManager.socketRoomsMap.get(client);
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {
-            const isOrganizer = !game.isRandomMode && game.organizer.socket.id === client.id;
+            const isOrganizer = game.organizer.socket.id === client.id;
             if (isOrganizer) {
                 this.disconnectOrganizer(roomId, client);
             } else {
@@ -114,7 +109,7 @@ export class ConnectionGateway implements OnGatewayDisconnect {
     private disconnectUserFromResultsPage(roomId: string, client: Socket) {
         if (client) {
             const game = this.gameManager.getGameByRoomId(roomId);
-            if (!game.isRandomMode && client.id === game.organizer.socket.id) {
+            if (client.id === game.organizer.socket.id) {
                 this.sendDisconnectMessage('Organisateur', roomId);
             } else {
                 const player = this.gameManager.getGameByRoomId(roomId).findTargetedPlayer(client);
@@ -132,7 +127,6 @@ export class ConnectionGateway implements OnGatewayDisconnect {
 
     private disconnectPlayer(game: Game, player: Player, roomId: string) {
         if (game) {
-            if (game.gameState === GameState.GAMING) game.playersRemoved.push(player);
             switch (game.gameState) {
                 case GameState.WAITING: {
                     this.sendDisconnectMessage(player.name, roomId);
@@ -140,6 +134,7 @@ export class ConnectionGateway implements OnGatewayDisconnect {
                     break;
                 }
                 case GameState.GAMING: {
+                    game.playersRemoved.push(player);
                     this.sendDisconnectMessage(player.name, roomId);
                     this.disconnectPlayerFromGamePage(game, player);
                     break;
@@ -153,18 +148,17 @@ export class ConnectionGateway implements OnGatewayDisconnect {
         }
     }
     private disconnectPlayerFromWaitingPage(roomId: string, disconnectedPlayer: Player, game: Game) {
-        if (game.isRandomMode && disconnectedPlayer.name === 'Organisateur') {
+        if (disconnectedPlayer.name === 'Organisateur') {
             this.disconnectOrganizer(roomId, disconnectedPlayer.socket);
         }
         const playerNames = game.players.filter((player) => player.name !== disconnectedPlayer.name).map((player) => player.name);
-        if (game.isRandomMode && playerNames.length === 0) {
+        if (playerNames.length === 0) {
             this.gameManager.endGame(game.roomId);
         }
-        this.server.emit(GameEvents.PlayerLeft, { playerNames, roomId});
+        this.server.emit(GameEvents.PlayerLeft, { playerNames, roomId });
     }
 
     private disconnectPlayerFromGamePage(game: Game, player: Player) {
-        if (!game.isRandomMode) {
             game.organizer.socket.emit(GameEvents.PlayerStatusUpdate, { name: player.name, isInGame: false });
             game.removePlayer(player.name);
             if (game.players.length === 0) {
@@ -173,14 +167,6 @@ export class ConnectionGateway implements OnGatewayDisconnect {
             } else {
                 game.checkAndPrepareForNextQuestion();
             }
-        } else if (game.isRandomMode) {
-            game.removePlayer(player.name);
-            if (game.players.length === 0) {
-                this.gameManager.endGame(game.roomId);
-            } else {
-                game.checkAndPrepareForNextQuestion();
-            }
-        }
     }
 
     private connectUser(client: Socket) {

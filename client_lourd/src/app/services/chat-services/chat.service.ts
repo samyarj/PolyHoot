@@ -79,13 +79,13 @@ export class ChatService {
                 this.allChatMessagesSource.next(this.allChatMessages);
             }
         });
-        this.socketClientService.on(ChatEvents.ChatStatusChange, (chatData: ChatData) => {
+        /* this.socketClientService.on(ChatEvents.ChatStatusChange, (chatData: ChatData) => {
             if (this.socketClientService.playerName === chatData.playerName) {
                 this.socketClientService.canChat = !this.socketClientService.canChat;
                 this.allChatMessages.push(chatData.message);
                 this.allChatMessagesSource.next(this.allChatMessages);
             }
-        });
+        }); */
 
         this.isInitialized = true;
     }

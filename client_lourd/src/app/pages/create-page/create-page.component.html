@@ -20,9 +20,6 @@
         </div>
         <div id="quizlist">
             <ol class="quizzes-list" style="--length: 5" role="list">
-                <li *ngIf="randomModeQuiz && randomModeQuiz.title === 'Mode aléatoire'" class="quizContainer" (click)="openDialog(randomModeQuiz)">
-                    <h3>{{ randomModeQuiz.title }}</h3>
-                </li>
                 <li class="quizContainer" *ngFor="let quiz of quizzes" (click)="openDialog(quiz)">
                     <h3>{{ quiz.title }}</h3>
                 </li>

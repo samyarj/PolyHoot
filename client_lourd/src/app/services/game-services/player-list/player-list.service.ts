@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { NOT_FOUND } from '@app/constants/constants';
-import { GameEvents } from '@app/constants/enum-class';
-import { ChatEvents } from '@app/services/chat-services/chat-events';
+// import { ChatEvents } from '@app/services/chat-services/chat-events';
 import { SortingService } from '@app/services/general-services/sorting-service/sorting.service';
-import { SocketClientService } from '@app/services/websocket-services/general/socket-client-manager.service';
+// import { SocketClientService } from '@app/services/websocket-services/general/socket-client-manager.service';
 import { PartialPlayer } from '@common/partial-player';
 import { Subject } from 'rxjs';
 
@@ -16,20 +15,20 @@ export class PlayerListService {
     playerListObservable = this.playerListSource.asObservable();
     noPlayers: number = this.playerList.length;
     constructor(
-        private socketHandlerService: SocketClientService,
+        // private socketHandlerService: SocketClientService,
         private sortingService: SortingService,
     ) {
         this.sortingService.sortById(this.sortingService.sortId, this.sortingService.sortDirection, this.playerList);
     }
 
-    changeChatStatus(playerName: string) {
+    /* changeChatStatus(playerName: string) {
         const playerFound = this.playerList.find((player) => player.name === playerName);
         if (playerFound) {
             playerFound.canChat = !playerFound.canChat;
             const playerData = { playerName, canChat: playerFound.canChat };
             this.socketHandlerService.send(ChatEvents.ChatStatusChange, playerData);
         }
-    }
+    } */
     resetPlayerList() {
         this.playerList.forEach((player: PartialPlayer) => {
             if (player.isInGame) {
@@ -56,7 +55,7 @@ export class PlayerListService {
         }
         this.sortingService.sortById(this.sortingService.sortId, this.sortingService.sortDirection, this.playerList);
     }
-    handlePlayerInteraction() {
+    /*  handlePlayerInteraction() {
         this.socketHandlerService.on(GameEvents.PlayerInteraction, (playerName: string) => {
             const playerIndex = this.playerList.findIndex((player) => playerName === player.name);
             if (playerIndex !== NOT_FOUND) {
@@ -64,8 +63,8 @@ export class PlayerListService {
             }
             this.sortingService.sortById(this.sortingService.sortId, this.sortingService.sortDirection, this.playerList);
         });
-    }
-    handlePlayerSubmission() {
+    } */
+    /* handlePlayerSubmission() {
         this.socketHandlerService.on(GameEvents.PlayerSubmitted, (playerName: string) => {
             const playerIndex = this.playerList.findIndex((player) => playerName === player.name);
             if (playerIndex !== NOT_FOUND) {
@@ -74,5 +73,5 @@ export class PlayerListService {
             }
             this.sortingService.sortById(this.sortingService.sortId, this.sortingService.sortDirection, this.playerList);
         });
-    }
+    } */
 }

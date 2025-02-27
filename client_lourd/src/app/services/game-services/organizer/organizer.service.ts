@@ -16,7 +16,6 @@ import {
 } from '@app/constants/enum-class';
 import { AnswerQRL } from '@app/interfaces/answer-qrl';
 import { GameInfo } from '@app/interfaces/game-info';
-import { Modification } from '@app/interfaces/modification';
 import { Modifiers } from '@app/interfaces/modifiers';
 import { PointsUpdateQRL } from '@app/interfaces/points-update';
 import { Question } from '@app/interfaces/question';
@@ -39,7 +38,6 @@ export class OrganizerService {
     gameModifiers: Modifiers = { paused: false, alertMode: false };
     gameStatus: GameStatus = GameStatus.WaitingForAnswers;
     isCorrectAnswersArray: boolean[];
-    peopleAnswering: Modification = { modifying: [], notModifying: [] };
     shouldDisconnect: boolean = true;
     private questionsLength: number;
     private pointsAfterCorrection: PointsUpdateQRL[] = [];
@@ -97,7 +95,6 @@ export class OrganizerService {
         }
     }
     signalUserDisconnect() {
-        this.socketHandlerService.isRandomMode = false;
         this.socketHandlerService.send(DisconnectEvents.OrganizerDisconnected);
         this.alertSoundPlayer.stop();
     }
@@ -125,7 +122,6 @@ export class OrganizerService {
 
     abandonGame() {
         this.messageHandlerService.confirmationDialog(ConfirmationMessage.AbandonGame, () => {
-            this.socketHandlerService.isRandomMode = false;
             this.router.navigate([AppRoute.CREATE]);
             this.alertSoundPlayer.stop();
         });
@@ -189,8 +185,6 @@ export class OrganizerService {
         this.socketHandlerService.on(GameEvents.PlayerStatusUpdate, (player: { name: string; isInGame: boolean }) => {
             this.playerListService.updatePlayerPresence(player.name, player.isInGame);
             if (player.isInGame === false) {
-                this.peopleAnswering.notModifying = this.peopleAnswering.notModifying.filter((name) => name !== player.name);
-                this.peopleAnswering.modifying = this.peopleAnswering.modifying.filter((name) => name !== player.name);
                 this.answersQRL = this.answersQRL.filter((playerGraded) => playerGraded.player !== player.name);
             }
         });
@@ -216,11 +210,11 @@ export class OrganizerService {
     }
 
     private handlePlayerListSockets() {
-        this.playerListService.handlePlayerInteraction();
         this.handlePlayerStatus();
         this.handlePlayerPoints();
         this.handlePlayerList();
-        this.playerListService.handlePlayerSubmission();
+        /* this.playerListService.handlePlayerInteraction();
+        this.playerListService.handlePlayerSubmission(); */
     }
 
     private handleTimerValue() {
@@ -272,8 +266,6 @@ export class OrganizerService {
             this.pointsAfterCorrection = [];
             this.totalNumberOfAnswers = [0, 0, 0];
             this.gameInfo.currentIndex = 0;
-            this.peopleAnswering.modifying = [];
-            this.peopleAnswering.notModifying = this.playerListService.playerList.filter((player) => player.isInGame).map((player) => player.name);
             this.gameModifiers = { paused: false, alertMode: false };
             this.gameInfo.currentQuestionIndex = nextQuestion.index;
             this.currentQuestion = nextQuestion.question;

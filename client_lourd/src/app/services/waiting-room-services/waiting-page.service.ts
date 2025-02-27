@@ -32,10 +32,6 @@ export class WaitingPageService {
         return this.socketService.isOrganizer;
     }
 
-    get isRandomMode() {
-        return this.socketService.isRandomMode;
-    }
-
     get roomId() {
         return this.socketService.roomId;
     }
@@ -45,13 +41,11 @@ export class WaitingPageService {
     }
 
     leaveWaitingPageAsOrganizor() {
-        this.socketService.isRandomMode = false;
         this.socketService.send(DisconnectEvents.OrganizerDisconnected);
         this.resetAttributes();
     }
 
     leaveWaitingPageAsPlayer() {
-        this.socketService.isRandomMode = false;
         this.socketService.send(DisconnectEvents.Player);
         this.resetAttributes();
     }
@@ -104,7 +98,6 @@ export class WaitingPageService {
 
     private handleBanPlayer() {
         this.socketService.on(GameEvents.PlayerBanned, () => {
-            this.socketService.isRandomMode = false;
             this.bannedPlayerSource.next(true);
             this.resetAttributes();
         });
@@ -132,7 +125,7 @@ export class WaitingPageService {
     private handleCountdownEnd() {
         this.socketService.on(TimerEvents.GameCountdownEnd, () => {
             this.timerEndSource.next(true);
-            if (this.isOrganizer || this.isRandomMode) this.startGame();
+            if (this.isOrganizer) this.startGame();
             this.resetAttributes();
         });
     }
@@ -140,9 +133,6 @@ export class WaitingPageService {
     private handleGameTitle() {
         this.socketService.on(GameEvents.Title, (title: string) => {
             this.gameTitle = title;
-            if (title === 'Mode aléatoire') {
-                this.socketService.isRandomMode = true;
-            } else this.socketService.isRandomMode = false;
         });
     }
 

@@ -11,7 +11,6 @@ export class SocketClientService {
     playerName: string;
     canChat: boolean;
     isOrganizer: boolean;
-    isRandomMode: boolean;
 
     constructor() {
         this.connect();

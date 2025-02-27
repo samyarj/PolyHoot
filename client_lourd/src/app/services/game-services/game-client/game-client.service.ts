@@ -37,7 +37,7 @@ export class GameClientService {
     private finalAnswer: boolean;
     private realShowAnswers: boolean;
     private socketsInitialized: boolean = false;
-    private interacted: boolean = false;
+    // private interacted: boolean = false;
 
     // constructeur a 4 parametres permis selon les charges et le prof, etant donne la nature des attributs
     // eslint-disable-next-line max-params
@@ -58,16 +58,12 @@ export class GameClientService {
         return this.socketHandler.roomId;
     }
 
-    get isRandomMode() {
-        return this.socketHandler.isRandomMode;
-    }
-
     selectChoice(indexChoice: number): boolean {
         if (this.time > 0 && !this.finalAnswer) {
-            if (!this.interacted) {
+            /*  if (!this.interacted) {
                 this.interacted = true;
                 this.socketHandler.send(GameEvents.PlayerInteraction);
-            }
+            } */
             if (this.currentQuestion.choices && this.currentQuestion.choices[indexChoice]) {
                 this.currentQuestion.choices[indexChoice].isSelected = !this.currentQuestion.choices[indexChoice].isSelected;
                 this.playerInfo.choiceSelected[indexChoice] = !this.playerInfo.choiceSelected[indexChoice];
@@ -113,7 +109,7 @@ export class GameClientService {
     resetAttributes() {
         this.choiceFeedback = ChoiceFeedback.Idle;
         this.answer = '';
-        this.interacted = false;
+        // this.interacted = false;
         this.gamePaused = false;
         this.finalAnswer = false;
         this.realShowAnswers = false;
@@ -143,7 +139,6 @@ export class GameClientService {
         });
     }
     signalUserDisconnect() {
-        this.socketHandler.isRandomMode = false;
         this.socketHandler.send(DisconnectEvents.Player);
         this.alertSoundPlayer.stop();
     }
@@ -157,7 +152,6 @@ export class GameClientService {
 
     abandonGame() {
         this.messageHandlerService.confirmationDialog(ConfirmationMessage.AbandonGame, () => {
-            this.socketHandler.isRandomMode = false;
             this.router.navigate([AppRoute.HOME]);
             this.alertSoundPlayer.stop();
         });
@@ -201,10 +195,6 @@ export class GameClientService {
                 this.playerInfo.submitted = false;
                 this.currentQuestionIndex = nextQuestion.index;
                 this.currentQuestion = nextQuestion.question;
-            } else {
-                if (this.isRandomMode) {
-                    this.socketHandler.send(GameEvents.ShowResults);
-                }
             }
         });
     }
