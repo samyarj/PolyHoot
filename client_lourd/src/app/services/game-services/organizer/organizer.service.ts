@@ -213,8 +213,6 @@ export class OrganizerService {
         this.handlePlayerStatus();
         this.handlePlayerPoints();
         this.handlePlayerList();
-        /* this.playerListService.handlePlayerInteraction();
-        this.playerListService.handlePlayerSubmission(); */
     }
 
     private handleTimerValue() {
@@ -261,7 +259,6 @@ export class OrganizerService {
         });
         this.socketHandlerService.on(GameEvents.NextQuestion, (nextQuestion: { question: Question; index: number }) => {
             this.playerListService.resetPlayerList();
-            // this.timeQuestionBegan = Date.now();
             this.answersQRL = [];
             this.pointsAfterCorrection = [];
             this.totalNumberOfAnswers = [0, 0, 0];
