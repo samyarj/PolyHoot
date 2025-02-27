@@ -37,7 +37,6 @@ export class GameClientService {
     private finalAnswer: boolean;
     private realShowAnswers: boolean;
     private socketsInitialized: boolean = false;
-    // private interacted: boolean = false;
 
     // constructeur a 4 parametres permis selon les charges et le prof, etant donne la nature des attributs
     // eslint-disable-next-line max-params
@@ -60,10 +59,6 @@ export class GameClientService {
 
     selectChoice(indexChoice: number): boolean {
         if (this.time > 0 && !this.finalAnswer) {
-            /*  if (!this.interacted) {
-                this.interacted = true;
-                this.socketHandler.send(GameEvents.PlayerInteraction);
-            } */
             if (this.currentQuestion.choices && this.currentQuestion.choices[indexChoice]) {
                 this.currentQuestion.choices[indexChoice].isSelected = !this.currentQuestion.choices[indexChoice].isSelected;
                 this.playerInfo.choiceSelected[indexChoice] = !this.playerInfo.choiceSelected[indexChoice];
@@ -73,14 +68,6 @@ export class GameClientService {
         }
         return false;
     }
-
-    /*     sendModifyUpdate(modified: boolean) {
-        if (!this.interacted) {
-            this.interacted = true;
-            this.socketHandler.send(GameEvents.PlayerInteraction);
-        }
-        this.socketHandler.send(GameEvents.ModifyUpdate, { playerName: this.socketHandler.playerName, modified });
-    } */
 
     finalizeAnswer() {
         this.playerInfo.submitted = true;
@@ -109,7 +96,6 @@ export class GameClientService {
     resetAttributes() {
         this.choiceFeedback = ChoiceFeedback.Idle;
         this.answer = '';
-        // this.interacted = false;
         this.gamePaused = false;
         this.finalAnswer = false;
         this.realShowAnswers = false;
@@ -117,7 +103,6 @@ export class GameClientService {
         this.playerInfo.waitingForQuestion = false;
         this.playerInfo.choiceSelected = [false, false, false, false];
         this.shouldDisconnect = true;
-        // this.socketsInitialized = false;
         if (this.currentQuestion && this.currentQuestion.choices) {
             for (const choice of this.currentQuestion.choices) {
                 choice.isSelected = false;

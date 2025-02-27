@@ -12,10 +12,6 @@ import { GameClientService } from '@app/services/game-services/game-client/game-
     styleUrls: ['game-page.component.scss'],
 })
 export class GamePageComponent implements OnDestroy {
-    // private lastModified = new Subject<void>();
-    // private subscriptions = new Subscription();
-    // private unsubscribe$ = new Subject<void>();
-    // private typingHasStopped = true;
     // eslint-disable-next-line @typescript-eslint/naming-convention
     readonly MAX_CHARACTERS = 200;
     isKeyAlreadyPressed: boolean = false;
@@ -176,14 +172,6 @@ export class GamePageComponent implements OnDestroy {
     abandonGame() {
         this.gameClientService.abandonGame();
     }
-
-    /* textAreaModified(): void {
-        if (this.typingHasStopped) {
-            this.typingHasStopped = false;
-            this.gameClientService.sendModifyUpdate(true);
-        }
-        this.lastModified.next();
-    } */
 
     private onUnload() {
         localStorage.removeItem('navigatedFromUnload');
