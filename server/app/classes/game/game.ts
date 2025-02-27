@@ -225,9 +225,7 @@ export class Game {
                 name: player.name,
                 points: player.points,
                 isInGame: player.isInGame,
-                interacted: player.interacted,
                 submitted: player.submitted,
-                canChat: player.canChat,
             });
         });
         this.organizer.socket.emit(GameEvents.SendPlayerList, players);

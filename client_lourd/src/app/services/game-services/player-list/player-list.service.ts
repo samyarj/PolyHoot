@@ -17,19 +17,14 @@ export class PlayerListService {
     }
     resetPlayerList() {
         this.playerList.forEach((player: PartialPlayer) => {
-            if (player.isInGame) {
-                player.submitted = false;
-                player.interacted = false;
-            }
+            if (player.isInGame) player.submitted = false;
         });
         this.sortingService.sortById(this.sortingService.sortId, this.sortingService.sortDirection, this.playerList);
     }
     updatePlayerPresence(name: string, status: boolean) {
         const playerIndex = this.playerList.findIndex((player) => player.name === name);
         if (playerIndex !== NOT_FOUND) {
-            this.playerList[playerIndex].canChat = false;
             this.playerList[playerIndex].isInGame = status;
-            this.playerList[playerIndex].interacted = false;
             this.playerList[playerIndex].submitted = false;
         }
         this.sortingService.sortById(this.sortingService.sortId, this.sortingService.sortDirection, this.playerList);
