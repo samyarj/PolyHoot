@@ -108,7 +108,7 @@ class _ChatWindowState extends State<ChatWindow> {
 
   String formatDate(Timestamp timestamp) {
     return DateFormat('HH:mm:ss').format(
-        timestamp.toDate().subtract(Duration(hours: 5))); // UTF --> UTF-5
+        timestamp.toDate().toUtc().subtract(Duration(hours: 5))); // UTC-5
   }
 
   @override
