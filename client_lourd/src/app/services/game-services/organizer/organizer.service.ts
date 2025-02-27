@@ -43,7 +43,6 @@ export class OrganizerService {
     private pointsAfterCorrection: PointsUpdateQRL[] = [];
     private totalNumberOfAnswers = [0, 0, 0];
     private socketsInitialized: boolean = false;
-    // private timeQuestionBegan: number = 0;
     // Ce sont des services qui communiquent avec d'autres composantes selon la logique du jeu
     // eslint-disable-next-line max-params
     constructor(
@@ -71,7 +70,6 @@ export class OrganizerService {
 
     handleSockets() {
         if (!this.socketsInitialized) {
-            // this.handleAnswerUpdate();
             this.handleQRLAnswer();
             this.handleEveryoneSubmitted();
             this.handlePlayerListSockets();

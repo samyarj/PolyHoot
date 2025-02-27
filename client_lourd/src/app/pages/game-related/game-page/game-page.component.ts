@@ -118,9 +118,6 @@ export class GamePageComponent implements OnDestroy {
             this.router.navigate([AppRoute.HOME]);
         }
         this.gameClientService.resetAttributes();
-        /*         this.unsubscribe$.next();
-        this.unsubscribe$.complete();
-        this.subscriptions.unsubscribe(); */
     }
     defaultKeyDownHandler(event: KeyboardEvent): void {
         if (this.isKeyAlreadyPressed) {

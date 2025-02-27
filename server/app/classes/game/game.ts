@@ -177,7 +177,6 @@ export class Game {
     finalizePlayerAnswer(@ConnectedSocket() client: Socket) {
         const targetedPlayer: Player = this.findTargetedPlayer(client);
         targetedPlayer.submitted = true;
-        this.organizer.socket.emit(GameEvents.PlayerSubmitted, targetedPlayer.name);
         if (!targetedPlayer.verifyIfAnswersCorrect(this.quiz.questions[this.currentQuestionIndex])) {
             targetedPlayer.isFirst = false;
             return this.checkAndPrepareForNextQuestion();
@@ -238,7 +237,7 @@ export class Game {
     // eslint-disable-next-line max-params
     private initializeGame(roomId: string, quiz: Quiz, @ConnectedSocket() client: Socket) {
         this.players = [];
-            this.organizer = new Player('Organisateur', true, client);
+        this.organizer = new Player('Organisateur', true, client);
         this.playersRemoved = [];
         this.bannedNames = [];
         this.quiz = quiz;
@@ -281,9 +280,7 @@ export class Game {
     }
     private emitCorrectionEvents() {
         if (this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QRL) {
-                this.players.forEach((player: Player) => {
-                    player.socket.emit(GameEvents.EveryoneSubmitted);
-                });
+            this.organizer.socket.emit(GameEvents.EveryoneSubmitted);
             this.players.forEach((player: Player) => {
                 player.socket.emit(GameEvents.WaitingForCorrection);
             });

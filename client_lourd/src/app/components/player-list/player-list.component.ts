@@ -24,7 +24,4 @@ export class PlayerListComponent {
     onSortChange(sortId: number, direction: SortDirection) {
         this.sortingService.sortById(sortId, direction, this.playerList);
     }
-    /* changeChatStatus(playerName: string) {
-        this.playerListService.changeChatStatus(playerName);
-    } */
 }
