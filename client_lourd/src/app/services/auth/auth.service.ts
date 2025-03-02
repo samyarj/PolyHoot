@@ -1,3 +1,4 @@
+import { SocketClientService } from './../websocket-services/general/socket-client-manager.service';
 /* eslint-disable @typescript-eslint/naming-convention */
 import { HttpClient } from '@angular/common/http';
 import { Injectable, Injector } from '@angular/core';
@@ -16,7 +17,7 @@ import { User } from '@app/interfaces/user';
 import { handleErrorsGlobally } from '@app/utils/rxjs-operators';
 import { collection, doc, getDocs, query, updateDoc, where } from '@firebase/firestore';
 import { User as FirebaseUser, onIdTokenChanged, sendPasswordResetEmail } from 'firebase/auth';
-import { BehaviorSubject, catchError, finalize, from, map, Observable, of, switchMap, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, finalize, from, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -37,6 +38,7 @@ export class AuthService {
         private injector: Injector,
         private router: Router,
         private firestore: Firestore,
+        private socketClientService: SocketClientService,
     ) {
         this.monitorTokenChanges();
     }
@@ -147,6 +149,15 @@ export class AuthService {
         return this.userBS.value;
     }
 
+    private setIsOnline(status: boolean, uid: string | null): void {
+        if (!uid) return;
+
+        const userDocRef = doc(this.firestore, `users/${uid}`);
+        from(updateDoc(userDocRef, { isOnline: status }))
+            .pipe(handleErrorsGlobally(this.injector))
+            .subscribe();
+    }
+
     private handleAuthAndFetchUser(userCredential: UserCredential, endpoint: string, method: 'GET' | 'POST' = 'GET'): Observable<User> {
         return from(userCredential.user.getIdToken()).pipe(
             switchMap((idToken) => {
@@ -161,6 +172,11 @@ export class AuthService {
                         throw new Error(`Unsupported HTTP method: ${method}`);
                 }
             }),
+            tap((user) => {
+                if (user && user.uid) {
+                    this.socketClientService.send('identifyMobileClient', user.uid);
+                }
+            }),
         );
     }
 
@@ -171,20 +187,33 @@ export class AuthService {
             if (this.isAuthenticating) {
                 return;
             }
+
             if (firebaseUser) {
                 try {
                     const idToken = await firebaseUser.getIdToken();
                     if (!idToken) throw new Error('Votre session a expiré. Veuillez vous reconnecter.');
 
-                    this.http
-                        .get<User>(`${this.baseUrl}/profile`, {
-                            headers: { Authorization: `Bearer ${idToken}` },
-                        })
-                        .pipe(finalize(() => this.loadingTokenBS.next(false)))
-                        .subscribe({
-                            next: (user) => this.userBS.next(user),
-                            error: () => this.logout(),
-                        });
+                    this.isUserOnline(firebaseUser.uid).subscribe((isOnline) => {
+                        if (isOnline) {
+                            this.loadingTokenBS.next(false);
+                            this.clearSession();
+                            throw new Error("L'utilisateur est déjà connecté sur un autre appareil. ");
+                        }
+
+                        this.http
+                            .get<User>(`${this.baseUrl}/profile`, {
+                                headers: { Authorization: `Bearer ${idToken}` },
+                            })
+                            .pipe(finalize(() => this.loadingTokenBS.next(false)))
+                            .subscribe({
+                                next: (user) => {
+                                    this.setIsOnline(true, user.uid);
+                                    this.userBS.next(user);
+                                    this.socketClientService.send('identifyMobileClient', user.uid);
+                                },
+                                error: () => this.logout(),
+                            });
+                    });
                 } catch {
                     this.loadingTokenBS.next(false);
                     this.logout();

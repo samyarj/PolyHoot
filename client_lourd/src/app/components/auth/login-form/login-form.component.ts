@@ -33,7 +33,9 @@ export class LoginFormComponent {
             return;
         }
 
-        const { identifier, password } = this.loginForm.value;
+        let { identifier, password } = this.loginForm.value;
+        identifier = identifier.trim();
+        password = password.trim();
         this.isSubmitting = true;
         this.loginForm.disable();
 
