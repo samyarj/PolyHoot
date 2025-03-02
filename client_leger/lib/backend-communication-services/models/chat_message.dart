@@ -1,13 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class ChatMessage {
   final String message;
   String? username;
   String? avatar;
-  final DateTime date;
+  final Timestamp timestamp;
   final String uid; // user uid
 
   ChatMessage({
     required this.message,
-    required this.date,
+    required this.timestamp,
     required this.uid,
     this.username,
     this.avatar,
@@ -16,10 +18,7 @@ class ChatMessage {
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     return ChatMessage(
       message: json['message'] as String,
-      date: DateTime.fromMillisecondsSinceEpoch(
-        json['date'] as int,
-        isUtc: true,
-      ).toLocal(),
+      timestamp: json['date'] as Timestamp,
       uid: json['uid'] as String,
       username: json['author'] as String?,
       avatar: json['avatar'] as String?,
