@@ -87,8 +87,14 @@ export class GamePageComponent implements OnDestroy {
     get answer(): string {
         return this.gameClientService.answer;
     }
+    get selectedRangeValue(): number {
+        return this.gameClientService.selectedRangeValue;
+    }
     set answer(value: string) {
         this.gameClientService.answer = value;
+    }
+    set selectedRangeValue(value: number) {
+        this.gameClientService.selectedRangeValue = value;
     }
     // J'ai remplace le window:unload par window:beforeunload pour que le localStorage soit modifie avant que la page soit dechargee
     @HostListener('window:beforeunload')

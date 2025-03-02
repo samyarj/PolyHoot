@@ -174,7 +174,7 @@ export class TestClientService {
     }
 
     private initializeQuestionTimer() {
-        if (this.currentQuestion.type === QuestionType.QCM) {
+        if (this.currentQuestion.type === QuestionType.QCM || this.currentQuestion.type === QuestionType.QRE) {
             this.timeService.resetTimer(this.quiz.duration);
         } else if (this.currentQuestion.type === QuestionType.QRL) {
             this.timeService.resetTimer(QRL_TIME);

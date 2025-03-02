@@ -34,6 +34,7 @@ export class GameClientService {
     shouldDisconnect: boolean = true;
     time: number = 0;
     answer: string = '';
+    selectedRangeValue: number = 0;
     private finalAnswer: boolean;
     private realShowAnswers: boolean;
     private socketsInitialized: boolean = false;

@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { addQuestionAnimation, deleteQuestionAnimation, gameFormAnimation, questionFormAnimation } from '@app/animations/animation';
 import { ID } from '@app/constants/constants';
 import { AppRoute, ButtonType, ConfirmationMessage } from '@app/constants/enum-class';
-import { EMPTY_QUESTION } from '@app/constants/mock-constants';
+import { EMPTY_QCM_QUESTION, EMPTY_QRE_QUESTION } from '@app/constants/mock-constants';
 import { Question } from '@app/interfaces/question';
 import { Quiz } from '@app/interfaces/quiz';
 import { QuizHandlerService } from '@app/services/admin-services/quiz-handler-service/quiz-handler.service';
@@ -22,7 +22,7 @@ export class CreateQuizComponent {
     @Output() questionToBank = new EventEmitter<Question>();
     @Output() submitQuiz = new EventEmitter<Quiz>();
     submitQuestionButton: string = ButtonType.ADD;
-    currentQuestion: Question = JSON.parse(JSON.stringify(EMPTY_QUESTION));
+    currentQuestion: Question = JSON.parse(JSON.stringify(EMPTY_QCM_QUESTION));
     // 4 services injectés plutôt que 3, c'est raisonnable d'après les chargés car 1 fichier = 1 responsabilité
     // eslint-disable-next-line max-params
     constructor(
@@ -36,9 +36,9 @@ export class CreateQuizComponent {
         return this.quizHandler.quiz;
     }
 
-    emptyCurrentQuestion() {
+    emptyCurrentQuestion(questionType: string) {
         const id = this.currentQuestion.id;
-        this.emptyQuestion();
+        this.emptyQuestion(questionType);
         this.currentQuestion.id = id;
     }
 
@@ -55,7 +55,7 @@ export class CreateQuizComponent {
             return;
         }
         this.quizHandler.addQuestionToQuiz(newQuestion);
-        this.emptyQuestion();
+        this.emptyQuestion(newQuestion.type);
     }
 
     addQuestionToBank(clickedQuestion: Question): void {
@@ -91,6 +91,7 @@ export class CreateQuizComponent {
     submitQuizEvent() {
         this.quizHandler.disableAnimations = true;
         this.quizHandler.prepareQuizBeforeSubmit();
+        console.log(this.quiz);
         this.submitQuiz.emit(this.quiz);
     }
 
@@ -109,7 +110,8 @@ export class CreateQuizComponent {
         this.router.navigate([AppRoute.ADMIN]);
     }
 
-    private emptyQuestion() {
-        this.currentQuestion = JSON.parse(JSON.stringify(EMPTY_QUESTION));
+    private emptyQuestion(questionType?: string) {
+        this.currentQuestion =
+            questionType === 'QRE' ? JSON.parse(JSON.stringify(EMPTY_QRE_QUESTION)) : JSON.parse(JSON.stringify(EMPTY_QCM_QUESTION));
     }
 }

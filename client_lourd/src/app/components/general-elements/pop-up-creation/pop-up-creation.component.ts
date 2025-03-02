@@ -38,6 +38,7 @@ export class PopUpCreationComponent {
     openNewGame(): void {
         const quiz = this.data;
         this.socketService.send(JoinEvents.Create, quiz, (roomId: string) => {
+            console.log(quiz);
             this.socketService.roomId = roomId;
             this.socketService.isOrganizer = true;
             this.verifyLocalStorage();

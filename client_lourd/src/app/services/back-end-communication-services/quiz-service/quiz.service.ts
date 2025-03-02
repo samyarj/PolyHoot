@@ -78,13 +78,14 @@ export class QuizService {
         );
     }
 
-    private removeChoicesQrl(questions: Question[]) {
+    private removeChoices(questions: Question[]) {
         questions.forEach((question) => {
-            if (question.type === QuestionType.QRL) delete question['choices'];
+            console.log(question);
+            if (question.type !== QuestionType.QCM) delete question['choices'];
         });
     }
 
     private filterQuizzes(quizzes: Quiz[]) {
-        quizzes.forEach((quiz) => this.removeChoicesQrl(quiz.questions));
+        quizzes.forEach((quiz) => this.removeChoices(quiz.questions));
     }
 }

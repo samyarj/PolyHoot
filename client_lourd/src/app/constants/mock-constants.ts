@@ -39,7 +39,7 @@ export const EMPTY_QUIZ_GAME_CLIENT: Quiz = {
     ],
 };
 
-export const EMPTY_QUESTION: Question = {
+export const EMPTY_QCM_QUESTION: Question = {
     type: QuestionType.QCM,
     text: '',
     points: 10,
@@ -47,6 +47,18 @@ export const EMPTY_QUESTION: Question = {
         { text: '', isCorrect: false },
         { text: '', isCorrect: false },
     ],
+};
+export const EMPTY_QRE_QUESTION: Question = {
+    id: '',
+    type: 'QRE',
+    text: '',
+    points: 10,
+    qreAttributes: {
+        goodAnswer: 0,
+        minBound: 0,
+        maxBound: 0,
+        tolerance: 0,
+    },
 };
 
 export const EMPTY_QUESTION_WITHOUT_CHOICES: Question = {

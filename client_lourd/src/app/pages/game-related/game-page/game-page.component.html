@@ -66,6 +66,22 @@
                         maxlength="{{ MAX_CHARACTERS }}"
                         [disabled]="submitted"
                     ></textarea>
+                    <div *ngIf="currentQuestion.type === 'QRE'" id="range-selection-section">
+                        <input *ngIf="currentQuestion.qreAttributes"
+                            type="range"
+                            id="range-input"
+                            [min]="currentQuestion.qreAttributes.minBound"
+                            [max]="currentQuestion.qreAttributes.maxBound"
+                            [(ngModel)]="selectedRangeValue"
+                            [disabled]="submitted"
+                        />
+                        <div id="range-values" *ngIf="currentQuestion.qreAttributes">
+                            <span>Borne minimale: {{ currentQuestion.qreAttributes.minBound }}</span>
+                            <span>Borne maximale: {{ currentQuestion.qreAttributes.maxBound }}</span>
+                            <span>Votre réponse: {{ selectedRangeValue }}</span>
+                            <span>Marge de tolérance: {{ currentQuestion.qreAttributes.tolerance }}</span>
+                        </div>
+                    </div>
                     <button [disabled]="submitted" id="submit-choice-button" (click)="finalizeAnswer()">Submit</button>
                 </div>
                 <button id="abandon-button" (click)="abandonGame()">Abandonner</button>

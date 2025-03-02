@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DisconnectEvents, GameEvents } from '@app/constants/enum-class';
-import { EMPTY_QUESTION } from '@app/constants/mock-constants';
+import { EMPTY_QCM_QUESTION } from '@app/constants/mock-constants';
 import { Question } from '@app/interfaces/question';
 import { SocketClientService } from '@app/services/websocket-services/general/socket-client-manager.service';
 
@@ -108,6 +108,6 @@ export class ResultsService {
         this.questions = [];
         this.resultsReady = false;
         this.currentQuestionIndex = 0;
-        this.question = EMPTY_QUESTION;
+        this.question = EMPTY_QCM_QUESTION;
     }
 }

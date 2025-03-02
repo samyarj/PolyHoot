@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ConfirmationMessage } from '@app/constants/enum-class';
-import { EMPTY_QUESTION } from '@app/constants/mock-constants';
+import { EMPTY_QCM_QUESTION } from '@app/constants/mock-constants';
 import { Question } from '@app/interfaces/question';
 import { QuestionChoice } from '@app/interfaces/question-choice';
 import { QuestionValidationService } from '@app/services/admin-services/validation-services/question-validation-service/question-validation.service';
@@ -64,7 +64,7 @@ export class BankPanelComponent {
     }
 
     emptyQuestion(questionType: string): void {
-        this.question = this.deepCloneQuestion(EMPTY_QUESTION);
+        this.question = this.deepCloneQuestion(EMPTY_QCM_QUESTION);
         this.question.type = questionType;
     }
 

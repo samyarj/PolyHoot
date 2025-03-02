@@ -159,14 +159,14 @@ export class ConnectionGateway implements OnGatewayDisconnect {
     }
 
     private disconnectPlayerFromGamePage(game: Game, player: Player) {
-            game.organizer.socket.emit(GameEvents.PlayerStatusUpdate, { name: player.name, isInGame: false });
-            game.removePlayer(player.name);
-            if (game.players.length === 0) {
-                this.server.to(game.roomId).emit(ConnectEvents.AllPlayersLeft);
-                this.disconnectOrganizer(game.roomId, game.organizer.socket);
-            } else {
-                game.checkAndPrepareForNextQuestion();
-            }
+        game.organizer.socket.emit(GameEvents.PlayerStatusUpdate, { name: player.name, isInGame: false });
+        game.removePlayer(player.name);
+        if (game.players.length === 0) {
+            this.server.to(game.roomId).emit(ConnectEvents.AllPlayersLeft);
+            this.disconnectOrganizer(game.roomId, game.organizer.socket);
+        } else {
+            game.checkAndPrepareForNextQuestion();
+        }
     }
 
     private connectUser(client: Socket) {
@@ -177,6 +177,7 @@ export class ConnectionGateway implements OnGatewayDisconnect {
             if (game.isGameReadyToStart()) {
                 const currentQuestion = game.startGame();
                 this.server.to(roomId).emit(GameEvents.QuestionsLength, currentQuestion.length);
+                console.log('connectUser', currentQuestion);
                 this.server.to(roomId).emit(GameEvents.NextQuestion, currentQuestion);
             }
         }

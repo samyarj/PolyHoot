@@ -8,10 +8,11 @@
                 (ngModelChange)="onQuestionTypeChange()"
                 name="type"
                 [disabled]="isTypeLocked"
-                title="Question à choix multiples (QCM) ou question à réponse libre (QRL)"
+                title="Question à choix multiples (QCM) ou question à réponse libre (QRL) ou question à réponse estimée (QRE)"
             >
                 <option value="QCM">QCM</option>
                 <option value="QRL">QRL</option>
+                <option value="QRE">QRE</option>
             </select>
         </div>
         <div class="form-group question-text">
@@ -54,6 +55,82 @@
             </small>
         </div>
     </div>
+
+    <div class="form-group answers-section" *ngIf="questionType === 'QRE'">
+        <div class="form-group">
+            <label class="form-label">Bonne réponse:</label>
+            <input
+                *ngIf="question.qreAttributes"
+                type="number"
+                min="0"
+                [(ngModel)]="question.qreAttributes.goodAnswer"
+                name="goodAnswer"
+                required
+                #goodAnswerInput="ngModel"
+            />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Borne minimale:</label>
+            <input
+                *ngIf="question.qreAttributes"
+                type="number"
+                min="0"
+                [(ngModel)]="question.qreAttributes.minBound"
+                name="minBound"
+                required
+                #minBoundInput="ngModel"
+            />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Borne maximale:</label>
+            <input
+                *ngIf="question.qreAttributes"
+                type="number"
+                min="0"
+                [(ngModel)]="question.qreAttributes.maxBound"
+                name="maxBound"
+                required
+                #maxBoundInput="ngModel"
+            />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Marge de tolérance:</label>
+            <input
+                *ngIf="question.qreAttributes"
+                type="number"
+                min="0"
+                [(ngModel)]="question.qreAttributes.tolerance"
+                name="tolerance"
+                required
+                #toleranceInput="ngModel"
+            />
+            <div>
+                <small *ngIf="!validateTolerance()" class="text-danger"> La marge de tolérance ne peut pas dépasser 1/4 de l'intervalle. </small>
+                <small *ngIf="question.qreAttributes && question.qreAttributes.minBound > question.qreAttributes.goodAnswer" class="text-danger">
+                    La borne minimale doit être inférieure à la bonne réponse.<br/>
+                </small>
+                <small *ngIf="question.qreAttributes && question.qreAttributes.maxBound <= question.qreAttributes.minBound" class="text-danger">
+                    La borne maximale doit être supérieure à la borne minimale.<br/>
+                </small>
+                <small
+                    *ngIf="
+                        (question.qreAttributes && question.qreAttributes.goodAnswer <= question.qreAttributes.minBound) ||
+                        (question.qreAttributes && question.qreAttributes.goodAnswer >= question.qreAttributes.maxBound)
+                    "
+                    class="text-danger"
+                >
+                    La bonne réponse doit être comprise entre la borne minimale et la borne maximale.<br/>
+                </small>
+                <small *ngIf="question.qreAttributes && question.qreAttributes.maxBound < question.qreAttributes.goodAnswer" class="text-danger">
+                    La borne maximale doit être supérieure à la bonne réponse.<br/>
+                </small>
+            </div>
+        </div>
+    </div>
+
     <div class="form-group answers-section" *ngIf="questionType === 'QCM'">
         <label class="form-label">Réponses:</label>
         <div cdkDropList class="answers-list" (cdkDropListDropped)="drop($event)">
