@@ -23,4 +23,18 @@ export class ChatChannelsController {
             response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
         }
     }
+
+    @ApiOkResponse({ description: 'All messages successfully deleted' })
+    @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+    @Delete('all/chatmessages')
+    async deleteAllChatMessages(@Res() response: Response) {
+        this.logger.log('Deleting all messages from all channels');
+        try {
+            await this.chatChannelsService.deleteAllMessages();
+            response.status(HttpStatus.OK).send({ message: 'All messages successfully deleted' });
+        } catch (error) {
+            this.logger.error(`Error deleting all messages: ${error.message}`);
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Internal server error' });
+        }
+    }
 }
