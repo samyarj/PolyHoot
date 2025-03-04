@@ -6,6 +6,10 @@
     width: 100%;
     height: 100%;
     background: linear-gradient(to bottom, var(--primary-color), var(--primary-color), var(--secondary-color));
+
+    * {
+        transition: all 0.3s ease-in-out;
+    }
 }
 
 .content-wrapper {
@@ -16,6 +20,7 @@
     display: flex;
     position: relative;
     flex-direction: column;
+    justify-content: space-between;
     align-items: center;
     background: #fffb0000;
     color: var(--text-color);
@@ -30,11 +35,12 @@
         box-shadow 0.3s ease;
     .coin-history {
         display: flex;
-        flex-direction: row;
+        flex-direction: row-reverse;
         align-items: center;
         justify-content: center;
         gap: 10px;
         width: 30%;
+        height: 5%;
         min-width: 320px;
         background: var(--primary-color);
         padding: 10px;
@@ -111,7 +117,6 @@
         .side-selection-container {
             width: 100%;
             height: 100%;
-            min-height: 150px;
             display: flex;
             flex-direction: row;
             position: relative;
@@ -127,17 +132,40 @@
                 position: relative;
             }
 
-            .pile:hover {
-                background: radial-gradient(circle, rgba(255, 215, 0, 0.5) 0%, transparent 20%);
+            .selected-tails {
+                background: radial-gradient(circle, rgba(123, 123, 123, 0.715) 0%, transparent 50%);
                 cursor: pointer;
+            }
+
+            .selected-heads {
+                background: radial-gradient(circle, rgba(123, 123, 123, 0.715) 0%, transparent 50%);
+                background: radial-gradient(circle, rgba(255, 215, 0, 0.5) 0%, transparent 50%);
+                cursor: pointer;
+            }
+            .pile:hover {
+                background: radial-gradient(circle, rgba(123, 123, 123, 0.715) 0%, transparent 20%);
+                cursor: pointer;
+                transition: all 1s ease-in-out;
             }
 
             .face:hover {
-                background: radial-gradient(circle, rgba(123, 123, 123, 0.715) 0%, transparent 20%);
+                background: radial-gradient(circle, rgba(255, 215, 0, 0.5) 0%, transparent 20%);
                 cursor: pointer;
+                transition: all 1s ease-in-out;
             }
 
-            .pile::after {
+            .selected-tails:hover {
+                background: radial-gradient(circle, rgba(123, 123, 123, 0.715) 0%, transparent 50%);
+                cursor: pointer;
+                transition: all 1s ease-in-out;
+            }
+
+            .selected-heads:hover {
+                background: radial-gradient(circle, rgba(255, 215, 0, 0.5) 0%, transparent 50%);
+                cursor: pointer;
+                transition: all 1s ease-in-out;
+            }
+            .face::after {
                 content: '';
                 position: absolute;
                 right: -1px;
@@ -152,6 +180,58 @@
                 );
             }
         }
+
+        .selection-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 5%;
+            justify-content: center;
+            align-items: center;
+            border-radius: 30px;
+            color: var(--text-color);
+
+            &.selected-heads {
+                background: linear-gradient(
+                    to right,
+                    rgba(255, 215, 0, 0.5) 5%,
+                    transparent 25%,
+                    transparent 75%,
+                    rgba(255, 215, 0, 0.5) 95%
+                ) !important;
+            }
+
+            &.selected-tails {
+                background: linear-gradient(
+                    to right,
+                    rgba(123, 123, 123, 0.715) 5%,
+                    transparent 25%,
+                    transparent 75%,
+                    rgba(123, 123, 123, 0.715) 95%
+                ) !important;
+            }
+
+            &.winner {
+                background: linear-gradient(
+                    to right,
+                    rgba(0, 255, 0, 0.82) 5%,
+                    transparent 25%,
+                    transparent 75%,
+                    rgba(0, 255, 0, 0.82) 95%
+                ) !important;
+            }
+
+            &.loser {
+                background: linear-gradient(
+                    to right,
+                    rgba(255, 0, 0, 0.82) 5%,
+                    transparent 25%,
+                    transparent 75%,
+                    rgba(255, 0, 0, 0.82) 95%
+                ) !important;
+            }
+        }
     }
 
     .place-bet-area {
@@ -159,7 +239,10 @@
         gap: 10px;
         width: 25%;
         min-width: 300px;
+        height: 18%;
+        min-height: 120px;
         align-items: center;
+        justify-content: center;
         padding: 5px;
         flex-direction: column;
         border-radius: 30px;
@@ -171,15 +254,16 @@
             box-shadow 0.3s ease;
 
         .manual-input-area {
-            height: 100%;
+            height: 45%;
             width: 100%;
             display: flex;
             flex-direction: row;
+            align-items: center;
             justify-content: space-around;
             position: relative;
             .bet-input {
                 width: 160px;
-                height: 40px;
+                height: 100%;
                 padding: 8px;
                 border: 2px solid #333;
                 border-radius: 30px;
@@ -192,11 +276,10 @@
             }
 
             .bet-button {
-                height: 40px;
+                height: 100%;
                 padding: 8px 15px;
                 font-size: 16px;
                 cursor: pointer;
-                //transition: background 0.3s;
 
                 &:hover {
                     background-color: #0056b3;
@@ -211,28 +294,15 @@
         .automatic-input-area {
             display: flex;
             width: 100%;
+            height: 45%;
             justify-content: space-around;
             position: relative;
             button {
-                height: 40px;
+                height: 100%;
             }
         }
-        .manual-input-area {
-            height: 100%;
-            width: 100%;
-            display: flex;
-            flex-direction: row;
-            justify-content: space-around;
-            margin-bottom: 5px;
-            position: relative;
-            padding-bottom: 10px; /* Adds spacing before the line */
-        }
 
-        .manual-input-area::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            bottom: -1px;
+        .separator {
             width: 100%;
             height: 1px;
             background: linear-gradient(

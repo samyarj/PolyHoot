@@ -38,6 +38,13 @@ export enum AppRoute {
     JOINGAME = '/join-game',
     QUESTIONBANK = '/questionBank',
 }
+export enum CoinFlipGameState {
+    Uninitialized = 0,
+    BettingPhase = 1,
+    PreFlippingPhase = 2,
+    FlippingPhase = 3,
+    ResultsPhase = 4,
+}
 
 export enum TimerEvents {
     Value = 'timerValue',

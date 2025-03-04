@@ -1,173 +1,116 @@
 <div class="page-wrapper">
     <div class="content-wrapper">
         <div class="coin-history">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="gold" />
-            </svg>
-
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="silver" />
-            </svg>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="gold" />
-            </svg>
-
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="silver" />
-            </svg>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="gold" />
-            </svg>
-
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="silver" />
-            </svg>
-
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="gold" />
-            </svg>
-
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="silver" />
-            </svg>
-
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="gold" />
-            </svg>
-
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="silver" />
+            <svg *ngFor="let flip of history" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <circle *ngIf="flip === 'heads'" cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="gold" />
+                <circle *ngIf="flip === 'tails'" cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="silver" />
             </svg>
         </div>
         <div class="coin-animation-area">
-            <div class="side-selection-container">
-                <div class="pile">
+            <div *ngIf="state === 1" class="side-selection-container">
+                <div [ngClass]="{ 'selected-heads': selectedSide === 'heads' }" class="face" (click)="this.selectSide('heads')">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
                         <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="gold" />
                     </svg>
                 </div>
-                <div class="face">
+                <div [ngClass]="{ 'selected-tails': selectedSide === 'tails' }" class="pile" (click)="this.selectSide('tails')">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
                         <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="silver" />
                     </svg>
                 </div>
             </div>
-            <!-- THIS IS THE ANIMATION COIN, DONT DELETE PLS -->
-            <!-- <div class="coin-container">     
-                <div class="coin">
-                    <svg class="heads" width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+
+            <div
+                *ngIf="state === 2"
+                class="selection-container"
+                [ngClass]="{ 'selected-heads': selectedSide === 'heads', 'selected-tails': selectedSide === 'tails' }"
+            >
+                <div *ngIf="selectedSide === 'heads'">
+                    <svg width="70" height="70" viewBox="0 0 24 24" fill="currentColor">
                         <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="gold" />
                     </svg>
-                    <svg class="tails" width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+                </div>
+
+                <div *ngIf="selectedSide === 'tails'">
+                    <svg width="70" height="70" viewBox="0 0 24 24" fill="currentColor">
                         <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="silver" />
                     </svg>
                 </div>
-            </div> -->
+                <div>La monnaie tournera bientôt...</div>
+            </div>
+
+            <div *ngIf="state === 3" class="coin-container">
+                <div class="coin">
+                    <svg class="tails" width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="gold" />
+                    </svg>
+                    <svg class="heads" width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="silver" />
+                    </svg>
+                </div>
+            </div>
+            <div
+                *ngIf="state === 4"
+                class="selection-container"
+                [ngClass]="{ winner: selectedSide === winningSide && selectedSide, loser: selectedSide !== winningSide && selectedSide }"
+            >
+                <div *ngIf="winningSide === 'heads'">
+                    <svg width="70" height="70" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="gold" />
+                    </svg>
+                </div>
+
+                <div *ngIf="winningSide === 'tails'">
+                    <svg width="70" height="70" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="silver" />
+                    </svg>
+                </div>
+                <div>Résultat</div>
+            </div>
         </div>
         <div class="place-bet-area">
-            <div class="manual-input-area">
-                <input type="number" min="1" step="1" placeholder="Placer votre mise" class="bet-input" />
-                <button class="bet-button custom-button-medium">Parier</button>
+            <div *ngIf="state === 1" class="manual-input-area">
+                <input
+                    [(ngModel)]="betAmount"
+                    (ngModelChange)="betAmount = updateBetAmount($event)"
+                    type="number"
+                    min="1"
+                    step="1"
+                    placeholder="Placer votre mise"
+                    class="bet-input"
+                />
+                <button class="bet-button custom-button-medium" (click)="submitBet()">Parier</button>
             </div>
-            <div class="automatic-input-area">
-                <button class="custom-button-medium">+10</button>
-                <button class="custom-button-medium">+25</button>
-                <button class="custom-button-medium">+50</button>
+            <div *ngIf="state === 1" class="separator"></div>
+            <div *ngIf="state === 1" class="automatic-input-area">
+                <button class="custom-button-medium" (click)="increaseBet(10)">+10</button>
+                <button class="custom-button-medium" (click)="increaseBet(25)">+25</button>
+                <button class="custom-button-medium" (click)="increaseBet(50)">+50</button>
             </div>
         </div>
 
         <div class="leaderboard-area">
-            <div class="heads winner">
+            <div class="heads" [ngClass]="{ winner: winningSide === 'heads' && state === 4, loser: winningSide !== 'heads' && state === 4 }">
                 <div class="side-title">Face</div>
                 <div class="better-list">
-                    <div class="better">
+                    <div *ngFor="let player of playerList.heads" class="better">
                         <div class="better-info">
                             <span class="emoji">🏆</span>
-                            <span class="name">Alice</span>
+                            <span class="name">{{ player.name }}</span>
                         </div>
-                        <span class="amount">100</span>
-                    </div>
-                    <div class="better">
-                        <div class="better-info">
-                            <span class="emoji">🏆</span>
-                            <span class="name">Ben</span>
-                        </div>
-                        <span class="amount">100</span>
-                    </div>
-                    <div class="better">
-                        <div class="better-info">
-                            <span class="emoji">🏆</span>
-                            <span class="name">Calisse</span>
-                        </div>
-                        <span class="amount">100</span>
-                    </div>
-                    <div class="better">
-                        <div class="better-info">
-                            <span class="emoji">🏆</span>
-                            <span class="name">Alice</span>
-                        </div>
-                        <span class="amount">100</span>
-                    </div>
-                    <div class="better">
-                        <div class="better-info">
-                            <span class="emoji">🏆</span>
-                            <span class="name">Alice</span>
-                        </div>
-                        <span class="amount">100</span>
-                    </div>
-                    <div class="better">
-                        <div class="better-info">
-                            <span class="emoji">🏆</span>
-                            <span class="name">Alice</span>
-                        </div>
-                        <span class="amount">100</span>
-                    </div>
-                    <div class="better">
-                        <div class="better-info">
-                            <span class="emoji">🏆</span>
-                            <span class="name">Alice</span>
-                        </div>
-                        <span class="amount">100</span>
-                    </div>
-                    <div class="better">
-                        <div class="better-info">
-                            <span class="emoji">🏆</span>
-                            <span class="name">Alice</span>
-                        </div>
-                        <span class="amount">100</span>
-                    </div>
-                    <div class="better">
-                        <div class="better-info">
-                            <span class="emoji">🏆</span>
-                            <span class="name">Alice</span>
-                        </div>
-                        <span class="amount">100</span>
+                        <span class="amount">{{ player.bet }}</span>
                     </div>
                 </div>
             </div>
-            <div class="tails loser">
+            <div class="tails" [ngClass]="{ winner: winningSide === 'tails' && state === 4, loser: winningSide !== 'tails' && state === 4 }">
                 <div class="side-title">Pile</div>
                 <div class="better-list">
-                    <div class="better">
+                    <div *ngFor="let player of playerList.tails" class="better">
                         <div class="better-info">
                             <span class="emoji">🏆</span>
-                            <span class="name">Alice</span>
+                            <span class="name">{{ player.name }}</span>
                         </div>
-                        <span class="amount">100</span>
-                    </div>
-                    <div class="better">
-                        <div class="better-info">
-                            <span class="emoji">🏆</span>
-                            <span class="name">Alice</span>
-                        </div>
-                        <span class="amount">100</span>
-                    </div>
-                    <div class="better">
-                        <div class="better-info">
-                            <span class="emoji">🏆</span>
-                            <span class="name">Alice</span>
-                        </div>
-                        <span class="amount">100</span>
+                        <span class="amount">{{ player.bet }}</span>
                     </div>
                 </div>
             </div>
