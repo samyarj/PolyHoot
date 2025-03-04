@@ -54,7 +54,6 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
 
   String? _usernameError;
   String? _emailError;
-  bool _isLoading = false;
 
   @override
   void initState() {
@@ -97,16 +96,10 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
   }
 
   Future signUp() async {
-    setState(() {
-      _isLoading = true;
-    });
     await isUsernameTaken(_usernameController.text.trim());
     await isEmailTaken(_emailController.text.trim());
 
     if (_usernameError != null || _emailError != null) {
-      setState(() {
-        _isLoading = false;
-      });
       return;
     }
 
@@ -116,22 +109,13 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
           _emailController.text.trim(),
           _passwordController.text.trim());
       if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-      });
     } catch (e) {
       if (!mounted) return;
       showErrorDialog(context, getCustomError(e));
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 
   void signUpWithGoogle() async {
-    setState(() {
-      _isLoading = true;
-    });
     try {
       await ref.read(userProvider.notifier).signWithGoogle(isLogin: false);
     } catch (e) {
@@ -140,9 +124,6 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
     } finally {
       // ignore: control_flow_in_finally
       if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 
@@ -238,6 +219,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
 
   @override
   Widget build(BuildContext context) {
+    final userState = ref.watch(userProvider);
     return Stack(
       children: [
         Container(
@@ -323,7 +305,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                   ),
                   SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: _isLoading
+                    onPressed: userState is AsyncLoading
                         ? null
                         : () async {
                             if (_formKey.currentState!.validate()) {
@@ -351,7 +333,8 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                   SizedBox(height: 16),
                   // Google Sign-Up
                   OutlinedButton.icon(
-                    onPressed: _isLoading ? null : signUpWithGoogle,
+                    onPressed:
+                        userState is AsyncLoading ? null : signUpWithGoogle,
                     icon: Icon(Icons.account_circle),
                     label: Text("S'inscrire avec Google",
                         style: TextStyle(fontSize: 18)),
@@ -367,7 +350,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             ),
           ),
         ),
-        if (_isLoading)
+        if (userState is AsyncLoading)
           Positioned.fill(
             child: Center(
               child: CircularProgressIndicator(),

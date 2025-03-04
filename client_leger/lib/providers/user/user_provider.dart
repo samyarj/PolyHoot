@@ -28,6 +28,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
 
   // Fetch user from API
   Future<void> fetchUser() async {
+    state = const AsyncValue.loading();
     try {
       AppLogger.d("Fetching user...");
       final firebaseUser = FirebaseAuth.instance.currentUser;
@@ -67,6 +68,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
   // Create a new user
   Future<void> createAndFetchUser(
       UserCredential userCredential, String endpoint) async {
+    state = const AsyncValue.loading();
     try {
       final idToken = await userCredential.user?.getIdToken();
       final headers = {'Authorization': 'Bearer $idToken'};
@@ -90,6 +92,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
   }
 
   Future<void> signIn(String identifier, String password) async {
+    state = const AsyncValue.loading();
     try {
       AppLogger.d("Signing in...");
       final email = await auth_service.getEmailFromIdentifier(identifier);
@@ -113,6 +116,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
   }
 
   Future<void> signUp(String username, String email, String password) async {
+    state = const AsyncValue.loading();
     try {
       AppLogger.d("Signing up...");
       final userCredential =
@@ -131,6 +135,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
   }
 
   Future<void> signWithGoogle({bool isLogin = true}) async {
+    state = const AsyncValue.loading();
     try {
       AppLogger.d("Signing in with Google...");
       final userCredential =
@@ -150,6 +155,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
   }
 
   Future<void> logout() async {
+    state = const AsyncValue.loading();
     try {
       AppLogger.d("Logging out...");
       final currentUser = FirebaseAuth.instance.currentUser;

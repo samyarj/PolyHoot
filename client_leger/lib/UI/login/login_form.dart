@@ -64,165 +64,150 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   @override
   Widget build(BuildContext context) {
     final userState = ref.watch(userProvider);
-    return userState.when(data: (user) {
-      return Stack(
-        children: [
-          Container(
-            alignment: Alignment.center,
-            width: 400,
-            padding: EdgeInsets.all(32),
-            child: Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Connexion",
-                      style:
-                          TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+    return Stack(
+      children: [
+        Container(
+          alignment: Alignment.center,
+          width: 400,
+          padding: EdgeInsets.all(32),
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Connexion",
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 32),
+                  TextFormField(
+                    controller: _identifierController,
+                    decoration: InputDecoration(
+                      labelText: 'Pseudonyme ou Email',
+                      enabledBorder: greyBorder,
+                      focusedBorder: blueBorder,
+                      errorBorder: greyBorder,
                     ),
-                    SizedBox(height: 32),
-                    TextFormField(
-                      controller: _identifierController,
-                      decoration: InputDecoration(
-                        labelText: 'Pseudonyme ou Email',
-                        enabledBorder: greyBorder,
-                        focusedBorder: blueBorder,
-                        errorBorder: greyBorder,
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Entrez votre pseudonyme ou votre email SVP';
-                        }
-                        return null;
-                      },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Entrez votre pseudonyme ou votre email SVP';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 32),
+                  TextFormField(
+                    controller: _passwordController,
+                    textInputAction: TextInputAction.done,
+                    decoration: InputDecoration(
+                      labelText: 'Mot de passe',
+                      enabledBorder: greyBorder,
+                      focusedBorder: blueBorder,
+                      errorBorder: greyBorder,
                     ),
-                    SizedBox(height: 32),
-                    TextFormField(
-                      controller: _passwordController,
-                      textInputAction: TextInputAction.done,
-                      decoration: InputDecoration(
-                        labelText: 'Mot de passe',
-                        enabledBorder: greyBorder,
-                        focusedBorder: blueBorder,
-                        errorBorder: greyBorder,
-                      ),
-                      obscureText: true,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Entrez votre mot de passe SVP';
-                        }
-                        return null;
-                      },
-                      onFieldSubmitted: (_) async {
-                        if (_formKey.currentState!.validate()) {
-                          await signIn();
-                        }
-                      },
-                    ),
-                    SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: userState.isLoading
-                            ? null
-                            : () async {
-                                if (_formKey.currentState!.validate()) {
-                                  await signIn();
-                                }
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              const Color.fromARGB(255, 19, 99, 236),
-                          foregroundColor: Colors.white, // White text color
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          textStyle: const TextStyle(fontSize: 18),
-                        ),
-                        child: Text('Connexion'),
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    TextButton(
-                      onPressed: () {
-                        context.go(Paths.signUp);
-                      },
-                      child: Text(
-                        "Pas de compte ? S'inscrire",
-                        style: TextStyle(
-                          fontSize: 16,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    // Forgot Password Link
-                    TextButton(
-                      onPressed: () {
-                        context.go(Paths.passwordReset);
-                      },
-                      child: Text(
-                        "Mot de passe oublié ?",
-                        style: TextStyle(
-                          fontSize: 16,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    // Divider
-                    Row(
-                      children: [
-                        Expanded(child: Divider()),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text('ou'),
-                        ),
-                        Expanded(child: Divider()),
-                      ],
-                    ),
-                    SizedBox(height: 16),
-                    // Google Login
-                    OutlinedButton.icon(
-                      onPressed: userState.isLoading ? null : loginWithGoogle,
-                      icon: Icon(Icons.account_circle, size: 20),
-                      label: Text(
-                        'Connexion avec Google',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: Size(double.infinity, 50),
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Entrez votre mot de passe SVP';
+                      }
+                      return null;
+                    },
+                    onFieldSubmitted: (_) async {
+                      if (_formKey.currentState!.validate()) {
+                        await signIn();
+                      }
+                    },
+                  ),
+                  SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: userState is AsyncLoading
+                          ? null
+                          : () async {
+                              if (_formKey.currentState!.validate()) {
+                                await signIn();
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 19, 99, 236),
+                        foregroundColor: Colors.white, // White text color
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
+                        textStyle: const TextStyle(fontSize: 18),
+                      ),
+                      child: Text('Connexion'),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () {
+                      context.go(Paths.signUp);
+                    },
+                    child: Text(
+                      "Pas de compte ? S'inscrire",
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  // Forgot Password Link
+                  TextButton(
+                    onPressed: () {
+                      context.go(Paths.passwordReset);
+                    },
+                    child: Text(
+                      "Mot de passe oublié ?",
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  // Divider
+                  Row(
+                    children: [
+                      Expanded(child: Divider()),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text('ou'),
+                      ),
+                      Expanded(child: Divider()),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  // Google Login
+                  OutlinedButton.icon(
+                    onPressed:
+                        userState is AsyncLoading ? null : loginWithGoogle,
+                    icon: Icon(Icons.account_circle, size: 20),
+                    label: Text(
+                      'Connexion avec Google',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
-          if (userState.isLoading)
-            Positioned.fill(
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
+        ),
+        if (userState is AsyncLoading)
+          Positioned.fill(
+            child: Center(
+              child: CircularProgressIndicator(),
             ),
-        ],
-      );
-    }, loading: () {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }, error: (error, stack) {
-      return Scaffold(
-        body: Center(
-          child: Text('Error: $error'),
-        ),
-      );
-    });
+          ),
+      ],
+    );
   }
 }
