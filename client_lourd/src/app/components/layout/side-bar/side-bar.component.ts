@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FieldPath } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { FirebaseChatMessage } from '@app/interfaces/chat-message';
 import { User } from '@app/interfaces/user';
@@ -17,7 +18,7 @@ export class SideBarComponent implements OnInit, OnDestroy {
     user$: Observable<User | null>;
     userUID: string | null = null;
     private messagesSubscription: Subscription;
-    private lastMessageDate: number | null = null; // Track last message date for pagination
+    private lastMessageDate: FieldPath; // Track last message date for pagination
     isFetchingOlderMessages: boolean = false; // Prevent multiple fetches at once
 
     constructor(
@@ -37,6 +38,7 @@ export class SideBarComponent implements OnInit, OnDestroy {
                     this.lastMessageDate = messages[0].date; // Track oldest message date
                 }
                 this.chatMessagesLoading = false;
+                console.log('messages', messages);
             },
             error: (err) => {
                 console.error('Error while fetching messages:', err);

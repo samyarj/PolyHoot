@@ -1,4 +1,5 @@
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Timestamp } from '@angular/fire/firestore';
 import { MAX_CHAR, MESSAGES_LIMIT } from '@app/constants/constants';
 import { FirebaseChatMessage } from '@app/interfaces/chat-message';
 import { AuthService } from '@app/services/auth/auth.service';
@@ -86,6 +87,10 @@ export class Chat2Component implements OnChanges {
      */
     isLengthInRange(): boolean {
         return this.inputMessage.length <= MAX_CHAR;
+    }
+
+    getFormattedDate(chatmessage: FirebaseChatMessage): Date {
+        return chatmessage.date instanceof Timestamp ? chatmessage.date.toDate() : new Date();
     }
 
     /**
