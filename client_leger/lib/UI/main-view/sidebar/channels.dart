@@ -6,8 +6,9 @@ import 'package:client_leger/backend-communication-services/error-handlers/globa
 import 'package:client_leger/backend-communication-services/models/chat_channels.dart';
 import 'package:client_leger/business/channel_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Channels extends StatelessWidget {
+class Channels extends ConsumerWidget {
   Channels(
       {super.key,
       required this.onChannelPicked,
@@ -27,11 +28,11 @@ class Channels extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     List<ChatChannel> userChannels = [];
     List<ChatChannel> joinableChannels = [];
     return StreamBuilder<List<ChatChannel>>(
-        stream: channelManager.fetchAllChannels(),
+        stream: channelManager.fetchAllChannels(ref),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
@@ -83,7 +84,7 @@ class Channels extends StatelessWidget {
                   Expanded(
                     child: TabBarView(
                       children: [
-                        _buildUserChannels(userChannels),
+                        _buildUserChannels(userChannels, ref),
                         _buildJoinChannels(joinableChannels),
                       ],
                     ),
@@ -95,7 +96,7 @@ class Channels extends StatelessWidget {
         });
   }
 
-  _buildUserChannels(List<ChatChannel> userChannels) {
+  _buildUserChannels(List<ChatChannel> userChannels, WidgetRef ref) {
     if (userChannels.isEmpty) {
       return Center(
         child: Text(
@@ -125,7 +126,7 @@ class Channels extends StatelessWidget {
                     await showConfirmationDialog(
                       context,
                       "$quitChannel ${channel.name} ?",
-                      () => channelManager.quitChannel(channel.name),
+                      () => channelManager.quitChannel(ref, channel.name),
                     );
                   },
                 ),

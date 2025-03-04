@@ -3,17 +3,19 @@ import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
+import 'package:client_leger/providers/user/user_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class SignUpForm extends StatefulWidget {
+class SignUpForm extends ConsumerStatefulWidget {
   const SignUpForm({super.key});
 
   @override
-  State<SignUpForm> createState() => _SignUpFormState();
+  ConsumerState<SignUpForm> createState() => _SignUpFormState();
 }
 
-class _SignUpFormState extends State<SignUpForm> {
+class _SignUpFormState extends ConsumerState<SignUpForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -109,8 +111,10 @@ class _SignUpFormState extends State<SignUpForm> {
     }
 
     try {
-      await auth_service.signUp(_usernameController.text.trim(),
-          _emailController.text.trim(), _passwordController.text.trim());
+      await ref.read(userProvider.notifier).signUp(
+          _usernameController.text.trim(),
+          _emailController.text.trim(),
+          _passwordController.text.trim());
       if (!mounted) return;
       setState(() {
         _isLoading = false;
@@ -129,7 +133,7 @@ class _SignUpFormState extends State<SignUpForm> {
       _isLoading = true;
     });
     try {
-      await auth_service.signWithGoogle(isLogin: false);
+      await ref.read(userProvider.notifier).signWithGoogle(isLogin: false);
     } catch (e) {
       if (!mounted) return;
       showErrorDialog(context, getCustomError(e));

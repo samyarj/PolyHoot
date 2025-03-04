@@ -1,3 +1,13 @@
+# Ignore NDK and build-related temporary files
+/app/.cxx/
+.gradle/
+.idea/
+**/build/
+**/local.properties
+**/captures/
+**/*.iml
+
+# Gradle Wrapper Files (already included)
 gradle-wrapper.jar
 /.gradle
 /captures/

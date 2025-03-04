@@ -5,8 +5,9 @@ import 'package:client_leger/backend-communication-services/error-handlers/globa
 import 'package:client_leger/backend-communication-services/models/chat_channels.dart';
 import 'package:client_leger/business/channel_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ChannelSearch extends StatefulWidget {
+class ChannelSearch extends ConsumerStatefulWidget {
   const ChannelSearch(
       {super.key,
       required this.joinableChannels,
@@ -15,10 +16,10 @@ class ChannelSearch extends StatefulWidget {
   final Future<void> Function(String) onDeleteChannel;
 
   @override
-  State<ChannelSearch> createState() => _ChannelSearchState();
+  ConsumerState<ChannelSearch> createState() => _ChannelSearchState();
 }
 
-class _ChannelSearchState extends State<ChannelSearch> {
+class _ChannelSearchState extends ConsumerState<ChannelSearch> {
   late ChannelManager _channelManager;
   final TextEditingController _searchChannelTextController =
       TextEditingController();
@@ -126,7 +127,8 @@ class _ChannelSearchState extends State<ChannelSearch> {
                                 size: 30,
                               ),
                               onPressed: () async {
-                                await _channelManager.joinChannel(channel.name);
+                                await _channelManager.joinChannel(
+                                    ref, channel.name);
                               },
                             ),
                             IconButton(

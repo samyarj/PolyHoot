@@ -3,12 +3,9 @@ import 'dart:convert';
 
 import 'package:client_leger/backend-communication-services/environment.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
-import 'package:client_leger/backend-communication-services/models/user.dart'
-    as user_model;
 import 'package:client_leger/utilities/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 
@@ -23,100 +20,100 @@ const String getEmailUrl = '$baseUrl/get-email';
 const String googleProvider = "google.com";
 const String passwordProvider = 'password';
 
-Completer<user_model.User> currentSignedInUserCompleter =
-    Completer<user_model.User>();
-Future<user_model.User> get currentSignedInUser =>
-    currentSignedInUserCompleter.future;
-ValueNotifier<bool> isLoggedIn = ValueNotifier<bool>(false);
+// Completer<user_model.User> currentSignedInUserCompleter =
+//     Completer<user_model.User>();
+// Future<user_model.User> get currentSignedInUser =>
+//     currentSignedInUserCompleter.future;
+// ValueNotifier<bool> isLoggedIn = ValueNotifier<bool>(false);
 
-Future<user_model.User?> fetchUser(
-  UserCredential userCredential,
-) async {
-  AppLogger.d("in fetchUser");
-  final idToken = await userCredential.user?.getIdToken();
-  final headers = {
-    'Authorization': 'Bearer $idToken',
-  };
+// Future<user_model.User?> fetchUser(
+//   UserCredential userCredential,
+// ) async {
+//   AppLogger.d("in fetchUser");
+//   final idToken = await userCredential.user?.getIdToken();
+//   final headers = {
+//     'Authorization': 'Bearer $idToken',
+//   };
 
-  final http.Response response = await http.get(Uri.parse(getProfileUrl),
-      headers: headers); // it puts isOnline: true
+//   final http.Response response = await http.get(Uri.parse(getProfileUrl),
+//       headers: headers); // it puts isOnline: true
 
-  if (response.statusCode == 200) {
-    final userJson = jsonDecode(response.body);
-    try {
-      currentSignedInUserCompleter.complete(user_model.User.fromJson(userJson));
-    } catch (e) {
-      AppLogger.e("Error while parsing userJson: $e");
-      throw Exception(
-          "Une erreur est survenue en essayant de traiter l'utilisateur courant");
-    }
-    return currentSignedInUser;
-  } else {
-    throw Exception(
-        'Une erreur est survenue au niveau du serveur : ${response.reasonPhrase}');
-  }
-}
+//   if (response.statusCode == 200) {
+//     final userJson = jsonDecode(response.body);
+//     try {
+//       currentSignedInUserCompleter.complete(user_model.User.fromJson(userJson));
+//     } catch (e) {
+//       AppLogger.e("Error while parsing userJson: $e");
+//       throw Exception(
+//           "Une erreur est survenue en essayant de traiter l'utilisateur courant");
+//     }
+//     return currentSignedInUser;
+//   } else {
+//     throw Exception(
+//         'Une erreur est survenue au niveau du serveur : ${response.reasonPhrase}');
+//   }
+// }
 
-Future<user_model.User?> createAndFetchUser(
-    UserCredential userCredential, String endpoint) async {
-  // with email or Google
-  AppLogger.d("in createAndFetchUser");
+// Future<user_model.User?> createAndFetchUser(
+//     UserCredential userCredential, String endpoint) async {
+//   // with email or Google
+//   AppLogger.d("in createAndFetchUser");
 
-  final idToken = await userCredential.user?.getIdToken();
+//   final idToken = await userCredential.user?.getIdToken();
 
-  final headers = {
-    'Authorization': 'Bearer $idToken',
-  };
+//   final headers = {
+//     'Authorization': 'Bearer $idToken',
+//   };
 
-  final http.Response response =
-      await http.post(Uri.parse(endpoint), headers: headers);
+//   final http.Response response =
+//       await http.post(Uri.parse(endpoint), headers: headers);
 
-  if (response.statusCode == 201) {
-    final userJson = jsonDecode(response.body);
-    AppLogger.i("userJson successfully fetched: $userJson");
+//   if (response.statusCode == 201) {
+//     final userJson = jsonDecode(response.body);
+//     AppLogger.i("userJson successfully fetched: $userJson");
 
-    try {
-      currentSignedInUserCompleter.complete(user_model.User.fromJson(userJson));
-      AppLogger.d("just updated the currentSignedInUser $currentSignedInUser");
-    } catch (e) {
-      AppLogger.e("Error while parsing userJson: $e");
-      throw Exception(
-          "Une erreur est survenue en essayant de traiter l'utilisateur courant");
-    }
+//     try {
+//       currentSignedInUserCompleter.complete(user_model.User.fromJson(userJson));
+//       AppLogger.d("just updated the currentSignedInUser $currentSignedInUser");
+//     } catch (e) {
+//       AppLogger.e("Error while parsing userJson: $e");
+//       throw Exception(
+//           "Une erreur est survenue en essayant de traiter l'utilisateur courant");
+//     }
 
-    return currentSignedInUser;
-  } else {
-    AppLogger.e(
-        "Failed to fetch/create user: ${response.reasonPhrase} ${response.statusCode}");
-    throw Exception(
-        "Une erreur serveur est survenue lors de la création de l'utilisateur");
-  }
-}
+//     return currentSignedInUser;
+//   } else {
+//     AppLogger.e(
+//         "Failed to fetch/create user: ${response.reasonPhrase} ${response.statusCode}");
+//     throw Exception(
+//         "Une erreur serveur est survenue lors de la création de l'utilisateur");
+//   }
+// }
 
-Future<user_model.User?> signUp(
-  String username,
-  String email,
-  String password,
-) async {
-  AppLogger.d("in signUp auth_service");
+// Future<user_model.User?> signUp(
+//   String username,
+//   String email,
+//   String password,
+// ) async {
+//   AppLogger.d("in signUp auth_service");
 
-  UserCredential userCredential = await FirebaseAuth.instance
-      .createUserWithEmailAndPassword(email: email, password: password);
+//   UserCredential userCredential = await FirebaseAuth.instance
+//       .createUserWithEmailAndPassword(email: email, password: password);
 
-  try {
-    await userCredential.user!.updateProfile(displayName: username);
+//   try {
+//     await userCredential.user!.updateProfile(displayName: username);
 
-    final user = await createAndFetchUser(userCredential, createUserUrl);
+//     final user = await createAndFetchUser(userCredential, createUserUrl);
 
-    AppLogger.d("About to refresh the listenable");
-    isLoggedIn.value = true;
-    return user;
-  } catch (e) {
-    await userCredential.user
-        ?.delete(); // on annule la creation du compte avec FireBase
-    rethrow;
-  }
-}
+//     AppLogger.d("About to refresh the listenable");
+//     isLoggedIn.value = true;
+//     return user;
+//   } catch (e) {
+//     await userCredential.user
+//         ?.delete(); // on annule la creation du compte avec FireBase
+//     rethrow;
+//   }
+// }
 
 Future<String> getEmailFromIdentifier(String identifier) async {
   if (identifier.contains('@')) {
@@ -137,36 +134,6 @@ Future<String> getEmailFromIdentifier(String identifier) async {
   final jsonResponse = jsonDecode(response.body);
 
   return jsonResponse['email'];
-}
-
-Future<user_model.User?> signIn(String identifier, String password) async {
-  AppLogger.d("in signIn");
-
-  try {
-    final email = await getEmailFromIdentifier(identifier);
-
-    final userCredential =
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-
-    final isOnline = await isUserOnline(email);
-
-    if (isOnline) {
-      AppLogger.e("Cet utilisateur est déjà connecté.");
-      throw Exception('Cet utilisateur est déjà connecté.');
-    }
-
-    final user = await fetchUser(userCredential);
-    AppLogger.d("About to change the listenable");
-    isLoggedIn.value = true;
-    return user;
-  } catch (e) {
-    await FirebaseAuth.instance.signOut();
-    AppLogger.e("Erreur de sign in : ${e.toString()}");
-    throw Exception(getCustomError(e));
-  }
 }
 
 Future<bool> isUserOnline(String email) async {
@@ -224,29 +191,29 @@ Future<bool> isEmailTaken(String email) async {
   }
 }
 
-Future<void> logout() async {
-  try {
-    AppLogger.d("in logout");
+// Future<void> logout() async {
+//   try {
+//     AppLogger.d("in logout");
 
-    User? currentUser = FirebaseAuth.instance.currentUser;
+//     User? currentUser = FirebaseAuth.instance.currentUser;
 
-    if (currentUser == null) {
-      throw Exception("Utilisateur courant non identifié.");
-    }
+//     if (currentUser == null) {
+//       throw Exception("Utilisateur courant non identifié.");
+//     }
 
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(currentUser.uid)
-        .update({'isOnline': false});
+//     await FirebaseFirestore.instance
+//         .collection('users')
+//         .doc(currentUser.uid)
+//         .update({'isOnline': false});
 
-    await FirebaseAuth.instance.signOut();
-  } catch (e) {
-    throw Exception(getCustomError(e));
-  } finally {
-    isLoggedIn.value = false;
-    currentSignedInUserCompleter = Completer<user_model.User>();
-  }
-}
+//     await FirebaseAuth.instance.signOut();
+//   } catch (e) {
+//     throw Exception(getCustomError(e));
+//   } finally {
+//     isLoggedIn.value = false;
+//     currentSignedInUserCompleter = Completer<user_model.User>();
+//   }
+// }
 
 Future<void> forgotPassword(String email) async {
   await FirebaseAuth.instance.setLanguageCode('fr');
@@ -283,25 +250,25 @@ Future<bool> emailCheck(String email) async {
   return false;
 }
 
-signWithGoogle({bool isLogin = true}) async {
-  final userCredential = await signInWithGoogle(isLogin: isLogin);
+// signWithGoogle({bool isLogin = true}) async {
+//   final userCredential = await signInWithGoogle(isLogin: isLogin);
 
-  bool isOnline = false;
-  if (userCredential.user?.email != null) {
-    AppLogger.d("about to check if user is online");
-    isOnline = await isUserOnline(userCredential.user!.email!);
-  }
+//   bool isOnline = false;
+//   if (userCredential.user?.email != null) {
+//     AppLogger.d("about to check if user is online");
+//     isOnline = await isUserOnline(userCredential.user!.email!);
+//   }
 
-  if (isOnline) throw Exception("Vous êtes déjà connecté ailleurs.");
+//   if (isOnline) throw Exception("Vous êtes déjà connecté ailleurs.");
 
-  AppLogger.d("about to update profile");
+//   AppLogger.d("about to update profile");
 
-  await userCredential.user!
-      .updateProfile(displayName: userCredential.user?.displayName);
+//   await userCredential.user!
+//       .updateProfile(displayName: userCredential.user?.displayName);
 
-  await createAndFetchUser(userCredential, googleSignInUrl);
-  isLoggedIn.value = true;
-}
+//   await createAndFetchUser(userCredential, googleSignInUrl);
+//   isLoggedIn.value = true;
+// }
 
 Future<UserCredential> signInWithGoogle({bool isLogin = true}) async {
   await GoogleSignIn().signOut();
