@@ -1,6 +1,8 @@
 import { CoinFlipGameState } from '@app/constants/enum-classes';
+import { AuthenticatedSocket } from '@app/interface/authenticated-request';
+import { UserService } from '@app/services/auth/user.service';
 import { Injectable } from '@nestjs/common';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { CoinFlipTimer } from './coinflip-timer';
 
 @Injectable()
@@ -10,10 +12,15 @@ export class CoinFlipGame {
     history: string[] = [];
     winningSide: string = '';
     playerList: {
-        heads: { name: string; socket: Socket; bet: number }[];
-        tails: { name: string; socket: Socket; bet: number }[];
+        heads: { name: string; socket: AuthenticatedSocket; bet: number }[];
+        tails: { name: string; socket: AuthenticatedSocket; bet: number }[];
     } = { heads: [], tails: [] };
-    constructor(private server: Server) {
+
+    constructor(
+        private server: Server,
+        private userService: UserService,
+    ) {
+        this.server = server;
         this.timer = new CoinFlipTimer(server);
         this.startGame();
     }
@@ -25,28 +32,19 @@ export class CoinFlipGame {
         this.server.emit('SendPlayerList', this.playerList);
     }
 
-    submitChoice(client: Socket, betChoice: { choice: string; bet: number }) {
-        if (this.gameState !== CoinFlipGameState.BettingPhase) {
-            return;
-        }
-        const isAlreadyInList =
+    isUserAlreadyInList(client: AuthenticatedSocket) {
+        return (
             this.playerList.heads.some((player) => player.socket.id === client.id) ||
-            this.playerList.tails.some((player) => player.socket.id === client.id);
+            this.playerList.tails.some((player) => player.socket.id === client.id)
+        );
+    }
 
-        if (!isAlreadyInList) {
-            // Add player to the correct list
-            if (betChoice.choice === 'heads') {
-                this.playerList.heads.push({ name: 'player', socket: client, bet: betChoice.bet });
-                return true;
-            } else if (betChoice.choice === 'tails') {
-                this.playerList.tails.push({ name: 'player', socket: client, bet: betChoice.bet });
-                return true;
-            }
+    addUserToList(client: AuthenticatedSocket, betChoice: { choice: string; bet: number }) {
+        if (betChoice.choice === 'heads') {
+            this.playerList.heads.push({ name: 'player', socket: client, bet: betChoice.bet });
+        } else if (betChoice.choice === 'tails') {
+            this.playerList.tails.push({ name: 'player', socket: client, bet: betChoice.bet });
         }
-
-        return false;
-
-        // substract the bet from their balance
     }
 
     flipCoin(): string {
@@ -58,18 +56,30 @@ export class CoinFlipGame {
         return result;
     }
 
-    adjustBalances(winningSide: string) {
-        let winningPlayers = winningSide === 'heads' ? this.playerList.heads : this.playerList.tails;
-        let losingPlayers = winningSide === 'heads' ? this.playerList.tails : this.playerList.heads;
+    async submitChoice(client: AuthenticatedSocket, betChoice: { choice: string; bet: number }) {
+        const isUserAlreadyInList = this.isUserAlreadyInList(client);
+        if (!isUserAlreadyInList) {
+            const submitStatus = await this.userService.updateUserCoins(client.user.uid, -1 * betChoice.bet);
+            if (submitStatus) {
+                this.addUserToList(client, betChoice);
+                return true;
+            }
+        }
+        return false;
+    }
 
-        // winning players balances adjusted
+    async adjustBalances(winningSide: string) {
+        let winningPlayers = winningSide === 'heads' ? this.playerList.heads : this.playerList.tails;
+        winningPlayers.forEach(async (player) => {
+            await this.userService.updateUserCoins(player.socket.user.uid, player.bet * 2);
+        });
     }
 
     startGame(): void {
         this.initializeGame();
         this.server.emit('coinflip-start-game');
+        //console.log('START-GAME');
         this.timer.startTimer(10, 'coinflip-timer', () => {
-            console.log('BETTING PHASE FINISHED');
             this.timer.stopTimer();
             this.startPreFlippingPhase();
         });
@@ -78,8 +88,8 @@ export class CoinFlipGame {
     startPreFlippingPhase() {
         this.gameState = CoinFlipGameState.PreFlippingPhase;
         this.server.emit('coinflip-pre-flipping');
+        //console.log('START-PRE-GAME');
         this.timer.startTimer(3, 'coinflip-timer', () => {
-            console.log('PRE-FLIPPING PHASE FINISHED');
             this.timer.stopTimer();
             this.startFlippingPhase();
         });
@@ -88,8 +98,8 @@ export class CoinFlipGame {
     startFlippingPhase() {
         this.gameState = CoinFlipGameState.FlippingPhase;
         this.server.emit('coinflip-flipping');
+        //console.log('START-FLIP');
         this.timer.startTimer(3, 'coinflip-timer', () => {
-            console.log('FLIPPED!');
             this.timer.stopTimer();
             this.startResultsPhase();
         });
@@ -99,6 +109,7 @@ export class CoinFlipGame {
         this.gameState = CoinFlipGameState.ResultsPhase;
         let result = this.flipCoin();
         this.adjustBalances(result);
+        //console.log('START-RESULTS');
         this.server.emit('coinflip-results', {
             result,
             playerList: {
@@ -108,7 +119,6 @@ export class CoinFlipGame {
             history: this.history,
         });
         this.timer.startTimer(3, 'coinflip-timer', () => {
-            console.log('RESULTS FINISHED! - STARTING NEW GAME');
             this.timer.stopTimer();
             this.startGame();
         });

@@ -17,6 +17,7 @@ import { handleErrorsGlobally } from '@app/utils/rxjs-operators';
 import { collection, doc, getDocs, query, updateDoc, where } from '@firebase/firestore';
 import { User as FirebaseUser, onIdTokenChanged, sendPasswordResetEmail } from 'firebase/auth';
 import { BehaviorSubject, catchError, finalize, from, map, Observable, of, switchMap, throwError } from 'rxjs';
+import { SocketClientService } from 'src/app/services/websocket-services/general/socket-client-manager.service';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -27,9 +28,14 @@ export class AuthService {
     private userBS: BehaviorSubject<User | null> = new BehaviorSubject<User | null>(null);
     private googleProvider = new GoogleAuthProvider();
     private loadingTokenBS = new BehaviorSubject<boolean>(true);
+    private tokenBS: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
     private isAuthenticating = false;
+    // eslint-disable-next-line @typescript-eslint/member-ordering
     user$ = this.userBS.asObservable();
+    // eslint-disable-next-line @typescript-eslint/member-ordering
     loadingToken$ = this.loadingTokenBS.asObservable();
+    // eslint-disable-next-line @typescript-eslint/member-ordering
+    token$ = this.tokenBS.asObservable();
 
     constructor(
         private auth: Auth,
@@ -37,6 +43,7 @@ export class AuthService {
         private injector: Injector,
         private router: Router,
         private firestore: Firestore,
+        private socketService: SocketClientService,
     ) {
         this.monitorTokenChanges();
     }
@@ -104,7 +111,7 @@ export class AuthService {
         const currentUser = this.auth.currentUser;
         if (currentUser) {
             const userDocRef = doc(this.firestore, `users/${currentUser.uid}`);
-
+            this.tokenBS.next(null);
             from(updateDoc(userDocRef, { isOnline: false }))
                 .pipe(
                     handleErrorsGlobally(this.injector),
@@ -122,6 +129,19 @@ export class AuthService {
 
     setUser(user: User): void {
         this.userBS.next(user);
+    }
+
+    async getToken(): Promise<string> {
+        const currentUser = this.auth.currentUser;
+        if (!currentUser) {
+            throw new Error('User not authenticated.');
+        }
+
+        try {
+            return await currentUser.getIdToken();
+        } catch (error) {
+            throw new Error('Failed to retrieve authentication token.');
+        }
     }
 
     checkingUsername(username: string): Observable<boolean> {
@@ -151,7 +171,7 @@ export class AuthService {
         return from(userCredential.user.getIdToken()).pipe(
             switchMap((idToken) => {
                 const options = { headers: { Authorization: `Bearer ${idToken}` } };
-
+                // this.socketService.connect(idToken);
                 switch (method) {
                     case 'GET':
                         return this.http.get<User>(endpoint, options);
@@ -175,7 +195,9 @@ export class AuthService {
                 try {
                     const idToken = await firebaseUser.getIdToken();
                     if (!idToken) throw new Error('Votre session a expiré. Veuillez vous reconnecter.');
-
+                    this.tokenBS.next(idToken);
+                    this.socketService.disconnect();
+                    this.socketService.connect(idToken);
                     this.http
                         .get<User>(`${this.baseUrl}/profile`, {
                             headers: { Authorization: `Bearer ${idToken}` },
@@ -187,17 +209,23 @@ export class AuthService {
                         });
                 } catch {
                     this.loadingTokenBS.next(false);
+                    this.tokenBS.next(null);
+                    this.socketService.disconnect();
                     this.logout();
                 }
             } else {
                 this.userBS.next(null);
                 this.loadingTokenBS.next(false);
+                this.tokenBS.next(null);
+                this.socketService.disconnect();
                 this.router.navigate(['/login']);
             }
         });
     }
 
     private signOutAndClearSession(): void {
+        this.tokenBS.next(null);
+        this.socketService.disconnect();
         from(this.auth.signOut())
             .pipe(
                 handleErrorsGlobally(this.injector),
@@ -207,6 +235,7 @@ export class AuthService {
     }
 
     private clearSession(): void {
+        this.tokenBS.next(null);
         this.router.navigate(['/login']);
     }
 

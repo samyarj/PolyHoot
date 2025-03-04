@@ -1,19 +1,22 @@
 import { CoinFlipGame } from '@app/classes/coinflip/coinflip-game';
+import { AuthenticatedSocket } from '@app/interface/authenticated-request';
 import { Injectable } from '@nestjs/common';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
+import { UserService } from '../auth/user.service';
 
 @Injectable()
 export class CoinflipManagerService {
     game: CoinFlipGame;
     private server: Server;
 
+    constructor(private userService: UserService) {}
     setServer(server: Server) {
         this.server = server;
-        this.game = new CoinFlipGame(server);
+        this.game = new CoinFlipGame(server, this.userService);
     }
 
-    submitChoice(client: Socket, betChoice: { choice: string; bet: number }) {
-        return this.game.submitChoice(client, betChoice);
+    async submitChoice(client: AuthenticatedSocket, betChoice: { choice: string; bet: number }) {
+        return await this.game.submitChoice(client, betChoice);
     }
 
     getPlayers() {

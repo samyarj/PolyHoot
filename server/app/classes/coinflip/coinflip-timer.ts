@@ -25,8 +25,6 @@ export class CoinFlipTimer {
                 this.server.emit(emitSignal, this.timerValue);
                 if (this.timerValue === 0) {
                     if (callback) callback();
-                } else {
-                    console.log(this.timerValue);
                 }
             }
         }, this.timerMode);
