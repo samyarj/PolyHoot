@@ -1,4 +1,5 @@
 /* eslint-disable no-underscore-dangle */ // Attributs de Mongo utilisent un underscore
+import { QreAttributes } from '@app/model/dto/question/qre-attributes-dto';
 import { QuestionChoice } from '@app/model/schema/question-choice/question-choice';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
@@ -46,9 +47,13 @@ export class Question {
                 isCorrect: { type: Boolean, default: false },
             },
         ],
-        default: [],
+        //default: [],
     })
-    choices: Types.Array<QuestionChoice>;
+    choices?: Types.Array<QuestionChoice>;
+
+    @ApiProperty()
+    @Prop({ type: QreAttributes, required: false })
+    qreAttributes?: QreAttributes;
 
     @ApiProperty({ description: 'The last modification date of the question' })
     @Prop({ required: false, default: new Date().toString() })

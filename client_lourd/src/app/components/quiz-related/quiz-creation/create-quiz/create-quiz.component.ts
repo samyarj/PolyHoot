@@ -51,7 +51,7 @@ export class CreateQuizComponent {
         if (this.submitQuestionButton === ButtonType.MODIFY) {
             this.quizHandler.modifyQuestionInQuiz(newQuestion);
             this.submitQuestionButton = ButtonType.ADD;
-            this.emptyQuestion();
+            this.emptyQuestion(newQuestion.type);
             return;
         }
         this.quizHandler.addQuestionToQuiz(newQuestion);
@@ -91,7 +91,7 @@ export class CreateQuizComponent {
     submitQuizEvent() {
         this.quizHandler.disableAnimations = true;
         this.quizHandler.prepareQuizBeforeSubmit();
-        console.log(this.quiz);
+        console.log('quiz submitted', this.quiz);
         this.submitQuiz.emit(this.quiz);
     }
 

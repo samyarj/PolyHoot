@@ -28,6 +28,7 @@ export class QuestionBankPageComponent {
 
     private questionsObserver: Partial<Observer<Question[]>> = {
         next: (questions: Question[]) => {
+            console.log(questions.filter((question) => question.type === 'QRE'));
             this.bankQuestions = this.sortingService.sortQuestionsByLastModified(questions);
             this.updateSelectedQuestions(this.selectedType, false);
         },

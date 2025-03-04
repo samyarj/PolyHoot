@@ -1,8 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ConfirmationMessage } from '@app/constants/enum-class';
-import { EMPTY_QCM_QUESTION } from '@app/constants/mock-constants';
+import { EMPTY_QCM_QUESTION, EMPTY_QRE_QUESTION } from '@app/constants/mock-constants';
 import { Question } from '@app/interfaces/question';
-import { QuestionChoice } from '@app/interfaces/question-choice';
 import { QuestionValidationService } from '@app/services/admin-services/validation-services/question-validation-service/question-validation.service';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
 
@@ -24,7 +23,6 @@ export class BankPanelComponent {
     @Output() cancelQuestionAdd = new EventEmitter<Question>();
 
     originalQuestion: Question;
-    originalChoices: QuestionChoice[];
     panelOpenState: boolean;
 
     constructor(
@@ -55,7 +53,7 @@ export class BankPanelComponent {
     }
 
     addQuestion() {
-        if (this.question.type === 'QRL') delete this.question['choices'];
+        if (this.question.type === 'QRL' || this.question.type === 'QRE') delete this.question['choices'];
         this.questionAdded.emit(this.question);
     }
 
@@ -64,7 +62,7 @@ export class BankPanelComponent {
     }
 
     emptyQuestion(questionType: string): void {
-        this.question = this.deepCloneQuestion(EMPTY_QCM_QUESTION);
+        this.question = questionType === 'QRE' ? this.deepCloneQuestion(EMPTY_QRE_QUESTION) : this.deepCloneQuestion(EMPTY_QCM_QUESTION);
         this.question.type = questionType;
     }
 

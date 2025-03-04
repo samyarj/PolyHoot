@@ -117,7 +117,7 @@ export class Game {
                 const timeDuration = this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QCM ? this.quiz.duration : TIME_FOR_QRL;
                 this.timer.startTimer(timeDuration, TimerEvents.Value, TimerEvents.End);
                 this.timer.isPaused = false;
-                console.log(this.quiz.questions[this.currentQuestionIndex]);
+                console.log('dans nextQuestion de game', this.quiz.questions[this.currentQuestionIndex]);
                 return { question: this.quiz.questions[this.currentQuestionIndex], index: this.currentQuestionIndex };
             }
         }
@@ -165,7 +165,7 @@ export class Game {
     startQuestionCountdown() {
         this.timer.startTimer(3, TimerEvents.QuestionCountdownValue, TimerEvents.QuestionCountdownEnd, () => {
             const currentQuestion = this.nextQuestion();
-            console.log(currentQuestion);
+            console.log('dans startQuestionCountdown', currentQuestion);
             if (currentQuestion) {
                 this.organizer.socket.emit(GameEvents.NextQuestion, currentQuestion);
                 this.organizer.socket.to(this.roomId).emit(GameEvents.NextQuestion, currentQuestion);

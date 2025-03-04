@@ -33,7 +33,8 @@ export class QuestionFormComponent implements OnChanges {
     ) {}
 
     submitQuestion() {
-        if (this.question.type === QuestionType.QRL || QuestionType.QRE) delete this.question['choices'];
+        console.log('on soumet cette question', this.question);
+        if (this.question.type !== QuestionType.QCM) delete this.question['choices'];
         this.questionSubmitted.emit(this.question);
     }
 
@@ -97,7 +98,7 @@ export class QuestionFormComponent implements OnChanges {
             }
             case QuestionType.QRE: {
                 this.question.type = QuestionType.QRE;
-                this.question = JSON.parse(JSON.stringify(EMPTY_QRE_QUESTION));
+                this.question.qreAttributes = JSON.parse(JSON.stringify(EMPTY_QRE_QUESTION.qreAttributes));
                 break;
             }
         }
@@ -114,16 +115,16 @@ export class QuestionFormComponent implements OnChanges {
             }
         }
     }
-    validateTolerance() {
-        if (!this.question.qreAttributes) return null;
-
-        const interval = this.question.qreAttributes.maxBound - this.question.qreAttributes.minBound;
-        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-        const maxTolerance = interval / 4;
-
-        if (this.question.qreAttributes.tolerance > maxTolerance) {
-            return false;
-        }
-        return true;
+    toleranceValid() {
+        return this.questionValidationService.toleranceValid(this.question.qreAttributes);
+    }
+    minBoundValid() {
+        return this.questionValidationService.minBoundValid(this.question.qreAttributes);
+    }
+    maxBoundValid() {
+        return this.questionValidationService.maxBoundValid(this.question.qreAttributes);
+    }
+    goodAnswerValid() {
+        return this.questionValidationService.goodAnswerValid(this.question.qreAttributes);
     }
 }

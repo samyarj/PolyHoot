@@ -108,24 +108,15 @@
                 #toleranceInput="ngModel"
             />
             <div>
-                <small *ngIf="!validateTolerance()" class="text-danger"> La marge de tolérance ne peut pas dépasser 1/4 de l'intervalle. </small>
-                <small *ngIf="question.qreAttributes && question.qreAttributes.minBound > question.qreAttributes.goodAnswer" class="text-danger">
-                    La borne minimale doit être inférieure à la bonne réponse.<br/>
+                <small *ngIf="!toleranceValid()" class="text-danger"> La marge de tolérance ne peut pas dépasser 1/4 de l'intervalle. </small>
+                <small *ngIf="!minBoundValid()" class="text-danger">
+                    La borne minimale doit être inférieure à la bonne réponse.<br />
                 </small>
-                <small *ngIf="question.qreAttributes && question.qreAttributes.maxBound <= question.qreAttributes.minBound" class="text-danger">
-                    La borne maximale doit être supérieure à la borne minimale.<br/>
+                <small *ngIf="!maxBoundValid()" class="text-danger">
+                    La borne maximale doit être supérieure à la borne minimale et à la bonne réponse.<br />
                 </small>
-                <small
-                    *ngIf="
-                        (question.qreAttributes && question.qreAttributes.goodAnswer <= question.qreAttributes.minBound) ||
-                        (question.qreAttributes && question.qreAttributes.goodAnswer >= question.qreAttributes.maxBound)
-                    "
-                    class="text-danger"
-                >
-                    La bonne réponse doit être comprise entre la borne minimale et la borne maximale.<br/>
-                </small>
-                <small *ngIf="question.qreAttributes && question.qreAttributes.maxBound < question.qreAttributes.goodAnswer" class="text-danger">
-                    La borne maximale doit être supérieure à la bonne réponse.<br/>
+                <small *ngIf="!goodAnswerValid()" class="text-danger">
+                    La bonne réponse doit être comprise entre la borne minimale et la borne maximale.<br />
                 </small>
             </div>
         </div>

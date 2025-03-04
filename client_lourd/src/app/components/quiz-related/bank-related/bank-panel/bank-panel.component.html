@@ -6,7 +6,7 @@
         [expanded]="expanded"
         [disabled]="expansionPanelDisabled"
     >
-        <mat-expansion-panel-header [class.expanded-panel]="expanded" [ngClass]="{ qcm: question.type === 'QCM', qrl: question.type === 'QRL' }">
+        <mat-expansion-panel-header [class.expanded-panel]="expanded" [ngClass]="{ qcm: question.type === 'QCM', qrl: question.type === 'QRL', qre: question.type === 'QRE' }">
             <mat-panel-title>
                 <i
                     class="fa-solid question-type-icon"

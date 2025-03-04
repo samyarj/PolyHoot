@@ -55,6 +55,35 @@ export class QuestionValidationService {
         );
         return !isDuplicate;
     }
+    toleranceValid(qreAttributes: QreAttributes | undefined): boolean {
+        if (qreAttributes) {
+            const interval = qreAttributes.maxBound - qreAttributes.minBound;
+            if (interval > 0) {
+                // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+                const maxTolerance = interval / 4;
+                return qreAttributes.tolerance <= maxTolerance;
+            }
+        }
+        return false;
+    }
+    minBoundValid(qreAttributes: QreAttributes | undefined): boolean {
+        if (qreAttributes) {
+            return qreAttributes.minBound < qreAttributes.goodAnswer && qreAttributes.minBound < qreAttributes.maxBound;
+        }
+        return false;
+    }
+    maxBoundValid(qreAttributes: QreAttributes | undefined): boolean {
+        if (qreAttributes) {
+            return qreAttributes.maxBound > qreAttributes.minBound && qreAttributes.maxBound > qreAttributes.goodAnswer;
+        }
+        return false;
+    }
+    goodAnswerValid(qreAttributes: QreAttributes | undefined): boolean {
+        if (qreAttributes) {
+            return qreAttributes.goodAnswer > qreAttributes.minBound && qreAttributes.goodAnswer < qreAttributes.maxBound;
+        }
+        return false;
+    }
 
     isQuestionValid(question: Question): boolean {
         switch (question.type) {
@@ -87,7 +116,10 @@ export class QuestionValidationService {
         return (
             !this.commonValidationService.isStringEmpty(question.text) &&
             this.arePointsValid(question.points) &&
-            this.isToleranceValid(question.qreAttributes)
+            this.toleranceValid(question.qreAttributes) &&
+            this.minBoundValid(question.qreAttributes) &&
+            this.maxBoundValid(question.qreAttributes) &&
+            this.goodAnswerValid(question.qreAttributes)
         );
     }
     verifyQuestion(question: Question, errorMessages: string[], index: number) {
@@ -163,15 +195,5 @@ export class QuestionValidationService {
         if (!this.commonValidationService.isValidStringValue(choice.text)) {
             errorMessages.push('Le choix de réponse #' + num.indexR + ' de la question #' + num.indexQ + ' doit avoir un champ "text" valide');
         }
-    }
-
-    private isToleranceValid(qreAttributes: QreAttributes | undefined): boolean {
-        if (qreAttributes) {
-            const interval = qreAttributes.maxBound - qreAttributes.minBound;
-            // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-            const maxTolerance = interval / 4;
-            return qreAttributes.tolerance <= maxTolerance;
-        }
-        return false;
     }
 }
