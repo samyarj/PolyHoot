@@ -93,8 +93,8 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
     if (_textController.text.trim().isNotEmpty && !_isSending) {
       try {
         _isSending = true;
-        await _channelManager.sendMessage(
-            ref, widget.channel, _textController.text);
+        await _channelManager.sendMessage(ref.read(userProvider).value!.uid,
+            widget.channel, _textController.text);
       } catch (e) {
         if (!mounted) return;
         showErrorDialog(context, e.toString());
@@ -111,7 +111,7 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
 
   @override
   Widget build(BuildContext context) {
-    final userState = ref.watch(userProvider);
+    final userState = ref.read(userProvider);
     return Scaffold(
         resizeToAvoidBottomInset: true,
         body: userState.when(

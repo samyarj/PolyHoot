@@ -2,7 +2,6 @@ import 'package:client_leger/backend-communication-services/chat/firebase_chat_s
 import 'package:client_leger/backend-communication-services/models/chat_channels.dart';
 import 'package:client_leger/backend-communication-services/models/chat_message.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ChannelManager {
   static final ChannelManager _instance = ChannelManager._internal();
@@ -22,21 +21,21 @@ class ChannelManager {
     return _firebaseChatService.getMessages(channel);
   }
 
-  Stream<List<ChatChannel>> fetchAllChannels(WidgetRef ref) {
-    return _firebaseChatService.fetchAllChannels(ref);
+  Stream<List<ChatChannel>> fetchAllChannels(String currentUserUid) {
+    return _firebaseChatService.fetchAllChannels(currentUserUid);
   }
 
-  Future<void> joinChannel(WidgetRef ref, String channel) async {
-    await _firebaseChatService.joinChannel(ref, channel);
+  Future<void> joinChannel(String currentUserUid, String channel) async {
+    await _firebaseChatService.joinChannel(currentUserUid, channel);
   }
 
-  Future<void> quitChannel(WidgetRef ref, String channel) async {
-    await _firebaseChatService.quitChannel(ref, channel);
+  Future<void> quitChannel(String currentUserUid, String channel) async {
+    await _firebaseChatService.quitChannel(currentUserUid, channel);
   }
 
   Future<void> sendMessage(
-      WidgetRef ref, String channel, String message) async {
-    await _firebaseChatService.sendMessage(ref, channel, message);
+      String currentUserUid, String channel, String message) async {
+    await _firebaseChatService.sendMessage(currentUserUid, channel, message);
   }
 
   Future<void> createChannel(String channel) async {

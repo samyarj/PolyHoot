@@ -4,10 +4,8 @@ import 'package:client_leger/backend-communication-services/models/chat_channels
 import 'package:client_leger/backend-communication-services/models/chat_message.dart';
 import 'package:client_leger/backend-communication-services/models/user.dart'
     as user_model;
-import 'package:client_leger/providers/user/user_provider.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
 class FirebaseChatService {
@@ -33,12 +31,10 @@ class FirebaseChatService {
   static const int messagesLimit = 50;
 
   Future<void> sendMessage(
-      WidgetRef ref, String channel, String message) async {
+      String currentUserUid, String channel, String message) async {
     try {
-      final user = ref.read(userProvider).value;
-
       final chatMessage = {
-        'uid': user!.uid,
+        'uid': currentUserUid,
         'message': message,
         'date': FieldValue.serverTimestamp(),
       };
@@ -206,10 +202,8 @@ class FirebaseChatService {
     }
   }
 
-  Stream<List<ChatChannel>> fetchAllChannels(WidgetRef ref) {
+  Stream<List<ChatChannel>> fetchAllChannels(String currentUserUid) {
     return _chatChannelsCollection.snapshots().asyncMap((snapshot) async {
-      final user = ref.read(userProvider).value;
-      final currentUserUid = user!.uid;
       return snapshot.docs.map((doc) {
         return ChatChannel.fromJson(
             doc.data() as Map<String, dynamic>, currentUserUid);
@@ -217,10 +211,8 @@ class FirebaseChatService {
     });
   }
 
-  joinChannel(WidgetRef ref, String channel) async {
+  joinChannel(String currentUserUid, String channel) async {
     try {
-      final user = ref.read(userProvider).value;
-      final currentUserUid = user!.uid;
       final channelRef = _chatChannelsCollection.doc(channel);
       await channelRef.update({
         'users': FieldValue.arrayUnion([currentUserUid]),
@@ -231,10 +223,8 @@ class FirebaseChatService {
     }
   }
 
-  quitChannel(WidgetRef ref, String channel) async {
+  quitChannel(String currentUserUid, String channel) async {
     try {
-      final user = ref.read(userProvider).value;
-      final currentUserUid = user!.uid;
       final channelRef = _chatChannelsCollection.doc(channel);
       await channelRef.update({
         'users': FieldValue.arrayRemove([currentUserUid]),

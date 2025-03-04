@@ -20,6 +20,12 @@ class MainScaffold extends ConsumerStatefulWidget {
 class _MainScaffoldState extends ConsumerState<MainScaffold> {
   bool _isLoggingOut = false;
 
+  @override
+  void initState() {
+    WebSocketManager.instance.initializeSocketConnection();
+    super.initState();
+  }
+
   _logout() async {
     if (_isLoggingOut) return;
 

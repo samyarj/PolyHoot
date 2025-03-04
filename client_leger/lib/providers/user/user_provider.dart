@@ -88,6 +88,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       AppLogger.e("Error creating user: $e");
       state = AsyncValue.error(e, stack);
       isLoggedIn.value = false;
+      rethrow;
     }
   }
 
@@ -117,20 +118,22 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
 
   Future<void> signUp(String username, String email, String password) async {
     state = const AsyncValue.loading();
+    AppLogger.d("Signing up...");
+    final userCredential =
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
     try {
-      AppLogger.d("Signing up...");
-      final userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
       await userCredential.user!.updateProfile(displayName: username);
       await createAndFetchUser(userCredential, auth_service.createUserUrl);
     } catch (e, stack) {
       AppLogger.e("Sign-up error: $e");
       state = AsyncValue.error(e, stack);
       isLoggedIn.value = false;
+      await userCredential.user
+          ?.delete(); // on annule la creation du compte avec FireBase
+      rethrow;
     }
   }
 
@@ -151,6 +154,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       AppLogger.e("Google sign-in error: $e");
       state = AsyncValue.error(e, stack);
       isLoggedIn.value = false;
+      rethrow;
     }
   }
 

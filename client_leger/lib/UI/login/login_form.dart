@@ -38,8 +38,6 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   }
 
   Future<void> signIn() async {
-    if (!_formKey.currentState!.validate()) return;
-
     try {
       await ref.read(userProvider.notifier).signIn(
             _identifierController.text.trim(),
