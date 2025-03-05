@@ -8,7 +8,7 @@
             <img class="background-img far" src="assets/pictures/waiting-page/background/far-clouds.png" />
             <img class="background-img mid" src="assets/pictures/waiting-page/background/mid-clouds.png" />
             <img class="background-img" src="assets/pictures/waiting-page/background/close-clouds.png" />
-            <div *ngIf="isOrganizer || isRandomMode" class="room-board-container">
+            <div *ngIf="isOrganizer" class="room-board-container">
                 <img class="room-board" src="assets/pictures/waiting-page/background/wooden-board.png" />
                 <p>{{ roomId }}</p>
             </div>
@@ -39,7 +39,7 @@
                     >
                         {{ player }}
                         <button
-                            *ngIf="(isOrganizer || isRandomMode) && player !== 'Organisateur'"
+                            *ngIf="isOrganizer && player !== 'Organisateur'"
                             (click)="banPlayer(player)"
                             class="btn btn-danger btn-sm"
                         >
@@ -52,7 +52,7 @@
                 <div class="lock-section">
                     <i class="fa-solid" [ngClass]="{ 'fa-lock': gameLocked, 'fa-unlock': !gameLocked }"></i>
                     <button
-                        *ngIf="isOrganizer || isRandomMode"
+                        *ngIf="isOrganizer"
                         (click)="toggleGameLock()"
                         class="btn btn-dark lock-btn"
                         title="Aucun joueur ne peut rejoindre la partie si elle est verrouillée"
@@ -60,7 +60,7 @@
                         {{ gameLocked ? 'Déverrouiller' : 'Verrouiller' }}
                     </button>
                 </div>
-                <p *ngIf="isOrganizer || (!isOrganizer && isRandomMode)">
+                <p *ngIf="isOrganizer">
                     {{
                         gameLocked
                             ? players.length >= 1
@@ -69,8 +69,8 @@
                             : 'Il faut verrouiller la partie pour commencer!'
                     }}
                 </p>
-                <p *ngIf="!isOrganizer && !isRandomMode">Veuillez attendre que l'organisateur démarre la partie.</p>
-                <p *ngIf="!isOrganizer && gameLocked && !isRandomMode">L'organisateur est prêt à démarrer la partie!</p>
+                <p *ngIf="!isOrganizer">Veuillez attendre que l'organisateur démarre la partie.</p>
+                <p *ngIf="!isOrganizer && gameLocked">L'organisateur est prêt à démarrer la partie!</p>
                 <button
                     *ngIf="isOrganizer"
                     [disabled]="players.length === 0 || !gameLocked"
@@ -79,11 +79,8 @@
                 >
                     Commencer la partie
                 </button>
-                <button *ngIf="isRandomMode && !isOrganizer" [disabled]="!gameLocked" (click)="startGame()" class="btn btn-primary start-game-btn">
-                    Commencer La partie
-                </button>
             </div>
-            <button *ngIf="!isOrganizer && !isRandomMode" (click)="leaveWaitingPageAsPlayer()" class="btn btn-danger leave-btn">Quitter</button>
+            <button *ngIf="!isOrganizer" (click)="leaveWaitingPageAsPlayer()" class="btn btn-danger leave-btn">Quitter</button>
             <button *ngIf="isOrganizer" (click)="abandonAsOrganizer()" class="btn btn-danger leave-btn">Quitter</button>
         </div>
         <div id="chat-separator"></div>

@@ -9,7 +9,6 @@ export const INVALID_INDEX = -1;
 export const QUESTION_DELAY = 3000;
 export const START_GAME_COUNTDOWN = 5;
 export const MAX_CHAR = 200;
-export const LAST_MODIFIED_INTERVAL = 5000;
 export const TIME_TO_NEXT_ANSWER = 3000;
 export const TIMER_VALUE = 5000;
 export const NOT_FOUND = -1;

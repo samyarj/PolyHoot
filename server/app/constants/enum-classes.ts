@@ -61,6 +61,7 @@ export enum GameEvents {
     WaitingForCorrection = 'waitingForCorrection',
     PlayerInteraction = 'playerInteraction',
     PlayerSubmitted = 'playerSubmitted',
+    GetCurrentGames = 'getCurrentGames',
 }
 
 export enum JoinEvents {
@@ -71,6 +72,7 @@ export enum JoinEvents {
     Join = 'joinGame',
     CanJoin = 'canJoinGame',
     JoinSuccess = 'onJoinGameSuccess',
+    LobbyCreated = 'lobbyCreated',
 }
 
 export enum JoinErrors {
@@ -85,6 +87,7 @@ export enum JoinErrors {
 export enum ConnectEvents {
     UserToGame = 'userConnectedToGamePage',
     identifyMobileClient = 'identifyMobileClient',
+    AllPlayersLeft = "AllPlayersLeft",
 }
 
 export enum DisconnectEvents {

@@ -30,18 +30,6 @@ export class OrganizerPageComponent implements OnDestroy {
     get currentQuestionIndex() {
         return this.organizerService.gameInfo.currentQuestionIndex;
     }
-    get noAnswersArray() {
-        return this.organizerService.noAnswersArray;
-    }
-    get peopleModifyingQuestion() {
-        return this.organizerService.peopleAnswering.modifying;
-    }
-    get peopleNotModifyingQuestion() {
-        return this.organizerService.peopleAnswering.notModifying;
-    }
-    get modifyAnswerArray() {
-        return [this.peopleModifyingQuestion.length, this.peopleNotModifyingQuestion.length];
-    }
     get gameStatus() {
         return this.organizerService.gameStatus;
     }
@@ -69,10 +57,6 @@ export class OrganizerPageComponent implements OnDestroy {
     }
     get question() {
         return this.organizerService.currentQuestion;
-    }
-
-    get noPlayers() {
-        return this.organizerService.noPlayers;
     }
 
     get isCorrectAnswersArray() {

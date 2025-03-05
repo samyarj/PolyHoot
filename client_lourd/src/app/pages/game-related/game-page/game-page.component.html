@@ -61,7 +61,6 @@
                     </div>
                     <textarea
                         *ngIf="currentQuestion.type === 'QRL'"
-                        (input)="textAreaModified()"
                         id="question-answer-input"
                         [(ngModel)]="answer"
                         maxlength="{{ MAX_CHARACTERS }}"
