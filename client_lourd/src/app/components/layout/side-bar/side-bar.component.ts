@@ -17,9 +17,10 @@ export class SideBarComponent implements OnInit, OnDestroy {
     chatMessagesLoading: boolean = true;
     user$: Observable<User | null>;
     userUID: string | null = null;
+    isFetchingOlderMessages: boolean = false; // Prevent multiple fetches at once
+
     private messagesSubscription: Subscription;
     private lastMessageDate: FieldPath; // Track last message date for pagination
-    isFetchingOlderMessages: boolean = false; // Prevent multiple fetches at once
 
     constructor(
         private authService: AuthService,
@@ -38,7 +39,6 @@ export class SideBarComponent implements OnInit, OnDestroy {
                     this.lastMessageDate = messages[0].date; // Track oldest message date
                 }
                 this.chatMessagesLoading = false;
-                console.log('messages', messages);
             },
             error: (err) => {
                 console.error('Error while fetching messages:', err);

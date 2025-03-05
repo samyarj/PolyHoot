@@ -15,7 +15,7 @@ import { Firestore } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { User } from '@app/interfaces/user';
 import { handleErrorsGlobally } from '@app/utils/rxjs-operators';
-import { collection, doc, getDocs, query, updateDoc, where } from '@firebase/firestore';
+import { collection, doc, getDocs, onSnapshot, query, updateDoc, where } from '@firebase/firestore';
 import { User as FirebaseUser, onIdTokenChanged, sendPasswordResetEmail } from 'firebase/auth';
 import { BehaviorSubject, catchError, finalize, from, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -29,6 +29,7 @@ export class AuthService {
     private googleProvider = new GoogleAuthProvider();
     private loadingTokenBS = new BehaviorSubject<boolean>(true);
     private isAuthenticating = false;
+    private userSnapshotUnsubscribe: (() => void) | null = null;
     user$ = this.userBS.asObservable();
     loadingToken$ = this.loadingTokenBS.asObservable();
 
@@ -104,6 +105,10 @@ export class AuthService {
 
     logout(): void {
         const currentUser = this.auth.currentUser;
+        if (this.userSnapshotUnsubscribe) {
+            this.userSnapshotUnsubscribe();
+            this.userSnapshotUnsubscribe = null;
+        }
         if (currentUser) {
             const userDocRef = doc(this.firestore, `users/${currentUser.uid}`);
 
@@ -188,6 +193,11 @@ export class AuthService {
                 return;
             }
 
+            if (this.userSnapshotUnsubscribe) {
+                this.userSnapshotUnsubscribe();
+                this.userSnapshotUnsubscribe = null;
+            }
+
             if (firebaseUser) {
                 try {
                     const idToken = await firebaseUser.getIdToken();
@@ -196,23 +206,31 @@ export class AuthService {
                     this.isUserOnline(firebaseUser.uid).subscribe((isOnline) => {
                         if (isOnline) {
                             this.loadingTokenBS.next(false);
-                            this.clearSession();
-                            throw new Error("L'utilisateur est déjà connecté sur un autre appareil. ");
+                            this.signOutAndClearSession();
+                            throw new Error("L'utilisateur est déjà connecté sur un autre appareil.");
                         }
 
-                        this.http
-                            .get<User>(`${this.baseUrl}/profile`, {
-                                headers: { Authorization: `Bearer ${idToken}` },
-                            })
-                            .pipe(finalize(() => this.loadingTokenBS.next(false)))
-                            .subscribe({
-                                next: (user) => {
-                                    this.setIsOnline(true, user.uid);
-                                    this.userBS.next(user);
-                                    this.socketClientService.send('identifyMobileClient', user.uid);
-                                },
-                                error: () => this.logout(),
-                            });
+                        const userDocRef = doc(this.firestore, `users/${firebaseUser.uid}`);
+
+                        this.setIsOnline(true, firebaseUser.uid);
+                        this.socketClientService.send('identifyMobileClient', firebaseUser.uid);
+
+                        this.userSnapshotUnsubscribe = onSnapshot(
+                            userDocRef,
+                            (docSnapshot) => {
+                                if (docSnapshot.exists()) {
+                                    const userData = docSnapshot.data() as User;
+                                    this.userBS.next(userData);
+                                } else {
+                                    this.userBS.next(null);
+                                }
+                                this.loadingTokenBS.next(false);
+                            },
+                            (error) => {
+                                console.error('Error fetching user data:', error);
+                                this.loadingTokenBS.next(false);
+                            },
+                        );
                     });
                 } catch {
                     this.loadingTokenBS.next(false);
