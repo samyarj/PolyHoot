@@ -33,7 +33,6 @@ export class QuestionFormComponent implements OnChanges {
     ) {}
 
     submitQuestion() {
-        console.log('on soumet cette question', this.question);
         if (this.question.type !== QuestionType.QCM) delete this.question['choices'];
         this.questionSubmitted.emit(this.question);
     }

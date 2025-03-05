@@ -17,7 +17,8 @@ export class Player {
     submitted: boolean;
     interacted: boolean;
     currentChoices: boolean[];
-    canChat: boolean;
+    qreAnswer: number;
+    exactAnswer: boolean;
 
     constructor(name: string, isOrganizer: boolean, @ConnectedSocket() client: Socket) {
         this.name = name;
@@ -29,7 +30,7 @@ export class Player {
         this.submitted = false;
         this.interacted = false;
         this.currentChoices = [false, false, false, false];
-        this.canChat = true;
+        this.qreAnswer = null;
     }
 
     prepareForNextQuestion() {
@@ -37,6 +38,7 @@ export class Player {
         this.isFirst = false;
         this.submitted = false;
         this.currentChoices = [false, false, false, false];
+        this.qreAnswer = null;
     }
 
     updatePlayerPoints(currentQuestion: Question) {
@@ -56,6 +58,14 @@ export class Player {
                 for (let choiceIndex = 0; choiceIndex < choices.length; choiceIndex++) {
                     if (choices[choiceIndex].isCorrect !== this.currentChoices[choiceIndex]) correct = false;
                 }
+            }
+        }
+        else if (currentQuestion.type === QuestionType.QRE) {
+            const qreAttributes = currentQuestion.qreAttributes;
+            if (qreAttributes) {
+                const minTolerated = qreAttributes.goodAnswer - qreAttributes.tolerance;
+                const maxTolerated = qreAttributes.goodAnswer + qreAttributes.tolerance;
+                if (this.qreAnswer > maxTolerated || this.qreAnswer < minTolerated) correct = false;
             }
         }
         return correct;

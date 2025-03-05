@@ -80,7 +80,6 @@ export class QuizService {
 
     private removeChoices(questions: Question[]) {
         questions.forEach((question) => {
-            console.log('removeChoices', question);
             if (question.type !== QuestionType.QCM) delete question.choices;
         });
     }

@@ -21,10 +21,6 @@ export class ChatService {
         this.allChatMessagesObservable = this.allChatMessagesSource.asObservable();
         this.isInitialized = false;
         this.roomId = this.socketClientService.roomId;
-        this.socketClientService.canChat = true;
-    }
-    get canChat() {
-        return this.socketClientService.canChat;
     }
 
     isRoomIdCurrent(): boolean {
@@ -73,7 +69,6 @@ export class ChatService {
                 this.socketClientService.roomId = '';
                 this.socketClientService.playerName = '';
                 this.socketClientService.isOrganizer = false;
-                this.socketClientService.canChat = true;
             } else {
                 this.allChatMessages.push(chatData.message);
                 this.allChatMessagesSource.next(this.allChatMessages);

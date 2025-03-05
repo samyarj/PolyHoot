@@ -91,7 +91,6 @@ export class CreateQuizComponent {
     submitQuizEvent() {
         this.quizHandler.disableAnimations = true;
         this.quizHandler.prepareQuizBeforeSubmit();
-        console.log('quiz submitted', this.quiz);
         this.submitQuiz.emit(this.quiz);
     }
 

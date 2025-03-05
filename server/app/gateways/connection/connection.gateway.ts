@@ -177,7 +177,6 @@ export class ConnectionGateway implements OnGatewayDisconnect {
             if (game.isGameReadyToStart()) {
                 const currentQuestion = game.startGame();
                 this.server.to(roomId).emit(GameEvents.QuestionsLength, currentQuestion.length);
-                console.log('connectUser', currentQuestion);
                 this.server.to(roomId).emit(GameEvents.NextQuestion, currentQuestion);
             }
         }

@@ -36,6 +36,9 @@
                     <p *ngIf="currentQuestion.type === 'QCM' && choiceFeedback === 'first'" style="color: white">
                         Félicitations, vous êtes le premier à avoir bien répondu! Un bonus de point de 20% vous est accordé
                     </p>
+                    <p *ngIf="currentQuestion.type === 'QRE' && choiceFeedback === 'exact'" style="color: white">
+                        Félicitations, c'était la réponse exacte! Un bonus de point de 20% vous est accordé
+                    </p>
                     <p *ngIf="choiceFeedback === 'correct'" style="color: white">
                         Bonne réponse{{ currentQuestion.type === 'QCM' ? ', mais pas la première!' : '!' }} Tous les points sont accordés.
                     </p>

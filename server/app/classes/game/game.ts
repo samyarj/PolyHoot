@@ -117,7 +117,6 @@ export class Game {
                 const timeDuration = this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QCM ? this.quiz.duration : TIME_FOR_QRL;
                 this.timer.startTimer(timeDuration, TimerEvents.Value, TimerEvents.End);
                 this.timer.isPaused = false;
-                console.log('dans nextQuestion de game', this.quiz.questions[this.currentQuestionIndex]);
                 return { question: this.quiz.questions[this.currentQuestionIndex], index: this.currentQuestionIndex };
             }
         }
@@ -152,7 +151,7 @@ export class Game {
     updatePointsQRL(data: { pointsTotal: { playerName: string; points: number }[]; answers: number[] }) {
         data.pointsTotal.forEach((dataPlayer) => {
             const client = this.players.find((player) => player.name === dataPlayer.playerName);
-            client.socket.emit(GameEvents.PlayerPointsUpdate, { points: dataPlayer.points, isFirst: false });
+            client.socket.emit(GameEvents.PlayerPointsUpdate, { points: dataPlayer.points, isFirst: false, exactAnswer: false });
             this.organizer.socket.emit(GameEvents.OrganizerPointsUpdate, { name: dataPlayer.playerName, points: dataPlayer.points });
             client.points = dataPlayer.points;
         });
@@ -165,7 +164,6 @@ export class Game {
     startQuestionCountdown() {
         this.timer.startTimer(3, TimerEvents.QuestionCountdownValue, TimerEvents.QuestionCountdownEnd, () => {
             const currentQuestion = this.nextQuestion();
-            console.log('dans startQuestionCountdown', currentQuestion);
             if (currentQuestion) {
                 this.organizer.socket.emit(GameEvents.NextQuestion, currentQuestion);
                 this.organizer.socket.to(this.roomId).emit(GameEvents.NextQuestion, currentQuestion);
@@ -183,14 +181,21 @@ export class Game {
             targetedPlayer.isFirst = false;
             return this.checkAndPrepareForNextQuestion();
         }
-        const currentFinalizeTime: number = Date.now();
-        if (!this.lastFinalizeCall) {
-            this.handleFirstAnswer(targetedPlayer, currentFinalizeTime);
-            return this.checkAndPrepareForNextQuestion();
-        }
+        if (this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QCM) {
+            const currentFinalizeTime: number = Date.now();
+            if (!this.lastFinalizeCall) {
+                this.handleFirstAnswer(targetedPlayer, currentFinalizeTime);
+                return this.checkAndPrepareForNextQuestion();
+            }
 
-        this.handleLaterAnswer(currentFinalizeTime);
-        targetedPlayer.isFirst = false;
+            this.handleLaterAnswer(currentFinalizeTime);
+            targetedPlayer.isFirst = false;
+        } else if (this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QRE) {
+            const question = this.quiz.questions[this.currentQuestionIndex];
+            if (question.qreAttributes.tolerance !== 0 && targetedPlayer.qreAnswer === question.qreAttributes.goodAnswer) {
+                targetedPlayer.noBonusesObtained++;
+            }
+        }
         this.checkAndPrepareForNextQuestion();
     }
     checkAndPrepareForNextQuestion(@ConnectedSocket() client?: Socket) {
@@ -255,16 +260,16 @@ export class Game {
     }
     private updatePlayerAnswersAndPoints() {
         this.players.forEach((player: Player) => {
-            const answers = player.currentChoices;
             const currentQuestion = this.quiz.questions[this.currentQuestionIndex];
             if (currentQuestion.type === QuestionType.QCM) {
+                const answers = player.currentChoices;
                 answers.forEach((selected, index) => {
                     if (selected) {
                         this.answersPerChoice[index]++;
                     }
                 });
                 player.updatePlayerPoints(this.quiz.questions[this.currentQuestionIndex]);
-                player.socket.emit(GameEvents.PlayerPointsUpdate, { points: player.points, isFirst: player.isFirst });
+                player.socket.emit(GameEvents.PlayerPointsUpdate, { points: player.points, isFirst: player.isFirst, exactAnswer: player.exactAnswer });
                 this.organizer.socket.emit(GameEvents.OrganizerPointsUpdate, { name: player.name, points: player.points });
             }
             player.prepareForNextQuestion();

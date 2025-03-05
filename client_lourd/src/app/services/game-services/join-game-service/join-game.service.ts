@@ -116,7 +116,6 @@ export class JoinGameService {
         this.socketService.on(JoinEvents.CanJoin, () => {
             this.socketService.roomId = gameId;
             this.socketService.playerName = playerName;
-            this.socketService.canChat = true;
             this.socketService.isOrganizer = false;
             this.redirectToPage('/waiting');
         });

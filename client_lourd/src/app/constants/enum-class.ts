@@ -23,6 +23,7 @@ export enum ChoiceFeedback {
     Incorrect = 'incorrect',
     Awaiting = 'awaiting',
     AwaitingCorrection = 'awaitingCorrection',
+    Exact = 'exact',
     Idle = 'idle',
 }
 
