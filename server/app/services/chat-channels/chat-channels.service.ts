@@ -42,5 +42,4 @@ export class ChatChannelsService {
         }
 
     }
-//Pour etre sur que ca a mit a jour
 }

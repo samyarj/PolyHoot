@@ -148,13 +148,7 @@ export class ConnectionGateway implements OnGatewayDisconnect {
         }
     }
     private disconnectPlayerFromWaitingPage(roomId: string, disconnectedPlayer: Player, game: Game) {
-        if (disconnectedPlayer.name === 'Organisateur') {
-            this.disconnectOrganizer(roomId, disconnectedPlayer.socket);
-        }
         const playerNames = game.players.filter((player) => player.name !== disconnectedPlayer.name).map((player) => player.name);
-        if (playerNames.length === 0) {
-            this.gameManager.endGame(game.roomId);
-        }
         this.server.emit(GameEvents.PlayerLeft, { playerNames, roomId });
     }
 
