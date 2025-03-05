@@ -1,5 +1,3 @@
-import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
-    as auth_service;
 import 'package:client_leger/backend-communication-services/environment.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/models/chat_channels.dart';
@@ -32,12 +30,11 @@ class FirebaseChatService {
 
   static const int messagesLimit = 50;
 
-  Future<void> sendMessage(String channel, String message) async {
+  Future<void> sendMessage(
+      String currentUserUid, String channel, String message) async {
     try {
-      final user = await auth_service.currentSignedInUser;
-
       final chatMessage = {
-        'uid': user.uid,
+        'uid': currentUserUid,
         'message': message,
         'date': FieldValue.serverTimestamp(),
       };
@@ -205,10 +202,8 @@ class FirebaseChatService {
     }
   }
 
-  Stream<List<ChatChannel>> fetchAllChannels() {
+  Stream<List<ChatChannel>> fetchAllChannels(String currentUserUid) {
     return _chatChannelsCollection.snapshots().asyncMap((snapshot) async {
-      final user = await auth_service.currentSignedInUser;
-      final currentUserUid = user.uid;
       return snapshot.docs.map((doc) {
         return ChatChannel.fromJson(
             doc.data() as Map<String, dynamic>, currentUserUid);
@@ -216,10 +211,8 @@ class FirebaseChatService {
     });
   }
 
-  joinChannel(String channel) async {
+  joinChannel(String currentUserUid, String channel) async {
     try {
-      final user = await auth_service.currentSignedInUser;
-      final currentUserUid = user.uid;
       final channelRef = _chatChannelsCollection.doc(channel);
       await channelRef.update({
         'users': FieldValue.arrayUnion([currentUserUid]),
@@ -230,10 +223,8 @@ class FirebaseChatService {
     }
   }
 
-  quitChannel(String channel) async {
+  quitChannel(String currentUserUid, String channel) async {
     try {
-      final user = await auth_service.currentSignedInUser;
-      final currentUserUid = user.uid;
       final channelRef = _chatChannelsCollection.doc(channel);
       await channelRef.update({
         'users': FieldValue.arrayRemove([currentUserUid]),

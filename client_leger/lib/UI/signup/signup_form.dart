@@ -3,17 +3,19 @@ import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
+import 'package:client_leger/providers/user/user_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class SignUpForm extends StatefulWidget {
+class SignUpForm extends ConsumerStatefulWidget {
   const SignUpForm({super.key});
 
   @override
-  State<SignUpForm> createState() => _SignUpFormState();
+  ConsumerState<SignUpForm> createState() => _SignUpFormState();
 }
 
-class _SignUpFormState extends State<SignUpForm> {
+class _SignUpFormState extends ConsumerState<SignUpForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -52,7 +54,6 @@ class _SignUpFormState extends State<SignUpForm> {
 
   String? _usernameError;
   String? _emailError;
-  bool _isLoading = false;
 
   @override
   void initState() {
@@ -95,50 +96,34 @@ class _SignUpFormState extends State<SignUpForm> {
   }
 
   Future signUp() async {
-    setState(() {
-      _isLoading = true;
-    });
     await isUsernameTaken(_usernameController.text.trim());
     await isEmailTaken(_emailController.text.trim());
 
     if (_usernameError != null || _emailError != null) {
-      setState(() {
-        _isLoading = false;
-      });
       return;
     }
 
     try {
-      await auth_service.signUp(_usernameController.text.trim(),
-          _emailController.text.trim(), _passwordController.text.trim());
+      await ref.read(userProvider.notifier).signUp(
+          _usernameController.text.trim(),
+          _emailController.text.trim(),
+          _passwordController.text.trim());
       if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-      });
     } catch (e) {
       if (!mounted) return;
       showErrorDialog(context, getCustomError(e));
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 
   void signUpWithGoogle() async {
-    setState(() {
-      _isLoading = true;
-    });
     try {
-      await auth_service.signWithGoogle(isLogin: false);
+      await ref.read(userProvider.notifier).signWithGoogle(isLogin: false);
     } catch (e) {
       if (!mounted) return;
       showErrorDialog(context, getCustomError(e));
     } finally {
       // ignore: control_flow_in_finally
       if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 
@@ -234,6 +219,7 @@ class _SignUpFormState extends State<SignUpForm> {
 
   @override
   Widget build(BuildContext context) {
+    final userState = ref.watch(userProvider);
     return Stack(
       children: [
         Container(
@@ -319,7 +305,7 @@ class _SignUpFormState extends State<SignUpForm> {
                   ),
                   SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: _isLoading
+                    onPressed: userState is AsyncLoading
                         ? null
                         : () async {
                             if (_formKey.currentState!.validate()) {
@@ -347,7 +333,8 @@ class _SignUpFormState extends State<SignUpForm> {
                   SizedBox(height: 16),
                   // Google Sign-Up
                   OutlinedButton.icon(
-                    onPressed: _isLoading ? null : signUpWithGoogle,
+                    onPressed:
+                        userState is AsyncLoading ? null : signUpWithGoogle,
                     icon: Icon(Icons.account_circle),
                     label: Text("S'inscrire avec Google",
                         style: TextStyle(fontSize: 18)),
@@ -363,7 +350,7 @@ class _SignUpFormState extends State<SignUpForm> {
             ),
           ),
         ),
-        if (_isLoading)
+        if (userState is AsyncLoading)
           Positioned.fill(
             child: Center(
               child: CircularProgressIndicator(),
