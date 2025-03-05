@@ -3,7 +3,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { SoundPlayer } from '@app/classes/sound-player/sound-player.class';
-import { ALERT_SOUND_PATH, BUFFER_TIME, TIME_TO_NEXT_ANSWER } from '@app/constants/constants';
+import { ALERT_SOUND_PATH, TIME_TO_NEXT_ANSWER } from '@app/constants/constants';
 import {
     AppRoute,
     ConfirmationMessage,
@@ -16,7 +16,6 @@ import {
 } from '@app/constants/enum-class';
 import { AnswerQRL } from '@app/interfaces/answer-qrl';
 import { GameInfo } from '@app/interfaces/game-info';
-import { Modification } from '@app/interfaces/modification';
 import { Modifiers } from '@app/interfaces/modifiers';
 import { PointsUpdateQRL } from '@app/interfaces/points-update';
 import { Question } from '@app/interfaces/question';
@@ -39,14 +38,11 @@ export class OrganizerService {
     gameModifiers: Modifiers = { paused: false, alertMode: false };
     gameStatus: GameStatus = GameStatus.WaitingForAnswers;
     isCorrectAnswersArray: boolean[];
-    noAnswersArray: number[];
-    peopleAnswering: Modification = { modifying: [], notModifying: [] };
     shouldDisconnect: boolean = true;
     private questionsLength: number;
     private pointsAfterCorrection: PointsUpdateQRL[] = [];
     private totalNumberOfAnswers = [0, 0, 0];
     private socketsInitialized: boolean = false;
-    private timeQuestionBegan: number = 0;
     // Ce sont des services qui communiquent avec d'autres composantes selon la logique du jeu
     // eslint-disable-next-line max-params
     constructor(
@@ -58,9 +54,6 @@ export class OrganizerService {
     ) {}
     get roomId() {
         return this.socketHandlerService.roomId;
-    }
-    get noPlayers() {
-        return this.playerListService.noPlayers;
     }
 
     nextQuestion() {
@@ -77,10 +70,8 @@ export class OrganizerService {
 
     handleSockets() {
         if (!this.socketsInitialized) {
-            this.handleAnswerUpdate();
             this.handleQRLAnswer();
             this.handleEveryoneSubmitted();
-            this.handleChoiceSockets();
             this.handlePlayerListSockets();
             this.handleTimeSockets();
             this.handleResultsSockets();
@@ -102,7 +93,6 @@ export class OrganizerService {
         }
     }
     signalUserDisconnect() {
-        this.socketHandlerService.isRandomMode = false;
         this.socketHandlerService.send(DisconnectEvents.OrganizerDisconnected);
         this.alertSoundPlayer.stop();
     }
@@ -119,7 +109,6 @@ export class OrganizerService {
     }
 
     initializeAttributes() {
-        this.initializeNoAnswersArray();
         this.initializeCorrectAnswers();
         this.gameStatus = GameStatus.WaitingForAnswers;
         this.gameModifiers.paused = false;
@@ -131,7 +120,6 @@ export class OrganizerService {
 
     abandonGame() {
         this.messageHandlerService.confirmationDialog(ConfirmationMessage.AbandonGame, () => {
-            this.socketHandlerService.isRandomMode = false;
             this.router.navigate([AppRoute.CREATE]);
             this.alertSoundPlayer.stop();
         });
@@ -178,44 +166,6 @@ export class OrganizerService {
         }
     }
 
-    private initializeNoAnswersArray() {
-        this.noAnswersArray = [];
-        if (this.currentQuestion.choices) this.noAnswersArray = Array(this.currentQuestion.choices?.length).fill(0);
-    }
-
-    private selectChoice(data: { selected: boolean; choice: number }) {
-        if (data.choice < this.noAnswersArray.length) {
-            if (data.selected && this.noAnswersArray[data.choice] + 1 <= this.playerListService.noPlayers) {
-                this.noAnswersArray[data.choice] += 1;
-            }
-            if (!data.selected && this.noAnswersArray[data.choice] - 1 >= 0) {
-                this.noAnswersArray[data.choice] -= 1;
-            }
-        }
-    }
-
-    private handleChoiceSockets() {
-        this.socketHandlerService.on(GameEvents.PlayerChoiceToOrganizer, (data: { selected: boolean; choice: number }) => {
-            this.selectChoice(data);
-        });
-    }
-
-    private handleAnswerUpdate() {
-        this.socketHandlerService.on(GameEvents.ModifyUpdate, (data: { playerName: string; modified: boolean }) => {
-            if (data.modified) {
-                this.peopleAnswering.modifying.push(data.playerName);
-                this.peopleAnswering.notModifying = this.peopleAnswering.notModifying.filter((name) => name !== data.playerName);
-            } else {
-                // Eviter que l'on recoive un evenement de stopped modifying qui provient de la question precedente.
-                // ... On sait que si l'on recoit un evenement de stopped modifying dans les premieres 5 secondes, c'est un faux positif.
-                // Le buffer time ne devrait pas depasser 5 secondes, au risque de ignorer de vrais evenements stopped modifying.
-                if (Date.now() - this.timeQuestionBegan > BUFFER_TIME) {
-                    this.peopleAnswering.notModifying.push(data.playerName);
-                    this.peopleAnswering.modifying = this.peopleAnswering.modifying.filter((name) => name !== data.playerName);
-                }
-            }
-        });
-    }
     private handleQRLAnswer() {
         this.socketHandlerService.on(GameEvents.QRLAnswerSubmitted, (data: { player: string; playerAnswer: string }) => {
             this.answersQRL.push(data);
@@ -233,8 +183,6 @@ export class OrganizerService {
         this.socketHandlerService.on(GameEvents.PlayerStatusUpdate, (player: { name: string; isInGame: boolean }) => {
             this.playerListService.updatePlayerPresence(player.name, player.isInGame);
             if (player.isInGame === false) {
-                this.peopleAnswering.notModifying = this.peopleAnswering.notModifying.filter((name) => name !== player.name);
-                this.peopleAnswering.modifying = this.peopleAnswering.modifying.filter((name) => name !== player.name);
                 this.answersQRL = this.answersQRL.filter((playerGraded) => playerGraded.player !== player.name);
             }
         });
@@ -260,11 +208,9 @@ export class OrganizerService {
     }
 
     private handlePlayerListSockets() {
-        this.playerListService.handlePlayerInteraction();
         this.handlePlayerStatus();
         this.handlePlayerPoints();
         this.handlePlayerList();
-        this.playerListService.handlePlayerSubmission();
     }
 
     private handleTimerValue() {
@@ -311,17 +257,13 @@ export class OrganizerService {
         });
         this.socketHandlerService.on(GameEvents.NextQuestion, (nextQuestion: { question: Question; index: number }) => {
             this.playerListService.resetPlayerList();
-            this.timeQuestionBegan = Date.now();
             this.answersQRL = [];
             this.pointsAfterCorrection = [];
             this.totalNumberOfAnswers = [0, 0, 0];
             this.gameInfo.currentIndex = 0;
-            this.peopleAnswering.modifying = [];
-            this.peopleAnswering.notModifying = this.playerListService.playerList.filter((player) => player.isInGame).map((player) => player.name);
             this.gameModifiers = { paused: false, alertMode: false };
             this.gameInfo.currentQuestionIndex = nextQuestion.index;
             this.currentQuestion = nextQuestion.question;
-            this.initializeNoAnswersArray();
             this.initializeCorrectAnswers();
         });
     }
@@ -342,7 +284,7 @@ export class OrganizerService {
     }
 
     private handleGameEnded() {
-        this.socketHandlerService.on(GameEvents.End, () => {
+        this.socketHandlerService.on(ConnectEvents.AllPlayersLeft, () => {
             this.router.navigate([AppRoute.CREATE]);
             this.messageHandlerService.popUpErrorDialog('Les joueurs ont tous quitté la partie!');
             this.alertSoundPlayer.stop();

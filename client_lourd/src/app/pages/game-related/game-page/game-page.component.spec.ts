@@ -61,7 +61,6 @@ describe('GamePageComponent', () => {
                 { provide: Location, useValue: locationSpy },
             ],
         });
-        mockClientService.clearAnswer = new BehaviorSubject<boolean>(false);
         mockClientService.playerInfo = { submitted: false, userFirst: false, choiceSelected: [], waitingForQuestion: false };
         fixture = TestBed.createComponent(GamePageComponent);
         component = fixture.componentInstance;
@@ -72,7 +71,6 @@ describe('GamePageComponent', () => {
     });
 
     it('getters should return expected values', () => {
-        expect(component.isTesting).toEqual(false);
         expect(component.quizReady).toEqual(true);
         mockClientService.playerInfo.waitingForQuestion = true;
         mockClientService.playerInfo.submitted = true;

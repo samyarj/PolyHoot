@@ -148,7 +148,7 @@ class _MainScaffoldState extends State<MainScaffold> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(child: widget.statefulNavigationShell),
-                  SizedBox(width: 375, child: SideBar(user: snapshot.data)),
+                  SizedBox(width: 400, child: SideBar(user: snapshot.data)),
                 ],
               ),
             );

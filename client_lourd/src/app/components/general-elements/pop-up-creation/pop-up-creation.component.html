@@ -14,7 +14,6 @@
         </ol>
         <div class="popup-actions">
             <button class="btn custom-width custom-button play-button" (click)="openNewGame()">Créer une partie</button>
-            <button *ngIf="data.title !== 'Mode aléatoire'" class="btn custom-width custom-button test-button" (click)="navigate('/test-game/' + this.data.id)">Tester</button>
         </div>
     </div>
 </div>

@@ -1,6 +1,7 @@
 import 'package:client_leger/backend-communication-services/chat/firebase_chat_service.dart';
 import 'package:client_leger/backend-communication-services/models/chat_channels.dart';
 import 'package:client_leger/backend-communication-services/models/chat_message.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChannelManager {
   static final ChannelManager _instance = ChannelManager._internal();
@@ -41,7 +42,7 @@ class ChannelManager {
   }
 
   Future<List<ChatMessage>> loadOlderMessages(
-      String channel, int lastMessageDate) async {
+      String channel, Timestamp lastMessageDate) async {
     return await _firebaseChatService.loadOlderMessages(
         channel, lastMessageDate);
   }

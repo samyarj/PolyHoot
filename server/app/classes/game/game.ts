@@ -22,7 +22,6 @@ export class Game {
     timer: Timer;
     playersRemoved: Player[];
     organizer: Player;
-    isRandomMode: boolean;
     private playersReadyForNext: boolean;
     private answersPerChoice: number[];
     private choicesHistory: number[][] = [];
@@ -30,8 +29,8 @@ export class Game {
     private lastFinalizeCall: number | null;
     private lastFinalizePlayer: Player;
 
-    constructor(roomId: string, quiz: Quiz, @ConnectedSocket() client: Socket, isRandomMode: boolean) {
-        this.initializeGame(roomId, quiz, client, isRandomMode);
+    constructor(roomId: string, quiz: Quiz, @ConnectedSocket() client: Socket) {
+        this.initializeGame(roomId, quiz, client);
     }
 
     addPlayer(player: Player, @ConnectedSocket() client: Socket) {
@@ -77,7 +76,7 @@ export class Game {
 
     isGameReadyToStart() {
         let ready = true;
-        if (!this.isRandomMode && !this.organizer.isInGame) ready = false;
+        if (!this.organizer.isInGame) ready = false;
         this.players.forEach((player: Player) => {
             if (!player.isInGame) ready = false;
         });
@@ -87,12 +86,7 @@ export class Game {
     startGame() {
         this.givePlayerList();
         const timeDuration = this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QCM ? this.quiz.duration : TIME_FOR_QRL;
-        if (this.isRandomMode)
-            this.timer.startTimer(timeDuration, TimerEvents.Value, TimerEvents.End, () => {
-                this.preparePlayersForNextQuestion();
-                this.startQuestionCountdown();
-            });
-        else this.timer.startTimer(timeDuration, TimerEvents.Value, TimerEvents.End);
+        this.timer.startTimer(timeDuration, TimerEvents.Value, TimerEvents.End);
         return { question: this.quiz.questions[this.currentQuestionIndex], index: this.currentQuestionIndex, length: this.quiz.questions.length };
     }
 
@@ -121,12 +115,7 @@ export class Game {
                 this.lastFinalizeCall = null;
                 this.currentQuestionIndex++;
                 const timeDuration = this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QCM ? this.quiz.duration : TIME_FOR_QRL;
-                if (this.isRandomMode)
-                    this.timer.startTimer(timeDuration, TimerEvents.Value, TimerEvents.End, () => {
-                        this.preparePlayersForNextQuestion();
-                        this.startQuestionCountdown();
-                    });
-                else this.timer.startTimer(timeDuration, TimerEvents.Value, TimerEvents.End);
+                this.timer.startTimer(timeDuration, TimerEvents.Value, TimerEvents.End);
                 this.timer.isPaused = false;
                 return { question: this.quiz.questions[this.currentQuestionIndex], index: this.currentQuestionIndex };
             }
@@ -176,10 +165,8 @@ export class Game {
         this.timer.startTimer(3, TimerEvents.QuestionCountdownValue, TimerEvents.QuestionCountdownEnd, () => {
             const currentQuestion = this.nextQuestion();
             if (currentQuestion) {
-                if (!this.isRandomMode) {
-                    this.organizer.socket.emit(GameEvents.NextQuestion, currentQuestion);
-                    this.organizer.socket.to(this.roomId).emit(GameEvents.NextQuestion, currentQuestion);
-                }
+                this.organizer.socket.emit(GameEvents.NextQuestion, currentQuestion);
+                this.organizer.socket.to(this.roomId).emit(GameEvents.NextQuestion, currentQuestion);
             }
             this.players.forEach((player: Player) => {
                 player.socket.emit(GameEvents.NextQuestion, currentQuestion);
@@ -190,7 +177,6 @@ export class Game {
     finalizePlayerAnswer(@ConnectedSocket() client: Socket) {
         const targetedPlayer: Player = this.findTargetedPlayer(client);
         targetedPlayer.submitted = true;
-        if (!this.isRandomMode) this.organizer.socket.emit(GameEvents.PlayerSubmitted, targetedPlayer.name);
         if (!targetedPlayer.verifyIfAnswersCorrect(this.quiz.questions[this.currentQuestionIndex])) {
             targetedPlayer.isFirst = false;
             return this.checkAndPrepareForNextQuestion();
@@ -212,7 +198,6 @@ export class Game {
         }
         if (this.areResultsReadyToShow()) {
             this.preparePlayersForNextQuestion();
-            if (this.isRandomMode) this.startQuestionCountdown();
         }
     }
     preparePlayersForNextQuestion() {
@@ -240,25 +225,17 @@ export class Game {
                 name: player.name,
                 points: player.points,
                 isInGame: player.isInGame,
-                interacted: player.interacted,
                 submitted: player.submitted,
-                canChat: player.canChat,
             });
         });
-        if (!this.isRandomMode) this.organizer.socket.emit(GameEvents.SendPlayerList, players);
+        this.organizer.socket.emit(GameEvents.SendPlayerList, players);
     }
 
     // Jusqu'à 5 paramètres sont permis d'après les chargés de lab
     // eslint-disable-next-line max-params
-    private initializeGame(roomId: string, quiz: Quiz, @ConnectedSocket() client: Socket, isRandomMode: boolean) {
+    private initializeGame(roomId: string, quiz: Quiz, @ConnectedSocket() client: Socket) {
         this.players = [];
-        if (isRandomMode) {
-            const organizerInRandomMode = new Player('Organisateur', false, client);
-            organizerInRandomMode.isInGame = true;
-            this.players.push(organizerInRandomMode);
-        } else {
-            this.organizer = new Player('Organisateur', true, client);
-        }
+        this.organizer = new Player('Organisateur', true, client);
         this.playersRemoved = [];
         this.bannedNames = [];
         this.quiz = quiz;
@@ -269,7 +246,6 @@ export class Game {
         this.timer = new Timer(roomId, client);
         this.playersReadyForNext = false;
         this.choicesHistory = [];
-        this.isRandomMode = isRandomMode;
     }
 
     private getPlayerByName(playerName: string): Player | undefined {
@@ -287,18 +263,13 @@ export class Game {
                 });
                 player.updatePlayerPoints(this.quiz.questions[this.currentQuestionIndex]);
                 player.socket.emit(GameEvents.PlayerPointsUpdate, { points: player.points, isFirst: player.isFirst });
-                if (!this.isRandomMode) this.organizer.socket.emit(GameEvents.OrganizerPointsUpdate, { name: player.name, points: player.points });
+                this.organizer.socket.emit(GameEvents.OrganizerPointsUpdate, { name: player.name, points: player.points });
             }
             player.prepareForNextQuestion();
         });
     }
     private emitNextQuestionEvents() {
-        if (!this.isRandomMode) this.organizer.socket.emit(GameEvents.ProceedToNextQuestion);
-        else {
-            this.players.forEach((player: Player) => {
-                player.socket.emit(GameEvents.ProceedToNextQuestion);
-            });
-        }
+        this.organizer.socket.emit(GameEvents.ProceedToNextQuestion);
     }
     private prepareForNextRound() {
         this.playersReadyForNext = true;
@@ -307,13 +278,7 @@ export class Game {
     }
     private emitCorrectionEvents() {
         if (this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QRL) {
-            if (!this.isRandomMode) {
-                this.organizer.socket.emit(GameEvents.EveryoneSubmitted);
-            } else {
-                this.players.forEach((player: Player) => {
-                    player.socket.emit(GameEvents.EveryoneSubmitted);
-                });
-            }
+            this.organizer.socket.emit(GameEvents.EveryoneSubmitted);
             this.players.forEach((player: Player) => {
                 player.socket.emit(GameEvents.WaitingForCorrection);
             });
