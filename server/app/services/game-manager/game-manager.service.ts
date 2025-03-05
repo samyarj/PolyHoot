@@ -15,9 +15,9 @@ export class GameManagerService {
         this.socketRoomsMap = new Map<Socket, string>();
     }
 
-    createGame(quiz: Quiz, @ConnectedSocket() client: Socket, isRandomMode: boolean): string {
+    createGame(quiz: Quiz, @ConnectedSocket() client: Socket): string {
         const roomId = this.generateNewRoomId();
-        this.currentGames.push(new Game(roomId, quiz, client, isRandomMode));
+        this.currentGames.push(new Game(roomId, quiz, client));
         return roomId;
     }
 

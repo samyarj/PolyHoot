@@ -24,29 +24,4 @@ export class ChatGateway {
         const clientRoomId: string = Array.from(clientSocket.rooms.values())[1];
         return this.chatService.getHistory(clientRoomId);
     }
-
-    @SubscribeMessage(ChatEvents.ChatStatusChange)
-    changeChatStatus(clientSocket: Socket, playerData: { playerName: string; canChat: boolean }) {
-        let message = {
-            message: '',
-            author: '',
-            date: new Date(),
-        };
-        if (!playerData.canChat) {
-            message = {
-                message: 'Vous ne pouvez plus envoyer de message',
-                author: 'System',
-                date: new Date(),
-            };
-        } else if (playerData.canChat) {
-            message = {
-                message: 'Vous pouvez maintenant envoyer des messages',
-                author: 'System',
-                date: new Date(),
-            };
-        }
-        const chatData = { message, playerName: playerData.playerName };
-        const clientRoomId: string = Array.from(clientSocket.rooms.values())[1];
-        this.server.to(clientRoomId).emit(ChatEvents.ChatStatusChange, chatData);
-    }
 }

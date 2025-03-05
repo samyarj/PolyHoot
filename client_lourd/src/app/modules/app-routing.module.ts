@@ -10,7 +10,6 @@ import { GamePageComponent } from '@app/pages/game-related/game-page/game-page.c
 import { JoinGamePageComponent } from '@app/pages/game-related/join-game-page/join-game-page.component';
 import { OrganizerPageComponent } from '@app/pages/game-related/organizer-page/organizer-page.component';
 import { ResultsPageComponent } from '@app/pages/game-related/results-page/results-page.component';
-import { TestGamePageComponent } from '@app/pages/game-related/test-page/test-game-page.component';
 import { InventoryPageComponent } from '@app/pages/inventory-page/inventory-page.component';
 import { CoinFlipPageComponent } from '@app/pages/luck-related/coin-flip-page/coin-flip-page.component';
 import { DailyFreePageComponent } from '@app/pages/luck-related/daily-free-page/daily-free-page.component';
@@ -92,7 +91,6 @@ const routes: Routes = [
     },
 
     { path: 'game', component: GamePageComponent, canActivate: [authGuard] },
-    { path: 'test-game/:id', component: TestGamePageComponent, canActivate: [authGuard] },
     { path: 'results', component: ResultsPageComponent, canActivate: [authGuard] },
     { path: 'waiting', component: WaitingPageComponent, canActivate: [authGuard] },
     { path: 'organizer', component: OrganizerPageComponent, canActivate: [authGuard] },

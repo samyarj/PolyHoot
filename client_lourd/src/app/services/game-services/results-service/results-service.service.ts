@@ -90,7 +90,6 @@ export class ResultsService {
     }
 
     disconnectUser() {
-        this.socketHandlerService.isRandomMode = false;
         this.socketHandlerService.send(DisconnectEvents.UserFromResults, this.socketHandlerService.playerName);
         this.resetAttributes();
     }

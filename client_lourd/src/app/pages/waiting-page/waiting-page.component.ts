@@ -46,10 +46,6 @@ export class WaitingPageComponent implements OnDestroy {
         return this.waitingPageService.isOrganizer;
     }
 
-    get isRandomMode() {
-        return this.waitingPageService.isRandomMode;
-    }
-
     get players() {
         return this.waitingPageService.players;
     }
