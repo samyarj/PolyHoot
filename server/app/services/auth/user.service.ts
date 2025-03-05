@@ -143,6 +143,23 @@ export class UserService {
         }
     }
 
+    async updateUserCoins(uid: string, bet: number): Promise<boolean> {
+        const userRef = await this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+
+        const currentCoins = userDoc.data().coins || 0;
+        const newCoins = currentCoins + bet;
+        if (newCoins < 0) {
+            return false;
+        } else {
+            await userRef.update({ coins: newCoins });
+            return true;
+        }
+    }
+
     private async getUserFromFirestore(uid: string): Promise<admin.firestore.DocumentData> {
         const userDoc = await this.firestore.collection('users').doc(uid).get();
         if (!userDoc.exists) throw new UnauthorizedException("L'utilisateur n'existe pas.");

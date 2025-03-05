@@ -8,6 +8,7 @@ import { PasswordValidationController } from './controllers/password-validation/
 import { QuestionController } from './controllers/question/question.controller';
 import { QuizController } from './controllers/quiz/quiz.controller';
 import { ChatGateway } from './gateways/chat/chat.gateway';
+import { CoinflipGateway } from './gateways/coinflip/coinflip.gateway';
 import { ConnectionGateway } from './gateways/connection/connection.gateway';
 import { GameGateway } from './gateways/game/game.gateway';
 import { GameRecordSchema, gameRecordSchema } from './model/schema/game-record/game-record-schema';
@@ -17,6 +18,7 @@ import { FirebaseModule } from './modules/firebase.module';
 import { UserService } from './services/auth/user.service';
 import { ChatChannelsService } from './services/chat-channels/chat-channels.service';
 import { ChatService } from './services/chat/chat.service';
+import { CoinflipManagerService } from './services/coinflip-manager/coinflip-manager.service';
 import { GameManagerService } from './services/game-manager/game-manager.service';
 import { GameRecordService } from './services/game-record/game-record.service';
 import { HistoryManagerService } from './services/history-manager/history-manager.service';
@@ -47,6 +49,8 @@ import { QuizService } from './services/quiz/quiz.service';
         ChatService,
         GameGateway,
         ChatGateway,
+        CoinflipGateway,
+        CoinflipManagerService,
         GameRecordService,
         ConnectionGateway,
         GameManagerService,

@@ -28,10 +28,15 @@ export class AuthService {
     private userBS: BehaviorSubject<User | null> = new BehaviorSubject<User | null>(null);
     private googleProvider = new GoogleAuthProvider();
     private loadingTokenBS = new BehaviorSubject<boolean>(true);
+    private tokenBS: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
     private isAuthenticating = false;
     private userSnapshotUnsubscribe: (() => void) | null = null;
+    // eslint-disable-next-line @typescript-eslint/member-ordering
     user$ = this.userBS.asObservable();
+    // eslint-disable-next-line @typescript-eslint/member-ordering
     loadingToken$ = this.loadingTokenBS.asObservable();
+    // eslint-disable-next-line @typescript-eslint/member-ordering
+    token$ = this.tokenBS.asObservable();
 
     constructor(
         private auth: Auth,
@@ -42,6 +47,11 @@ export class AuthService {
         private socketClientService: SocketClientService,
     ) {
         this.monitorTokenChanges();
+    }
+
+    // Necessary to remove circular dependency
+    getSocketService() {
+        return this.socketClientService;
     }
 
     signUp(username: string, email: string, password: string): Observable<User> {
@@ -167,7 +177,9 @@ export class AuthService {
         return from(userCredential.user.getIdToken()).pipe(
             switchMap((idToken) => {
                 const options = { headers: { Authorization: `Bearer ${idToken}` } };
-
+                this.tokenBS.next(idToken);
+                this.socketClientService.disconnect();
+                this.socketClientService.connect(idToken);
                 switch (method) {
                     case 'GET':
                         return this.http.get<User>(endpoint, options);
@@ -202,6 +214,9 @@ export class AuthService {
                 try {
                     const idToken = await firebaseUser.getIdToken();
                     if (!idToken) throw new Error('Votre session a expiré. Veuillez vous reconnecter.');
+                    this.tokenBS.next(idToken);
+                    this.socketClientService.disconnect();
+                    this.socketClientService.connect(idToken);
 
                     this.isUserOnline(firebaseUser.uid).subscribe((isOnline) => {
                         if (isOnline) {
@@ -220,6 +235,7 @@ export class AuthService {
                             (docSnapshot) => {
                                 if (docSnapshot.exists()) {
                                     const userData = docSnapshot.data() as User;
+                                    console.log(userData);
                                     this.userBS.next(userData);
                                 } else {
                                     this.userBS.next(null);
@@ -234,10 +250,14 @@ export class AuthService {
                     });
                 } catch {
                     this.loadingTokenBS.next(false);
+                    this.tokenBS.next(null);
+                    this.socketClientService.disconnect();
                     this.logout();
                 }
             } else {
                 this.userBS.next(null);
+                this.tokenBS.next(null);
+                this.socketClientService.disconnect();
                 this.loadingTokenBS.next(false);
                 this.router.navigate(['/login']);
             }
@@ -245,6 +265,8 @@ export class AuthService {
     }
 
     private signOutAndClearSession(): void {
+        this.tokenBS.next(null);
+        this.socketClientService.disconnect();
         from(this.auth.signOut())
             .pipe(
                 handleErrorsGlobally(this.injector),
@@ -254,6 +276,7 @@ export class AuthService {
     }
 
     private clearSession(): void {
+        this.tokenBS.next(null);
         this.router.navigate(['/login']);
     }
 
