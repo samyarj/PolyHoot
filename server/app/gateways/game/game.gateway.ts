@@ -15,14 +15,6 @@ export class GameGateway {
         private historyManager: HistoryManagerService,
     ) {}
 
-    @SubscribeMessage(GameEvents.SelectFromPlayer)
-    handleSelected(@ConnectedSocket() client: Socket, @MessageBody() data: { choice: number }): void {
-        const roomId = Array.from(client.rooms.values())[1];
-        const game = this.gameManager.getGameByRoomId(roomId);
-        const choiceSignal = game.handleChoiceChange(client, data.choice);
-       game.organizer.socket.emit(GameEvents.PlayerChoiceToOrganizer, choiceSignal);
-    }
-
     @SubscribeMessage(TimerEvents.Pause)
     handlePauseGame(@ConnectedSocket() client: Socket) {
         const roomId = Array.from(client.rooms.values())[1];
@@ -91,11 +83,11 @@ export class GameGateway {
     }
 
     @SubscribeMessage(GameEvents.FinalizePlayerAnswer)
-    handlePlayerFinalizeAnswer(@ConnectedSocket() client: Socket) {
+    handleFinalizePlayerAnswer(@ConnectedSocket() client: Socket, @MessageBody() answerData: { choiceSelected: boolean[]; qreAnswer: number }) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {
-            game.finalizePlayerAnswer(client);
+            game.finalizePlayerAnswer(client, answerData);
         }
     }
 
@@ -131,7 +123,7 @@ export class GameGateway {
             const playerNames = game.players.map((player) => player.name);
             client.emit(JoinEvents.CanJoin);
             const roomId = Array.from(client.rooms.values())[1];
-            this.server.emit(JoinEvents.JoinSuccess,{ playerNames, roomId});
+            this.server.emit(JoinEvents.JoinSuccess, { playerNames, roomId });
             this.gameManager.socketRoomsMap.set(client, data.gameId);
         } else if (game.playerExists(playerName)) {
             client.emit(JoinErrors.ExistingName);
@@ -168,7 +160,7 @@ export class GameGateway {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         const isLocked = game.toggleGameLock();
-        this.server.emit(GameEvents.AlertLockToggled, {isLocked, roomId});
+        this.server.emit(GameEvents.AlertLockToggled, { isLocked, roomId });
     }
     @SubscribeMessage(GameEvents.PlayerBan)
     handleBanPlayer(@ConnectedSocket() client: Socket, @MessageBody() playerName: string) {
@@ -179,7 +171,7 @@ export class GameGateway {
             game.removePlayer(playerName);
         }
         const playerNames = this.gameManager.getGameByRoomId(roomId).players.map((player) => player.name);
-        this.server.emit(GameEvents.PlayerLeft, { playerNames, roomId});
+        this.server.emit(GameEvents.PlayerLeft, { playerNames, roomId });
     }
 
     @SubscribeMessage(GameEvents.CorrectionFinished)

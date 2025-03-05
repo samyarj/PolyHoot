@@ -248,7 +248,7 @@ export class OrganizerService {
     private handleNextQuestion() {
         // Si tout le monde repond a une question QCM, on saute directement a l'etat ou la correction est terminee.
         this.socketHandlerService.on(GameEvents.ProceedToNextQuestion, () => {
-            if (this.currentQuestion.type === QuestionType.QCM) {
+            if (this.currentQuestion.type === QuestionType.QCM || this.currentQuestion.type === QuestionType.QRE) {
                 this.gameStatus = GameStatus.CorrectionFinished;
                 if (this.gameInfo.currentQuestionIndex + 1 >= this.questionsLength) {
                     this.gameStatus = GameStatus.GameFinished;

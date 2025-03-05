@@ -34,7 +34,7 @@ export class GameClientService {
     shouldDisconnect: boolean = true;
     time: number = 0;
     answer: string = '';
-    selectedRangeValue: number = 0;
+    qreAnswer: number = 0;
     private finalAnswer: boolean;
     private realShowAnswers: boolean;
     private socketsInitialized: boolean = false;
@@ -63,7 +63,6 @@ export class GameClientService {
             if (this.currentQuestion.choices && this.currentQuestion.choices[indexChoice]) {
                 this.currentQuestion.choices[indexChoice].isSelected = !this.currentQuestion.choices[indexChoice].isSelected;
                 this.playerInfo.choiceSelected[indexChoice] = !this.playerInfo.choiceSelected[indexChoice];
-                this.socketHandler.send(GameEvents.SelectFromPlayer, { choice: indexChoice });
                 return true;
             }
         }
@@ -76,8 +75,15 @@ export class GameClientService {
 
         if (!this.finalAnswer && this.time > 0) {
             this.finalAnswer = true;
-            this.socketHandler.send(GameEvents.FinalizePlayerAnswer);
+            console.log(this.playerInfo.choiceSelected, this.qreAnswer);
+            this.socketHandler.send(GameEvents.FinalizePlayerAnswer, {
+                choiceSelected: this.playerInfo.choiceSelected,
+                qreAnswer: this.qreAnswer,
+            });
         }
+    }
+    sendAnswerForCorrection(answer: string) {
+        this.socketHandler.send(GameEvents.QRLAnswerSubmitted, { player: this.socketHandler.playerName, playerAnswer: answer });
     }
 
     handleSockets() {
@@ -131,9 +137,6 @@ export class GameClientService {
 
     signalUserConnect() {
         this.socketHandler.send(ConnectEvents.UserToGame);
-    }
-    sendAnswerForCorrection(answer: string) {
-        this.socketHandler.send(GameEvents.QRLAnswerSubmitted, { player: this.socketHandler.playerName, playerAnswer: answer });
     }
 
     abandonGame() {

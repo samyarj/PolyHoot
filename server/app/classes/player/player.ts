@@ -1,9 +1,9 @@
+import { BONUS_MULTIPLIER } from '@app/constants';
 import { QuestionType } from '@app/constants/enum-classes';
 import { Question } from '@app/model/schema/question/question';
 import { Injectable } from '@nestjs/common';
 import { ConnectedSocket } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
-import { BONUS_MULTIPLIER } from '@app/constants';
 
 @Injectable()
 export class Player {
@@ -39,12 +39,14 @@ export class Player {
         this.submitted = false;
         this.currentChoices = [false, false, false, false];
         this.qreAnswer = null;
+        this.exactAnswer = false;
     }
 
     updatePlayerPoints(currentQuestion: Question) {
         const correct = this.verifyIfAnswersCorrect(currentQuestion);
         if (correct) {
             if (this.isFirst) this.points += currentQuestion.points * BONUS_MULTIPLIER;
+            else if (this.exactAnswer) this.points += currentQuestion.points * BONUS_MULTIPLIER;
             else this.points += currentQuestion.points;
         }
     }
@@ -59,9 +61,9 @@ export class Player {
                     if (choices[choiceIndex].isCorrect !== this.currentChoices[choiceIndex]) correct = false;
                 }
             }
-        }
-        else if (currentQuestion.type === QuestionType.QRE) {
+        } else if (currentQuestion.type === QuestionType.QRE) {
             const qreAttributes = currentQuestion.qreAttributes;
+            console.log('Dans verif QRE ', qreAttributes);
             if (qreAttributes) {
                 const minTolerated = qreAttributes.goodAnswer - qreAttributes.tolerance;
                 const maxTolerated = qreAttributes.goodAnswer + qreAttributes.tolerance;
