@@ -21,9 +21,9 @@ export class ConnectionGateway implements OnGatewayDisconnect {
         private userService: UserService,
     ) {}
 
-    @SubscribeMessage(ConnectEvents.identifyMobileClient)
+    @SubscribeMessage(ConnectEvents.IdentifyMobileClient)
     handleIdentify(@MessageBody() uid: string, @ConnectedSocket() client: Socket) {
-        this.userService.addMobileClientToMap(client.id, uid);
+        this.userService.addUserToMap(client.id, uid);
     }
 
     @SubscribeMessage(ConnectEvents.UserToGame)
@@ -61,11 +61,11 @@ export class ConnectionGateway implements OnGatewayDisconnect {
     Appelé quand l'utilisateur fait close all sur le client léger
     */
     handleDisconnect(client: Socket) {
-        if (this.userService.isMobileClient(client.id)) {
-            const clientUid = this.userService.getMobileClientUid(client.id);
+        if (this.userService.isUserInMap(client.id)) {
+            const clientUid = this.userService.getUserUidFromMap(client.id);
             if (clientUid) {
                 this.userService.logout(clientUid);
-                this.userService.removeMobileClientFromMap(client.id);
+                this.userService.removeUserFromMap(client.id);
             }
         }
         const roomId = this.gameManager.socketRoomsMap.get(client);
@@ -153,14 +153,14 @@ export class ConnectionGateway implements OnGatewayDisconnect {
     }
 
     private disconnectPlayerFromGamePage(game: Game, player: Player) {
-            game.organizer.socket.emit(GameEvents.PlayerStatusUpdate, { name: player.name, isInGame: false });
-            game.removePlayer(player.name);
-            if (game.players.length === 0) {
-                this.server.to(game.roomId).emit(ConnectEvents.AllPlayersLeft);
-                this.disconnectOrganizer(game.roomId, game.organizer.socket);
-            } else {
-                game.checkAndPrepareForNextQuestion();
-            }
+        game.organizer.socket.emit(GameEvents.PlayerStatusUpdate, { name: player.name, isInGame: false });
+        game.removePlayer(player.name);
+        if (game.players.length === 0) {
+            this.server.to(game.roomId).emit(ConnectEvents.AllPlayersLeft);
+            this.disconnectOrganizer(game.roomId, game.organizer.socket);
+        } else {
+            game.checkAndPrepareForNextQuestion();
+        }
     }
 
     private connectUser(client: Socket) {

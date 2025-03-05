@@ -47,9 +47,13 @@ export class ForgotPasswordFormComponent {
             },
         });
     }
+    trimEmail() {
+        this.forgotPasswordForm.controls.email.setValue(this.forgotPasswordForm.controls.email.value.toString().trim());
+    }
 
     checkEmail(): void {
-        const email = this.forgotPasswordForm.controls.email.value;
+        const email = this.forgotPasswordForm.controls.email.value.toString().trim();
+        this.trimEmail();
         this.isTypingEmail = false;
 
         // Skip if email is invalid or unchanged
