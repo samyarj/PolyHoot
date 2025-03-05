@@ -27,7 +27,7 @@ export enum ChoiceFeedback {
 }
 
 export enum AppRoute {
-    ADMIN = '/admin',
+    ADMIN = '/quiz-question-management',
     LOGIN = '/login',
     HOME = '/home',
     WAITING = '/waiting-room',

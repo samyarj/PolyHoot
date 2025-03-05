@@ -1,7 +1,7 @@
 <div class="question-bank-container">
     <div class="buttons">
         <div class="show-logo-button">
-            <button class="custom-button-cancel-medium" (click)="redirectToPage('\admin')">Retour</button>
+            <button class="custom-button-cancel-medium" (click)="redirectToPage('/quiz-question-management')">Retour</button>
             <img src="assets/pictures/button-owl.png" class="character" />
         </div>
         <app-question-type-filter (filterQuestionTypeChange)="updateSelectedQuestions($event, true)"></app-question-type-filter>
