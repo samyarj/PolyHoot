@@ -4,7 +4,7 @@ import { Server } from 'socket.io';
 export class CoinFlipTimer {
     timerValue: number;
     interval: NodeJS.Timeout | null;
-    timerMode: number = 1000;
+    timerMode: number = 100;
     constructor(private server: Server) {}
 
     startTimer(timerValue: number, emitSignal: string, callback?: () => void) {

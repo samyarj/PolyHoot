@@ -7,7 +7,7 @@
             </svg>
         </div>
         <div class="coin-animation-area">
-            <div *ngIf="state === 1" class="side-selection-container">
+            <div *ngIf="state === 1 && !submitted" class="side-selection-container">
                 <div [ngClass]="{ 'selected-heads': selectedSide === 'heads' }" class="face" (click)="this.selectSide('heads')">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
                         <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="gold" />
@@ -18,41 +18,69 @@
                         <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="silver" />
                     </svg>
                 </div>
+                <div class="time">
+                    {{ time | number: '1.1-1' }}
+                </div>
             </div>
 
             <div
-                *ngIf="state === 2"
-                class="selection-container"
-                [ngClass]="{ 'selected-heads': selectedSide === 'heads', 'selected-tails': selectedSide === 'tails' }"
+                *ngIf="state === 1 && submitted"
+                class="side-selection-container selection-submitted"
+                [ngClass]="{ 'selected-heads': selectedSide === 'heads' && submitted, 'selected-tails': selectedSide === 'tails' && submitted }"
             >
-                <div *ngIf="selectedSide === 'heads'">
+                <div *ngIf="selectedSide === 'heads' && submitted">
                     <svg width="70" height="70" viewBox="0 0 24 24" fill="currentColor">
                         <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="gold" />
                     </svg>
                 </div>
 
-                <div *ngIf="selectedSide === 'tails'">
+                <div *ngIf="selectedSide === 'tails' && submitted">
                     <svg width="70" height="70" viewBox="0 0 24 24" fill="currentColor">
                         <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="silver" />
                     </svg>
                 </div>
-                <div>La monnaie tournera bientôt...</div>
+                <div class="time" [ngStyle]="{ color: submitted ? 'black' : 'var(--text-color)' }">
+                    {{ time | number: '1.1-1' }}
+                </div>
+            </div>
+            <div
+                *ngIf="state === 2"
+                class="selection-container"
+                [ngClass]="{ 'selected-heads': selectedSide === 'heads' && submitted, 'selected-tails': selectedSide === 'tails' && submitted }"
+            >
+                <div *ngIf="selectedSide === 'heads' && submitted">
+                    <svg width="70" height="70" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="gold" />
+                    </svg>
+                </div>
+
+                <div *ngIf="selectedSide === 'tails' && submitted">
+                    <svg width="70" height="70" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="silver" />
+                    </svg>
+                </div>
+                <div class="time" [ngStyle]="{ color: submitted ? 'black' : 'var(--text-color)' }">
+                    {{ time | number: '1.1-1' }}
+                </div>
             </div>
 
             <div *ngIf="state === 3" class="coin-container">
                 <div class="coin">
-                    <svg class="tails" width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+                    <svg class="tails" width="70" height="70" viewBox="0 0 24 24" fill="currentColor">
                         <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="gold" />
                     </svg>
-                    <svg class="heads" width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+                    <svg class="heads" width="70" height="70" viewBox="0 0 24 24" fill="currentColor">
                         <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="silver" />
                     </svg>
+                </div>
+                <div class="time" [ngStyle]="{ color: 'black' }">
+                    {{ time | number: '1.1-1' }}
                 </div>
             </div>
             <div
                 *ngIf="state === 4"
                 class="selection-container"
-                [ngClass]="{ winner: selectedSide === winningSide && selectedSide, loser: selectedSide !== winningSide && selectedSide }"
+                [ngClass]="{ winner: selectedSide === winningSide && submitted, loser: selectedSide !== winningSide && submitted }"
             >
                 <div *ngIf="winningSide === 'heads'">
                     <svg width="70" height="70" viewBox="0 0 24 24" fill="currentColor">
@@ -65,11 +93,13 @@
                         <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="silver" />
                     </svg>
                 </div>
-                <div>Résultat</div>
+                <div class="time" [ngStyle]="{ color: 'black' }">
+                    {{ time | number: '1.1-1' }}
+                </div>
             </div>
         </div>
         <div class="place-bet-area">
-            <div *ngIf="state === 1" class="manual-input-area">
+            <div *ngIf="state === 1 && selectedSide !== '' && !submitted" class="manual-input-area">
                 <input
                     [(ngModel)]="betAmount"
                     (ngModelChange)="betAmount = updateBetAmount($event)"
@@ -81,8 +111,23 @@
                 />
                 <button class="bet-button custom-button-medium" (click)="submitBet()">Parier</button>
             </div>
-            <div *ngIf="state === 1" class="separator"></div>
-            <div *ngIf="state === 1" class="automatic-input-area">
+            <div *ngIf="state === 1 && selectedSide === '' && !submitted" class="info">
+                <p>Veuillez faire votre choix de face ou pile.</p>
+            </div>
+            <div *ngIf="state === 1 && submitted" class="info">
+                <p>Veuillez attendre pour la fin de la période des mises</p>
+            </div>
+            <div *ngIf="state === 2" class="info">
+                <p>La monnaie tournera bientôt...</p>
+            </div>
+            <div *ngIf="state === 3" class="info">
+                <p>La monnaie tourne!!!</p>
+            </div>
+            <div *ngIf="state === 4" class="info">
+                <p>Une nouvelle partie commencera sous peu...</p>
+            </div>
+            <div *ngIf="state === 1 && selectedSide !== '' && !submitted" class="separator"></div>
+            <div *ngIf="state === 1 && selectedSide !== '' && !submitted" class="automatic-input-area">
                 <button class="custom-button-medium" (click)="increaseBet(10)">+10</button>
                 <button class="custom-button-medium" (click)="increaseBet(25)">+25</button>
                 <button class="custom-button-medium" (click)="increaseBet(50)">+50</button>

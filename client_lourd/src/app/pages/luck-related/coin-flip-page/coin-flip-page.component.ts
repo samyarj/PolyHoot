@@ -31,6 +31,12 @@ export class CoinFlipPageComponent {
         return this.coinFlipService.betAmount;
     }
 
+    get submitted() {
+        return this.coinFlipService.submitted;
+    }
+    get time() {
+        return this.coinFlipService.time;
+    }
     get playerList() {
         return this.coinFlipService.playerList;
     }

@@ -41,9 +41,9 @@ export class CoinFlipGame {
 
     addUserToList(client: AuthenticatedSocket, betChoice: { choice: string; bet: number }) {
         if (betChoice.choice === 'heads') {
-            this.playerList.heads.push({ name: 'player', socket: client, bet: betChoice.bet });
+            this.playerList.heads.push({ name: client.user.displayName, socket: client, bet: betChoice.bet });
         } else if (betChoice.choice === 'tails') {
-            this.playerList.tails.push({ name: 'player', socket: client, bet: betChoice.bet });
+            this.playerList.tails.push({ name: client.user.displayName, socket: client, bet: betChoice.bet });
         }
     }
 
@@ -79,7 +79,7 @@ export class CoinFlipGame {
         this.initializeGame();
         this.server.emit('coinflip-start-game');
         //console.log('START-GAME');
-        this.timer.startTimer(10, 'coinflip-timer', () => {
+        this.timer.startTimer(100, 'BetTimeContdown', () => {
             this.timer.stopTimer();
             this.startPreFlippingPhase();
         });
@@ -89,7 +89,7 @@ export class CoinFlipGame {
         this.gameState = CoinFlipGameState.PreFlippingPhase;
         this.server.emit('coinflip-pre-flipping');
         //console.log('START-PRE-GAME');
-        this.timer.startTimer(3, 'coinflip-timer', () => {
+        this.timer.startTimer(30, 'BetTimeContdown', () => {
             this.timer.stopTimer();
             this.startFlippingPhase();
         });
@@ -99,7 +99,7 @@ export class CoinFlipGame {
         this.gameState = CoinFlipGameState.FlippingPhase;
         this.server.emit('coinflip-flipping');
         //console.log('START-FLIP');
-        this.timer.startTimer(3, 'coinflip-timer', () => {
+        this.timer.startTimer(30, 'BetTimeContdown', () => {
             this.timer.stopTimer();
             this.startResultsPhase();
         });
@@ -118,7 +118,7 @@ export class CoinFlipGame {
             },
             history: this.history,
         });
-        this.timer.startTimer(3, 'coinflip-timer', () => {
+        this.timer.startTimer(30, 'BetTimeContdown', () => {
             this.timer.stopTimer();
             this.startGame();
         });
