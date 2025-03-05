@@ -7,14 +7,13 @@ export class ChatChannelsService {
     private globalChatCollection = this.firestore.collection('globalChat');
     private chatChannelsCollection = this.firestore.collection('chatChannels');
 
-
     async deleteChatChannel(channelName: string): Promise<void> {
         const channelRef = this.chatChannelsCollection.doc(channelName);
         const messagesRef = channelRef.collection('messages');
 
         // Delete all documents in the subcollection
         const messagesSnapshot = await messagesRef.get();
-        const deletePromises = messagesSnapshot.docs.map(doc => doc.ref.delete());
+        const deletePromises = messagesSnapshot.docs.map((doc) => doc.ref.delete());
         await Promise.all(deletePromises);
 
         // Delete the parent document
@@ -40,7 +39,5 @@ export class ChatChannelsService {
             });
             await channelBatch.commit();
         }
-
     }
-//Pour etre sur que ca a mit a jour
 }
