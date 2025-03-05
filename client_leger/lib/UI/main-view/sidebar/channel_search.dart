@@ -10,9 +10,11 @@ class ChannelSearch extends StatefulWidget {
   const ChannelSearch(
       {super.key,
       required this.joinableChannels,
-      required this.onDeleteChannel});
+      required this.onDeleteChannel,
+      required this.currentUserUid});
   final List<ChatChannel> joinableChannels;
   final Future<void> Function(String) onDeleteChannel;
+  final String currentUserUid;
 
   @override
   State<ChannelSearch> createState() => _ChannelSearchState();
@@ -126,7 +128,8 @@ class _ChannelSearchState extends State<ChannelSearch> {
                                 size: 30,
                               ),
                               onPressed: () async {
-                                await _channelManager.joinChannel(channel.name);
+                                await _channelManager.joinChannel(
+                                    widget.currentUserUid, channel.name);
                               },
                             ),
                             IconButton(
