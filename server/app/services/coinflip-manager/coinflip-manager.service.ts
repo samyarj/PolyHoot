@@ -21,8 +21,8 @@ export class CoinflipManagerService {
 
     getPlayers() {
         return {
-            heads: this.game.playerList.heads.map((player) => ({ name: player.name, bet: player.bet })),
-            tails: this.game.playerList.tails.map((player) => ({ name: player.name, bet: player.bet })),
+            heads: this.game.playerList.heads.map((player) => ({ name: player.name, bet: player.bet })).sort((a, b) => b.bet - a.bet),
+            tails: this.game.playerList.tails.map((player) => ({ name: player.name, bet: player.bet })).sort((a, b) => b.bet - a.bet),
         };
     }
 

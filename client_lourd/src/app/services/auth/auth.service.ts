@@ -48,6 +48,11 @@ export class AuthService {
         this.monitorTokenChanges();
     }
 
+    // Necessary to remove circular dependency
+    getSocketService() {
+        return this.socketService;
+    }
+
     signUp(username: string, email: string, password: string): Observable<User> {
         this.isAuthenticating = true;
         return this.createUser(email, password).pipe(
