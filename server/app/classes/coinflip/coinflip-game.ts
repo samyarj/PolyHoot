@@ -1,9 +1,10 @@
-import { CoinFlipGameState } from '@app/constants/enum-classes';
+import { CoinFlipEvents, CoinFlipGameState } from '@app/constants/enum-classes';
 import { AuthenticatedSocket } from '@app/interface/authenticated-request';
 import { UserService } from '@app/services/auth/user.service';
 import { Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
 import { CoinFlipTimer } from './coinflip-timer';
+import { BET_TIMER_CS, FLIP_TIMER_CS, HISTORY_MAX_SIZE, PRE_FLIP_TIMER_CS, RESULTS_TIMER_CS } from './coinflip.constants';
 
 @Injectable()
 export class CoinFlipGame {
@@ -29,7 +30,7 @@ export class CoinFlipGame {
         this.winningSide = '';
         this.gameState = CoinFlipGameState.BettingPhase;
         this.playerList = { heads: [], tails: [] };
-        this.server.emit('SendPlayerList', this.playerList);
+        this.server.emit(CoinFlipEvents.SendPlayerList, this.playerList);
     }
 
     isUserAlreadyInList(client: AuthenticatedSocket) {
@@ -50,7 +51,7 @@ export class CoinFlipGame {
     flipCoin(): string {
         let result = Math.random() > 0.5 ? 'heads' : 'tails';
         this.history.push(result);
-        if (this.history.length > 10) {
+        if (this.history.length > HISTORY_MAX_SIZE) {
             this.history.shift();
         }
         return result;
@@ -77,9 +78,9 @@ export class CoinFlipGame {
 
     startGame(): void {
         this.initializeGame();
-        this.server.emit('coinflip-start-game');
+        this.server.emit(CoinFlipEvents.StartGame);
         //console.log('START-GAME');
-        this.timer.startTimer(100, 'BetTimeContdown', () => {
+        this.timer.startTimer(BET_TIMER_CS, CoinFlipEvents.BetTimeCountdown, () => {
             this.timer.stopTimer();
             this.startPreFlippingPhase();
         });
@@ -87,9 +88,9 @@ export class CoinFlipGame {
 
     startPreFlippingPhase() {
         this.gameState = CoinFlipGameState.PreFlippingPhase;
-        this.server.emit('coinflip-pre-flipping');
+        this.server.emit(CoinFlipEvents.PreFlippingPhase);
         //console.log('START-PRE-GAME');
-        this.timer.startTimer(30, 'BetTimeContdown', () => {
+        this.timer.startTimer(PRE_FLIP_TIMER_CS, CoinFlipEvents.BetTimeCountdown, () => {
             this.timer.stopTimer();
             this.startFlippingPhase();
         });
@@ -97,9 +98,9 @@ export class CoinFlipGame {
 
     startFlippingPhase() {
         this.gameState = CoinFlipGameState.FlippingPhase;
-        this.server.emit('coinflip-flipping');
+        this.server.emit(CoinFlipEvents.FlippingPhase);
         //console.log('START-FLIP');
-        this.timer.startTimer(30, 'BetTimeContdown', () => {
+        this.timer.startTimer(FLIP_TIMER_CS, CoinFlipEvents.BetTimeCountdown, () => {
             this.timer.stopTimer();
             this.startResultsPhase();
         });
@@ -110,7 +111,7 @@ export class CoinFlipGame {
         let result = this.flipCoin();
         this.adjustBalances(result);
         //console.log('START-RESULTS');
-        this.server.emit('coinflip-results', {
+        this.server.emit(CoinFlipEvents.Results, {
             result,
             playerList: {
                 heads: this.playerList.heads.map((player) => ({ name: player.name, bet: player.bet })),
@@ -118,7 +119,7 @@ export class CoinFlipGame {
             },
             history: this.history,
         });
-        this.timer.startTimer(30, 'BetTimeContdown', () => {
+        this.timer.startTimer(RESULTS_TIMER_CS, CoinFlipEvents.BetTimeCountdown, () => {
             this.timer.stopTimer();
             this.startGame();
         });

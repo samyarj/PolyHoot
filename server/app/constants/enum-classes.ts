@@ -30,6 +30,17 @@ export enum CoinFlipGameState {
     ResultsPhase = 4,
 }
 
+export enum CoinFlipEvents {
+    StartGame = 'coinflip-start-game',
+    PreFlippingPhase = 'coinflip-pre-flipping',
+    FlippingPhase = 'coinflip-flipping',
+    Results = 'coinflip-results',
+    BetTimeCountdown = 'BetTimeCountdown',
+    SendPlayerList = 'SendPlayerList',
+    JoinGame = 'JoinGame',
+    SubmitChoice = 'SubmitChoice',
+}
+
 export enum TimerEvents {
     Value = 'timerValue',
     End = 'timerEnd',

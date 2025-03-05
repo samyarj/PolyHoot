@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '@app/components/general-elements/confirmation-dialog/confirmation-dialog.component';
 import { ErrorDialogComponent } from '@app/components/general-elements/error-dialog/error-dialog.component';
 import { WIDTH_SIZE } from '@app/constants/constants';
-import { CoinFlipGameState } from '@app/constants/enum-class';
+import { CoinFlipEvents, CoinFlipGameState } from '@app/constants/enum-class';
 import { SocketClientService } from 'src/app/services/websocket-services/general/socket-client-manager.service';
 
 @Injectable({
@@ -45,7 +45,7 @@ export class CoinFlipService {
 
     getState() {
         this.socketService.send(
-            'JoinGame',
+            CoinFlipEvents.JoinGame,
             (answer: {
                 playerList: {
                     heads: { name: string; bet: number }[];
@@ -62,20 +62,20 @@ export class CoinFlipService {
     }
 
     initializeEventListeners() {
-        this.socketService.on('coinflip-start-game', () => {
+        this.socketService.on(CoinFlipEvents.StartGame, () => {
             this.resetAttributes();
         });
 
-        this.socketService.on('coinflip-pre-flipping', () => {
+        this.socketService.on(CoinFlipEvents.PreFlippingPhase, () => {
             this.gameState = CoinFlipGameState.PreFlippingPhase;
         });
 
-        this.socketService.on('coinflip-flipping', () => {
+        this.socketService.on(CoinFlipEvents.FlippingPhase, () => {
             this.gameState = CoinFlipGameState.FlippingPhase;
         });
 
         this.socketService.on(
-            'coinflip-results',
+            CoinFlipEvents.Results,
             (answer: {
                 result: string;
                 playerList: {
@@ -91,11 +91,15 @@ export class CoinFlipService {
             },
         );
 
-        this.socketService.on('SendPlayerList', (playerList: { heads: { name: string; bet: number }[]; tails: { name: string; bet: number }[] }) => {
-            this.playerList = playerList;
-        });
+        this.socketService.on(
+            CoinFlipEvents.SendPlayerList,
+            (playerList: { heads: { name: string; bet: number }[]; tails: { name: string; bet: number }[] }) => {
+                this.playerList = playerList;
+            },
+        );
 
-        this.socketService.on('BetTimeContdown', (time: number) => {
+        this.socketService.on(CoinFlipEvents.BetTimeCountdown, (time: number) => {
+            // turning seconds into ms. no need for const.
             // eslint-disable-next-line @typescript-eslint/no-magic-numbers
             this.time = time / 10;
         });
@@ -110,16 +114,20 @@ export class CoinFlipService {
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
                 if (this.betAmount > 0 && this.betAmount % 1 === 0) {
-                    this.socketService.send('SubmitChoice', { choice: this.selectedSide, bet: this.betAmount }, (submitStatus: boolean) => {
-                        if (submitStatus) {
-                            this.submitted = true;
-                        } else {
-                            this.matdialog.open(ErrorDialogComponent, {
-                                width: WIDTH_SIZE,
-                                data: { message: 'Vous ne pouvez pas parier plus de coins que ce que vous avez!', reloadOnClose: false },
-                            });
-                        }
-                    });
+                    this.socketService.send(
+                        CoinFlipEvents.SubmitChoice,
+                        { choice: this.selectedSide, bet: this.betAmount },
+                        (submitStatus: boolean) => {
+                            if (submitStatus) {
+                                this.submitted = true;
+                            } else {
+                                this.matdialog.open(ErrorDialogComponent, {
+                                    width: WIDTH_SIZE,
+                                    data: { message: 'Vous ne pouvez pas parier plus de coins que ce que vous avez!', reloadOnClose: false },
+                                });
+                            }
+                        },
+                    );
                 }
             }
         });

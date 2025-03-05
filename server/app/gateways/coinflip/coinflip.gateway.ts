@@ -1,3 +1,4 @@
+import { CoinFlipEvents } from '@app/constants/enum-classes';
 import { WsAuthGuard } from '@app/guards/auth/auth.guard';
 import { AuthenticatedSocket } from '@app/interface/authenticated-request';
 import { CoinflipManagerService } from '@app/services/coinflip-manager/coinflip-manager.service';
@@ -31,14 +32,14 @@ export class CoinflipGateway implements OnGatewayInit, OnGatewayConnection {
         // Additional logic for handling new connections can be added here
     }
 
-    @SubscribeMessage('SubmitChoice')
+    @SubscribeMessage(CoinFlipEvents.SubmitChoice)
     async handleSubmitChoice(client: AuthenticatedSocket, betChoice: { choice: string; bet: number }) {
         let submitStatus = await this.coinflipManager.submitChoice(client, betChoice);
-        this.server.emit('SendPlayerList', this.coinflipManager.getPlayers());
+        this.server.emit(CoinFlipEvents.SendPlayerList, this.coinflipManager.getPlayers());
         return submitStatus;
     }
 
-    @SubscribeMessage('JoinGame')
+    @SubscribeMessage(CoinFlipEvents.JoinGame)
     handleJoinGame(client: AuthenticatedSocket) {
         return this.coinflipManager.getGameInfo();
     }
