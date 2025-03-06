@@ -48,21 +48,30 @@ export class Game {
 
     validPlayer(playerName: string): boolean {
         const trimmedPlayerName = playerName.trim();
+        console.log('Dans validPlayer avec ', trimmedPlayerName);
         return (
             trimmedPlayerName &&
-            !this.playerExists(trimmedPlayerName) &&
+            //!this.playerExists(trimmedPlayerName) &&
             !this.isPlayerBanned(trimmedPlayerName) &&
             !this.isNameOrganizer(trimmedPlayerName)
         );
     }
 
-    playerExists(playerName: string): boolean {
+    /* playerExists(playerName: string): boolean {
         const player = this.getPlayerByName(playerName);
+        console.log('PlayerExists: ', !!player);
         return !!player;
-    }
+    } */
 
     isPlayerBanned(playerName: string): boolean {
         const lowerCasePlayerName = playerName.toLowerCase();
+        console.log(
+            'isPlayerBanned: ',
+            this.bannedNames,
+            lowerCasePlayerName,
+            'va retourner ',
+            this.bannedNames.some((name) => name.toLowerCase() === lowerCasePlayerName),
+        );
         return this.bannedNames.some((name) => name.toLowerCase() === lowerCasePlayerName);
     }
 
@@ -248,9 +257,9 @@ export class Game {
         this.playersReadyForNext = false;
     }
 
-    private getPlayerByName(playerName: string): Player | undefined {
+    /* private getPlayerByName(playerName: string): Player | undefined {
         return this.players.find((player) => player.name.toLowerCase() === playerName.toLowerCase());
-    }
+    } */
     private updatePlayerAnswersAndPoints() {
         this.players.forEach((player: Player) => {
             const currentQuestion = this.quiz.questions[this.currentQuestionIndex];

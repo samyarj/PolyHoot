@@ -31,7 +31,6 @@ export class WaitingPageComponent implements OnDestroy {
         private location: Location,
     ) {
         this.onUnload();
-        this.waitingPageService.handleSocketEvents();
         this.handleSocketSubscriptions();
     }
 

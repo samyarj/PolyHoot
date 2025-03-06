@@ -1,4 +1,4 @@
-import { AfterContentChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Lobby } from '@app/interfaces/lobby';
 import { JoinGameService } from '@app/services/game-services/join-game-service/join-game.service';
 import { Observer, Subscription } from 'rxjs';
@@ -8,7 +8,7 @@ import { Observer, Subscription } from 'rxjs';
     templateUrl: './join-game-page.component.html',
     styleUrls: ['./join-game-page.component.scss'],
 })
-export class JoinGamePageComponent implements OnDestroy, OnInit, AfterContentChecked {
+export class JoinGamePageComponent implements OnDestroy, OnInit {
     @ViewChild('playerNameField') playerNameField: ElementRef<HTMLInputElement>;
 
     title: string = 'Joindre une partie';
@@ -27,12 +27,12 @@ export class JoinGamePageComponent implements OnDestroy, OnInit, AfterContentChe
         return this.joinGameService.popUpMessage;
     }
 
-    get gameIdValidated() {
-        return this.joinGameService.gameIdValidated;
+    get canAccessGame() {
+        return this.joinGameService.canAccessGame;
     }
 
-    get wrongPin() {
-        return this.joinGameService.wrongPin;
+    get wrongGameId() {
+        return this.joinGameService.wrongGameId;
     }
 
     ngOnInit() {
@@ -46,34 +46,12 @@ export class JoinGamePageComponent implements OnDestroy, OnInit, AfterContentChe
         if (this.lobbysSubscription) this.lobbysSubscription.unsubscribe();
     }
 
-    ngAfterContentChecked() {
-        if (this.gameIdValidated) {
-            this.focusPlayerNameField();
-        }
-    }
-
     validGameId(roomId?: string) {
         this.gameId = roomId || this.gameId;
         this.joinGameService.validGameId(this.gameId);
     }
 
-    joinGame() {
-        this.joinGameService.joinGame(this.gameId, this.playerName);
-    }
-
     redirectToPage(page: string) {
         this.joinGameService.redirectToPage(page);
-    }
-
-    redirectToGameAcces() {
-        this.joinGameService.updateGameIdValidated(false);
-        this.playerName = '';
-        this.gameId = '';
-    }
-
-    private focusPlayerNameField() {
-        if (this.playerNameField && this.playerNameField.nativeElement) {
-            this.playerNameField.nativeElement.focus();
-        }
     }
 }
