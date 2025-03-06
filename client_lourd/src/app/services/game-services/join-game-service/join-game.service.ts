@@ -45,6 +45,7 @@ export class JoinGameService {
     }
 
     joinGame(gameId: string, playerName: string) {
+        console.log("Essaie de join la partie")
         const data = { gameId, playerName };
         this.socketService.send(JoinEvents.Join, data);
         this.handleJoinGame(gameId, playerName);
@@ -132,6 +133,7 @@ export class JoinGameService {
 
     private handleBannedName() {
         this.socketService.on(JoinErrors.BannedName, () => {
+            console.log("BannedName reçu du serveur")
             this.popUpMessage = 'Ce nom est banni. Veuillez choisir un autre nom.';
             this.showPopUp();
         });

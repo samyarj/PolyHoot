@@ -57,10 +57,6 @@ export class JoinGamePageComponent implements OnDestroy, OnInit, AfterContentChe
         this.joinGameService.validGameId(this.gameId);
     }
 
-    joinGame() {
-        this.joinGameService.joinGame(this.gameId, this.playerName);
-    }
-
     redirectToPage(page: string) {
         this.joinGameService.redirectToPage(page);
     }

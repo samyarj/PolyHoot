@@ -50,6 +50,7 @@ export class Game {
 
     validPlayer(playerName: string): boolean {
         const trimmedPlayerName = playerName.trim();
+        console.log('Dans validPlayer avec ', trimmedPlayerName);
         return (
             trimmedPlayerName &&
             !this.playerExists(trimmedPlayerName) &&
@@ -60,11 +61,19 @@ export class Game {
 
     playerExists(playerName: string): boolean {
         const player = this.getPlayerByName(playerName);
+        console.log('PlayerExists: ', !!player);
         return !!player;
     }
 
     isPlayerBanned(playerName: string): boolean {
         const lowerCasePlayerName = playerName.toLowerCase();
+        console.log(
+            'isPlayerBanned: ',
+            this.bannedNames,
+            lowerCasePlayerName,
+            'va retourner ',
+            this.bannedNames.some((name) => name.toLowerCase() === lowerCasePlayerName),
+        );
         return this.bannedNames.some((name) => name.toLowerCase() === lowerCasePlayerName);
     }
 

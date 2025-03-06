@@ -98,6 +98,7 @@ export class WaitingPageService {
 
     private handleBanPlayer() {
         this.socketService.on(GameEvents.PlayerBanned, () => {
+            console.log('dans waiting page service le on du playerBanned');
             this.bannedPlayerSource.next(true);
             this.resetAttributes();
         });
