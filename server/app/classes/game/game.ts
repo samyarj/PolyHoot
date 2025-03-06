@@ -48,7 +48,6 @@ export class Game {
 
     validPlayer(playerName: string): boolean {
         const trimmedPlayerName = playerName.trim();
-        console.log('Dans validPlayer avec ', trimmedPlayerName);
         return (
             trimmedPlayerName &&
             //!this.playerExists(trimmedPlayerName) &&
@@ -57,21 +56,8 @@ export class Game {
         );
     }
 
-    /* playerExists(playerName: string): boolean {
-        const player = this.getPlayerByName(playerName);
-        console.log('PlayerExists: ', !!player);
-        return !!player;
-    } */
-
     isPlayerBanned(playerName: string): boolean {
         const lowerCasePlayerName = playerName.toLowerCase();
-        console.log(
-            'isPlayerBanned: ',
-            this.bannedNames,
-            lowerCasePlayerName,
-            'va retourner ',
-            this.bannedNames.some((name) => name.toLowerCase() === lowerCasePlayerName),
-        );
         return this.bannedNames.some((name) => name.toLowerCase() === lowerCasePlayerName);
     }
 
@@ -121,7 +107,7 @@ export class Game {
                 this.playersReadyForNext = false;
                 this.lastFinalizeCall = null;
                 this.currentQuestionIndex++;
-                const timeDuration = this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QRL ? TIME_FOR_QRL: this.quiz.duration;
+                const timeDuration = this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QRL ? TIME_FOR_QRL : this.quiz.duration;
                 this.timer.startTimer(timeDuration, TimerEvents.Value, TimerEvents.End);
                 this.timer.isPaused = false;
                 return { question: this.quiz.questions[this.currentQuestionIndex], index: this.currentQuestionIndex };
@@ -208,9 +194,7 @@ export class Game {
             const targetedPlayer: Player = this.findTargetedPlayer(client);
             targetedPlayer.submitted = true;
         }
-        console.log('Dans checkAndArepare');
         if (this.areResultsReadyToShow()) {
-            console.log('SI tu me vois ca devrait marcher');
             this.preparePlayersForNextQuestion();
         }
     }
@@ -257,9 +241,6 @@ export class Game {
         this.playersReadyForNext = false;
     }
 
-    /* private getPlayerByName(playerName: string): Player | undefined {
-        return this.players.find((player) => player.name.toLowerCase() === playerName.toLowerCase());
-    } */
     private updatePlayerAnswersAndPoints() {
         this.players.forEach((player: Player) => {
             const currentQuestion = this.quiz.questions[this.currentQuestionIndex];
@@ -300,7 +281,7 @@ export class Game {
     private handleLaterAnswer(currentFinalizeTime: number) {
         if (currentFinalizeTime - this.lastFinalizeCall < ANSWER_TIME_INTERVAL) {
             this.lastFinalizePlayer.isFirst = false;
-                this.lastFinalizePlayer.noBonusesObtained--;
+            this.lastFinalizePlayer.noBonusesObtained--;
         }
     }
 }

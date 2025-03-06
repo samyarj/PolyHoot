@@ -34,7 +34,7 @@ export class GameClientService {
     shouldDisconnect: boolean = true;
     time: number = 0;
     answer: string = '';
-    qreAnswer: number = 0;
+    qreAnswer: number;
     private finalAnswer: boolean;
     private realShowAnswers: boolean;
     private socketsInitialized: boolean = false;
@@ -75,7 +75,6 @@ export class GameClientService {
 
         if (!this.finalAnswer && this.time > 0) {
             this.finalAnswer = true;
-            console.log(this.playerInfo.choiceSelected, this.qreAnswer);
             this.socketHandler.send(GameEvents.FinalizePlayerAnswer, {
                 choiceSelected: this.playerInfo.choiceSelected,
                 qreAnswer: this.qreAnswer,
@@ -103,6 +102,7 @@ export class GameClientService {
     resetAttributes() {
         this.choiceFeedback = ChoiceFeedback.Idle;
         this.answer = '';
+        this.qreAnswer = 0;
         this.gamePaused = false;
         this.finalAnswer = false;
         this.realShowAnswers = false;
@@ -167,6 +167,7 @@ export class GameClientService {
             this.time = time;
         });
         this.socketHandler.on(TimerEvents.End, (time: number) => {
+            this.playerInfo.submitted = true;
             this.time = time;
         });
     }
@@ -184,6 +185,8 @@ export class GameClientService {
                 this.playerInfo.submitted = false;
                 this.currentQuestionIndex = nextQuestion.index;
                 this.currentQuestion = nextQuestion.question;
+                if (this.currentQuestion.type === 'QRE' && this.currentQuestion.qreAttributes)
+                    this.qreAnswer = this.currentQuestion.qreAttributes.minBound;
             }
         });
     }

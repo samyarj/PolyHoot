@@ -64,6 +64,7 @@ export class Player {
             if (qreAttributes) {
                 const minTolerated = qreAttributes.goodAnswer - qreAttributes.tolerance;
                 const maxTolerated = qreAttributes.goodAnswer + qreAttributes.tolerance;
+                console.log("qreAnswer lorsque timer arrive a 0", this.qreAnswer);
                 if (this.qreAnswer > maxTolerated || this.qreAnswer < minTolerated) correct = false;
             }
         }
