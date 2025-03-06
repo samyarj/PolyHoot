@@ -1,0 +1,2 @@
+D:/poly/7eme session/LOG3900-210/client_leger/android/app/.cxx/Debug/b4q3y6m3/arm64-v8a/CMakeFiles/edit_cache.dir
+D:/poly/7eme session/LOG3900-210/client_leger/android/app/.cxx/Debug/b4q3y6m3/arm64-v8a/CMakeFiles/rebuild_cache.dir

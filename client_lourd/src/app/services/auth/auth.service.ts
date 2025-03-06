@@ -1,3 +1,4 @@
+import { SocketClientService } from './../websocket-services/general/socket-client-manager.service';
 /* eslint-disable @typescript-eslint/naming-convention */
 import { HttpClient } from '@angular/common/http';
 import { Injectable, Injector } from '@angular/core';
@@ -14,9 +15,9 @@ import { Firestore } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { User } from '@app/interfaces/user';
 import { handleErrorsGlobally } from '@app/utils/rxjs-operators';
-import { collection, doc, getDocs, query, updateDoc, where } from '@firebase/firestore';
+import { collection, doc, getDocs, onSnapshot, query, updateDoc, where } from '@firebase/firestore';
 import { User as FirebaseUser, onIdTokenChanged, sendPasswordResetEmail } from 'firebase/auth';
-import { BehaviorSubject, catchError, finalize, from, map, Observable, of, switchMap, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, finalize, from, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -27,9 +28,15 @@ export class AuthService {
     private userBS: BehaviorSubject<User | null> = new BehaviorSubject<User | null>(null);
     private googleProvider = new GoogleAuthProvider();
     private loadingTokenBS = new BehaviorSubject<boolean>(true);
+    private tokenBS: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
     private isAuthenticating = false;
+    private userSnapshotUnsubscribe: (() => void) | null = null;
+    // eslint-disable-next-line @typescript-eslint/member-ordering
     user$ = this.userBS.asObservable();
+    // eslint-disable-next-line @typescript-eslint/member-ordering
     loadingToken$ = this.loadingTokenBS.asObservable();
+    // eslint-disable-next-line @typescript-eslint/member-ordering
+    token$ = this.tokenBS.asObservable();
 
     constructor(
         private auth: Auth,
@@ -37,8 +44,14 @@ export class AuthService {
         private injector: Injector,
         private router: Router,
         private firestore: Firestore,
+        private socketClientService: SocketClientService,
     ) {
         this.monitorTokenChanges();
+    }
+
+    // Necessary to remove circular dependency
+    getSocketService() {
+        return this.socketClientService;
     }
 
     signUp(username: string, email: string, password: string): Observable<User> {
@@ -102,6 +115,10 @@ export class AuthService {
 
     logout(): void {
         const currentUser = this.auth.currentUser;
+        if (this.userSnapshotUnsubscribe) {
+            this.userSnapshotUnsubscribe();
+            this.userSnapshotUnsubscribe = null;
+        }
         if (currentUser) {
             const userDocRef = doc(this.firestore, `users/${currentUser.uid}`);
 
@@ -147,11 +164,22 @@ export class AuthService {
         return this.userBS.value;
     }
 
+    private setIsOnline(status: boolean, uid: string | null): void {
+        if (!uid) return;
+
+        const userDocRef = doc(this.firestore, `users/${uid}`);
+        from(updateDoc(userDocRef, { isOnline: status }))
+            .pipe(handleErrorsGlobally(this.injector))
+            .subscribe();
+    }
+
     private handleAuthAndFetchUser(userCredential: UserCredential, endpoint: string, method: 'GET' | 'POST' = 'GET'): Observable<User> {
         return from(userCredential.user.getIdToken()).pipe(
             switchMap((idToken) => {
                 const options = { headers: { Authorization: `Bearer ${idToken}` } };
-
+                this.tokenBS.next(idToken);
+                this.socketClientService.disconnect();
+                this.socketClientService.connect(idToken);
                 switch (method) {
                     case 'GET':
                         return this.http.get<User>(endpoint, options);
@@ -159,6 +187,11 @@ export class AuthService {
                         return this.http.post<User>(endpoint, {}, options);
                     default:
                         throw new Error(`Unsupported HTTP method: ${method}`);
+                }
+            }),
+            tap((user) => {
+                if (user && user.uid) {
+                    this.socketClientService.send('identifyMobileClient', user.uid);
                 }
             }),
         );
@@ -171,26 +204,60 @@ export class AuthService {
             if (this.isAuthenticating) {
                 return;
             }
+
+            if (this.userSnapshotUnsubscribe) {
+                this.userSnapshotUnsubscribe();
+                this.userSnapshotUnsubscribe = null;
+            }
+
             if (firebaseUser) {
                 try {
                     const idToken = await firebaseUser.getIdToken();
                     if (!idToken) throw new Error('Votre session a expiré. Veuillez vous reconnecter.');
+                    this.tokenBS.next(idToken);
+                    this.socketClientService.disconnect();
+                    this.socketClientService.connect(idToken);
 
-                    this.http
-                        .get<User>(`${this.baseUrl}/profile`, {
-                            headers: { Authorization: `Bearer ${idToken}` },
-                        })
-                        .pipe(finalize(() => this.loadingTokenBS.next(false)))
-                        .subscribe({
-                            next: (user) => this.userBS.next(user),
-                            error: () => this.logout(),
-                        });
+                    this.isUserOnline(firebaseUser.uid).subscribe((isOnline) => {
+                        if (isOnline) {
+                            this.loadingTokenBS.next(false);
+                            this.signOutAndClearSession();
+                            throw new Error("L'utilisateur est déjà connecté sur un autre appareil.");
+                        }
+
+                        const userDocRef = doc(this.firestore, `users/${firebaseUser.uid}`);
+
+                        this.setIsOnline(true, firebaseUser.uid);
+                        this.socketClientService.send('identifyMobileClient', firebaseUser.uid);
+
+                        this.userSnapshotUnsubscribe = onSnapshot(
+                            userDocRef,
+                            (docSnapshot) => {
+                                if (docSnapshot.exists()) {
+                                    const userData = docSnapshot.data() as User;
+                                    console.log(userData);
+                                    this.userBS.next(userData);
+                                } else {
+                                    this.userBS.next(null);
+                                }
+                                this.loadingTokenBS.next(false);
+                            },
+                            (error) => {
+                                console.error('Error fetching user data:', error);
+                                this.loadingTokenBS.next(false);
+                            },
+                        );
+                    });
                 } catch {
                     this.loadingTokenBS.next(false);
+                    this.tokenBS.next(null);
+                    this.socketClientService.disconnect();
                     this.logout();
                 }
             } else {
                 this.userBS.next(null);
+                this.tokenBS.next(null);
+                this.socketClientService.disconnect();
                 this.loadingTokenBS.next(false);
                 this.router.navigate(['/login']);
             }
@@ -198,6 +265,8 @@ export class AuthService {
     }
 
     private signOutAndClearSession(): void {
+        this.tokenBS.next(null);
+        this.socketClientService.disconnect();
         from(this.auth.signOut())
             .pipe(
                 handleErrorsGlobally(this.injector),
@@ -207,6 +276,7 @@ export class AuthService {
     }
 
     private clearSession(): void {
+        this.tokenBS.next(null);
         this.router.navigate(['/login']);
     }
 

@@ -21,12 +21,13 @@ export class JoinGameService {
     lobbysObservable: Observable<Lobby[]>;
     user$: Observable<User | null>;
     private username: string;
+    private socketService: SocketClientService;
 
     constructor(
-        private socketService: SocketClientService,
         private router: Router,
         private authService: AuthService,
     ) {
+        this.socketService = this.authService.getSocketService();
         this.lobbysSource = new Subject<Lobby[]>();
         this.lobbysObservable = this.lobbysSource.asObservable();
         this.handleLobbys();

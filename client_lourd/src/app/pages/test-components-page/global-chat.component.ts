@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FieldValue } from '@angular/fire/firestore';
 import { FirebaseChatMessage } from '@app/interfaces/chat-message';
 import { FirebaseChatService } from '@app/services/chat-services/firebase/firebase-chat.service';
 import { Subscription } from 'rxjs';
@@ -13,7 +14,7 @@ export class GlobalChatComponent implements OnInit, OnDestroy {
     chatMessagesLoading: boolean = true;
     name = 'Chat Général';
     private messagesSubscription: Subscription;
-    private lastMessageDate: number | null = null; // Track last message date for pagination
+    private lastMessageDate: FieldValue; // Track last message date for pagination
     isFetchingOlderMessages: boolean = false; // Prevent multiple fetches at once
 
     constructor(private firebaseChatService: FirebaseChatService) {}
