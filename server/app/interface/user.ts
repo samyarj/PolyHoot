@@ -29,5 +29,5 @@ export interface User {
     nWins?: number; // Number of wins
     isOnline?: boolean; // Online status
     pity?: number; // Pity counter
-    lastDailyClaimDate?: Date; // Next date where user can get daily free
+    nextDailyFree?: Date; // Next date where user can get daily free
 }

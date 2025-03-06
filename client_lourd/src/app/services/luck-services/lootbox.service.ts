@@ -46,4 +46,22 @@ export class LootBoxService {
             .get<LootBoxContainer[]>(`${this.baseUrl}/lootBox`, options)
             .pipe(catchError((error) => this.messageHandler.handleHttpError(error)));
     }
+
+    openDailyFree(): Observable<Reward> {
+        const options = {
+            headers: { authorization: `Bearer ${this.tokenID}` },
+        };
+        return this.http
+            .post<Reward>(`${this.baseUrl}/dailyFree`, {}, options)
+            .pipe(catchError((error) => this.messageHandler.handleHttpError(error)));
+    }
+
+    getDailyFree(): Observable<{ lootbox: LootBoxContainer; canClaim: boolean }> {
+        const options = {
+            headers: { authorization: `Bearer ${this.tokenID}` },
+        };
+        return this.http
+            .get<{ lootbox: LootBoxContainer; canClaim: boolean }>(`${this.baseUrl}/dailyFree`, options)
+            .pipe(catchError((error) => this.messageHandler.handleHttpError(error)));
+    }
 }

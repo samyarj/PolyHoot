@@ -1,13 +1,13 @@
 import { LootBox } from '@app/classes/lootbox/lootbox';
-import { LOOTBOX_1, LOOTBOX_2, LOOTBOX_3, PITY_INCREMENT } from '@app/constants/lootbox';
-import { LootBoxContainer, Reward, RewardRarity } from '@app/interface/lootbox-related';
+import { DAILY_FREE_BOX, LOOTBOX_1, LOOTBOX_2, LOOTBOX_3, PITY_INCREMENT } from '@app/constants/lootbox';
+import { LootBoxContainer, Reward, RewardRarity, RewardType } from '@app/interface/lootbox-related';
 import { Injectable } from '@nestjs/common';
 import { UserService } from '../auth/user.service';
 
 @Injectable()
 export class LootBoxService {
     private availableLootBoxes: LootBox[] = [new LootBox(LOOTBOX_1), new LootBox(LOOTBOX_2), new LootBox(LOOTBOX_3)];
-
+    private dailyFree: LootBox = new LootBox(DAILY_FREE_BOX);
     constructor(private userService: UserService) {}
 
     getBoxes(pity: number): LootBoxContainer[] {
@@ -16,16 +16,45 @@ export class LootBoxService {
 
     async updatePity(uid: string, pity: number) {
         await this.userService.updatePity(uid, pity);
-        console.log('pityUpdated!!!');
+    }
+
+    async updateNextDailyFree(uid: string): Promise<boolean> {
+        return await this.userService.updateNextDailyFree(uid);
+    }
+
+    async getDailyFree(): Promise<LootBoxContainer> {
+        return await this.dailyFree;
+    }
+
+    async canClaimDailyFreeUser(uid: string): Promise<boolean> {
+        return await this.userService.canClaimDailyFreeUser(uid);
+    }
+
+    async openDailyFree(uid: string): Promise<Reward | null> {
+        let reward: Reward = this.dailyFree.open(0);
+        if (reward.type === RewardType.Coins && typeof reward.value === 'number') {
+            //certain this is number unless object not well constructed
+            if (await this.updateNextDailyFree(uid)) {
+                await this.userService.updateUserCoins(uid, reward.value as number);
+                return reward;
+            }
+        }
+
+        return null;
     }
 
     async openBox(boxIndex: number, uid: string, pity: number): Promise<Reward> {
-        let canAffordBox: Promise<boolean> = this.userService.updateUserCoins(uid, -1 * this.availableLootBoxes[boxIndex].price);
+        let canAffordBox: boolean = await this.userService.updateUserCoins(uid, -1 * this.availableLootBoxes[boxIndex].price);
         if (!canAffordBox) {
             return null;
         } else {
             let reward: Reward = this.availableLootBoxes[boxIndex].open(pity);
-            // PUT INTO INVENTORY HERE!!!
+            if (reward.type === RewardType.Coins && typeof reward.value === 'number') {
+                //certain this is number unless object not well constructed
+                await this.userService.updateUserCoins(uid, reward.value as number);
+            } else {
+                // PUT INTO INVENTORY HERE if not coins and if not alr owned!!!
+            }
             if (reward.rarity === RewardRarity.Common) {
                 await this.updatePity(uid, pity + PITY_INCREMENT);
             } else {

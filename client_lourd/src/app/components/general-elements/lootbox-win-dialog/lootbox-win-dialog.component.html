@@ -40,6 +40,11 @@
             <p>{{ data.value }}</p>
         </div>
 
+        <div class="reward-div" *ngIf="data.type === rewardType.Coins">
+            Vous avez gagné le montant d'argent :
+            <p>{{ data.value }}</p>
+        </div>
+
         <!-- Close Button -->
         <button class="button" (click)="onClose()">Fermer</button>
     </div>

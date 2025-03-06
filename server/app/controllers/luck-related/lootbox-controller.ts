@@ -49,7 +49,7 @@ export class LootBoxController {
     }
 
     @UseGuards(AuthGuard)
-    @ApiOkResponse({ description: 'LootBoxes fetched successfully' })
+    @ApiOkResponse({ description: 'LootBox opened successfully' })
     @ApiInternalServerErrorResponse({ description: 'Internal server error' })
     @Post('lootBox')
     async openLootBox(@Body() payload: { id: number }, @Req() req: AuthenticatedRequest, @Res() response: Response) {
@@ -58,6 +58,45 @@ export class LootBoxController {
             const user = await this.userService.getUserByUid(req.user.uid);
             const reward = await this.lootBoxService.openBox(payload.id, user.uid, user.pity);
             response.status(HttpStatus.OK).json(reward);
+        } catch (error) {
+            this.logger.error(`Error fetching profile: ${error.message}`);
+
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
+        }
+    }
+
+    @UseGuards(AuthGuard)
+    @ApiOkResponse({ description: 'DailyFree fetched successfully' })
+    @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+    @Get('dailyFree')
+    async getDailyFree(@Req() req: AuthenticatedRequest, @Res() response: Response) {
+        this.logger.log(`Getting boxes for user : ${req.user.displayName}`);
+        try {
+            const user = await this.userService.getUserByUid(req.user.uid);
+            const dailyFree: LootBoxContainer = await this.lootBoxService.getDailyFree();
+            const canClaim: boolean = await this.lootBoxService.canClaimDailyFreeUser(req.user.uid);
+            response.status(HttpStatus.OK).json({ lootbox: dailyFree, canClaim: canClaim });
+        } catch (error) {
+            this.logger.error(`Error fetching profile: ${error.message}`);
+
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
+        }
+    }
+
+    @UseGuards(AuthGuard)
+    @ApiOkResponse({ description: 'DailyFree successfully' })
+    @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+    @Post('dailyFree')
+    async openDailyFree(@Req() req: AuthenticatedRequest, @Res() response: Response) {
+        this.logger.log(`Opening box for user : ${req.user.displayName}`);
+        try {
+            const user = await this.userService.getUserByUid(req.user.uid);
+            const reward = await this.lootBoxService.openDailyFree(user.uid);
+            if (reward === null) {
+                throw new Error('Cannot claim daily free, not the time yet :)');
+            } else {
+                response.status(HttpStatus.OK).json(reward);
+            }
         } catch (error) {
             this.logger.error(`Error fetching profile: ${error.message}`);
 

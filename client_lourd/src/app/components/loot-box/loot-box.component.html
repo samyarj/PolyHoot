@@ -6,7 +6,7 @@
     <div class="interaction-div" [ngClass]="{ show: isMoved }">
         <div class="interaction-div-content">
             <div class="preview-items-wrapper">
-                <div class="preview-items">
+                <div class="preview-items" onWheel="this.scrollLeft+=event.deltaY>0?25:-25">
                     <ng-container *ngFor="let reward of lootBoxContainer.rewards; let i = index; let last = last">
                         <div
                             class="item"

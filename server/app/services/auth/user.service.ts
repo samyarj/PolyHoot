@@ -175,6 +175,37 @@ export class UserService {
         }
     }
 
+    async updateNextDailyFree(uid: string) {
+        const userRef = await this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+
+        const currentTimestamp = new Date();
+        if (currentTimestamp > userDoc.data().nextDailyFree.toDate()) {
+            currentTimestamp.setDate(currentTimestamp.getDate() + 1);
+            await userRef.update({ nextDailyFree: currentTimestamp });
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    async canClaimDailyFreeUser(uid: string) {
+        const userRef = await this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+        const currentTimestamp = new Date();
+        if (currentTimestamp > userDoc.data().nextDailyFree.toDate()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private async getUserFromFirestore(uid: string): Promise<admin.firestore.DocumentData> {
         const userDoc = await this.firestore.collection('users').doc(uid).get();
         if (!userDoc.exists) throw new UnauthorizedException("L'utilisateur n'existe pas.");
@@ -211,7 +242,7 @@ export class UserService {
             nWins: userDoc.nWins || 0,
             isOnline: true,
             pity: userDoc.pity || 0,
-            lastDailyClaimDate: userDoc.lastDailyClaimDate || null,
+            nextDailyFree: userDoc.nextDailyFree || null,
         };
     }
 }

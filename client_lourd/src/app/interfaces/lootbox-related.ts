@@ -2,6 +2,7 @@ export enum RewardType {
     Theme = 'theme',
     Avatar = 'avatar',
     Border = 'border',
+    Coins = 'coins',
 }
 
 export enum RewardRarity {
@@ -14,7 +15,7 @@ export interface Reward {
     type: RewardType;
     rarity: RewardRarity;
     odds: number;
-    value: string; // the link for the avatar/border or the name of the theme to be applied.
+    value: string | number; // the link for the avatar/border or the name of the theme to be applied. Or coins amount.
 }
 
 export interface LootBoxContainer {
