@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FieldPath } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { FirebaseChatMessage } from '@app/interfaces/chat-message';
 import { User } from '@app/interfaces/user';
@@ -27,6 +28,9 @@ export class SideBarComponent implements OnInit, OnDestroy {
     channels: ChatChannel[] = [];
     newChannelName: string = '';
     selectedChannel: string | null = null;
+
+    private messagesSubscription: Subscription;
+    private lastMessageDate: FieldPath; // Track last message date for pagination
 
     constructor(
         private authService: AuthService,

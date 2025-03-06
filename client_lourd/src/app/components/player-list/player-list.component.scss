@@ -64,20 +64,10 @@
     box-shadow: 5px 5px 5px #6978bb;
 }
 .not-interacted {
-    background-color: rgb(224, 33, 33);
-    color: white;
-}
-.interacted {
-    background-color: rgb(206, 189, 6);
-    color: white;
-}
-.submitted {
     background-color: rgb(4, 199, 4);
     color: white;
 }
-
 .crossed {
-    background-color: black;
     color: white;
     text-decoration: line-through;
     text-decoration-thickness: 3px;

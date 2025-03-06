@@ -1,20 +1,19 @@
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/router/routes.dart';
-import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
-    as auth_service;
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
-import 'package:client_leger/utilities/logger.dart';
+import 'package:client_leger/providers/user/user_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class LoginForm extends StatefulWidget {
+class LoginForm extends ConsumerStatefulWidget {
   const LoginForm({super.key});
 
   @override
-  State<LoginForm> createState() => _LoginFormState();
+  ConsumerState<LoginForm> createState() => _LoginFormState();
 }
 
-class _LoginFormState extends State<LoginForm> {
+class _LoginFormState extends ConsumerState<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _identifierController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -30,7 +29,6 @@ class _LoginFormState extends State<LoginForm> {
       color: Colors.blue.shade300,
     ),
   );
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -39,51 +37,31 @@ class _LoginFormState extends State<LoginForm> {
     super.dispose();
   }
 
-  Future signIn() async {
-    AppLogger.d("in signIn (login_form.dart)");
-
-    FocusManager.instance.primaryFocus?.unfocus();
-
-    setState(() {
-      _isLoading = true;
-    });
+  Future<void> signIn() async {
     try {
-      await auth_service.signIn(
-        _identifierController.text.trim(),
-        _passwordController.text.trim(),
-      );
+      await ref.read(userProvider.notifier).signIn(
+            _identifierController.text.trim(),
+            _passwordController.text.trim(),
+          );
     } catch (e) {
-      if (!mounted) return;
-      showErrorDialog(context, getCustomError(e));
-    } finally {
-      // ignore: control_flow_in_finally
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-      });
+      if (context.mounted) {
+        showErrorDialog(context, getCustomError(e));
+      }
     }
   }
 
   void loginWithGoogle() async {
-    setState(() {
-      _isLoading = true;
-    });
     try {
-      await auth_service.signWithGoogle();
+      await ref.read(userProvider.notifier).signWithGoogle();
     } catch (e) {
       if (!mounted) return;
       showErrorDialog(context, getCustomError(e));
-    } finally {
-      // ignore: control_flow_in_finally
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final userState = ref.watch(userProvider);
     return Stack(
       children: [
         Container(
@@ -143,7 +121,7 @@ class _LoginFormState extends State<LoginForm> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _isLoading
+                      onPressed: userState is AsyncLoading
                           ? null
                           : () async {
                               if (_formKey.currentState!.validate()) {
@@ -202,7 +180,8 @@ class _LoginFormState extends State<LoginForm> {
                   SizedBox(height: 16),
                   // Google Login
                   OutlinedButton.icon(
-                    onPressed: _isLoading ? null : loginWithGoogle,
+                    onPressed:
+                        userState is AsyncLoading ? null : loginWithGoogle,
                     icon: Icon(Icons.account_circle, size: 20),
                     label: Text(
                       'Connexion avec Google',
@@ -220,7 +199,7 @@ class _LoginFormState extends State<LoginForm> {
             ),
           ),
         ),
-        if (_isLoading)
+        if (userState is AsyncLoading)
           Positioned.fill(
             child: Center(
               child: CircularProgressIndicator(),

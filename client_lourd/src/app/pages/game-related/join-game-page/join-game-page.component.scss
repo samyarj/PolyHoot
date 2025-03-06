@@ -1,5 +1,5 @@
-$primary-color: var(--primary-color);
-$second-color: var(--secondary-color);
+$primary-color: #00115a;
+$second-color: #7ac97a;
 
 html,
 body {
@@ -9,8 +9,8 @@ body {
 }
 
 .page-wrapper {
-    background: linear-gradient(to bottom, var(--primary-color), var(--primary-color), var(--secondary-color));
-    height: 100%;
+    background: linear-gradient(to bottom, #c1ccff, #c1ccff, $second-color);
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
@@ -40,26 +40,37 @@ body {
     }
 }
 
-.outerContainer {
+#playerName {
+    width: 230px;
+    height: 50px;
+}
+.split-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+}
+.left-container {
+    width: 50%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     height: 80vh;
     margin-top: 1px;
     h1 {
         font-size: 1.5rem;
         margin-bottom: 20px;
-        color: var(--text-color);
+        color: $primary-color;
         font-weight: bold;
     }
     form {
         display: flex;
         flex-direction: column;
         align-items: center;
-        background-color: var(--primary-color);
+        background-color: #ebeeff;
         padding: 20px 50px 30px;
-        box-shadow: 0px 0px 20px color-mix(in srgb, var(--tertiary-color), transparent 10%);
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
         border-radius: 5px;
         margin-top: 200px;
         input {
@@ -77,17 +88,47 @@ body {
         }
         .buttons {
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
             width: 100%;
             margin-top: 10px;
-            .custom-button-medium {
-                min-width: 40%;
+            button {
+                margin: 0px 30px 0px;
             }
         }
     }
 }
+.right-container {
+    width: 50%;
+    height: 90vh;
+    display: flex;
+    justify-content: space-around;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    background-color: #f5f5f5;
+    border-radius: 10px;
+    text-align: center;
+    padding: 20px;
+    overflow: auto;
+}
+.right-container > * {
+    background: red;
+    border: 2px solid black;
+    padding: 30px;
+    display: block;
+    width: 100%;
+}
 
-#playerName {
-    width: 230px;
-    height: 50px;
+#submit {
+    background-color: $primary-color;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    width: 100px;
+    height: 40px;
+    font-size: 1rem;
+    cursor: pointer;
+    &:hover {
+        background-color: darken($primary-color, 10%);
+    }
 }

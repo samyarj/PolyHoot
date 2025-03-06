@@ -6,7 +6,6 @@ import { ErrorDialogComponent } from '@app/components/general-elements/error-dia
 import { JoinEvents } from '@app/constants/enum-class';
 import { Quiz } from '@app/interfaces/quiz';
 import { QuizService } from '@app/services/back-end-communication-services/quiz-service/quiz.service';
-import { WaitingPageService } from '@app/services/waiting-room-services/waiting-page.service';
 import { SocketClientService } from '@app/services/websocket-services/general/socket-client-manager.service';
 
 @Component({
@@ -28,7 +27,6 @@ export class PopUpCreationComponent {
         private router: Router,
         private dialog: MatDialog,
         private socketService: SocketClientService,
-        private waitingPageService: WaitingPageService,
     ) {
         this.fetchQuizById(this.data.id);
     }
@@ -38,19 +36,10 @@ export class PopUpCreationComponent {
     }
 
     openNewGame(): void {
-        const isRandomMode = this.data.title === 'Mode aléatoire';
         const quiz = this.data;
-        this.socketService.send(JoinEvents.Create, { quiz, isRandomMode }, (roomId: string) => {
+        this.socketService.send(JoinEvents.Create, quiz, (roomId: string) => {
             this.socketService.roomId = roomId;
             this.socketService.isOrganizer = true;
-            if (isRandomMode) {
-                this.socketService.isRandomMode = true;
-                this.socketService.isOrganizer = false;
-                this.socketService.playerName = 'Organisateur';
-                this.waitingPageService.players = ['Organisateur'];
-            } else {
-                this.socketService.isRandomMode = false;
-            }
             this.verifyLocalStorage();
             this.navigate('/waiting');
         });

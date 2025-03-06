@@ -1,10 +1,12 @@
 <div class="page-wrapper">
+    <app-header-game [title]="title"></app-header-game>
     <img id="owl-image" src="assets/pictures/button-owl.png" />
-    <div *ngIf="!gameIdValidated" class="pin-valid-container">
-        <div *ngIf="wrongPin" class="wrong-input">
-            <p>{{ popUpMessage }}</p>
-        </div>
-        <div class="outerContainer">
+    <div class="split-container">
+        <div *ngIf="!gameIdValidated" class="left-container">
+            <div *ngIf="wrongPin" class="wrong-input">
+                <p>{{ popUpMessage }}</p>
+            </div>
+
             <form (ngSubmit)="validGameId()" #accessForm="ngForm">
                 <h1>Code d'accès à la partie</h1>
                 <label for="gamePin"></label>
@@ -23,30 +25,32 @@
                 />
                 <div *ngIf="accessForm.invalid" class="text-danger">*Le code d'accès doit comporter 4 chiffres.</div>
                 <div class="buttons">
-                    <!-- <button id="homebutton" type="button" class="custom-button-cancel-medium" (click)="redirectToPage('/home')">Retour</button> -->
-                    <button id="submit" type="submit" class="custom-button-medium" [disabled]="accessForm.invalid">Joindre</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div *ngIf="gameIdValidated" class="pin-valid-container">
-        <div *ngIf="wrongPin" class="wrong-input">
-            <p>{{ popUpMessage }}</p>
-        </div>
-        <div class="outerContainer">
-            <form (ngSubmit)="joinGame()">
-                <h1>Entrez votre nom de joueur</h1>
-                <label for="playerName"></label>
-                <input #playerNameField id="playerName" type="text" maxlength="20" name="playerName" [(ngModel)]="playerName" required />
-                <h3>maximum de 20 caractères</h3>
-                <div class="buttons">
-                    <button id="homebutton" type="button" class="custom-button-cancel login-back-button" (click)="redirectToGameAcces()">
+                    <button
+                        id="homebutton"
+                        type="button"
+                        class="btn custom-width custom-button-cancel login-back-button"
+                        (click)="redirectToPage('/home')"
+                    >
                         Retour
                     </button>
-
-                    <button type="submit" class="custom-button">Allons-y !</button>
+                    <button id="submit" type="submit" class="btn custom-width custom-button" [disabled]="accessForm.invalid">Joindre</button>
                 </div>
             </form>
+        </div>
+        <div *ngIf="!gameIdValidated" class="right-container">
+            <div *ngFor="let lobby of lobbys; let i = index">
+                <span> {{ lobby.title }} </span>
+                <span> {{ ' Nombre de joueurs : ' + lobby.nbPlayers }} </span><br />
+                <button
+                    id="submit"
+                    type="button"
+                    class="btn custom-width custom-button"
+                    [disabled]="lobby.isLocked"
+                    (click)="validGameId(lobby.roomId)"
+                >
+                    Joindre
+                </button>
+            </div>
         </div>
     </div>
 </div>

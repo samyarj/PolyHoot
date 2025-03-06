@@ -5,9 +5,11 @@ import 'package:client_leger/UI/main-view/sidebar/channel_search.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/models/chat_channels.dart';
 import 'package:client_leger/business/channel_manager.dart';
+import 'package:client_leger/providers/user/user_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Channels extends StatelessWidget {
+class Channels extends ConsumerWidget {
   Channels(
       {super.key,
       required this.onChannelPicked,
@@ -27,11 +29,12 @@ class Channels extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     List<ChatChannel> userChannels = [];
     List<ChatChannel> joinableChannels = [];
+    String currentUserUid = ref.read(userProvider).value!.uid;
     return StreamBuilder<List<ChatChannel>>(
-        stream: channelManager.fetchAllChannels(),
+        stream: channelManager.fetchAllChannels(currentUserUid),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
@@ -83,8 +86,8 @@ class Channels extends StatelessWidget {
                   Expanded(
                     child: TabBarView(
                       children: [
-                        _buildUserChannels(userChannels),
-                        _buildJoinChannels(joinableChannels),
+                        _buildUserChannels(userChannels, currentUserUid),
+                        _buildJoinChannels(joinableChannels, currentUserUid),
                       ],
                     ),
                   ),
@@ -95,7 +98,7 @@ class Channels extends StatelessWidget {
         });
   }
 
-  _buildUserChannels(List<ChatChannel> userChannels) {
+  _buildUserChannels(List<ChatChannel> userChannels, String currentUserUid) {
     if (userChannels.isEmpty) {
       return Center(
         child: Text(
@@ -125,7 +128,8 @@ class Channels extends StatelessWidget {
                     await showConfirmationDialog(
                       context,
                       "$quitChannel ${channel.name} ?",
-                      () => channelManager.quitChannel(channel.name),
+                      () => channelManager.quitChannel(
+                          currentUserUid, channel.name),
                     );
                   },
                 ),
@@ -147,11 +151,13 @@ class Channels extends StatelessWidget {
     );
   }
 
-  _buildJoinChannels(List<ChatChannel> joinableChannels) {
+  _buildJoinChannels(
+      List<ChatChannel> joinableChannels, String currentUserUid) {
     return ChannelSearch(
       key: ValueKey(joinableChannels),
       joinableChannels: joinableChannels,
       onDeleteChannel: onDeleteChannel,
+      currentUserUid: currentUserUid,
     );
   }
 }

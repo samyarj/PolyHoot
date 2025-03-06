@@ -1,5 +1,3 @@
-import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
-    as auth_service;
 import 'package:client_leger/backend-communication-services/environment.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/models/chat_channels.dart';
@@ -32,14 +30,13 @@ class FirebaseChatService {
 
   static const int messagesLimit = 50;
 
-  Future<void> sendMessage(String channel, String message) async {
+  Future<void> sendMessage(
+      String currentUserUid, String channel, String message) async {
     try {
-      final user = await auth_service.currentSignedInUser;
-
       final chatMessage = {
-        'uid': user.uid,
+        'uid': currentUserUid,
         'message': message,
-        'date': DateTime.now().millisecondsSinceEpoch,
+        'date': FieldValue.serverTimestamp(),
       };
 
       if (channel == "General") {
@@ -98,9 +95,13 @@ class FirebaseChatService {
         AppLogger.d("In the asyncMap");
 
         for (final change in snapshot.docChanges) {
-          if (change.type == DocumentChangeType.added) {
-            final ChatMessage message =
-                ChatMessage.fromJson(change.doc.data() as Map<String, dynamic>);
+          Map<String, dynamic> jsonMessage =
+              change.doc.data() as Map<String, dynamic>;
+          if (change.type == DocumentChangeType.modified ||
+              change.type == DocumentChangeType.added &&
+                  jsonMessage['date'] != null) {
+            // when server adds the timestamp the document change type is modified and not added
+            final ChatMessage message = ChatMessage.fromJson(jsonMessage);
             newMessages.add(message);
             userIds.add(message.uid);
           }
@@ -118,8 +119,8 @@ class FirebaseChatService {
               users[msg.uid]?.avatarEquipped ?? 'assets/default-avatar.png';
         }
 
-        newMessages
-            .sort((ChatMessage a, ChatMessage b) => b.date.compareTo(a.date));
+        newMessages.sort((ChatMessage a, ChatMessage b) =>
+            b.timestamp.compareTo(a.timestamp));
 
         AppLogger.i("newmessage length is: ${newMessages.length}");
 
@@ -158,7 +159,7 @@ class FirebaseChatService {
   }
 
   Future<List<ChatMessage>> loadOlderMessages(
-      String channel, int lastMessageDate) async {
+      String channel, Timestamp lastMessageDate) async {
     try {
       final olderMessagesQuery = channel == "General"
           ? _globalChatCollection
@@ -189,8 +190,8 @@ class FirebaseChatService {
             users[msg.uid]?.avatarEquipped ?? 'assets/default-avatar.png';
       }
 
-      olderMessages
-          .sort((ChatMessage a, ChatMessage b) => b.date.compareTo(a.date));
+      olderMessages.sort(
+          (ChatMessage a, ChatMessage b) => b.timestamp.compareTo(a.timestamp));
 
       AppLogger.i("oldermessage length is: ${olderMessages.length}");
 
@@ -201,10 +202,8 @@ class FirebaseChatService {
     }
   }
 
-  Stream<List<ChatChannel>> fetchAllChannels() {
+  Stream<List<ChatChannel>> fetchAllChannels(String currentUserUid) {
     return _chatChannelsCollection.snapshots().asyncMap((snapshot) async {
-      final user = await auth_service.currentSignedInUser;
-      final currentUserUid = user.uid;
       return snapshot.docs.map((doc) {
         return ChatChannel.fromJson(
             doc.data() as Map<String, dynamic>, currentUserUid);
@@ -212,10 +211,8 @@ class FirebaseChatService {
     });
   }
 
-  joinChannel(String channel) async {
+  joinChannel(String currentUserUid, String channel) async {
     try {
-      final user = await auth_service.currentSignedInUser;
-      final currentUserUid = user.uid;
       final channelRef = _chatChannelsCollection.doc(channel);
       await channelRef.update({
         'users': FieldValue.arrayUnion([currentUserUid]),
@@ -226,10 +223,8 @@ class FirebaseChatService {
     }
   }
 
-  quitChannel(String channel) async {
+  quitChannel(String currentUserUid, String channel) async {
     try {
-      final user = await auth_service.currentSignedInUser;
-      final currentUserUid = user.uid;
       final channelRef = _chatChannelsCollection.doc(channel);
       await channelRef.update({
         'users': FieldValue.arrayRemove([currentUserUid]),

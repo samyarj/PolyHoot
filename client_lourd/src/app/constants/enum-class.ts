@@ -27,7 +27,7 @@ export enum ChoiceFeedback {
 }
 
 export enum AppRoute {
-    ADMIN = '/admin',
+    ADMIN = '/quiz-question-management',
     LOGIN = '/login',
     HOME = '/home',
     WAITING = '/waiting-room',
@@ -37,6 +37,24 @@ export enum AppRoute {
     CREATE = '/create',
     JOINGAME = '/join-game',
     QUESTIONBANK = '/questionBank',
+}
+export enum CoinFlipGameState {
+    Uninitialized = 0,
+    BettingPhase = 1,
+    PreFlippingPhase = 2,
+    FlippingPhase = 3,
+    ResultsPhase = 4,
+}
+
+export enum CoinFlipEvents {
+    StartGame = 'coinflip-start-game',
+    PreFlippingPhase = 'coinflip-pre-flipping',
+    FlippingPhase = 'coinflip-flipping',
+    Results = 'coinflip-results',
+    BetTimeCountdown = 'BetTimeCountdown',
+    SendPlayerList = 'SendPlayerList',
+    JoinGame = 'JoinGame',
+    SubmitChoice = 'SubmitChoice',
 }
 
 export enum TimerEvents {
@@ -83,6 +101,7 @@ export enum GameEvents {
     WaitingForCorrection = 'waitingForCorrection',
     PlayerInteraction = 'playerInteraction',
     PlayerSubmitted = 'playerSubmitted',
+    GetCurrentGames = 'getCurrentGames',
 }
 
 export enum JoinEvents {
@@ -93,6 +112,7 @@ export enum JoinEvents {
     Join = 'joinGame',
     CanJoin = 'canJoinGame',
     JoinSuccess = 'onJoinGameSuccess',
+    LobbyCreated = 'lobbyCreated',
 }
 
 export enum JoinErrors {
@@ -106,6 +126,8 @@ export enum JoinErrors {
 
 export enum ConnectEvents {
     UserToGame = 'userConnectedToGamePage',
+    AllPlayersLeft = 'AllPlayersLeft',
+    IdentifyMobileClient = 'identifyMobileClient',
 }
 
 export enum DisconnectEvents {

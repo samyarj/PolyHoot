@@ -9,7 +9,6 @@ export const INVALID_INDEX = -1;
 export const QUESTION_DELAY = 3000;
 export const START_GAME_COUNTDOWN = 5;
 export const MAX_CHAR = 200;
-export const LAST_MODIFIED_INTERVAL = 5000;
 export const TIME_TO_NEXT_ANSWER = 3000;
 export const TIMER_VALUE = 5000;
 export const NOT_FOUND = -1;
@@ -39,7 +38,7 @@ export const EXPIRY_CHECK_INTERVAL = MINUTES * MILLISECONDS;
 export const EMAIL_REGEX = /^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
 export const USERNAME_REGEX = /^[a-zA-Z0-9._]{3,20}$/;
 export const PASSWORD_MIN_LENGTH = 6;
-export const MESSAGES_LIMIT = 50;
+export const MESSAGES_LIMIT = 30;
 export const MIN_LOADING_TIME = 600;
 
 export const DEFAULT_HOVER_INDEX = -1;

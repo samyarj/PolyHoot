@@ -98,7 +98,14 @@
         <!-- Password Field -->
         <div class="form-group mb-3">
             <label for="password" class="form-label">Mot de passe</label>
-            <input id="password" type="password" placeholder="Entez votre mot de passe" formControlName="password" class="form-control" />
+            <input
+                (blur)="verifyPasswordMatch()"
+                id="password"
+                type="password"
+                placeholder="Entez votre mot de passe"
+                formControlName="password"
+                class="form-control"
+            />
             <small *ngIf="signUpForm.get('password')?.invalid && signUpForm.get('password')?.touched" class="text-danger">
                 Le mot de passe doit contenir au moins 6 caractères.
             </small>
@@ -113,10 +120,16 @@
                 placeholder="Confirmez votre mot de passe"
                 formControlName="confirmPassword"
                 class="form-control"
+                (blur)="verifyPasswordMatch()"
             />
             <small *ngIf="signUpForm.get('confirmPassword')?.invalid && signUpForm.get('confirmPassword')?.touched" class="text-danger">
                 La confirmation du mot de passe est requise.
             </small>
+            <small
+                *ngIf="!passwordsMatch && signUpForm.get('confirmPassword')?.touched && !signUpForm.get('confirmPassword')?.invalid"
+                class="text-danger"
+                >Les mots de passe ne correspondent pas.</small
+            >
         </div>
 
         <!-- Submit Button -->

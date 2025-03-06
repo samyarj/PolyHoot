@@ -361,8 +361,6 @@ export const MOCK_QUESTION_ADD_POINTS: Question = {
 
 export const MOCK_SCROLL_HEIGHT = 100;
 
-export const RANDOM_QUESTIONS_NUMBER = 5;
-
 export const MOCK_GAMES: Game[] = [
     { name: 'Space Invaders', startingDate: '2024-01-01', playersNumber: 4, bestScore: 5000 },
     { name: 'Mystic Quest', startingDate: '2024-02-15', playersNumber: 2, bestScore: 3000 },

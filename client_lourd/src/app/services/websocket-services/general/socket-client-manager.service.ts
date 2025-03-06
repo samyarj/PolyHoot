@@ -11,18 +11,19 @@ export class SocketClientService {
     playerName: string;
     canChat: boolean;
     isOrganizer: boolean;
-    isRandomMode: boolean;
-
-    constructor() {
-        this.connect();
-    }
 
     isSocketAlive() {
         return this.socket && this.socket.connected;
     }
 
-    connect() {
-        if (!this.isSocketAlive()) this.socket = io(environment.serverUrlSocket, { transports: ['websocket'], upgrade: false });
+    connect(token: string) {
+        if (!this.isSocketAlive() && token !== null) {
+            this.socket = io(environment.serverUrlSocket, {
+                transports: ['websocket'],
+                upgrade: false,
+                query: { token },
+            });
+        }
     }
 
     disconnect() {
