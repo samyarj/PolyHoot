@@ -8,19 +8,19 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    background-color: white;
+    background-color: var(--primary-color);
     margin-bottom: 10px;
     padding: 15px;
     border-radius: 12px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    height: 500px;
+    height: 400px;
     overflow-y: auto;
 }
 
 .user {
     align-self: flex-end;
     background: linear-gradient(to right, #47ae6c, #2ecc71);
-    color: white;
+    color: var(--primary-color);
     border-radius: 15px 15px 0 15px;
     box-shadow: 0 6px 12px rgba(71, 174, 108, 0.5);
 }
@@ -28,7 +28,7 @@
 .otherUser {
     align-self: flex-start;
     background: linear-gradient(to right, #4a69bb, #3b5998);
-    color: white;
+    color: var(--primary-color);
     border-radius: 15px 15px 15px 0;
     box-shadow: 0 6px 12px rgba(74, 105, 187, 0.5);
 }
@@ -49,8 +49,8 @@
 }
 .systemMessage {
     max-width: 100%;
-    background: #4f5487;
-    color: white;
+    background: hsl(235, 26%, 42%);
+    color: var(--primary-color);
     border-radius: 15px 15px 15px 15px;
     font-style: italic;
     word-wrap: break-word;
@@ -100,13 +100,13 @@ span.error {
     border: none;
     border-radius: 15px;
     font-size: 16px;
-    background-color: white;
-    color: #2c3e50;
+    background-color: var(--primary-color);
+    color: var(--text-color);
     transition: background-color 0.3s ease;
 }
 
 #myTextInput:focus {
-    background-color: white;
+    background-color: var(--primary-color);
 }
 
 #send-button {
@@ -116,7 +116,7 @@ span.error {
     font-family: 'Lato', sans-serif;
     border-radius: 15px;
     background-color: #2ecc71;
-    color: white;
+    color: var(--primary-color);
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
@@ -126,12 +126,12 @@ span.error {
 }
 
 h2 {
-    color: white;
+    color: var(--primary-color);
     margin-right: 10px;
 }
 
 #chatBubble {
-    color: white;
+    color: var(--primary-color);
     font-size: 24px;
 }
 
@@ -166,7 +166,7 @@ h2 {
 
 div.time {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--primary-color);
 }
 
 .spacer {

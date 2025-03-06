@@ -99,7 +99,7 @@ export class AdminPageComponent {
     }
 
     goToEdit(id: string | undefined) {
-        if (id) this.router.navigate(['/admin/modifierQuiz/' + id]);
+        if (id) this.router.navigate(['quiz-question-management/modifierQuiz/' + id]);
     }
 
     trackByFn(_index: number, item: Quiz) {

@@ -1,7 +1,9 @@
+import { FieldValue } from '@angular/fire/firestore';
+
 export interface FirebaseChatMessage {
     message: string;
     username?: string;
     avatar?: string;
-    date: number;
+    date: FieldValue;
     uid: string;
 }

@@ -2,23 +2,29 @@ import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/main-view/sidebar/sidebar.dart';
 import 'package:client_leger/UI/play/playbutton.dart';
 import 'package:client_leger/UI/router/routes.dart';
-import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
-    as auth_service;
-import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
+import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
+import 'package:client_leger/providers/user/user_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class MainScaffold extends StatefulWidget {
+class MainScaffold extends ConsumerStatefulWidget {
   const MainScaffold({super.key, required this.statefulNavigationShell});
 
   final StatefulNavigationShell statefulNavigationShell;
 
   @override
-  State<MainScaffold> createState() => _MainScaffoldState();
+  ConsumerState<MainScaffold> createState() => _MainScaffoldState();
 }
 
-class _MainScaffoldState extends State<MainScaffold> {
+class _MainScaffoldState extends ConsumerState<MainScaffold> {
   bool _isLoggingOut = false;
+
+  @override
+  void initState() {
+    WebSocketManager.instance.initializeSocketConnection();
+    super.initState();
+  }
 
   _logout() async {
     if (_isLoggingOut) return;
@@ -27,10 +33,10 @@ class _MainScaffoldState extends State<MainScaffold> {
       _isLoggingOut = true;
     });
     try {
-      await auth_service.logout();
+      await ref.read(userProvider.notifier).logout();
     } catch (e) {
       if (!mounted) return;
-      showErrorDialog(context, getCustomError(e));
+      showErrorDialog(context, e.toString());
     } finally {
       if (!mounted) return;
       setState(() {
@@ -41,74 +47,112 @@ class _MainScaffoldState extends State<MainScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF00115A), Color(0xFF004080)],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
+    final userState = ref.watch(userProvider);
+    return userState.when(data: (user) {
+      WebSocketManager.instance
+          .webSocketSender("identifyMobileClient", user?.uid);
+
+      return Scaffold(
+        appBar: AppBar(
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF00115A), Color(0xFF004080)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
             ),
           ),
-        ),
-        title: Row(children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Image.asset(
-              'assets/logo.png',
-              width: 50,
-              height: 50,
+          title: Row(children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Image.asset(
+                'assets/logo.png',
+                width: 50,
+                height: 50,
+              ),
             ),
-          ),
-          PlayButton(
-            onPressed: () => widget.statefulNavigationShell.goBranch(
-                0), // Go to the Play branch (without clearing nav stack; saves the state!)
-          ),
-        ]),
-        iconTheme: const IconThemeData(color: Colors.white),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            iconSize: 34,
-            onPressed: () => context.go(Paths.quiz),
-          ),
-          IconButton(
-            icon: const Icon(Icons.backpack),
-            iconSize: 34,
-            onPressed: () => context.go(Paths.equipped),
-          ),
-          IconButton(
-            icon: const Icon(Icons.attach_money),
-            iconSize: 34,
-            onPressed: () => context.go(Paths.coins),
-          ),
-          _isLoggingOut
-              ? const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 3,
-                    ),
+            PlayButton(
+              onPressed: () => widget.statefulNavigationShell.goBranch(
+                  0), // Go to the Play branch (without clearing nav stack; saves the state!)
+            ),
+            IconButton(
+              icon: const Icon(Icons.edit),
+              iconSize: 34,
+              onPressed: () => context.go(Paths.quiz),
+            ),
+            IconButton(
+              icon: const Icon(Icons.backpack),
+              iconSize: 34,
+              onPressed: () => context.go(Paths.equipped),
+            ),
+            IconButton(
+              icon: const Icon(Icons.attach_money),
+              iconSize: 34,
+              onPressed: () => context.go(Paths.coins),
+            ),
+            Spacer(),
+            IconButton(
+              icon: const Icon(Icons.notifications),
+              iconSize: 34,
+              onPressed: () => {},
+            ),
+            const SizedBox(width: 200),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: PopupMenuButton<int>(
+                onSelected: (value) {
+                  if (value == 1) {
+                    _logout();
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem<int>(
+                    value: 1,
+                    child: Text('Déconnexion'),
                   ),
-                )
-              : IconButton(
-                  icon: const Icon(Icons.logout),
-                  iconSize: 34,
-                  onPressed: _logout,
+                ],
+                offset: Offset(0, 48),
+                child: CircleAvatar(
+                  radius: 23,
+                  backgroundImage: user?.avatarEquipped != null
+                      ? NetworkImage(user!.avatarEquipped!)
+                      : AssetImage('assets/default_avatar.png'),
                 ),
-        ],
-      ),
-      body: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(child: widget.statefulNavigationShell),
-          const SideBar(),
-        ],
-      ),
-    );
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              user?.username ?? 'Guest',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ]),
+          iconTheme: const IconThemeData(color: Colors.white),
+        ),
+        body: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(child: widget.statefulNavigationShell),
+            SizedBox(width: 400, child: SideBar(user: user)),
+          ],
+        ),
+      );
+    }, loading: () {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }, error: (error, stack) {
+      return Scaffold(
+        body: Center(
+          child: Text('Error: $error'),
+        ),
+      );
+    });
   }
 }

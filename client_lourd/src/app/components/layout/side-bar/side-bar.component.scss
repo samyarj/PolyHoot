@@ -2,7 +2,7 @@
 .main-aside {
     height: 100vh;
     width: 380px;
-    background-color: #010a13bb;
+    background-color: var(--primary-color);
     position: fixed;
     right: 0;
     top: 0;
@@ -43,14 +43,26 @@
     position: relative;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    height: 101px;
+    width: 100%;
+    border-bottom: 1px solid var(--tertiary-color);
     cursor: pointer;
 }
 
 /* Avatar */
+.username{
+    color: var(--text-color);
+    font-size: 1.5rem;
+    margin-left: 10px;
+    flex-grow: 1;
+}
+
 .avatar {
-    width: 40px;
-    height: 40px;
+    width: auto;
+    height: 75px;
     border-radius: 50%;
+    margin: 8px;
     object-fit: cover;
     border: 2px solid #ddd;
     transition: transform 0.2s ease;
@@ -75,3 +87,155 @@
     align-items: center;
     justify-content: space-around;
 }
+
+//notification button
+.notification-container{
+    padding: 20px;
+    button{
+        background: none;
+        border: none;
+    }
+    i{
+        color: var(--tertiary-color);
+        font-size: 2rem;
+    }
+}
+
+// Social menu
+.social-menu{    
+    padding-top: 25px;
+    padding-left: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--tertiary-color);
+}
+
+.social-menu-title{
+    color: var(--tertiary-color);
+    font-style: italic;
+    font-weight: bold;
+    font-size: 1.5rem;
+    flex-grow: 1;
+}
+
+.social-menu-content{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+// friend menu list configuration
+ul.friend-menu {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    height: 100%;
+    margin: 0;
+    padding-left: 15px;
+
+    li {
+        height: 100%;
+        display: flex;
+        position: relative;
+        font-size: var(--navbar-font-size);
+        justify-content: center;
+        align-items: center;
+        padding: 10px 10px; // Adds internal spacing
+    }
+}
+
+// add friend configuration
+.add-friend{
+    .add-friend-button{
+        background: none;
+        border: none;
+    }
+    i{
+        color: var(--tertiary-color);
+        font-size: 1.3rem;
+    }
+}
+
+// friend list configuration
+.friend-list{
+    .friend-list-button{
+        background: none;
+        border: none;
+    }
+    i{
+        color: var(--tertiary-color);
+        font-size: 1.3rem;
+    }
+}
+
+//friend request configuration
+div.friend-request {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    width: 100%;
+    border: var(--tertiary-color) 1px solid;
+    border-radius: 5%;
+    
+    .friend-request-button {
+        background: none;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between; 
+        width: 100%; 
+    }
+
+    li { 
+        height: 100%;
+        display: flex;
+        position: relative;
+        font-size: var(--navbar-font-size);
+        justify-content: center;
+        align-items: center;
+        padding: 10px 15px; 
+    }
+    span{
+        color: var(--tertiary-color);
+        font-size: 1.3rem;
+        flex-grow: 1;
+    }
+    .friend-request-number{
+        background-color: var(--tertiary-color);
+        border-radius: 20%;
+        margin-right: 20px;
+        span{
+            color: var(--primary-color);
+            font-size: 1.3rem;
+            font-weight: bold;
+            flex-grow: 1;
+        }
+    }
+}
+
+//chat configuration
+.chat-menu{    
+    padding-top: 25px;
+    padding-left: 15px;
+    padding-bottom: 15px;
+}
+
+.chat-menu-title{
+    color: var(--tertiary-color);
+    font-style: italic;
+    font-weight: bold;
+    font-size: 1.5rem;
+    flex-grow: 1;
+}
+
+img.my-channels-icon{
+    width: 15px; 
+    height: 20px;
+
+}
+
+img.global-channels-icon{
+    width: 15px; 
+    height: 20px;
+}
+

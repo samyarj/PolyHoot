@@ -1,5 +1,18 @@
 import { Injectable } from '@angular/core';
-import { Firestore, addDoc, collection, doc, getDoc, limit, onSnapshot, orderBy, query, startAfter } from '@angular/fire/firestore';
+import {
+    FieldValue,
+    Firestore,
+    addDoc,
+    collection,
+    doc,
+    getDoc,
+    limit,
+    onSnapshot,
+    orderBy,
+    query,
+    serverTimestamp,
+    startAfter,
+} from '@angular/fire/firestore';
 import { MESSAGES_LIMIT } from '@app/constants/constants';
 import { FirebaseChatMessage } from '@app/interfaces/chat-message';
 import { User } from '@app/interfaces/user';
@@ -30,7 +43,7 @@ export class FirebaseChatService {
         const chatMessage: FirebaseChatMessage = {
             uid: user.uid,
             message,
-            date: Date.now(),
+            date: serverTimestamp(),
         };
 
         await addDoc(this.globalChatCollection, chatMessage); // Add message to Firestore
@@ -39,45 +52,49 @@ export class FirebaseChatService {
     /**
      * Get a real-time stream of the latest 50 messages from the global chat.
      */
+
     getMessages(): Observable<FirebaseChatMessage[]> {
-        const messagesQuery = query(
-            this.globalChatCollection,
-            orderBy('date', 'desc'), // Fetch latest messages first
-            limit(MESSAGES_LIMIT), // Load only the last 50 messages
-        );
+        const messagesQuery = query(this.globalChatCollection, orderBy('date', 'desc'), limit(MESSAGES_LIMIT));
 
         return new Observable<FirebaseChatMessage[]>((observer) => {
-            let messagesCache: FirebaseChatMessage[] = []; // Store messages
+            let messagesCache: FirebaseChatMessage[] = [];
+
             const unsubscribe = onSnapshot(messagesQuery, async (snapshot) => {
-                const newMessages: FirebaseChatMessage[] = [];
+                const updatedMessages: FirebaseChatMessage[] = [];
                 const userIds: Set<string> = new Set();
 
                 snapshot.docChanges().forEach((change) => {
                     const message = change.doc.data() as FirebaseChatMessage;
 
-                    if (change.type === 'added') {
-                        newMessages.push(message); // Collect new messages
+                    if (change.type === 'added' || change.type === 'modified') {
+                        if (!message.date) return; // Skip if Firestore still hasn't set the timestamp
+
                         userIds.add(message.uid);
+                        updatedMessages.push(message);
                     }
                 });
 
-                if (newMessages.length === 0) return;
+                if (updatedMessages.length === 0) return;
 
-                // Fetch user details for all unique UIDs
+                // Fetch user details
                 const users = await this.fetchUserDetails(Array.from(userIds));
 
-                // Attach user details to messages
-                const enrichedMessages = newMessages.map((msg) => ({
+                // Attach user details
+                const enrichedMessages = updatedMessages.map((msg) => ({
                     ...msg,
                     username: users[msg.uid]?.username || 'Inconnu',
                     avatar:
                         users[msg.uid]?.avatarEquipped || 'https://res.cloudinary.com/dtu6fkkm9/image/upload/v1737478954/default-avatar_qcaycl.jpg',
                 }));
 
-                // 🔥 **Ensure messages are always in ascending order**
-                messagesCache = [...messagesCache, ...enrichedMessages].sort((a, b) => a.date - b.date);
+                // 🔥 Ensure messages are sorted correctly using `Timestamp`
+                messagesCache = [...messagesCache, ...enrichedMessages].sort((a, b) => {
+                    const dateA = (a.date as any)?.toMillis?.() || 0; // Convert Firestore Timestamp
+                    const dateB = (b.date as any)?.toMillis?.() || 0; // Convert Firestore Timestamp
+                    return dateA - dateB;
+                });
 
-                observer.next([...messagesCache]); // Send the correctly ordered messages
+                observer.next([...messagesCache]); // ✅ Emit updated messages
             });
 
             return () => unsubscribe();
@@ -87,7 +104,7 @@ export class FirebaseChatService {
     /**
      * Load older messages (pagination).
      */
-    loadOlderMessages(lastMessageDate: number): Observable<FirebaseChatMessage[]> {
+    loadOlderMessages(lastMessageDate: FieldValue): Observable<FirebaseChatMessage[]> {
         const olderMessagesQuery = query(
             this.globalChatCollection,
             orderBy('date', 'desc'),
@@ -123,7 +140,11 @@ export class FirebaseChatService {
                 }));
 
                 // 🔥 **Ensure messages are always in ascending order**
-                messagesCache = [...enrichedMessages, ...messagesCache].sort((a, b) => a.date - b.date);
+                messagesCache = [...enrichedMessages, ...messagesCache].sort((a, b) => {
+                    const dateA = (a.date as any)?.toMillis?.() || 0; // Convert Firestore Timestamp
+                    const dateB = (b.date as any)?.toMillis?.() || 0; // Convert Firestore Timestamp
+                    return dateA - dateB;
+                });
 
                 observer.next([...messagesCache]); // Send correctly ordered messages
             });

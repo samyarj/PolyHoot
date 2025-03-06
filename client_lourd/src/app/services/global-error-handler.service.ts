@@ -40,7 +40,7 @@ export class GlobalErrorHandlerService extends ErrorHandler {
         }
 
         // Appeler le gestionnaire d'erreurs Angular par défaut
-        super.handleError(error);
+        // super.handleError(error);
     }
 
     private getFirebaseErrorMessage(error: FirebaseError): string {

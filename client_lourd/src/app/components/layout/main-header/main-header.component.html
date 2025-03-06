@@ -3,7 +3,7 @@
         <ul class="left-list">
             <img class="logo" src="assets/pictures/logo.png" />
             <li class="item-background-hover end-category" routerLink="game-home" routerLinkActive="item-background-active">Jouer</li>
-            <li class="item-background-hover" routerLink="home" routerLinkActive="item-background-active">Accueuil</li>
+            <li class="item-background-hover" routerLink="home" routerLinkActive="item-background-active">Accueil</li>
         </ul>
 
         <ul class="right-list">
@@ -26,7 +26,7 @@
             <li class="item-background-hover end-category" routerLink="luck" routerLinkActive="item-background-active">
                 <i class="fa-solid fa-clover"></i>
             </li>
-            <li>10 coins</li>
+            <li *ngIf="user$ | async as user">Coins: {{ user.coins }}</li>
             <li>
                 <button (click)="toggleTheme()">
                     <img src="https://fav.farm/🌙" alt="Dark mode" />

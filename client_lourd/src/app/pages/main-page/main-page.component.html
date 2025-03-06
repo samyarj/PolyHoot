@@ -7,9 +7,6 @@
             <div class="x3">
                 <div class="cloud"></div>
             </div>
-            <div class="logo-container">
-                <img class="logo" src="assets/pictures/logo.png" alt="Logo Projet" />
-            </div>
             <div class="x2">
                 <div class="cloud"></div>
             </div>
@@ -33,10 +30,127 @@
         </p>
     </footer>
     <div class="feature-content">
-        <h1 class="title">PolyHoot</h1>
-        <p>Testez vos connaissances!</p>
-        <div class="btn-container">
-            <!-- <button class="custom-button-cancel-medium" [routerLink]="['/global-chat']">Accéder au canal de discussion général</button> -->
+        <div class="main-nav">
+            <div class="nav-elements-wrapper">
+                <div
+                    *ngFor="let item of navInfo; let i = index"
+                    class="nav-element"
+                    (click)="setActiveSlideIndex(i)"
+                    [ngClass]="{
+                        'item-background-active': activeSlideIndex === i,
+                        'item-background-hover': hoverIndex === i && activeSlideIndex !== i
+                    }"
+                    (mouseenter)="hoverIndex = i"
+                    (mouseleave)="hoverIndex = -1"
+                >
+                    <div class="nav-element-title">
+                        <ng-container [ngSwitch]="item.title">
+                            <ng-container *ngSwitchCase="'Administrer les quiz'">
+                                <i class="fa-solid fa-screwdriver-wrench"></i> Administrer les quiz
+                            </ng-container>
+                            <ng-container *ngSwitchCase="'Section chance'"> <i class="fa-solid fa-clover"></i> Section chance </ng-container>
+                            <ng-container *ngSwitchCase="'Boutique'"> <i class="fa-solid fa-sack-dollar"></i> Boutique </ng-container>
+                            <ng-container *ngSwitchCase="'Inventaire'">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="var(--tertiary-color)"
+                                    width="16px"
+                                    height="16px"
+                                    viewBox="0 0 24 24"
+                                    data-name="Layer 1"
+                                >
+                                    <path
+                                        d="M13,10H11a1,1,0,0,0,0,2h2a1,1,0,0,0,0-2Zm5,0a4,4,0,0,0-3-3.86V5A3,3,0,0,0,9,5V6.14A4,4,0,0,0,6,10a4,4,0,0,0-4,4v3a3,3,0,0,0,3,3H6.18A3,3,0,0,0,9,22h6a3,3,0,0,0,2.82-2H19a3,3,0,0,0,3-3V14A4,4,0,0,0,18,10ZM6,18H5a1,1,0,0,1-1-1V14a2,2,0,0,1,2-2ZM11,5a1,1,0,0,1,2,0V6H11Zm5,14a1,1,0,0,1-1,1H9a1,1,0,0,1-1-1V18a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2Zm0-4.44A3.91,3.91,0,0,0,14,14H10a3.91,3.91,0,0,0-2,.56V10a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2ZM20,17a1,1,0,0,1-1,1H18V12a2,2,0,0,1,2,2Z"
+                                    />
+                                </svg>
+                                Inventaire
+                            </ng-container>
+                            <ng-container *ngSwitchDefault>
+                                {{ item.title }}
+                            </ng-container>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="vertical-divider"></div>
+        <div class="info-container">
+            <div class="info-section">
+                <h1 class="title">
+                    <ng-container [ngSwitch]="this.navInfo[activeSlideIndex].title">
+                        <ng-container *ngSwitchCase="'Administrer les quiz'">
+                            <i class="fa-solid fa-screwdriver-wrench"></i> Administrer les quiz
+                        </ng-container>
+                        <ng-container *ngSwitchCase="'Section chance'"> <i class="fa-solid fa-clover"></i> Section chance </ng-container>
+                        <ng-container *ngSwitchCase="'Boutique'"> <i class="fa-solid fa-sack-dollar"></i> Boutique </ng-container>
+                        <ng-container *ngSwitchCase="'Inventaire'">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="var(--tertiary-color)"
+                                width="30px"
+                                height="30px"
+                                viewBox="0 0 24 24"
+                                data-name="Layer 1"
+                            >
+                                <path
+                                    d="M13,10H11a1,1,0,0,0,0,2h2a1,1,0,0,0,0-2Zm5,0a4,4,0,0,0-3-3.86V5A3,3,0,0,0,9,5V6.14A4,4,0,0,0,6,10a4,4,0,0,0-4,4v3a3,3,0,0,0,3,3H6.18A3,3,0,0,0,9,22h6a3,3,0,0,0,2.82-2H19a3,3,0,0,0,3-3V14A4,4,0,0,0,18,10ZM6,18H5a1,1,0,0,1-1-1V14a2,2,0,0,1,2-2ZM11,5a1,1,0,0,1,2,0V6H11Zm5,14a1,1,0,0,1-1,1H9a1,1,0,0,1-1-1V18a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2Zm0-4.44A3.91,3.91,0,0,0,14,14H10a3.91,3.91,0,0,0-2,.56V10a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2ZM20,17a1,1,0,0,1-1,1H18V12a2,2,0,0,1,2,2Z"
+                                />
+                            </svg>
+                            Inventaire
+                        </ng-container>
+                        <ng-container *ngSwitchDefault>
+                            {{ this.navInfo[activeSlideIndex].title }}
+                        </ng-container>
+                    </ng-container>
+                </h1>
+                <div class="info-description">{{ this.navInfo[activeSlideIndex].description }}</div>
+            </div>
+            <div class="screenshot-with-links-diagram" #parentElement>
+                <ng-container *ngFor="let screenshot of navInfo[activeSlideIndex].screenshots; let i = index">
+                    <ng-container *ngIf="screenshot.image; else textContent">
+                        <img
+                            #img
+                            class="img"
+                            [src]="'assets/home-page-screenshots/' + screenshot.image"
+                            alt="Screenshot {{ i + 1 }}"
+                            [ngClass]="{ first: i === 0, second: i === 1, third: i === 2 }"
+                            [style.top.%]="calculateTopPosition(i, navInfo[activeSlideIndex].screenshots.length)"
+                            [style.right]="calculateRightPosition(i, navInfo[activeSlideIndex].screenshots.length)"
+                            [style.width.%]="calculateImageWidth(navInfo[activeSlideIndex].screenshots.length)"
+                            (click)="navigate(screenshot.route)"
+                        />
+                    </ng-container>
+                    <ng-template #textContent>
+                        <div
+                            class="screenshot"
+                            [ngClass]="{ first: i === 0, second: i === 1, third: i === 2 }"
+                            [style.top.%]="calculateTopPosition(i, navInfo[activeSlideIndex].screenshots.length)"
+                            [style.right]="calculateRightPosition(i, navInfo[activeSlideIndex].screenshots.length)"
+                            [style.height.%]="calculateHeight(navInfo[activeSlideIndex].screenshots.length)"
+                            (click)="navigate(screenshot.route)"
+                        >
+                            {{ 'screenshot ' + (i + 1) }}
+                        </div>
+                    </ng-template>
+                    <div
+                        class="button-and-line"
+                        [style.width]="calculateRightPosition(i, navInfo[activeSlideIndex].screenshots.length)"
+                        [ngClass]="{ first: i === 0, second: i === 1, third: i === 2 }"
+                        [style.top]="
+                            'calc(' +
+                            calculateTopPosition(i, navInfo[activeSlideIndex].screenshots.length) +
+                            '% + ' +
+                            calculateHeight(navInfo[activeSlideIndex].screenshots.length) / 2 +
+                            '% - 25px)'
+                        "
+                    >
+                        <div class="line"></div>
+                        <button #button class="custom-button-medium" (click)="navigate(screenshot.route)">
+                            {{ screenshot.buttonDescription }}
+                        </button>
+                    </div>
+                </ng-container>
+            </div>
         </div>
     </div>
 </div>

@@ -8,8 +8,8 @@ import 'package:client_leger/UI/play/playpage.dart';
 import 'package:client_leger/UI/quiz/quiz_page.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/UI/signup/signup_page.dart';
-import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
-    as auth_service;
+import 'package:client_leger/providers/user/user_provider.dart'
+    as user_provider;
 import 'package:client_leger/utilities/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +19,7 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _playShellNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter router = GoRouter(
-  refreshListenable: auth_service.isLoggedIn,
+  refreshListenable: user_provider.isLoggedIn,
   initialLocation: Paths.play,
   navigatorKey: _rootNavigatorKey,
   debugLogDiagnostics: true,
@@ -87,13 +87,13 @@ final GoRouter router = GoRouter(
   redirect: (BuildContext context, GoRouterState state) async {
     final bool loggedIn = FirebaseAuth.instance.currentUser != null &&
         !FirebaseAuth.instance.currentUser!.isAnonymous &&
-        auth_service.isLoggedIn.value;
+        user_provider.isLoggedIn.value;
     final bool loggingIn = state.matchedLocation == Paths.logIn ||
         state.matchedLocation == Paths.signUp ||
         state.matchedLocation == Paths.passwordReset;
 
     AppLogger.d(
-        "IN REDIRECT loggedIn = $loggedIn and loggingIn = $loggingIn  and isLoggedIn = ${auth_service.isLoggedIn.value} and state.matchedlocation = ${state.matchedLocation}");
+        "IN REDIRECT loggedIn = $loggedIn and loggingIn = $loggingIn  and isLoggedIn = ${user_provider.isLoggedIn.value} and state.matchedlocation = ${state.matchedLocation}");
 
     if (!loggedIn && !loggingIn) return Paths.logIn;
     if (loggedIn && loggingIn) return Paths.play;

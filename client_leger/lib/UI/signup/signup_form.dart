@@ -3,17 +3,19 @@ import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
+import 'package:client_leger/providers/user/user_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class SignUpForm extends StatefulWidget {
+class SignUpForm extends ConsumerStatefulWidget {
   const SignUpForm({super.key});
 
   @override
-  State<SignUpForm> createState() => _SignUpFormState();
+  ConsumerState<SignUpForm> createState() => _SignUpFormState();
 }
 
-class _SignUpFormState extends State<SignUpForm> {
+class _SignUpFormState extends ConsumerState<SignUpForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -52,7 +54,6 @@ class _SignUpFormState extends State<SignUpForm> {
 
   String? _usernameError;
   String? _emailError;
-  bool _isLoading = false;
 
   @override
   void initState() {
@@ -95,41 +96,34 @@ class _SignUpFormState extends State<SignUpForm> {
   }
 
   Future signUp() async {
-    setState(() {
-      _isLoading = true;
-    });
     await isUsernameTaken(_usernameController.text.trim());
     await isEmailTaken(_emailController.text.trim());
 
     if (_usernameError != null || _emailError != null) {
-      setState(() {
-        _isLoading = false;
-      });
       return;
     }
 
     try {
-      await auth_service.signUp(_usernameController.text.trim(),
-          _emailController.text.trim(), _passwordController.text.trim());
+      await ref.read(userProvider.notifier).signUp(
+          _usernameController.text.trim(),
+          _emailController.text.trim(),
+          _passwordController.text.trim());
       if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-      });
     } catch (e) {
       if (!mounted) return;
       showErrorDialog(context, getCustomError(e));
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 
   void signUpWithGoogle() async {
     try {
-      await auth_service.signInWithGoogle();
+      await ref.read(userProvider.notifier).signWithGoogle(isLogin: false);
     } catch (e) {
       if (!mounted) return;
       showErrorDialog(context, getCustomError(e));
+    } finally {
+      // ignore: control_flow_in_finally
+      if (!mounted) return;
     }
   }
 
@@ -217,7 +211,7 @@ class _SignUpFormState extends State<SignUpForm> {
   }
 
   String? validateConfirmPassword(String? value) {
-    if (value == null || value != _passwordController.text) {
+    if (value == null || value.trim() != _passwordController.text.trim()) {
       return 'Les mots de passe ne correspondent pas.';
     }
     return null;
@@ -225,136 +219,144 @@ class _SignUpFormState extends State<SignUpForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.center,
-      width: 400,
-      padding: EdgeInsets.only(top: 0, bottom: 42, left: 32, right: 32),
-      child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "S'inscrire",
-                style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
-              ),
-              SizedBox(height: 16),
-              // Username Field
-              TextFormField(
-                key: _usernameFieldKey,
-                controller: _usernameController,
-                focusNode: _usernameFocusNode,
-                decoration: InputDecoration(
-                  errorMaxLines: 3,
-                  labelText: 'Pseudonyme',
-                  hintText: 'Entrez votre pseudonyme',
-                  errorText: _usernameError,
-                  border: OutlineInputBorder(),
-                ),
-                validator: validateUsername,
-              ),
-              SizedBox(height: 16),
-              // Email Field
-              TextFormField(
-                key: _emailFieldKey,
-                controller: _emailController,
-                focusNode: _emailFocusNode,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  hintText: 'Entrez votre email',
-                  errorText: _emailError,
-                  border: OutlineInputBorder(),
-                ),
-                validator: validateEmail,
-              ),
-              SizedBox(height: 16),
-              // Password Field
-              TextFormField(
-                key: _passwordFieldKey,
-                controller: _passwordController,
-                focusNode: _passwordFocusNode,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Mot de passe',
-                  hintText: 'Entrez votre mot de passe',
-                  border: OutlineInputBorder(),
-                ),
-                validator: validatePassword,
-              ),
-              SizedBox(height: 16),
-              // Confirm Password Field
-              TextFormField(
-                key: _confirmPasswordFieldKey,
-                controller: _confirmPasswordController,
-                focusNode: _confirmPasswordFocusNode,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Confirmer le mot de passe',
-                  hintText: 'Confirmer le mot de passe',
-                  border: OutlineInputBorder(),
-                ),
-                validator: validateConfirmPassword,
-              ),
-              SizedBox(height: 16),
-              // Terms and Privacy
-              Text(
-                "En créant un compte, vous acceptez les Conditions d'utilisation et la Politique de confidentialité.",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 14),
-              ),
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _isLoading
-                    ? null
-                    : () async {
-                        if (_formKey.currentState!.validate()) {
-                          await signUp();
-                        }
-                      },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+    final userState = ref.watch(userProvider);
+    return Stack(
+      children: [
+        Container(
+          alignment: Alignment.center,
+          width: 400,
+          padding: EdgeInsets.only(top: 0, bottom: 42, left: 32, right: 32),
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "S'inscrire",
+                    style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
                   ),
-                ),
-                child: _isLoading
-                    ? CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      )
-                    : Text('Créer un nouveau compte',
+                  SizedBox(height: 16),
+                  // Username Field
+                  TextFormField(
+                    key: _usernameFieldKey,
+                    controller: _usernameController,
+                    focusNode: _usernameFocusNode,
+                    decoration: InputDecoration(
+                      errorMaxLines: 3,
+                      labelText: 'Pseudonyme',
+                      hintText: 'Entrez votre pseudonyme',
+                      errorText: _usernameError,
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: validateUsername,
+                  ),
+                  SizedBox(height: 16),
+                  // Email Field
+                  TextFormField(
+                    key: _emailFieldKey,
+                    controller: _emailController,
+                    focusNode: _emailFocusNode,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      hintText: 'Entrez votre email',
+                      errorText: _emailError,
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: validateEmail,
+                  ),
+                  SizedBox(height: 16),
+                  // Password Field
+                  TextFormField(
+                    key: _passwordFieldKey,
+                    controller: _passwordController,
+                    focusNode: _passwordFocusNode,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: 'Mot de passe',
+                      hintText: 'Entrez votre mot de passe',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: validatePassword,
+                  ),
+                  SizedBox(height: 16),
+                  // Confirm Password Field
+                  TextFormField(
+                    key: _confirmPasswordFieldKey,
+                    controller: _confirmPasswordController,
+                    focusNode: _confirmPasswordFocusNode,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: 'Confirmer le mot de passe',
+                      hintText: 'Confirmer le mot de passe',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: validateConfirmPassword,
+                  ),
+                  SizedBox(height: 16),
+                  // Terms and Privacy
+                  Text(
+                    "En créant un compte, vous acceptez les Conditions d'utilisation et la Politique de confidentialité.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: userState is AsyncLoading
+                        ? null
+                        : () async {
+                            if (_formKey.currentState!.validate()) {
+                              await signUp();
+                            }
+                          },
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text('Créer un nouveau compte',
                         style: TextStyle(fontSize: 18)),
-              ),
-              SizedBox(height: 16),
-              TextButton(
-                onPressed: () {
-                  context.go(Paths.logIn);
-                },
-                child: Text('Vous avez un compte ? Connexion',
-                    style: TextStyle(fontSize: 18)),
-              ),
-              Divider(),
-              SizedBox(height: 16),
-              // Google Sign-Up
-              OutlinedButton.icon(
-                onPressed: null,
-                icon: Icon(Icons.account_circle),
-                label: Text("S'inscrire avec Google",
-                    style: TextStyle(fontSize: 18)),
-                style: OutlinedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
                   ),
-                  minimumSize: Size(double.infinity, 50),
-                ),
+                  SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () {
+                      context.go(Paths.logIn);
+                    },
+                    child: Text('Vous avez un compte ? Connexion',
+                        style: TextStyle(fontSize: 18)),
+                  ),
+                  Divider(),
+                  SizedBox(height: 16),
+                  // Google Sign-Up
+                  OutlinedButton.icon(
+                    onPressed:
+                        userState is AsyncLoading ? null : signUpWithGoogle,
+                    icon: Icon(Icons.account_circle),
+                    label: Text("S'inscrire avec Google",
+                        style: TextStyle(fontSize: 18)),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      minimumSize: Size(double.infinity, 50),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
-      ),
+        if (userState is AsyncLoading)
+          Positioned.fill(
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+      ],
     );
   }
 }

@@ -16,20 +16,18 @@
             *ngFor="let player of playerList"
             class="player-info-section"
             [ngClass]="{
-                crossed: !player.isInGame,
-                'not-interacted': !player.interacted,
-                interacted: player.interacted,
-                submitted: player.submitted
+                crossed: !player.isInGame
             }"
+            [ngStyle]="{ 'background-color': 'rgb(4, 199, 4)' }"
         >
             <p>{{ player.name }}</p>
             <p>{{ player.points }} points</p>
-            <button *ngIf="player.canChat" mat-icon-button (click)="changeChatStatus(player.name)">
+            <!-- <button *ngIf="player.canChat" mat-icon-button (click)="changeChatStatus(player.name)">
                 <i class="fa-solid fa-comment button-icon"></i>
             </button>
             <button *ngIf="!player.canChat" mat-icon-button [disabled]="!player.isInGame" (click)="changeChatStatus(player.name)">
                 <i class="fa-solid fa-comment-slash"></i>
-            </button>
+            </button> -->
         </div>
     </div>
 </div>

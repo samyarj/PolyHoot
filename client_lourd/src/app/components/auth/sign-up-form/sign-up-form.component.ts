@@ -3,7 +3,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EMAIL_REGEX, PASSWORD_MIN_LENGTH, USERNAME_REGEX } from '@app/constants/constants';
 import { User } from '@app/interfaces/user';
-import { ToastrService } from 'ngx-toastr';
 import { AuthService } from 'src/app/services/auth/auth.service';
 
 @Component({
@@ -24,13 +23,13 @@ export class SignUpFormComponent implements OnInit {
     currentEmail: string = '';
     isUsernameTaken: boolean = false;
     isEmailTaken: boolean = false;
+    passwordsMatch: boolean = false;
 
     constructor(
         private fb: FormBuilder,
         private authService: AuthService,
         private route: ActivatedRoute,
         private router: Router,
-        private toast: ToastrService,
     ) {}
 
     ngOnInit(): void {
@@ -41,15 +40,10 @@ export class SignUpFormComponent implements OnInit {
      * Handle normal sign-up form submission
      */
     signUp(): void {
-        const { username, email, password, confirmPassword } = this.signUpForm.value;
-
-        if (password !== confirmPassword) {
-            this.toast.error('Passwords do not match.', 'Error', {
-                positionClass: 'toast-top-left',
-            });
-
-            return;
-        }
+        let { username, email, password } = this.signUpForm.value;
+        username = username.trim();
+        email = email.trim();
+        password = password.trim();
 
         this.isLoading = true;
         this.signUpForm.disable();
@@ -75,7 +69,8 @@ export class SignUpFormComponent implements OnInit {
     }
 
     checkUsername(): void {
-        const username = this.signUpForm.controls.username.value;
+        const username = this.signUpForm.controls.username.value.toString().trim();
+        this.signUpForm.controls.username.setValue(username);
         this.isTypingUsername = false;
 
         if (!username || username === this.currentUsername || this.signUpForm.get('username')?.hasError('pattern')) {
@@ -102,7 +97,8 @@ export class SignUpFormComponent implements OnInit {
     }
 
     checkEmail(): void {
-        const email = this.signUpForm.controls.email.value;
+        const email = this.signUpForm.controls.email.value.toString().trim();
+        this.signUpForm.controls.email.setValue(email);
         this.isTypingEmail = false;
 
         if (!email || email === this.currentEmail || this.signUpForm.get('email')?.hasError('pattern')) {
@@ -128,6 +124,16 @@ export class SignUpFormComponent implements OnInit {
             },
         });
     }
+    verifyPasswordMatch(): void {
+        const password = this.signUpForm.controls.password.value.toString().trim();
+        const confirmPassword = this.signUpForm.controls.confirmPassword.value.toString().trim();
+
+        if (!password || !confirmPassword) {
+            return;
+        }
+
+        this.passwordsMatch = password === confirmPassword;
+    }
 
     invalidFormStatus(): boolean {
         return (
@@ -138,8 +144,17 @@ export class SignUpFormComponent implements OnInit {
             this.isTypingUsername ||
             this.isTypingEmail ||
             this.isUsernameTaken ||
-            this.isEmailTaken
+            this.isEmailTaken ||
+            !this.passwordsMatch
         );
+    }
+
+    onInputEvent(fieldName: string) {
+        if (fieldName === 'username') {
+            this.isTypingUsername = true;
+        } else if (fieldName === 'email') {
+            this.isTypingEmail = true;
+        }
     }
 
     private handleUserSuccess(user: User): void {
@@ -155,15 +170,7 @@ export class SignUpFormComponent implements OnInit {
             username: ['', [Validators.required, Validators.pattern(USERNAME_REGEX)]],
             email: ['', [Validators.required, Validators.pattern(EMAIL_REGEX)]],
             password: ['', [Validators.required, Validators.minLength(PASSWORD_MIN_LENGTH)]],
-            confirmPassword: ['', [Validators.required, Validators.minLength(PASSWORD_MIN_LENGTH)]],
+            confirmPassword: ['', [Validators.required]],
         });
-    }
-
-    onInputEvent(fieldName: string) {
-        if (fieldName === 'username') {
-            this.isTypingUsername = true;
-        } else if (fieldName === 'email') {
-            this.isTypingEmail = true;
-        }
     }
 }

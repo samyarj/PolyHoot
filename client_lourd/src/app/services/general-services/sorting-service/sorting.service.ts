@@ -15,7 +15,6 @@ export class SortingService {
     sortsOptions: { id: number; name: string }[] = [
         { id: 1, name: 'Nom' },
         { id: 2, name: 'Pointage' },
-        { id: 3, name: "État d'interaction" },
     ];
     sortId: number = 1;
     sortDirection: SortDirection = 'asc';
@@ -76,11 +75,6 @@ export class SortingService {
 
                 break;
             }
-            case 3: {
-                this.sortByState(direction, playerList);
-
-                break;
-            }
             default: {
                 break;
             }
@@ -106,29 +100,6 @@ export class SortingService {
         }
     }
 
-    private sortByState(direction: SortDirection, playerList: PartialPlayer[]) {
-        playerList.sort((a, b) => {
-            if (!a.isInGame && b.isInGame) {
-                return 1;
-            } else if (a.isInGame && !b.isInGame) {
-                return -1;
-            }
-            if (a.submitted && !b.submitted) {
-                return 1;
-            } else if (!a.submitted && b.submitted) {
-                return -1;
-            }
-            if (!a.interacted && b.interacted) {
-                return -1;
-            } else if (a.interacted && !b.interacted) {
-                return 1;
-            }
-            return a.name.localeCompare(b.name);
-        });
-        if (direction === 'desc') {
-            playerList.reverse();
-        }
-    }
     private compareValues(valueA: string, valueB: string, direction: SortDirection): number {
         // Compare Dates.
         if (this.isDateString(valueA) && this.isDateString(valueB)) {

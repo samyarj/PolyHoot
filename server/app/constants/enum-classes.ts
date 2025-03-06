@@ -17,6 +17,30 @@ export enum GameState {
     RESULTS,
 }
 
+export enum CoinSide {
+    Heads = 'heads',
+    Tails = 'tails',
+}
+
+export enum CoinFlipGameState {
+    Uninitialized = 0,
+    BettingPhase = 1,
+    PreFlippingPhase = 2,
+    FlippingPhase = 3,
+    ResultsPhase = 4,
+}
+
+export enum CoinFlipEvents {
+    StartGame = 'coinflip-start-game',
+    PreFlippingPhase = 'coinflip-pre-flipping',
+    FlippingPhase = 'coinflip-flipping',
+    Results = 'coinflip-results',
+    BetTimeCountdown = 'BetTimeCountdown',
+    SendPlayerList = 'SendPlayerList',
+    JoinGame = 'JoinGame',
+    SubmitChoice = 'SubmitChoice',
+}
+
 export enum TimerEvents {
     Value = 'timerValue',
     End = 'timerEnd',
@@ -61,6 +85,7 @@ export enum GameEvents {
     WaitingForCorrection = 'waitingForCorrection',
     PlayerInteraction = 'playerInteraction',
     PlayerSubmitted = 'playerSubmitted',
+    GetCurrentGames = 'getCurrentGames',
 }
 
 export enum JoinEvents {
@@ -71,6 +96,7 @@ export enum JoinEvents {
     Join = 'joinGame',
     CanJoin = 'canJoinGame',
     JoinSuccess = 'onJoinGameSuccess',
+    LobbyCreated = 'lobbyCreated',
 }
 
 export enum JoinErrors {
@@ -84,7 +110,8 @@ export enum JoinErrors {
 
 export enum ConnectEvents {
     UserToGame = 'userConnectedToGamePage',
-    identifyMobileClient = 'identifyMobileClient',
+    IdentifyMobileClient = 'identifyMobileClient',
+    AllPlayersLeft = 'AllPlayersLeft',
 }
 
 export enum DisconnectEvents {

@@ -50,7 +50,6 @@ import { GameMainPageComponent } from './pages/game-related/game-main-page/game-
 import { JoinGamePageComponent } from './pages/game-related/join-game-page/join-game-page.component';
 import { OrganizerPageComponent } from './pages/game-related/organizer-page/organizer-page.component';
 import { ResultsPageComponent } from './pages/game-related/results-page/results-page.component';
-import { TestGamePageComponent } from './pages/game-related/test-page/test-game-page.component';
 import { InventoryPageComponent } from './pages/inventory-page/inventory-page.component';
 import { CoinFlipPageComponent } from './pages/luck-related/coin-flip-page/coin-flip-page.component';
 import { DailyFreePageComponent } from './pages/luck-related/daily-free-page/daily-free-page.component';
@@ -98,7 +97,6 @@ import { ProfilePageComponent } from './pages/profile-page/profile-page.componen
         QuestionBankComponent,
         PopUpCreationComponent,
         ErrorDialogComponent,
-        TestGamePageComponent,
         ResultsPageComponent,
         WaitingPageComponent,
         OrganizerPageComponent,
