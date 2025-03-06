@@ -13,6 +13,16 @@
     --navbar-font-size: 16px;
     --navbar-separator-size: 2px;
 }
+
+.backdrop-dialog {
+    background-color: color-mix(in srgb, var(--primary-color) 40%, rgba(0, 0, 0, 0)) !important;
+}
+
+::ng-deep.custom-container {
+    border-radius: 30px !important;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0) !important;
+}
 // ******************************
 // Tutorial for themes
 // primary-color:

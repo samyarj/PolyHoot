@@ -160,6 +160,21 @@ export class UserService {
         }
     }
 
+    async updatePity(uid: string, pity: number): Promise<boolean> {
+        const userRef = await this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+
+        if (pity < 0 || pity > 100) {
+            return false;
+        } else {
+            await userRef.update({ pity: pity });
+            return true;
+        }
+    }
+
     private async getUserFromFirestore(uid: string): Promise<admin.firestore.DocumentData> {
         const userDoc = await this.firestore.collection('users').doc(uid).get();
         if (!userDoc.exists) throw new UnauthorizedException("L'utilisateur n'existe pas.");
@@ -196,6 +211,7 @@ export class UserService {
             nWins: userDoc.nWins || 0,
             isOnline: true,
             pity: userDoc.pity || 0,
+            lastDailyClaimDate: userDoc.lastDailyClaimDate || null,
         };
     }
 }

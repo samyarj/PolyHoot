@@ -1,0 +1,39 @@
+<div class="loot-box-wrapper" mat-border-radius="30px">
+    <div
+        *ngIf="!removeBoxImage"
+        [ngClass]="{
+            open: isOpened
+        }"
+        class="cover-box"
+    >
+        image goes here
+    </div>
+    <div
+        [ngClass]="{
+            'very-rare': data.rarity === rewardRarity.VeryRare,
+            rare: data.rarity === rewardRarity.Rare,
+            common: data.rarity === rewardRarity.Common
+        }"
+        class="win-container"
+    >
+        <!-- Title -->
+        <div class="title">Félicitations!</div>
+
+        <!-- Reward Type Sections -->
+        <div class="reward-div" *ngIf="data.type === rewardType.Theme">
+            Vous avez gagné le thème suivant :
+            <p>{{ data.value }}</p>
+        </div>
+        <div class="reward-div" *ngIf="data.type === rewardType.Avatar">
+            Vous avez gagné l'avatar suivant :
+            <p>{{ data.value }}</p>
+        </div>
+        <div class="reward-div" *ngIf="data.type === rewardType.Border">
+            Vous avez gagné le border suivant :
+            <p>{{ data.value }}</p>
+        </div>
+
+        <!-- Close Button -->
+        <button class="button" (click)="onClose()">Fermer</button>
+    </div>
+</div>

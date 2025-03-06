@@ -1,12 +1,12 @@
 <div class="page-wrapper">
-    <div class="pity">Pity is : 0</div>
+    <div class="pity">Pity is : {{ user?.pity }} %</div>
     <div class="content-wrapper">
-        <app-loot-box class="loot-box"></app-loot-box>
-        <app-loot-box class="loot-box"></app-loot-box>
-        <app-loot-box class="loot-box"></app-loot-box>
-        <app-loot-box class="loot-box"></app-loot-box>
-        <app-loot-box class="loot-box"></app-loot-box>
-        <app-loot-box class="loot-box"></app-loot-box>
-        <app-loot-box class="loot-box"></app-loot-box>
+        <app-loot-box
+            *ngFor="let lootBox of lootBoxes; let i = index"
+            [openFunction]="openBox.bind(this)"
+            [id]="i"
+            [lootBoxContainer]="lootBox"
+            class="loot-box"
+        ></app-loot-box>
     </div>
 </div>

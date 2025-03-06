@@ -1,0 +1,67 @@
+import { AuthGuard } from '@app/guards/auth/auth.guard';
+import { AuthenticatedRequest } from '@app/interface/authenticated-request';
+import { LootBoxContainer } from '@app/interface/lootbox-related';
+import { UserService } from '@app/services/auth/user.service';
+import { LootBoxService } from '@app/services/lootbox/lootbox.service';
+import { Body, Controller, Get, HttpStatus, Logger, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { ApiInternalServerErrorResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
+
+@ApiTags('LootBox')
+@Controller('loot')
+export class LootBoxController {
+    constructor(
+        private readonly userService: UserService,
+        private readonly logger: Logger,
+        private readonly lootBoxService: LootBoxService,
+    ) {}
+
+    // @UseGuards(AuthGuard)
+    // @ApiOkResponse({ description: 'DailyFree successfully claimed' })
+    // @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+    // @Get('daily-free')
+    // async getProfile(@Req() req: AuthenticatedRequest, @Res() response: Response) {
+    //     this.logger.log(`Getting daily free info of : ${req.user.displayName}`);
+    //     try {
+    //         console.log('DAILY-FREE-INFOO!');
+    //     } catch (error) {
+    //         this.logger.error(`Error fetching profile: ${error.message}`);
+
+    //         response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
+    //     }
+    // }
+
+    @UseGuards(AuthGuard)
+    @ApiOkResponse({ description: 'LootBoxes fetched successfully' })
+    @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+    @Get('lootBox')
+    async getLootBoxReward(@Req() req: AuthenticatedRequest, @Res() response: Response) {
+        this.logger.log(`GEtting boxes for user : ${req.user.displayName}`);
+        try {
+            const user = await this.userService.getUserByUid(req.user.uid);
+            const lootBoxes: LootBoxContainer[] = this.lootBoxService.getBoxes(user.pity);
+            response.status(HttpStatus.OK).json(lootBoxes);
+        } catch (error) {
+            this.logger.error(`Error fetching profile: ${error.message}`);
+
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
+        }
+    }
+
+    @UseGuards(AuthGuard)
+    @ApiOkResponse({ description: 'LootBoxes fetched successfully' })
+    @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+    @Post('lootBox')
+    async openLootBox(@Body() payload: { id: number }, @Req() req: AuthenticatedRequest, @Res() response: Response) {
+        this.logger.log(`Opening box for user : ${req.user.displayName}`);
+        try {
+            const user = await this.userService.getUserByUid(req.user.uid);
+            const reward = await this.lootBoxService.openBox(payload.id, user.uid, user.pity);
+            response.status(HttpStatus.OK).json(reward);
+        } catch (error) {
+            this.logger.error(`Error fetching profile: ${error.message}`);
+
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
+        }
+    }
+}
