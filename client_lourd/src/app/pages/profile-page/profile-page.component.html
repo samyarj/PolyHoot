@@ -6,7 +6,9 @@
                 <img src="avatar1.jpg" alt="Avatar" />
             </div>
 
-            <input type="file" />
+            <input type="file" (change)="onFileSelected($event)" accept="image/*" #fileInput style="display: none" />
+            <button (click)="fileInput.click()" class="upload-btn">Choose Avatar</button>
+            <button (click)="onUpload()" class="upload-btn">Upload Avatar</button>
         </div>
     </div>
 
@@ -27,13 +29,5 @@
         <h2>Statistics</h2>
         <p>Total Actions: 0</p>
         <p>Last Login: N/A</p>
-    </div>
-
-    <div>
-        <h2>Action History</h2>
-        <ul>
-            <li>Action 1</li>
-            <li>Action 2</li>
-        </ul>
     </div>
 </div>

@@ -1,19 +1,34 @@
+import { AuthGuard } from '@app/guards/auth/auth.guard';
+import { AuthenticatedRequest } from '@app/interface/authenticated-request';
 import { CloudinaryService } from '@app/modules/cloudinary/cloudinary.service';
-import { Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { UserService } from '@app/services/auth/user.service';
+import { Controller, HttpStatus, Post, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 import { Multer } from 'multer';
 
 @Controller('upload-img')
 export class UploadImgController {
-    constructor(private readonly cloudinaryService: CloudinaryService) {}
+    constructor(
+        private readonly cloudinaryService: CloudinaryService,
+        private readonly userService: UserService,
+    ) {}
+
     @Post()
+    @UseGuards(AuthGuard)
     @UseInterceptors(FileInterceptor('image'))
-    async uploadImage(@UploadedFile() file: Multer.File) {
+    async uploadImage(@UploadedFile() file: Multer.File, @Req() req: AuthenticatedRequest, @Res() res: Response) {
         try {
             const result = await this.cloudinaryService.uploadImage(file);
-            return { message: 'Image uploaded successfully', data: result };
+            // Update the user's avatar with the new URL
+            await this.userService.updateUserAvatar(req.user.uid, result.secure_url);
+
+            return res.status(HttpStatus.OK).json({
+                message: 'Image uploaded and avatar updated successfully',
+                avatarUrl: result.secure_url,
+            });
         } catch (error) {
-            return { error: error.message };
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: error.message });
         }
     }
 }
