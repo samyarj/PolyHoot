@@ -183,6 +183,10 @@ export class UserService {
         }
 
         const currentTimestamp = new Date();
+        if (!userDoc.data().nextDailyFree) {
+            await userRef.update({ nextDailyFree: currentTimestamp });
+            return true;
+        }
         if (currentTimestamp > userDoc.data().nextDailyFree.toDate()) {
             currentTimestamp.setDate(currentTimestamp.getDate() + 1);
             await userRef.update({ nextDailyFree: currentTimestamp });
@@ -199,6 +203,11 @@ export class UserService {
             throw new Error("L'utilisateur n'existe pas.");
         }
         const currentTimestamp = new Date();
+        if (!userDoc.data().nextDailyFree) {
+            await userRef.update({ nextDailyFree: currentTimestamp });
+            return true;
+        }
+
         if (currentTimestamp > userDoc.data().nextDailyFree.toDate()) {
             return true;
         } else {
