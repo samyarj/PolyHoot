@@ -10,24 +10,11 @@ import { ResultsService } from '@app/services/game-services/results-service/resu
     styleUrls: ['./results-page.component.scss'],
 })
 export class ResultsPageComponent implements OnInit, OnDestroy {
-    canShowPrevious: boolean;
-    canShowNext: boolean;
     constructor(
         private resultsService: ResultsService,
         private router: Router,
         private location: Location,
-    ) {
-        this.canNavigate();
-    }
-    get question() {
-        return this.resultsService.question;
-    }
-    get nbAnswersArray() {
-        return this.resultsService.nbAnswersArray;
-    }
-    get correctAnswersArray() {
-        return this.resultsService.correctAnswersArray;
-    }
+    ) {}
     get nbPlayers() {
         return this.resultsService.nbPlayers;
     }
@@ -50,21 +37,6 @@ export class ResultsPageComponent implements OnInit, OnDestroy {
             return;
         }
         this.resultsService.sortPlayers();
-        this.resultsService.setAnswersArray();
-        this.resultsService.setCorrectAnswers();
-    }
-
-    navigate(direction: string) {
-        if (direction === 'next' && this.resultsService.currentQuestionIndex < this.resultsService.questions.length - 1) {
-            this.resultsService.currentQuestionIndex++;
-            this.resultsService.question = this.resultsService.questions[this.resultsService.currentQuestionIndex];
-        } else if (direction === 'previous' && this.resultsService.currentQuestionIndex > 0) {
-            this.resultsService.currentQuestionIndex--;
-            this.resultsService.question = this.resultsService.questions[this.resultsService.currentQuestionIndex];
-        }
-        this.canNavigate();
-        this.resultsService.setAnswersArray();
-        this.resultsService.setCorrectAnswers();
     }
 
     returnHome() {
@@ -79,21 +51,6 @@ export class ResultsPageComponent implements OnInit, OnDestroy {
                 this.resultsService.disconnectUser();
             }
             this.returnHome();
-        }
-    }
-    private canNavigate() {
-        if (this.resultsService.questions.length === 1) {
-            this.canShowPrevious = false;
-            this.canShowNext = false;
-        } else if (this.resultsService.currentQuestionIndex === 0) {
-            this.canShowPrevious = false;
-            this.canShowNext = true;
-        } else if (this.resultsService.currentQuestionIndex === this.resultsService.questions.length - 1) {
-            this.canShowPrevious = true;
-            this.canShowNext = false;
-        } else {
-            this.canShowPrevious = true;
-            this.canShowNext = true;
         }
     }
     private onUnload() {

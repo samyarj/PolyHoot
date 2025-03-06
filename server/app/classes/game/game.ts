@@ -130,7 +130,7 @@ export class Game {
                 player.isInGame = false;
                 playerList.push({ name: player.name, points: player.points, isInGame: player.isInGame, noBonusesObtained: player.noBonusesObtained });
             });
-            const resultsData = { questions: this.quiz.questions, players: playerList };
+            const resultsData = playerList;
             return resultsData;
         }
     }

@@ -119,6 +119,7 @@ export class GameGateway {
         const { gameId, playerName } = data;
         const canJoinGame = this.gameManager.joinGame(gameId, playerName, client);
         const game = this.gameManager.getGameByRoomId(gameId);
+        console.log(game.players);
         if (canJoinGame) {
             const playerNames = game.players.map((player) => player.name);
             client.emit(JoinEvents.CanJoin);
@@ -192,7 +193,7 @@ export class GameGateway {
             const results = game.getResults();
             if (results) this.server.to(roomId).emit(GameEvents.SendResults, results);
             game.gameState = GameState.RESULTS;
-            this.historyManager.saveGameRecordToDB(roomId, results.players);
+            this.historyManager.saveGameRecordToDB(roomId, results);
         }
     }
 }

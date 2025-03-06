@@ -15,7 +15,6 @@ export class Player {
     isFirst: boolean;
     socket: Socket;
     submitted: boolean;
-    interacted: boolean;
     currentChoices: boolean[];
     qreAnswer: number;
     exactAnswer: boolean;
@@ -28,13 +27,11 @@ export class Player {
         this.noBonusesObtained = 0;
         this.socket = client;
         this.submitted = false;
-        this.interacted = false;
         this.currentChoices = [false, false, false, false];
         this.qreAnswer = null;
     }
 
     prepareForNextQuestion() {
-        this.interacted = false;
         this.isFirst = false;
         this.submitted = false;
         this.currentChoices = [false, false, false, false];
