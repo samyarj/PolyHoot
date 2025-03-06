@@ -110,6 +110,7 @@ export class GameGateway {
 
     @SubscribeMessage(JoinEvents.ValidateGameId)
     handleValidGameId(@ConnectedSocket() client: Socket, @MessageBody() data: string) {
+        console.log('2:Va valider si cet id existe', data);
         const isValidId = this.gameManager.validRoom(data);
         const game = this.gameManager.getGameByRoomId(data);
         let isRoomLocked: boolean;
@@ -120,6 +121,7 @@ export class GameGateway {
         } else if (isRoomLocked) {
             client.emit(JoinErrors.RoomLocked);
         } else {
+            console.log('3: Rentre ici pcq id est valide');
             client.emit(JoinEvents.ValidId, data);
         }
     }
@@ -127,9 +129,11 @@ export class GameGateway {
     @SubscribeMessage(JoinEvents.Join)
     handleJoinGame(@ConnectedSocket() client: Socket, @MessageBody() data: { gameId: string; playerName: string }) {
         const { gameId, playerName } = data;
+        console.log('6:', playerName, 'Essaye de join la partie ', gameId);
         const canJoinGame = this.gameManager.joinGame(gameId, playerName, client);
         console.log('normalement canJoinGame est false', canJoinGame);
         const game = this.gameManager.getGameByRoomId(gameId);
+        console.log('7: Le roomId juste apres avoir récup la game', game.roomId);
         if (canJoinGame) {
             const playerNames = game.players.map((player) => player.name);
             client.emit(JoinEvents.CanJoin);
@@ -139,7 +143,7 @@ export class GameGateway {
         } else if (game.playerExists(playerName)) {
             client.emit(JoinErrors.ExistingName);
         } else if (game.isPlayerBanned(playerName)) {
-            console.log("normalement ça rentre ici pcq isplayerBanned est true");
+            console.log('normalement ça rentre ici pcq isplayerBanned est true');
             client.emit(JoinErrors.BannedName);
         } else if (game.isNameOrganizer(playerName)) {
             client.emit(JoinErrors.OrganizerName);

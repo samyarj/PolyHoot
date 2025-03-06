@@ -31,6 +31,7 @@ export class JoinGameService {
         this.lobbysSource = new Subject<Lobby[]>();
         this.lobbysObservable = this.lobbysSource.asObservable();
         this.handleLobbys();
+        this.handleIdValidation();
         this.user$ = this.authService.user$;
         this.user$.subscribe((user) => {
             if (user) {
@@ -40,12 +41,12 @@ export class JoinGameService {
     }
 
     validGameId(gameId: string) {
+        console.log('1: gameId a valider', gameId);
         this.socketService.send(JoinEvents.ValidateGameId, gameId);
-        this.handleIdValidation(gameId);
     }
 
     joinGame(gameId: string, playerName: string) {
-        console.log("Essaie de join la partie")
+        console.log('5:Essaie de join la partie', gameId);
         const data = { gameId, playerName };
         this.socketService.send(JoinEvents.Join, data);
         this.handleJoinGame(gameId, playerName);
@@ -74,8 +75,8 @@ export class JoinGameService {
         this.handleLockedLobby();
         this.handleUpdateLobby();
     }
-    private handleIdValidation(gameId: string) {
-        this.handleValidId(gameId);
+    private handleIdValidation() {
+        this.handleValidId();
         this.handleInvalidId();
         this.handleRoomLocked();
     }
@@ -89,11 +90,12 @@ export class JoinGameService {
         this.handleRoomLocked();
     }
 
-    private handleValidId(gameId: string) {
-        this.socketService.on(JoinEvents.ValidId, () => {
+    private handleValidId() {
+        this.socketService.on(JoinEvents.ValidId, (gameId: string) => {
             this.gameIdValidated = true;
             this.wrongPin = false;
             this.popUpMessage = '';
+            console.log("4: A recu que l'id est valide et ca c'est le id recu localement normalement envoyé", gameId);
             this.joinGame(gameId, this.username);
         });
     }
@@ -133,7 +135,7 @@ export class JoinGameService {
 
     private handleBannedName() {
         this.socketService.on(JoinErrors.BannedName, () => {
-            console.log("BannedName reçu du serveur")
+            console.log('BannedName reçu du serveur');
             this.popUpMessage = 'Ce nom est banni. Veuillez choisir un autre nom.';
             this.showPopUp();
         });
