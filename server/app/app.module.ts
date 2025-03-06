@@ -12,6 +12,8 @@ import { GameGateway } from './gateways/game/game.gateway';
 import { GameRecordSchema, gameRecordSchema } from './model/schema/game-record/game-record-schema';
 import { Question, questionSchema } from './model/schema/question/question';
 import { Quiz, quizSchema } from './model/schema/quiz/quiz';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
+import { CloudinaryService } from './modules/cloudinary/cloudinary.service';
 import { FirebaseModule } from './modules/firebase.module';
 import { UserService } from './services/auth/user.service';
 import { ChatService } from './services/chat/chat.service';
@@ -37,6 +39,7 @@ import { QuizService } from './services/quiz/quiz.service';
             { name: GameRecordSchema.name, schema: gameRecordSchema, collection: 'history' },
         ]),
         FirebaseModule,
+        CloudinaryModule,
     ],
     providers: [
         Logger,
@@ -50,6 +53,7 @@ import { QuizService } from './services/quiz/quiz.service';
         GameManagerService,
         HistoryManagerService,
         UserService,
+        CloudinaryService,
     ],
 
     controllers: [QuestionController, QuizController, AuthController, PasswordValidationController, HistoryController],
