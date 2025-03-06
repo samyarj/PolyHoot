@@ -6,25 +6,28 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Row(
-        children: [
-          LoginForm(),
-          SizedBox(
-            width: 32,
-          ),
-          Expanded(
-            child: SizedBox(
-              height: double.infinity,
-              width: double.infinity,
-              child: Image.asset(
-                'assets/welcome-page-bg.png',
-                fit: BoxFit.cover,
+    return Theme(
+      data: ThemeData.light(),
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Row(
+          children: [
+            LoginForm(),
+            SizedBox(
+              width: 32,
+            ),
+            Expanded(
+              child: SizedBox(
+                height: double.infinity,
+                width: double.infinity,
+                child: Image.asset(
+                  'assets/welcome-page-bg.png',
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

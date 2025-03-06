@@ -3,13 +3,13 @@ import 'package:client_leger/UI/equipped/equipped_page.dart';
 import 'package:client_leger/UI/forgot-password/password_reset_page.dart';
 import 'package:client_leger/UI/login/login_page.dart';
 import 'package:client_leger/UI/main-view/main_scaffold.dart';
-import 'package:client_leger/UI/play/creategamepage.dart';
-import 'package:client_leger/UI/play/playpage.dart';
+import 'package:client_leger/UI/play/pages/creategamepage.dart';
+import 'package:client_leger/UI/play/pages/playpage.dart';
+import 'package:client_leger/UI/play/pages/waiting_page.dart';
 import 'package:client_leger/UI/quiz/quiz_page.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/UI/signup/signup_page.dart';
-import 'package:client_leger/providers/user/user_provider.dart'
-    as user_provider;
+import 'package:client_leger/providers/user_provider.dart' as user_provider;
 import 'package:client_leger/utilities/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -53,6 +53,11 @@ final GoRouter router = GoRouter(
                   path: Paths.gameCreation,
                   builder: (context, state) => const GameCreationPage(),
                 ),
+                GoRoute(
+                    path: Paths.waitingPage,
+                    builder: (context, state) {
+                      return WaitingPage();
+                    }),
               ],
             ),
           ],

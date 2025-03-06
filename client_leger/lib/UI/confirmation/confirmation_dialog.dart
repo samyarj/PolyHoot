@@ -1,3 +1,4 @@
+import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:flutter/material.dart';
 
 Future<void> showConfirmationDialog(BuildContext context, String message,
@@ -45,7 +46,7 @@ class __ConfirmationDialogState extends State<_ConfirmationDialog> {
               Padding(
                 padding: const EdgeInsets.only(top: 16.0),
                 child: Center(
-                  child: CircularProgressIndicator(),
+                  child: ThemedProgressIndicator(),
                 ),
               ),
           ],

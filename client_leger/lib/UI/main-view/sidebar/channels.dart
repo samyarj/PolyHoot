@@ -5,7 +5,8 @@ import 'package:client_leger/UI/main-view/sidebar/channel_search.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/models/chat_channels.dart';
 import 'package:client_leger/business/channel_manager.dart';
-import 'package:client_leger/providers/user/user_provider.dart';
+import 'package:client_leger/providers/user_provider.dart';
+import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -37,7 +38,7 @@ class Channels extends ConsumerWidget {
         stream: channelManager.fetchAllChannels(currentUserUid),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
+            return const ThemedProgressIndicator();
           }
 
           if (snapshot.hasError) {
