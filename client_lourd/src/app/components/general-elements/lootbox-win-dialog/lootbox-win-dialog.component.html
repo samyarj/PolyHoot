@@ -1,4 +1,11 @@
-<div class="loot-box-wrapper" mat-border-radius="30px">
+<div
+    class="loot-box-wrapper"
+    [ngClass]="{
+        'very-rare': data.rarity === rewardRarity.VeryRare,
+        rare: data.rarity === rewardRarity.Rare,
+        common: data.rarity === rewardRarity.Common
+    }"
+>
     <div
         *ngIf="!removeBoxImage"
         [ngClass]="{

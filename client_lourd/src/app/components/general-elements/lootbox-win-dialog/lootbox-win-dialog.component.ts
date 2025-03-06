@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Reward, RewardRarity, RewardType } from '@app/interfaces/lootbox-related';
 
@@ -7,7 +7,7 @@ import { Reward, RewardRarity, RewardType } from '@app/interfaces/lootbox-relate
     templateUrl: './lootbox-win-dialog.component.html',
     styleUrls: ['./lootbox-win-dialog.component.scss'],
 })
-export class LootBoxWinDialogComponent implements OnInit {
+export class LootBoxWinDialogComponent {
     rewardType = RewardType;
     rewardRarity = RewardRarity;
     isOpened = false;
@@ -19,18 +19,16 @@ export class LootBoxWinDialogComponent implements OnInit {
     constructor(
         public dialogRef: MatDialogRef<LootBoxWinDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public data: Reward, // @Inject(WINDOW) private window: Window,
-    ) {}
-
-    onClose(): void {
-        this.dialogRef.close();
-    }
-
-    ngOnInit() {
+    ) {
         setTimeout(() => {
             this.isOpened = true;
             setTimeout(() => {
                 this.removeBoxImage = true;
             }, this.removeDelay);
         }, this.explosionDelay); // You can adjust the delay
+    }
+
+    onClose(): void {
+        this.dialogRef.close();
     }
 }

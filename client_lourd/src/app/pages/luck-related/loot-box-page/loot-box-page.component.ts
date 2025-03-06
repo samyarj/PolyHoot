@@ -37,7 +37,7 @@ export class LootBoxPageComponent {
             next: (reward: Reward) => {
                 this.matdialog.open(LootBoxWinDialogComponent, {
                     data: reward,
-                    backdropClass: 'backdrop-dialog',
+                    backdropClass: `backdrop-dialog-${reward.rarity}`,
                     panelClass: 'custom-container',
                 });
                 this.lootBoxService.getBoxes().subscribe(this.lootBoxesObserver);

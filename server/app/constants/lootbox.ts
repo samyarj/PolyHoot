@@ -31,7 +31,7 @@ export const REWARDS_1: Reward[] = [
     {
         type: RewardType.Avatar,
         rarity: RewardRarity.Common,
-        odds: 20,
+        odds: 30,
         value: '',
     },
 ];
