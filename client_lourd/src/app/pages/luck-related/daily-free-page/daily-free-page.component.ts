@@ -1,16 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { LootBoxWinDialogComponent } from '@app/components/general-elements/lootbox-win-dialog/lootbox-win-dialog.component';
 import { LootBoxContainer, Reward, RewardRarity, RewardType } from '@app/interfaces/lootbox-related';
 import { LootBoxService } from '@app/services/luck-services/lootbox.service';
-import { lastValueFrom, Observer } from 'rxjs';
+import { interval, Observer, Subject, takeUntil } from 'rxjs';
 
 @Component({
     selector: 'app-daily-free-page',
     templateUrl: './daily-free-page.component.html',
     styleUrls: ['./daily-free-page.component.scss'],
 })
-export class DailyFreePageComponent {
+export class DailyFreePageComponent implements OnInit, OnDestroy {
     isMoved = false;
     rewardRarity = RewardRarity;
     rewardType = RewardType;
@@ -19,20 +19,25 @@ export class DailyFreePageComponent {
         image: '',
         price: 0,
     };
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+    nextDailyFreeDate: Date = new Date(9999, 1, 1);
+    hoursLeft: number = 0;
+    minutesLeft: number = 0;
     canClaim: boolean = false;
     shouldConsiderAvailable: boolean = false;
-    firstRequestMade: boolean = false;
+    private destroy$ = new Subject<void>();
 
-    private dailyFreeObserver: Partial<Observer<{ lootbox: LootBoxContainer; canClaim: boolean }>> = {
-        next: (dailyFree: { lootbox: LootBoxContainer; canClaim: boolean }) => {
+    private dailyFreeObserver: Partial<Observer<{ lootbox: LootBoxContainer; canClaim: boolean; nextDailyFreeDate: Date }>> = {
+        next: (dailyFree: { lootbox: LootBoxContainer; canClaim: boolean; nextDailyFreeDate: Date }) => {
             this.dailyFreeContainer = dailyFree.lootbox;
             this.canClaim = dailyFree.canClaim;
+            this.nextDailyFreeDate = new Date(dailyFree.nextDailyFreeDate);
+            this.setHoursMinsLeft();
             if (this.canClaim) {
                 this.shouldConsiderAvailable = false;
             } else {
                 this.shouldConsiderAvailable = true;
             }
-            this.firstRequestMade = false;
             console.log(this.user?.nextDailyFree);
         },
         error: () => {
@@ -51,25 +56,64 @@ export class DailyFreePageComponent {
         return this.lootBoxService.user;
     }
 
-    get availableIn(): string {
-        if (this.user?.nextDailyFree !== null && this.user?.nextDailyFree !== undefined && this.shouldConsiderAvailable && !this.firstRequestMade) {
-            const nextDateStr = this.user.nextDailyFree.toDate().toLocaleString('en-US', {});
-            const currentDate = new Date();
-            // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-            const timeDifferenceMin = (new Date(nextDateStr).getTime() - currentDate.getTime()) / 60000; // 60 000 ms in one minute
-            // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-            const hours = Math.floor(timeDifferenceMin / 60); // Round down the hours
-            // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-            const minutes = Math.ceil(timeDifferenceMin % 60); // Round up the minutes
-            if (timeDifferenceMin <= 0) {
-                this.lootBoxService.getDailyFree().subscribe(this.dailyFreeObserver);
-                this.firstRequestMade = true;
-                return 'Checking status';
+    get availableIn() {
+        if (this.hoursLeft < 0) {
+            return 'Checking status';
+        } else {
+            if (this.hoursLeft > 1) {
+                if (this.minutesLeft > 1) {
+                    return `${this.hoursLeft} heures et ${Math.ceil(this.minutesLeft)} minutes`;
+                } else {
+                    return `${this.hoursLeft} heures et ${Math.ceil(this.minutesLeft)} minute`;
+                }
+            } else if (this.hoursLeft === 1) {
+                if (this.minutesLeft > 1) {
+                    return `${this.hoursLeft} heure et ${Math.ceil(this.minutesLeft)} minutes`;
+                } else {
+                    return `${this.hoursLeft} heure et ${Math.ceil(this.minutesLeft)} minute`;
+                }
             } else {
-                return `${hours} heures et ${minutes} minutes`;
+                if (this.minutesLeft > 1) {
+                    return `${Math.ceil(this.minutesLeft)} minutes`;
+                } else {
+                    return `${Math.ceil(this.minutesLeft)} minute`;
+                }
             }
         }
-        return 'Checking status';
+    }
+
+    ngOnInit() {
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        interval(12000)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(() => {
+                if (!this.canClaim) {
+                    this.minutesLeft -= 0.2;
+                    if (this.minutesLeft <= 0) {
+                        this.hoursLeft -= 1;
+                        if (this.hoursLeft < 0) {
+                            this.loadDailyFree();
+                        }
+                        this.minutesLeft = 60;
+                    }
+                    console.log(`heures: ${this.hoursLeft}\nminutes: ${this.minutesLeft}`);
+                }
+            });
+    }
+
+    ngOnDestroy() {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    setHoursMinsLeft() {
+        const currentDate = new Date();
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        const timeDifferenceMin = (this.nextDailyFreeDate.getTime() - currentDate.getTime()) / 60000; // 60 000 ms in one minute
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        this.hoursLeft = Math.floor(timeDifferenceMin / 60); // Round down the hours
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        this.minutesLeft = timeDifferenceMin % 60;
     }
 
     openDailyFree() {
@@ -87,17 +131,6 @@ export class DailyFreePageComponent {
     }
 
     private async loadDailyFree(): Promise<void> {
-        try {
-            const dailyFree = await lastValueFrom(this.lootBoxService.getDailyFree());
-            this.dailyFreeContainer = dailyFree.lootbox;
-            this.canClaim = dailyFree.canClaim;
-            if (this.canClaim) {
-                this.shouldConsiderAvailable = false;
-            } else {
-                this.shouldConsiderAvailable = true;
-            }
-        } catch (error) {
-            console.error('Error fetching daily free loot box:', error);
-        }
+        this.lootBoxService.getDailyFree().subscribe(this.dailyFreeObserver);
     }
 }

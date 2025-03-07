@@ -6,6 +6,7 @@ import { LootBoxService } from '@app/services/lootbox/lootbox.service';
 import { Body, Controller, Get, HttpStatus, Logger, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiInternalServerErrorResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
+import { Timestamp } from 'firebase/firestore';
 
 @ApiTags('LootBox')
 @Controller('loot')
@@ -57,10 +58,12 @@ export class LootBoxController {
     async getDailyFree(@Req() req: AuthenticatedRequest, @Res() response: Response) {
         this.logger.log(`Getting boxes for user : ${req.user.displayName}`);
         try {
-            const user = await this.userService.getUserByUid(req.user.uid);
             const dailyFree: LootBoxContainer = await this.lootBoxService.getDailyFree();
             const canClaim: boolean = await this.lootBoxService.canClaimDailyFreeUser(req.user.uid);
-            response.status(HttpStatus.OK).json({ lootbox: dailyFree, canClaim: canClaim });
+            const user = await this.userService.getUserByUid(req.user.uid);
+            response
+                .status(HttpStatus.OK)
+                .json({ lootbox: dailyFree, canClaim: canClaim, nextDailyFreeDate: new Date((user.nextDailyFree as unknown as Timestamp).toDate()) });
         } catch (error) {
             this.logger.error(`Error fetching profile: ${error.message}`);
 
