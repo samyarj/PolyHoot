@@ -1,8 +1,13 @@
 import 'package:client_leger/backend-communication-services/models/lobby.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
-import 'package:client_leger/utilities/logger.dart'; // ✅ Import AppLogger
+import 'package:client_leger/utilities/logger.dart';
 import 'package:client_leger/utilities/socket_events.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final joinGameProvider =
+    StateNotifierProvider.autoDispose<JoinGameNotifier, JoinGameState>((ref) {
+  return JoinGameNotifier();
+});
 
 class JoinGameState {
   final List<Lobby> lobbys;
@@ -51,6 +56,7 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
           wrongPin: false,
           gameLocked: false,
         )) {
+    AppLogger.i("JoinGameService initialized");
     _setupListeners();
     getAllLobbys();
   }
@@ -159,8 +165,7 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
     _socketManager.webSocketSender(GameEvents.GetCurrentGames.value);
   }
 
-  void resetService() {
-    AppLogger.i("Resetting JoinGameService state");
+  void resetAttributes() {
     state = state.copyWith(
       popUpMessage: '',
       gameIdValidated: false,
@@ -168,6 +173,25 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
       gameLocked: false,
       isJoined: false,
     );
+  }
+
+  @override
+  void dispose() {
+    AppLogger.i("Disposing JoinGameService");
+    _socketManager.socket.off(JoinEvents.LobbyCreated.value);
+    _socketManager.socket.off(GameEvents.End.value);
+    _socketManager.socket.off(GameEvents.GetCurrentGames.value);
+    _socketManager.socket.off(GameEvents.AlertLockToggled.value);
+    _socketManager.socket.off(JoinEvents.JoinSuccess.value);
+    _socketManager.socket.off(GameEvents.PlayerLeft.value);
+    _socketManager.socket.off(JoinErrors.InvalidId.value);
+    _socketManager.socket.off(JoinErrors.RoomLocked.value);
+    _socketManager.socket.off(JoinErrors.BannedName.value);
+    _socketManager.socket.off(JoinEvents.ValidId.value);
+    _socketManager.socket.off(JoinEvents.CanJoin.value);
+    if (!mounted) return;
+    resetAttributes();
+    super.dispose();
   }
 
   void _showPopUp(String message) {
@@ -180,8 +204,3 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
     });
   }
 }
-
-final joinGameProvider =
-    StateNotifierProvider<JoinGameNotifier, JoinGameState>((ref) {
-  return JoinGameNotifier();
-});

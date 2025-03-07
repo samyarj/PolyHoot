@@ -63,6 +63,14 @@ export class GameGateway {
         if (game) game.preparePlayersForNextQuestion();
     }
 
+    @SubscribeMessage(GameEvents.GetCurrentPlayers)
+    handleCurrentPlayers(@ConnectedSocket() client: Socket, @MessageBody() data: { roomId: string }) {
+        const roomId = data.roomId;
+        const game = this.gameManager.getGameByRoomId(roomId);
+        const playerNames = game.players.map((player) => player.name);
+        return playerNames;
+    }
+
     @SubscribeMessage(GameEvents.GetCurrentGames)
     handleGetCurrentGames(@ConnectedSocket() client: Socket) {
         const currentGamesInfos = [];
@@ -129,7 +137,7 @@ export class GameGateway {
         const game = this.gameManager.getGameByRoomId(gameId);
         if (canJoinGame) {
             const playerName = game.players.map((player) => player.name);
-            client.emit(JoinEvents.CanJoin, { playerNames: playerName, gameId });
+            client.emit(JoinEvents.CanJoin, { playerNames: playerName, gameId: gameId });
             const roomId = Array.from(client.rooms.values())[1];
             this.server.emit(JoinEvents.JoinSuccess, { playerNames: playerName, roomId });
             this.gameManager.socketRoomsMap.set(client, data.gameId);

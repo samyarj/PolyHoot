@@ -70,7 +70,8 @@ enum GameEvents {
   WaitingForCorrection('waitingForCorrection'),
   PlayerInteraction('playerInteraction'),
   PlayerSubmitted('playerSubmitted'),
-  GetCurrentGames('getCurrentGames');
+  GetCurrentGames('getCurrentGames'),
+  GetCurrentPlayers('getCurrentPlayers');
 
   final String value;
   const GameEvents(this.value);

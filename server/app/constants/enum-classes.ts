@@ -86,6 +86,7 @@ export enum GameEvents {
     PlayerInteraction = 'playerInteraction',
     PlayerSubmitted = 'playerSubmitted',
     GetCurrentGames = 'getCurrentGames',
+    GetCurrentPlayers = 'getCurrentPlayers',
 }
 
 export enum JoinEvents {

@@ -27,19 +27,16 @@ class _JoinGameState extends ConsumerState<JoinGame> {
     final colorScheme = Theme.of(context).colorScheme;
     ref.listen(joinGameProvider, (previous, next) {
       if (next.isJoined) {
-        joinNotifier.resetService();
+        Future.delayed(const Duration(milliseconds: 200), () {});
+        ref.read(joinGameProvider.notifier).resetAttributes();
         WidgetsBinding.instance.addPostFrameCallback((_) {
           GoRouter.of(context).push('${Paths.play}/${Paths.waitingPage}');
         });
       }
     });
 
-    return Container(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

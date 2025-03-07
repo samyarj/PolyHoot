@@ -1,6 +1,7 @@
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/models/quiz.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
+import 'package:client_leger/utilities/socket_events.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -132,7 +133,7 @@ class GameCreationPopup {
   static void _createGame(BuildContext context, Quiz quiz) {
     final socket = WebSocketManager.instance;
 
-    socket.webSocketSender("createGame", quiz.toJson(), (roomId) {
+    socket.webSocketSender(JoinEvents.Create.value, quiz.toJson(), (roomId) {
       socket.roomId = roomId;
       socket.isOrganizer = true;
       Navigator.pop(context);

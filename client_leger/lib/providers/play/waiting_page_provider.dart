@@ -4,7 +4,8 @@ import 'package:client_leger/utilities/socket_events.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final waitingPageProvider =
-    StateNotifierProvider<WaitingPageNotifier, WaitingPageState>((ref) {
+    StateNotifierProvider.autoDispose<WaitingPageNotifier, WaitingPageState>(
+        (ref) {
   return WaitingPageNotifier(WebSocketManager.instance);
 });
 
@@ -63,10 +64,13 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
           timerEnded: false,
         )) {
     _initializeListeners();
+    _getPlayerList();
+    AppLogger.i("WaitingPageNotifier initialized");
   }
 
   void _initializeListeners() {
     _socketManager.webSocketReceiver(GameEvents.PlayerLeft.value, (data) {
+      if (state.banned) return;
       if (data is Map<String, dynamic> && data.containsKey('playerNames')) {
         final List<String> updatedPlayers =
             List<String>.from(data['playerNames'] as List);
@@ -90,14 +94,14 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
 
     _socketManager.webSocketReceiver(GameEvents.PlayerBanned.value, (_) {
       state = state.copyWith(banned: true);
-      resetAttributes();
+      //_resetAttributes();
       AppLogger.i("Player was banned");
     });
 
     _socketManager.webSocketReceiver(DisconnectEvents.OrganizerHasLeft.value,
         (_) {
       state = state.copyWith(organizerDisconnected: true);
-      resetAttributes();
+      //_resetAttributes();
       AppLogger.i("Organizer has left");
     });
 
@@ -117,7 +121,7 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
       if (state.players.isNotEmpty) {
         startGame();
       }
-      resetAttributes();
+      //_resetAttributes();
       AppLogger.i("Game countdown ended");
     });
 
@@ -131,15 +135,14 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
     _socketManager.webSocketSender(GameEvents.ToggleLock.value);
   }
 
-  void leaveWaitingPageAsOrganizer() {
-    _socketManager
-        .webSocketSender(DisconnectEvents.OrganizerDisconnected.value);
-    resetAttributes();
-  }
-
-  void leaveWaitingPageAsPlayer() {
-    _socketManager.webSocketSender(DisconnectEvents.Player.value);
-    resetAttributes();
+  void confirmLeaveWaitingPage() {
+    if (_socketManager.isOrganizer) {
+      _socketManager
+          .webSocketSender(DisconnectEvents.OrganizerDisconnected.value);
+    } else {
+      _socketManager.webSocketSender(DisconnectEvents.Player.value);
+    }
+    //_resetAttributes();
   }
 
   void banPlayer(String playerName) {
@@ -154,7 +157,20 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
     _socketManager.webSocketSender(GameEvents.StartGameCountdown.value, time);
   }
 
-  void resetAttributes() {
+  void _getPlayerList() {
+    _socketManager.webSocketSender(GameEvents.GetCurrentPlayers.value,
+        {"roomId": WebSocketManager.instance.roomId}, (data) {
+      if (data is List) {
+        final List<String> updatedPlayers = List<String>.from(data);
+        state = state.copyWith(players: updatedPlayers);
+        AppLogger.i("Players updated: ${state.players}");
+      } else {
+        AppLogger.w("Invalid data for GetCurrentPlayers event.");
+      }
+    });
+  }
+
+  void _resetAttributes() {
     state = WaitingPageState(
       players: [],
       gameLocked: false,
@@ -164,5 +180,20 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
       organizerDisconnected: false,
       timerEnded: false,
     );
+  }
+
+  @override
+  void dispose() {
+    _socketManager.socket.off(GameEvents.PlayerLeft.value);
+    _socketManager.socket.off(JoinEvents.JoinSuccess.value);
+    _socketManager.socket.off(GameEvents.PlayerBanned.value);
+    _socketManager.socket.off(DisconnectEvents.OrganizerHasLeft.value);
+    _socketManager.socket.off(GameEvents.AlertLockToggled.value);
+    _socketManager.socket.off(TimerEvents.GameCountdownValue.value);
+    _socketManager.socket.off(TimerEvents.GameCountdownEnd.value);
+    _socketManager.socket.off(GameEvents.Title.value);
+    if (!mounted) return;
+    _resetAttributes();
+    super.dispose();
   }
 }
