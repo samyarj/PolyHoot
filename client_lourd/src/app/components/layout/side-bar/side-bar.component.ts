@@ -23,14 +23,14 @@ export class SideBarComponent implements OnInit, OnDestroy {
     private globalMessagesSubscription: Subscription;
     private selectedChannelMessagesSubscription: Subscription;
     private channelsSubscription: Subscription;
-    private lastMessageDate: number | null = null; // Track last message date for pagination
+    private lastMessageDate: FieldPath; // Track last message date for pagination
     isFetchingOlderMessages: boolean = false; // Prevent multiple fetches at once
     channels: ChatChannel[] = [];
     newChannelName: string = '';
     selectedChannel: string | null = null;
 
-    private messagesSubscription: Subscription;
-    private lastMessageDate: FieldPath; // Track last message date for pagination
+    // private messagesSubscription: Subscription;
+    // private lastMessageDate: FieldPath; // Track last message date for pagination
 
     constructor(
         private authService: AuthService,

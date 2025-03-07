@@ -3,15 +3,21 @@ import {
     FieldValue,
     Firestore,
     addDoc,
+    arrayRemove,
+    arrayUnion,
     collection,
+    deleteDoc,
     doc,
     getDoc,
+    getDocs,
     limit,
     onSnapshot,
     orderBy,
     query,
     serverTimestamp,
+    setDoc,
     startAfter,
+    updateDoc,
 } from '@angular/fire/firestore';
 import { MESSAGES_LIMIT } from '@app/constants/constants';
 import { FirebaseChatMessage } from '@app/interfaces/chat-message';
@@ -60,8 +66,9 @@ export class FirebaseChatService {
      * Get a real-time stream of the latest 50 messages from the global chat.
      */
 
-    getMessages(): Observable<FirebaseChatMessage[]> {
-        const messagesQuery = query(this.globalChatCollection, orderBy('date', 'desc'), limit(MESSAGES_LIMIT));
+    getMessages(channel: string): Observable<FirebaseChatMessage[]> {
+        const messagesCollection = channel === 'General' ? this.globalChatCollection : collection(this.firestore, `chatChannels/${channel}/messages`)
+        const messagesQuery = query(messagesCollection, orderBy('date', 'desc'), limit(MESSAGES_LIMIT));
 
         return new Observable<FirebaseChatMessage[]>((observer) => {
             let messagesCache: FirebaseChatMessage[] = [];
@@ -111,7 +118,8 @@ export class FirebaseChatService {
     /**
      * Load older messages (pagination).
      */
-    loadOlderMessages(lastMessageDate: FieldValue): Observable<FirebaseChatMessage[]> {
+    loadOlderMessages(channel: string, lastMessageDate: FieldValue): Observable<FirebaseChatMessage[]> {
+        const messagesCollection = channel === 'General' ? this.globalChatCollection : collection(this.firestore, `chatChannels/${channel}/messages`);
         const olderMessagesQuery = query(
             messagesCollection,
             orderBy('date', 'desc'),
