@@ -57,6 +57,7 @@ export class DailyFreePageComponent implements OnInit, OnDestroy {
     }
 
     get availableIn() {
+        // keep this demon as is. We're hyper-customizing this :).
         if (this.hoursLeft < 0) {
             return 'Checking status';
         } else {
