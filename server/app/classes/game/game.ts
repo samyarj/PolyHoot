@@ -37,10 +37,10 @@ export class Game {
     }
 
     removePlayer(playerName: string): Player[] {
+        console.log("removePlayer", playerName, this.players);
         const index = this.players.findIndex((player) => player.name.toLowerCase() === playerName.toLowerCase());
         const outRangeIndex = -1;
         if (index !== outRangeIndex) {
-            this.players[index].socket.emit(GameEvents.PlayerBanned);
             this.players[index].socket.leave(this.roomId);
             return this.players.splice(index, 1);
         }
@@ -50,7 +50,6 @@ export class Game {
         const trimmedPlayerName = playerName.trim();
         return (
             trimmedPlayerName &&
-            //!this.playerExists(trimmedPlayerName) &&
             !this.isPlayerBanned(trimmedPlayerName) &&
             !this.isNameOrganizer(trimmedPlayerName)
         );

@@ -173,6 +173,8 @@ export class GameGateway {
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {
             game.bannedNames.push(playerName.toLowerCase());
+            const player = game.players.find((player) => player.name === playerName);
+            player.socket.emit(GameEvents.PlayerBanned);
             game.removePlayer(playerName);
         }
         const playerNames = this.gameManager.getGameByRoomId(roomId).players.map((player) => player.name);
