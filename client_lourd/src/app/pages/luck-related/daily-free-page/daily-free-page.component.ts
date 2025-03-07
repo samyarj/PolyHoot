@@ -33,6 +33,7 @@ export class DailyFreePageComponent {
                 this.shouldConsiderAvailable = true;
             }
             this.firstRequestMade = false;
+            console.log(this.user?.nextDailyFree);
         },
         error: () => {
             console.log('Could not fetch lootBoxes.');
@@ -51,7 +52,7 @@ export class DailyFreePageComponent {
     }
 
     get availableIn(): string {
-        if (this.user?.nextDailyFree && this.shouldConsiderAvailable && !this.firstRequestMade) {
+        if (this.user?.nextDailyFree !== null && this.user?.nextDailyFree !== undefined && this.shouldConsiderAvailable && !this.firstRequestMade) {
             const nextDateStr = this.user.nextDailyFree.toDate().toLocaleString('en-US', {});
             const currentDate = new Date();
             // eslint-disable-next-line @typescript-eslint/no-magic-numbers

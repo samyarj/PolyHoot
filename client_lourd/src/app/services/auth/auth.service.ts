@@ -202,7 +202,7 @@ export class AuthService {
 
         onIdTokenChanged(this.auth, async (firebaseUser) => {
             if (this.isAuthenticating) {
-                return;
+                // return;
             }
 
             if (this.userSnapshotUnsubscribe) {
