@@ -110,7 +110,6 @@ export class DailyFreePageComponent implements OnInit, OnDestroy {
                             this.minutesLeft = 59.999999999999999; // So that it floors towards 59 when shown on screen.
                         }
                     }
-                    console.log(`${this.hoursLeft},\n${this.minutesLeft}`);
                 });
         }
     }
