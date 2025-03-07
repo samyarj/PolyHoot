@@ -27,6 +27,7 @@ import { ChatComponent } from './components/chat/chat.component';
 import { Chat2Component } from './components/chat/chat2/chat2.component';
 import { ConfirmationDialogComponent } from './components/general-elements/confirmation-dialog/confirmation-dialog.component';
 import { ErrorDialogComponent } from './components/general-elements/error-dialog/error-dialog.component';
+import { LootBoxWinDialogComponent } from './components/general-elements/lootbox-win-dialog/lootbox-win-dialog.component';
 import { PopUpCreationComponent } from './components/general-elements/pop-up-creation/pop-up-creation.component';
 import { HeaderGameComponent } from './components/layout/filler/header-game/header-game.component';
 import { SecondaryHeaderGameComponent } from './components/layout/filler/secondary-header-game/secondary-header-game.component';
@@ -96,6 +97,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         QuestionBankComponent,
         PopUpCreationComponent,
         ErrorDialogComponent,
+        LootBoxWinDialogComponent,
         ResultsPageComponent,
         WaitingPageComponent,
         OrganizerPageComponent,
