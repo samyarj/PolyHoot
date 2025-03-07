@@ -72,7 +72,7 @@ export class LootBoxController {
             let minutesLeft: number = timeDiffMinutes % 60;
             if (hoursLeft === 24 && minutesLeft === 0) {
                 hoursLeft = 23;
-                minutesLeft = 59.999999999999; // Goal is for it to floor towards 59.
+                minutesLeft = 59.9999998; // Goal is for it to floor towards 59.
             }
             response.status(HttpStatus.OK).json({ lootbox: dailyFree, canClaim: canClaim, hoursLeft: hoursLeft, minutesLeft: minutesLeft });
         } catch (error) {

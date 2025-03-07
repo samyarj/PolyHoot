@@ -106,8 +106,7 @@ export class DailyFreePageComponent implements OnInit, OnDestroy {
                             if (this.hoursLeft < 0) {
                                 this.loadDailyFree();
                             }
-                            // eslint-disable-next-line no-loss-of-precision
-                            this.minutesLeft = 59.999999999999999; // So that it floors towards 59 when shown on screen.
+                            this.minutesLeft = 59.9999998; // So that it floors towards 59 when shown on screen.
                         }
                     }
                 });
