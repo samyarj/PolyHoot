@@ -1,3 +1,4 @@
+import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/providers/play/waiting_page_provider.dart';
 import 'package:client_leger/utilities/confirmation_dialog.dart';
@@ -25,11 +26,15 @@ class WaitingPage extends ConsumerWidget {
 
     ref.listen(waitingPageProvider, (previous, next) {
       if (next.banned) {
-        _showToast(context, "Vous avez été banni !");
+        _showToast(context, "Vous avez été banni de la salle d'attente !");
         _leavePage(context);
       } else if (next.organizerDisconnected && !socketManager.isOrganizer) {
-        _showToast(context, "L'organisateur a quitté la partie !");
+        _showToast(context, "L'organisateur a quitté la salle d'attente !");
         _leavePage(context);
+      } else if (next.timerEnded) {
+        final route =
+            socketManager.isOrganizer ? Paths.organizerVue : Paths.playerVue;
+        GoRouter.of(context).go('/play/$route');
       }
     });
 
@@ -156,7 +161,7 @@ class WaitingPage extends ConsumerWidget {
                                 ),
                                 Text(
                                   waitingState.gameLocked
-                                      ? (waitingState.players.length >= 1
+                                      ? (waitingState.players.isNotEmpty
                                           ? "Vous pouvez commencer!"
                                           : "Il faut au moins un joueur pour commencer!")
                                       : "Il faut verrouiller la partie pour commencer!",
@@ -217,7 +222,6 @@ class WaitingPage extends ConsumerWidget {
       type: ToastificationType.info,
       autoCloseDuration: Duration(seconds: 3),
       alignment: Alignment.topCenter,
-      //backgroundColor: Colors.red,
       style: ToastificationStyle.flatColored,
       showIcon: true,
     );
@@ -225,7 +229,9 @@ class WaitingPage extends ConsumerWidget {
 
   void _leavePage(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      GoRouter.of(context).pop();
+      final route =
+          socketManager.isOrganizer ? '/play' : '/play/${Paths.joinGame}';
+      GoRouter.of(context).go(route);
     });
   }
 }

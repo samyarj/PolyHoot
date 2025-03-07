@@ -30,7 +30,7 @@ class _JoinGameState extends ConsumerState<JoinGame> {
         Future.delayed(const Duration(milliseconds: 200), () {});
         ref.read(joinGameProvider.notifier).resetAttributes();
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          GoRouter.of(context).push('${Paths.play}/${Paths.waitingPage}');
+          GoRouter.of(context).go('${Paths.play}/${Paths.waitingPage}');
         });
       }
     });
