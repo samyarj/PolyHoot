@@ -254,4 +254,25 @@ export class UserService {
             nextDailyFree: userDoc.nextDailyFree || null,
         };
     }
+
+    async updateUserAvatar(uid: string, avatarUrl: string): Promise<void> {
+        const userRef = this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+
+        if (!userDoc.exists) {
+            throw new UnauthorizedException("L'utilisateur n'existe pas.");
+        }
+
+        // Update the avatarEquipped field
+        await userRef.update({ avatarEquipped: avatarUrl });
+
+        // Add the new avatar to the user's inventory if it's not already there
+        const userData = userDoc.data();
+        const avatars = userData.inventory?.avatars || [];
+        if (!avatars.includes(avatarUrl)) {
+            await userRef.update({
+                'inventory.avatars': admin.firestore.FieldValue.arrayUnion(avatarUrl),
+            });
+        }
+    }
 }
