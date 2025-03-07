@@ -1,4 +1,4 @@
 export interface AnswerQRL {
-    player: string;
+    playerName: string;
     playerAnswer: string;
 }

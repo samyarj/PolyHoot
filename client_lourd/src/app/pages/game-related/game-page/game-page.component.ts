@@ -27,7 +27,6 @@ export class GamePageComponent implements OnDestroy {
         }
         this.gameClientService.getTitle();
         this.gameClientService.resetInformationFields();
-        this.gameClientService.handleSockets();
         this.gameClientService.resetAttributes();
         this.gameClientService.playerPoints = 0;
         this.gameClientService.signalUserConnect();

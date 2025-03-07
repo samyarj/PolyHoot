@@ -60,11 +60,9 @@ export class Player {
             }
         } else if (currentQuestion.type === QuestionType.QRE) {
             const qreAttributes = currentQuestion.qreAttributes;
-            console.log('Dans verif QRE ', qreAttributes);
             if (qreAttributes) {
                 const minTolerated = qreAttributes.goodAnswer - qreAttributes.tolerance;
                 const maxTolerated = qreAttributes.goodAnswer + qreAttributes.tolerance;
-                console.log("qreAnswer lorsque timer arrive a 0", this.qreAnswer);
                 if (this.qreAnswer > maxTolerated || this.qreAnswer < minTolerated) correct = false;
             }
         }

@@ -44,7 +44,6 @@ export class GameManagerService {
         const game = this.getGameByRoomId(roomId);
         const trimmedPlayerName = playerName.trim();
         if (!game.validPlayer(trimmedPlayerName)) {
-            console.log("Normalement tu me vois pcq le player est pas valid")
             return false;
         }
         const roomToJoin = this.getGameByRoomId(roomId);

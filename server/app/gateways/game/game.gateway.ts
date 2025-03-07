@@ -93,10 +93,12 @@ export class GameGateway {
     }
 
     @SubscribeMessage(GameEvents.QRLAnswerSubmitted)
-    handleQRLAnswer(@ConnectedSocket() client: Socket, @MessageBody() data: { player: string; playerAnswer: string }) {
+    handleQRLAnswer(@ConnectedSocket() client: Socket, @MessageBody() playerAnswer: string) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
-        game.organizer.socket.emit(GameEvents.QRLAnswerSubmitted, data);
+        console.log('2:Data reçue du serveur ', playerAnswer);
+        const playerName = game.players.find((player) => player.socket === client).name;
+        game.organizer.socket.emit(GameEvents.QRLAnswerSubmitted, { playerName, playerAnswer });
     }
 
     @SubscribeMessage(JoinEvents.ValidateGameId)
@@ -118,9 +120,7 @@ export class GameGateway {
     @SubscribeMessage(JoinEvents.Join)
     handleJoinGame(@ConnectedSocket() client: Socket, @MessageBody() data: { gameId: string; playerName: string }) {
         const { gameId, playerName } = data;
-        console.log(playerName, 'Essaye de join la partie ', gameId);
         const canJoinGame = this.gameManager.joinGame(gameId, playerName, client);
-        console.log('normalement canJoinGame est false', canJoinGame);
         const game = this.gameManager.getGameByRoomId(gameId);
         if (canJoinGame) {
             const playerNames = game.players.map((player) => player.name);
@@ -129,14 +129,9 @@ export class GameGateway {
             this.server.emit(JoinEvents.JoinSuccess, { playerNames, roomId });
             this.server.emit(JoinEvents.JoinSuccess, { playerNames, roomId });
             this.gameManager.socketRoomsMap.set(client, data.gameId);
-        } /* else if (game.playerExists(playerName)) {
-            client.emit(JoinErrors.ExistingName);
-        }*/ else if (game.isPlayerBanned(playerName)) {
-            console.log('normalement ça rentre ici pcq isplayerBanned est true');
+        } else if (game.isPlayerBanned(playerName)) {
             client.emit(JoinErrors.BannedName);
-        } /* else if (game.isNameOrganizer(playerName)) {
-            client.emit(JoinErrors.OrganizerName);
-        } */ else if (game.isLocked) {
+        } else if (game.isLocked) {
             client.emit(JoinErrors.RoomLocked);
         } else {
             client.emit(JoinErrors.Generic);
@@ -165,7 +160,7 @@ export class GameGateway {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         const isLocked = game.toggleGameLock();
-        this.server.emit(GameEvents.AlertLockToggled, {  isLocked, roomId  });
+        this.server.emit(GameEvents.AlertLockToggled, { isLocked, roomId });
     }
     @SubscribeMessage(GameEvents.PlayerBan)
     handleBanPlayer(@ConnectedSocket() client: Socket, @MessageBody() playerName: string) {
@@ -184,7 +179,7 @@ export class GameGateway {
     @SubscribeMessage(GameEvents.CorrectionFinished)
     handleCorrectionFinished(
         @ConnectedSocket() client: Socket,
-        @MessageBody() data: { pointsTotal: { playerName: string; points: number }[]; answers: number[] },
+        @MessageBody() data: { pointsTotal: { playerName: string; points: number }[] /*  answers: number[]  */ },
     ) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);

@@ -37,7 +37,6 @@ export class GameClientService {
     qreAnswer: number;
     private finalAnswer: boolean;
     private realShowAnswers: boolean;
-    private socketsInitialized: boolean = false;
 
     // constructeur a 4 parametres permis selon les charges et le prof, etant donne la nature des attributs
     // eslint-disable-next-line max-params
@@ -47,6 +46,8 @@ export class GameClientService {
         private resultService: ResultsService,
         private messageHandlerService: MessageHandlerService,
     ) {
+        console.log(this.socketHandler.playerName);
+        this.handleSockets();
         this.resetAttributes();
     }
 
@@ -82,21 +83,8 @@ export class GameClientService {
         }
     }
     sendAnswerForCorrection(answer: string) {
-        this.socketHandler.send(GameEvents.QRLAnswerSubmitted, { player: this.socketHandler.playerName, playerAnswer: answer });
-    }
-
-    handleSockets() {
-        if (!this.socketsInitialized) {
-            this.handleWaitingForCorrection();
-            this.handleTimerValue();
-            this.goToNextQuestion();
-            this.getTitle();
-            this.playerPointsUpdate();
-            this.organizerHasDisconnected();
-            this.showEndResults();
-            this.resultService.handleResultsSockets();
-            this.socketsInitialized = true;
-        }
+        this.socketHandler.send(GameEvents.QRLAnswerSubmitted, answer);
+        console.log('Data envoyée au serveur ', answer);
     }
 
     resetAttributes() {
@@ -146,8 +134,19 @@ export class GameClientService {
         });
     }
 
+    private handleSockets() {
+        this.handleWaitingForCorrection();
+        this.handleTimerValue();
+        this.goToNextQuestion();
+        this.getTitle();
+        this.playerPointsUpdate();
+        this.organizerHasDisconnected();
+        this.showEndResults();
+        this.resultService.handleResultsSockets();
+    }
     private handleTimerValue() {
         this.socketHandler.on(TimerEvents.Paused, (pauseState: boolean) => {
+            console.log('1');
             this.gamePaused = pauseState;
         });
         this.socketHandler.on(TimerEvents.AlertModeStarted, () => {
@@ -174,6 +173,7 @@ export class GameClientService {
 
     private handleWaitingForCorrection() {
         this.socketHandler.on(GameEvents.WaitingForCorrection, () => {
+            this.time = 0;
             this.choiceFeedback = ChoiceFeedback.AwaitingCorrection;
         });
     }
@@ -192,6 +192,7 @@ export class GameClientService {
     }
     private playerPointsUpdate() {
         this.socketHandler.on(GameEvents.PlayerPointsUpdate, (playerQuestionInfo: { points: number; isFirst: boolean; exactAnswer: boolean }) => {
+            this.time = 0;
             if (playerQuestionInfo.points === this.playerPoints + this.currentQuestion.points) {
                 this.choiceFeedback = ChoiceFeedback.Correct;
             } else if (playerQuestionInfo.points === this.playerPoints) {

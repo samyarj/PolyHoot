@@ -18,7 +18,7 @@
                 </div>
             </div>
             <div class="general-info-section">
-                <div *ngIf="question.type === 'QCM'" class="histogram-section">
+                <!-- <div *ngIf="question.type === 'QCM'" class="histogram-section">
                     <div class="options-container">
                         <div
                             *ngFor="let choice of isCorrectAnswersArray; let index = index"
@@ -28,7 +28,7 @@
                             <p class="option-text">{{ question.choices ? question.choices[index].text : '' }}</p>
                         </div>
                     </div>
-                </div>
+                </div> -->
                 <div *ngIf="question.type === 'QRL' && gameStatus === 'waitingForAnswers'" class="histogram-section">
                 </div>
                 <div *ngIf="question.type === 'QRL' && gameStatus === 'organizerCorrecting'" class="histogram-section">

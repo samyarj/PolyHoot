@@ -62,7 +62,6 @@
             <input
                 *ngIf="question.qreAttributes"
                 type="number"
-                min="0"
                 [(ngModel)]="question.qreAttributes.goodAnswer"
                 name="goodAnswer"
                 required
@@ -75,7 +74,6 @@
             <input
                 *ngIf="question.qreAttributes"
                 type="number"
-                min="0"
                 [(ngModel)]="question.qreAttributes.minBound"
                 name="minBound"
                 required
@@ -88,7 +86,6 @@
             <input
                 *ngIf="question.qreAttributes"
                 type="number"
-                min="0"
                 [(ngModel)]="question.qreAttributes.maxBound"
                 name="maxBound"
                 required
@@ -101,7 +98,6 @@
             <input
                 *ngIf="question.qreAttributes"
                 type="number"
-                min="0"
                 [(ngModel)]="question.qreAttributes.tolerance"
                 name="tolerance"
                 required

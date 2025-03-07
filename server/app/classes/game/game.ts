@@ -37,7 +37,6 @@ export class Game {
     }
 
     removePlayer(playerName: string): Player[] {
-        console.log("removePlayer", playerName, this.players);
         const index = this.players.findIndex((player) => player.name.toLowerCase() === playerName.toLowerCase());
         const outRangeIndex = -1;
         if (index !== outRangeIndex) {
@@ -48,11 +47,7 @@ export class Game {
 
     validPlayer(playerName: string): boolean {
         const trimmedPlayerName = playerName.trim();
-        return (
-            trimmedPlayerName &&
-            !this.isPlayerBanned(trimmedPlayerName) &&
-            !this.isNameOrganizer(trimmedPlayerName)
-        );
+        return trimmedPlayerName && !this.isPlayerBanned(trimmedPlayerName) && !this.isNameOrganizer(trimmedPlayerName);
     }
 
     isPlayerBanned(playerName: string): boolean {
@@ -135,7 +130,8 @@ export class Game {
         });
     }
 
-    updatePointsQRL(data: { pointsTotal: { playerName: string; points: number }[]; answers: number[] }) {
+    updatePointsQRL(data: { pointsTotal: { playerName: string; points: number }[] /* answers: number[] */ }) {
+        console.log('PointsTotal', data.pointsTotal);
         data.pointsTotal.forEach((dataPlayer) => {
             const client = this.players.find((player) => player.name === dataPlayer.playerName);
             client.socket.emit(GameEvents.PlayerPointsUpdate, { points: dataPlayer.points, isFirst: false, exactAnswer: false });
@@ -165,7 +161,6 @@ export class Game {
         targetedPlayer.submitted = true;
         targetedPlayer.currentChoices = answerData.choiceSelected;
         targetedPlayer.qreAnswer = answerData.qreAnswer;
-        console.log(targetedPlayer.currentChoices, targetedPlayer.qreAnswer);
         if (!targetedPlayer.verifyIfAnswersCorrect(this.quiz.questions[this.currentQuestionIndex])) {
             targetedPlayer.isFirst = false;
             return this.checkAndPrepareForNextQuestion();
