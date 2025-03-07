@@ -16,21 +16,6 @@ export class LootBoxController {
         private readonly lootBoxService: LootBoxService,
     ) {}
 
-    // @UseGuards(AuthGuard)
-    // @ApiOkResponse({ description: 'DailyFree successfully claimed' })
-    // @ApiInternalServerErrorResponse({ description: 'Internal server error' })
-    // @Get('daily-free')
-    // async getProfile(@Req() req: AuthenticatedRequest, @Res() response: Response) {
-    //     this.logger.log(`Getting daily free info of : ${req.user.displayName}`);
-    //     try {
-    //         console.log('DAILY-FREE-INFOO!');
-    //     } catch (error) {
-    //         this.logger.error(`Error fetching profile: ${error.message}`);
-
-    //         response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
-    //     }
-    // }
-
     @UseGuards(AuthGuard)
     @ApiOkResponse({ description: 'LootBoxes fetched successfully' })
     @ApiInternalServerErrorResponse({ description: 'Internal server error' })

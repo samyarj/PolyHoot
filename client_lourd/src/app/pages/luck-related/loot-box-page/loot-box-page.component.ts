@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from '@app/components/general-elements/error-dialog/error-dialog.component';
 import { LootBoxWinDialogComponent } from '@app/components/general-elements/lootbox-win-dialog/lootbox-win-dialog.component';
 import { LootBoxContainer, Reward } from '@app/interfaces/lootbox-related';
 import { LootBoxService } from '@app/services/luck-services/lootbox.service';
@@ -34,13 +35,20 @@ export class LootBoxPageComponent {
 
     openBox(id: number) {
         this.lootBoxService.openBox(id).subscribe({
-            next: (reward: Reward) => {
-                this.matdialog.open(LootBoxWinDialogComponent, {
-                    data: reward,
-                    backdropClass: `backdrop-dialog-${reward.rarity}`,
-                    panelClass: 'custom-container',
-                });
-                this.lootBoxService.getBoxes().subscribe(this.lootBoxesObserver);
+            next: (reward: Reward | null) => {
+                if (reward === null) {
+                    this.matdialog.open(ErrorDialogComponent, {
+                        width: '400px',
+                        data: { message: "Vous n'avez pas assez d'argent pour vous procurer cette Loot Box.", reloadOnClose: false },
+                    });
+                } else {
+                    this.matdialog.open(LootBoxWinDialogComponent, {
+                        data: reward,
+                        backdropClass: `backdrop-dialog-${reward.rarity}`,
+                        panelClass: 'custom-container',
+                    });
+                    this.lootBoxService.getBoxes().subscribe(this.lootBoxesObserver);
+                }
             },
         });
     }
