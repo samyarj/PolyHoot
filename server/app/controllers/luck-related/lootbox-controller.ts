@@ -61,9 +61,20 @@ export class LootBoxController {
             const dailyFree: LootBoxContainer = await this.lootBoxService.getDailyFree();
             const canClaim: boolean = await this.lootBoxService.canClaimDailyFreeUser(req.user.uid);
             const user = await this.userService.getUserByUid(req.user.uid);
-            response
-                .status(HttpStatus.OK)
-                .json({ lootbox: dailyFree, canClaim: canClaim, nextDailyFreeDate: new Date((user.nextDailyFree as unknown as Timestamp).toDate()) });
+
+            const currentTime = new Date();
+            const nextDailyFreeDate = new Date((user.nextDailyFree as unknown as Timestamp).toDate());
+
+            const timeDiffMs = nextDailyFreeDate.getTime() - currentTime.getTime();
+            const timeDiffMinutes = timeDiffMs / 60000; // Convert milliseconds to minutes
+
+            let hoursLeft: number = Math.floor(timeDiffMinutes / 60);
+            let minutesLeft: number = timeDiffMinutes % 60;
+            if (hoursLeft === 24 && minutesLeft === 0) {
+                hoursLeft = 23;
+                minutesLeft = 59.999999999999; // Goal is for it to floor towards 59.
+            }
+            response.status(HttpStatus.OK).json({ lootbox: dailyFree, canClaim: canClaim, hoursLeft: hoursLeft, minutesLeft: minutesLeft });
         } catch (error) {
             this.logger.error(`Error fetching profile: ${error.message}`);
 

@@ -56,12 +56,12 @@ export class LootBoxService {
             .pipe(catchError((error) => this.messageHandler.handleHttpError(error)));
     }
 
-    getDailyFree(): Observable<{ lootbox: LootBoxContainer; canClaim: boolean; nextDailyFreeDate: Date }> {
+    getDailyFree(): Observable<{ lootbox: LootBoxContainer; canClaim: boolean; hoursLeft: number; minutesLeft: number }> {
         const options = {
             headers: { authorization: `Bearer ${this.tokenID}` },
         };
         return this.http
-            .get<{ lootbox: LootBoxContainer; canClaim: boolean; nextDailyFreeDate: Date }>(`${this.baseUrl}/dailyFree`, options)
+            .get<{ lootbox: LootBoxContainer; canClaim: boolean; hoursLeft: number; minutesLeft: number }>(`${this.baseUrl}/dailyFree`, options)
             .pipe(catchError((error) => this.messageHandler.handleHttpError(error)));
     }
 }
