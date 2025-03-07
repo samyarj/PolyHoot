@@ -5,8 +5,9 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 final class WebSocketManager {
   static final WebSocketManager instance = WebSocketManager();
 
-  String? roomId; // ✅ Optional Room ID
-  bool isOrganizer = false; // ✅ Default to false
+  String? roomId;
+  bool isOrganizer = false;
+  String? playerName;
 
   String _fetchBaseUrl() {
     return Environment.serverUrlSocket;

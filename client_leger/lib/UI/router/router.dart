@@ -4,6 +4,7 @@ import 'package:client_leger/UI/forgot-password/password_reset_page.dart';
 import 'package:client_leger/UI/login/login_page.dart';
 import 'package:client_leger/UI/main-view/main_scaffold.dart';
 import 'package:client_leger/UI/play/pages/creategamepage.dart';
+import 'package:client_leger/UI/play/pages/join_game.dart';
 import 'package:client_leger/UI/play/pages/playpage.dart';
 import 'package:client_leger/UI/play/pages/waiting_page.dart';
 import 'package:client_leger/UI/quiz/quiz_page.dart';
@@ -54,10 +55,12 @@ final GoRouter router = GoRouter(
                   builder: (context, state) => const GameCreationPage(),
                 ),
                 GoRoute(
+                  path: Paths.joinGame,
+                  builder: (context, state) => JoinGame(),
+                ),
+                GoRoute(
                     path: Paths.waitingPage,
-                    builder: (context, state) {
-                      return WaitingPage();
-                    }),
+                    builder: (context, state) => WaitingPage()),
               ],
             ),
           ],

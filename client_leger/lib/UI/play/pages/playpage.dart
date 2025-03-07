@@ -73,7 +73,10 @@ class PlayPage extends StatelessWidget {
                   ),
                   SizedBox(width: 20),
                   ElevatedButton(
-                    onPressed: () => {},
+                    onPressed: () => {
+                      GoRouter.of(context)
+                          .push('${Paths.play}/${Paths.joinGame}')
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black,

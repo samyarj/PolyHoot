@@ -42,7 +42,7 @@ export class Game {
         const index = this.players.findIndex((player) => player.name.toLowerCase() === playerName.toLowerCase());
         const outRangeIndex = -1;
         if (index !== outRangeIndex) {
-            this.players[index].socket.emit(GameEvents.PlayerBanned);
+            //if(isBanned) this.players[index].socket.emit(GameEvents.PlayerBanned);
             this.players[index].socket.leave(this.roomId);
             return this.players.splice(index, 1);
         }

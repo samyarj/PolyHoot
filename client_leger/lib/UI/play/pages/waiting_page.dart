@@ -1,7 +1,9 @@
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
-import 'package:client_leger/providers/waiting_page_provider.dart';
+import 'package:client_leger/providers/play/waiting_page_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:toastification/toastification.dart';
 
 class WaitingPage extends ConsumerWidget {
   @override
@@ -9,13 +11,23 @@ class WaitingPage extends ConsumerWidget {
     final waitingState = ref.watch(waitingPageProvider);
     final socketManager = WebSocketManager.instance;
 
-    leaveWaitingpage() {
+    ref.listen(waitingPageProvider, (previous, next) {
+      if (next.banned) {
+        _showToast(context, "Vous avez été banni !");
+        _leavePage(context);
+      } else if (next.organizerDisconnected && !socketManager.isOrganizer) {
+        _showToast(context, "L'organisateur a quitté la partie !");
+        _leavePage(context);
+      }
+    });
+
+    void leaveWaitingpage() {
       if (socketManager.isOrganizer) {
         ref.read(waitingPageProvider.notifier).leaveWaitingPageAsOrganizer();
       } else {
         ref.read(waitingPageProvider.notifier).leaveWaitingPageAsPlayer();
       }
-      Navigator.pop(context);
+      _leavePage(context);
     }
 
     return Scaffold(
@@ -161,21 +173,30 @@ class WaitingPage extends ConsumerWidget {
                         ElevatedButton.styleFrom(backgroundColor: Colors.red),
                     child: Text("Quitter"),
                   ),
-                  if (waitingState.banned)
-                    Text("Vous avez été banni !",
-                        style: TextStyle(
-                            color: Colors.red, fontWeight: FontWeight.bold)),
-                  if (waitingState.organizerDisconnected)
-                    Text("L'organisateur a quitté la partie !",
-                        style: TextStyle(
-                            color: Colors.red, fontWeight: FontWeight.bold)),
-                  if (waitingState.timerEnded)
-                    Text("La partie va commencer !",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
                 ],
               ),
       ),
     );
+  }
+
+  /// **Show a toast notification**
+  void _showToast(BuildContext context, String message) {
+    toastification.show(
+      context: context,
+      title: Text(message),
+      type: ToastificationType.error,
+      autoCloseDuration: Duration(seconds: 4),
+      alignment: Alignment.topCenter,
+      backgroundColor: Colors.red,
+      style: ToastificationStyle.flatColored,
+      showIcon: false,
+    );
+  }
+
+  /// **Leave the page and reset attributes**
+  void _leavePage(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      GoRouter.of(context).pop();
+    });
   }
 }
