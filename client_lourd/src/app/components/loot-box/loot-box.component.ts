@@ -16,4 +16,13 @@ export class LootBoxComponent {
     toggleMove() {
         this.isMoved = !this.isMoved;
     }
+
+    coinShow(value: number | string, limit: number, upperlimit: number) {
+        if (typeof value === 'number') {
+            if (value >= limit && value < upperlimit) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

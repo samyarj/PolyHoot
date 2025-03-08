@@ -35,13 +35,22 @@ export class LootBoxPageComponent {
 
     openBox(id: number) {
         this.lootBoxService.openBox(id).subscribe({
-            next: (reward: Reward | null) => {
+            next: (reward: Reward | null | boolean) => {
                 if (reward === null) {
                     this.matdialog.open(ErrorDialogComponent, {
                         width: '400px',
                         data: { message: "Vous n'avez pas assez d'argent pour vous procurer cette Loot Box.", reloadOnClose: false },
                     });
-                } else {
+                } else if (reward === false) {
+                    this.matdialog.open(ErrorDialogComponent, {
+                        width: '400px',
+                        data: {
+                            message: "Vous possèdez déjà l'item obtenu. Vous recevrez le prix de la lootBox en retour dans votre compte.",
+                            reloadOnClose: false,
+                        },
+                    });
+                } else if (reward !== true) {
+                    // to remove stupid type deduction error.
                     this.matdialog.open(LootBoxWinDialogComponent, {
                         data: reward,
                         backdropClass: `backdrop-dialog-${reward.rarity}`,

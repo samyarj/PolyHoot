@@ -106,12 +106,29 @@
                         box-shadow 1s ease;
                     .item-img {
                         width: 70%;
+                        height: 70%;
                         aspect-ratio: 1 / 1;
                         background: var(--primary-color);
                         border-radius: 500px;
                         display: flex;
                         justify-content: center;
                         align-items: center;
+                    }
+
+                    .item-img-theme {
+                        background: linear-gradient(to bottom, var(--primary-color) 55%, var(--secondary-color) 85%);
+                        border-radius: 3px black;
+                    }
+
+                    .item-img-coins {
+                        display: flex;
+                        flex-direction: column;
+
+                        svg {
+                            height: 50%;
+                            width: 50%;
+                            fill: var(--text-color);
+                        }
                     }
                 }
                 .very-rare {

@@ -70,6 +70,16 @@
         justify-content: center;
         align-items: center;
         color: var(--text-color);
+
+        .item-img-coins {
+            height: 40%;
+            width: 40%;
+
+            svg {
+                height: 100%;
+                width: 100%;
+            }
+        }
     }
 
     .button {
