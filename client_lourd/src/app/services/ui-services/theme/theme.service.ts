@@ -16,7 +16,11 @@ export class ThemeService {
                     this.ownedThemes = user?.inventory?.themes;
                 }
                 if (user?.config?.themeEquipped) {
-                    this.setTheme(user?.config?.themeEquipped);
+                    if (user.config.themeEquipped !== 'default') {
+                        this.setTheme(user?.config?.themeEquipped);
+                    } else {
+                        this.setTheme('dark');
+                    }
                 } else {
                     this.setTheme('dark');
                 }
@@ -25,7 +29,6 @@ export class ThemeService {
     };
     constructor(private authService: AuthService) {
         this.setTheme('light');
-        console.log('setting theme');
         this.authService.user$.subscribe(this.ownedThemesObserver);
     }
 

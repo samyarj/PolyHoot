@@ -30,6 +30,7 @@ export class AuthService {
     private loadingTokenBS = new BehaviorSubject<boolean>(true);
     private tokenBS: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
     private isAuthenticating = false;
+    private isSigningUp = false;
     private userSnapshotUnsubscribe: (() => void) | null = null;
     // eslint-disable-next-line @typescript-eslint/member-ordering
     user$ = this.userBS.asObservable();
@@ -46,7 +47,7 @@ export class AuthService {
         private firestore: Firestore,
         private socketClientService: SocketClientService,
     ) {
-        this.monitorTokenChanges();
+        this.monitorTokenChanges(true);
     }
 
     // Necessary to remove circular dependency
@@ -54,13 +55,20 @@ export class AuthService {
         return this.socketClientService;
     }
 
+    monitorTokenChangesAfterSignUp() {
+        this.monitorTokenChanges(false);
+    }
+
     signUp(username: string, email: string, password: string): Observable<User> {
-        this.isAuthenticating = true;
+        this.isSigningUp = true;
         return this.createUser(email, password).pipe(
             switchMap((userCredential) => this.updateUserProfile(userCredential.user, { displayName: username }).pipe(map(() => userCredential))),
             switchMap((userCredential) =>
                 this.handleAuthAndFetchUser(userCredential, `${this.baseUrl}/create-user`, 'POST').pipe(
-                    finalize(() => (this.isAuthenticating = false)),
+                    finalize(() => {
+                        this.isSigningUp = false;
+                        this.monitorTokenChangesAfterSignUp();
+                    }),
                 ),
             ),
             handleErrorsGlobally(this.injector),
@@ -197,12 +205,16 @@ export class AuthService {
         );
     }
 
-    private monitorTokenChanges(): void {
+    private monitorTokenChanges(signIn: boolean): void {
         this.loadingTokenBS.next(true);
 
         onIdTokenChanged(this.auth, async (firebaseUser) => {
             if (this.isAuthenticating) {
                 // return;
+            }
+
+            if (this.isSigningUp) {
+                return;
             }
 
             if (this.userSnapshotUnsubscribe) {
@@ -219,7 +231,7 @@ export class AuthService {
                     this.socketClientService.connect(idToken);
 
                     this.isUserOnline(firebaseUser.uid).subscribe((isOnline) => {
-                        if (isOnline) {
+                        if (isOnline && signIn) {
                             this.loadingTokenBS.next(false);
                             this.signOutAndClearSession();
                             throw new Error("L'utilisateur est déjà connecté sur un autre appareil.");
