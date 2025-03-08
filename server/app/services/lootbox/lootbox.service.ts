@@ -43,7 +43,7 @@ export class LootBoxService {
         return null;
     }
 
-    async openBox(boxIndex: number, uid: string, pity: number): Promise<Reward> {
+    async openBox(boxIndex: number, uid: string, pity: number): Promise<Reward | boolean> {
         let canAffordBox: boolean = await this.userService.updateUserCoins(uid, -1 * this.availableLootBoxes[boxIndex].price);
         if (!canAffordBox) {
             return null;
@@ -54,6 +54,17 @@ export class LootBoxService {
                 await this.userService.updateUserCoins(uid, reward.value as number);
             } else {
                 // PUT INTO INVENTORY HERE if not coins and if not alr owned!!!
+                let hasBeenAddedToInventory: boolean = false;
+                if (reward.type === RewardType.Avatar) hasBeenAddedToInventory = await this.userService.addToInventory(uid, 'avatar', reward.value);
+                else if (reward.type === RewardType.Border)
+                    hasBeenAddedToInventory = await this.userService.addToInventory(uid, 'banner', reward.value);
+                else if (reward.type === RewardType.Theme)
+                    hasBeenAddedToInventory = await this.userService.addToInventory(uid, 'theme', reward.value);
+
+                if (!hasBeenAddedToInventory) {
+                    await this.userService.updateUserCoins(uid, this.availableLootBoxes[boxIndex].price); // give back money.
+                    return false;
+                }
             }
             if (reward.rarity === RewardRarity.Common) {
                 await this.updatePity(uid, pity + PITY_INCREMENT);

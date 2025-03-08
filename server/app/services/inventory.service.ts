@@ -8,4 +8,12 @@ export class InventoryService {
     async equipTheme(uid: string, theme: string): Promise<boolean> {
         return await this.userService.equipTheme(uid, theme);
     }
+
+    async equipAvatar(uid: string, avatarURL: string): Promise<boolean> {
+        return await this.userService.equipAvatar(uid, avatarURL);
+    }
+
+    async equipBanner(uid: string, bannerURL: string): Promise<boolean> {
+        return await this.userService.equipBanner(uid, bannerURL);
+    }
 }

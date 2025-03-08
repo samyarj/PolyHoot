@@ -10,27 +10,27 @@
                             <img [src]="avatar" alt="avatar" class="square-avatar" />
                         </div>
                         <!-- Add more avatars -->
-                        <p *ngIf="avatars.length === 0">Vous n'avez pas d'avatars obtenus, allez-en obtenir dans la boutique ou dans les lootbox!</p>
                     </div>
+                    <p *ngIf="avatars.length === 0">Vous n'avez pas d'avatars obtenus, allez-en obtenir dans la boutique ou dans les lootbox!</p>
                 </div>
 
                 <div class="inventory-section">
-                    <div class="section-title">Bordure d'avatar</div>
+                    <div class="section-title">Bannière d'avatar</div>
                     <div class="grid">
                         <div *ngFor="let banner of banners" class="square" (click)="selectBanner(banner)">
                             <img [src]="banner" alt="avatar" class="square-banner" />
                         </div>
-                        <p *ngIf="banners.length === 0">
-                            Vous n'avez pas de bannières obtenues, allez-en obtenir dans la boutique ou dans les lootbox!
-                        </p>
                         <!-- Add more borders -->
                     </div>
+                    <p *ngIf="banners.length === 0">Vous n'avez pas de bannières obtenues, allez-en obtenir dans la boutique ou dans les lootbox!</p>
                 </div>
 
                 <div class="inventory-section">
                     <div class="section-title">Thèmes de couleur</div>
                     <div class="grid">
-                        <div *ngFor="let theme of themes" class="square" (click)="selectTheme(theme)">{{ theme }}</div>
+                        <div *ngFor="let theme of themes" class="square theme" [attr.data-theme]="theme" (click)="selectTheme(theme)">
+                            {{ theme }}
+                        </div>
                     </div>
                 </div>
             </div>

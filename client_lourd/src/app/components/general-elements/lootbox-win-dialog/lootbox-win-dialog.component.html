@@ -12,9 +12,7 @@
             open: isOpened
         }"
         class="cover-box"
-    >
-        image goes here
-    </div>
+    ></div>
     <div
         [ngClass]="{
             'very-rare': data.rarity === rewardRarity.VeryRare,
@@ -29,20 +27,22 @@
         <!-- Reward Type Sections -->
         <div class="reward-div" *ngIf="data.type === rewardType.Theme">
             Vous avez gagné le thème suivant :
-            <p>{{ data.value }}</p>
+            <div *ngIf="data.type === rewardType.Theme" class="item-img-theme" [attr.data-theme]="data.value">
+                {{ data.value }}
+            </div>
         </div>
         <div class="reward-div" *ngIf="data.type === rewardType.Avatar">
             Vous avez gagné l'avatar suivant :
-            <p>{{ data.value }}</p>
+            <app-avatar-banner *ngIf="data.type === rewardType.Avatar" [avatarUrl]="data.value" class="item-img-av"></app-avatar-banner>
         </div>
         <div class="reward-div" *ngIf="data.type === rewardType.Border">
             Vous avez gagné le border suivant :
-            <p>{{ data.value }}</p>
+            <app-avatar-banner *ngIf="data.type === rewardType.Border" [bannerUrl]="data.value || undefined" class="item-img-av"></app-avatar-banner>
         </div>
 
         <div class="reward-div" *ngIf="data.type === rewardType.Coins">
             Vous avez gagné le montant d'argent :
-            <div *ngIf="data.type === rewardType.Coins && coinShow(data.value, 0, 25)" class="item-img item-img-coins" [attr.data-theme]="data.value">
+            <div *ngIf="data.type === rewardType.Coins && coinShow(data.value, 0, 25)" class="item-img-coins" [attr.data-theme]="data.value">
                 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 24 24">
                     <g fill="var(--text-color)">
                         <path

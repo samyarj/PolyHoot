@@ -34,6 +34,13 @@
     transform: perspective(500px);
     box-shadow: inset 0px 0px 10px color-mix(in srgb, var(--tertiary-color) 80%, transparent);
     padding: 0px;
+
+    .lootbox-image {
+        width: 100%;
+        text-align: center;
+        font-size: x-large;
+        color: var(--text-color);
+    }
     .price {
         position: absolute;
         bottom: 10px; /* Adjust the spacing from the bottom */
@@ -117,7 +124,8 @@
 
                     .item-img-theme {
                         background: linear-gradient(to bottom, var(--primary-color) 55%, var(--secondary-color) 85%);
-                        border-radius: 3px black;
+                        border: 3px solid var(--tertiary-color);
+                        color: var(--text-color);
                     }
 
                     .item-img-coins {
