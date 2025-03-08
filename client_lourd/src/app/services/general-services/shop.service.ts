@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ShopItem } from '@app/interfaces/shop-item';
+import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
 import { catchError, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -30,8 +31,8 @@ export class ShopService {
             this.tokenID = token;
         });
         this.authService.user$.subscribe({
-            next: () => {
-                this.getShop();
+            next: (user: User | null) => {
+                if (user) this.getShop();
             },
         });
     }

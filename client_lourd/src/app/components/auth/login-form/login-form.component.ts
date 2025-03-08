@@ -17,7 +17,7 @@ export class LoginFormComponent {
         private fb: FormBuilder,
         private authService: AuthService,
         private router: Router,
-        private route: ActivatedRoute,
+        private route: ActivatedRoute, // private themeService: ThemeService,
     ) {
         this.loginForm = this.fb.group({
             identifier: ['', [Validators.required]],
@@ -42,8 +42,8 @@ export class LoginFormComponent {
         this.authService.login(identifier, password).subscribe({
             next: (user) => {
                 const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-                this.router.navigateByUrl(returnUrl);
                 this.authService.setUser(user);
+                this.router.navigateByUrl(returnUrl);
             },
             error: (error) => {
                 this.errorMessage = error.message;
@@ -57,8 +57,8 @@ export class LoginFormComponent {
         this.authService.signWithGoogle().subscribe({
             next: (user) => {
                 const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-                this.router.navigateByUrl(returnUrl);
                 this.authService.setUser(user);
+                this.router.navigateByUrl(returnUrl);
             },
             error: (error) => {
                 this.errorMessage = error.message;

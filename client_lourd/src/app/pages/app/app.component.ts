@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { MIN_LOADING_TIME } from '@app/constants/constants';
 import { AuthService } from '@app/services/auth/auth.service';
 import { ThemeService } from '@app/services/ui-services/theme/theme.service';
@@ -15,9 +16,15 @@ export class AppComponent {
     constructor(
         public authService: AuthService,
         public themeService: ThemeService,
+        private router: Router,
     ) {
         combineLatest([this.authService.loadingToken$.pipe(startWith(true)), new Promise((resolve) => setTimeout(resolve, MIN_LOADING_TIME))])
             .pipe(map(([isLoading]) => isLoading))
             .subscribe((loading) => this.showSpinner$.next(loading));
+    }
+
+    get isLoginOrSignUp(): boolean {
+        const authRoutes = ['login', 'signup', 'forgot-password'];
+        return authRoutes.includes(this.router.url.split('?')[0].split('#')[0].replace('/', ''));
     }
 }

@@ -11,13 +11,15 @@ export class ThemeService {
     private ownedThemes: string[] = [];
     private ownedThemesObserver: Partial<Observer<User | null>> = {
         next: (user: User | null) => {
-            if (user?.inventory?.themes) {
-                this.ownedThemes = user?.inventory?.themes;
-            }
-            if (user?.config?.themeEquipped) {
-                this.setTheme(user?.config?.themeEquipped);
-            } else {
-                this.setTheme('dark');
+            if (user) {
+                if (user?.inventory?.themes) {
+                    this.ownedThemes = user?.inventory?.themes;
+                }
+                if (user?.config?.themeEquipped) {
+                    this.setTheme(user?.config?.themeEquipped);
+                } else {
+                    this.setTheme('dark');
+                }
             }
         },
     };
