@@ -92,6 +92,18 @@
     --active-bg: rgba(255, 255, 255, 0.4);
 }
 
+[data-theme='sunset'] {
+    --primary-color: #200071;
+    --secondary-color: #fe65cb;
+    --tertiary-color: #ff8c00;
+    --text-color: rgb(254, 216, 255);
+
+    // Header colors
+    --nav-bg: #2b0070;
+    --hover-bg: rgba(255, 0, 225, 0.2);
+    --active-bg: rgba(255, 170, 0, 0.4);
+}
+
 [data-theme='light'] {
     --primary-color: #ffffff;
     --secondary-color: #71cdff;

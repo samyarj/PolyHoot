@@ -1,0 +1,21 @@
+<div class="avatar-banner-container">
+    <img *ngIf="this.avatarUrl !== undefined" class="avatar-img" [src]="avatarUrl" alt="Avatar" />
+    <img
+        *ngIf="
+            this.bannerUrl !== undefined &&
+            this.bannerUrl !== 'https://res.cloudinary.com/dtu6fkkm9/image/upload/t_banner-tranf/v1741396585/border-12_ekpeb9.png'
+        "
+        class="banner-img"
+        [src]="this.bannerUrl"
+        alt="Banner"
+    />
+    <img
+        *ngIf="
+            this.bannerUrl !== undefined &&
+            this.bannerUrl === 'https://res.cloudinary.com/dtu6fkkm9/image/upload/t_banner-tranf/v1741396585/border-12_ekpeb9.png'
+        "
+        class="banner-img-sidali"
+        [src]="this.bannerUrl"
+        alt="Banner"
+    />
+</div>

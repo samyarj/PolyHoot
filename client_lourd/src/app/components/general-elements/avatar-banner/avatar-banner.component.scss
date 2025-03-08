@@ -1,0 +1,29 @@
+.avatar-banner-container {
+    position: relative;
+    display: flex;
+    width: inherit;
+    height: inherit;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-img {
+    position: absolute;
+    width: inherit;
+    height: inherit;
+    border-radius: 50%;
+}
+
+.banner-img {
+    position: absolute;
+    width: calc(100% + 10px);
+    height: calc(100% + 10px);
+    border-radius: 50%;
+}
+
+.banner-img-sidali {
+    position: absolute;
+    width: calc(200% + 10px);
+    height: calc(200% + 10px);
+    border-radius: 50%;
+}
