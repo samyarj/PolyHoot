@@ -254,8 +254,11 @@ export class UserService {
             throw new Error("L'utilisateur n'existe pas.");
         }
         const banners = userDoc.data().inventory?.banners || [];
+
         if (banners.includes(bannerURL)) {
             await userRef.update({ borderEquipped: bannerURL });
+            return true;
+        } else if (bannerURL === '') {
             return true;
         }
         return false;
