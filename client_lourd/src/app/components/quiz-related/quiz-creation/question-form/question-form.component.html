@@ -98,6 +98,7 @@
             <input
                 *ngIf="question.qreAttributes"
                 type="number"
+                min = 0
                 [(ngModel)]="question.qreAttributes.tolerance"
                 name="tolerance"
                 required
