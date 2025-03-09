@@ -2,7 +2,7 @@
 <div class="bank-question-container">
     <app-question-type-filter (filterQuestionTypeChange)="updateSelectedQuestions($event, true)"></app-question-type-filter>
     <ul>
-        <li *ngFor="let question of selectedQuestions" [ngClass]="{ qcm: question.type === 'QCM', qrl: question.type === 'QRL' }">
+        <li *ngFor="let question of selectedQuestions" [ngClass]="{ qcm: question.type === 'QCM', qrl: question.type === 'QRL', qre: question.type === 'QRE' }">
             <i
                 class="fa-solid question-type-icon"
                 [ngClass]="{

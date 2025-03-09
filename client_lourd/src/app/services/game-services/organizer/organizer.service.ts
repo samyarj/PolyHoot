@@ -37,11 +37,10 @@ export class OrganizerService {
     gameInfo: GameInfo = { time: 0, currentQuestionIndex: 0, currentIndex: 0, playersInGame: 0 };
     gameModifiers: Modifiers = { paused: false, alertMode: false };
     gameStatus: GameStatus = GameStatus.WaitingForAnswers;
-    isCorrectAnswersArray: boolean[];
     shouldDisconnect: boolean = true;
     private questionsLength: number;
     private pointsAfterCorrection: PointsUpdateQRL[] = [];
-    private totalNumberOfAnswers = [0, 0, 0];
+    // private totalNumberOfAnswers = [0, 0, 0];
     private socketsInitialized: boolean = false;
     // Ce sont des services qui communiquent avec d'autres composantes selon la logique du jeu
     // eslint-disable-next-line max-params
@@ -82,7 +81,7 @@ export class OrganizerService {
     }
 
     gradeAnswer(value: QRLGrade) {
-        this.updateTotalAnswersArray(value);
+        // this.updateTotalAnswersArray(value);
         this.updatePointsForPlayer(value);
 
         const isLastQuestion = this.gameInfo.currentIndex >= this.answersQRL.length - 1;
@@ -109,7 +108,6 @@ export class OrganizerService {
     }
 
     initializeAttributes() {
-        this.initializeCorrectAnswers();
         this.gameStatus = GameStatus.WaitingForAnswers;
         this.gameModifiers.paused = false;
         this.gameModifiers.alertMode = false;
@@ -126,7 +124,9 @@ export class OrganizerService {
     }
 
     private updatePointsForPlayer(value: QRLGrade) {
-        const foundPlayer = this.playerListService.playerList.find((player) => player.name === this.answersQRL[this.gameInfo.currentIndex].player);
+        const foundPlayer = this.playerListService.playerList.find(
+            (player) => player.name === this.answersQRL[this.gameInfo.currentIndex].playerName,
+        );
         if (foundPlayer && foundPlayer.isInGame) {
             // eslint-disable-next-line @typescript-eslint/no-magic-numbers
             const additionalPoints = this.currentQuestion.points * (value / 100); // Conversion en pourcentage
@@ -137,44 +137,34 @@ export class OrganizerService {
         }
     }
 
-    private updateTotalAnswersArray(value: QRLGrade) {
+    /* private updateTotalAnswersArray(value: QRLGrade) {
         if (value === QRLGrade.Wrong) this.totalNumberOfAnswers[0] += 1;
         if (value === QRLGrade.Partial) this.totalNumberOfAnswers[1] += 1;
         if (value === QRLGrade.Correct) this.totalNumberOfAnswers[2] += 1;
-    }
+    } */
 
     private sendInfoToUsers() {
         this.gameStatus = GameStatus.CorrectionFinished;
         this.answersQRL = [];
         this.socketHandlerService.send(GameEvents.CorrectionFinished, {
             pointsTotal: this.pointsAfterCorrection,
-            answers: this.totalNumberOfAnswers,
+            /* answers: this.totalNumberOfAnswers, */
         });
         if (this.gameInfo.currentQuestionIndex + 1 >= this.questionsLength) {
             this.gameStatus = GameStatus.GameFinished;
         }
     }
 
-    private initializeCorrectAnswers() {
-        this.isCorrectAnswersArray = [];
-        const choices = this.currentQuestion.choices;
-        if (choices) {
-            for (const choice of choices) {
-                if (choice.isCorrect) this.isCorrectAnswersArray.push(true);
-                else this.isCorrectAnswersArray.push(false);
-            }
-        }
-    }
-
     private handleQRLAnswer() {
-        this.socketHandlerService.on(GameEvents.QRLAnswerSubmitted, (data: { player: string; playerAnswer: string }) => {
+        this.socketHandlerService.on(GameEvents.QRLAnswerSubmitted, (data: { playerName: string; playerAnswer: string }) => {
             this.answersQRL.push(data);
-            this.answersQRL.sort((a, b) => a.player.toLowerCase().localeCompare(b.player.toLowerCase()));
+            this.answersQRL.sort((a, b) => a.playerName.toLowerCase().localeCompare(b.playerName.toLowerCase()));
         });
     }
 
     private handleEveryoneSubmitted() {
         this.socketHandlerService.on(GameEvents.EveryoneSubmitted, () => {
+            this.gameInfo.time = 0;
             this.gameStatus = GameStatus.OrganizerCorrecting;
         });
     }
@@ -183,7 +173,7 @@ export class OrganizerService {
         this.socketHandlerService.on(GameEvents.PlayerStatusUpdate, (player: { name: string; isInGame: boolean }) => {
             this.playerListService.updatePlayerPresence(player.name, player.isInGame);
             if (player.isInGame === false) {
-                this.answersQRL = this.answersQRL.filter((playerGraded) => playerGraded.player !== player.name);
+                this.answersQRL = this.answersQRL.filter((playerGraded) => playerGraded.playerName !== player.name);
             }
         });
     }
@@ -248,8 +238,9 @@ export class OrganizerService {
     private handleNextQuestion() {
         // Si tout le monde repond a une question QCM, on saute directement a l'etat ou la correction est terminee.
         this.socketHandlerService.on(GameEvents.ProceedToNextQuestion, () => {
-            if (this.currentQuestion.type === QuestionType.QCM) {
+            if (this.currentQuestion.type === QuestionType.QCM || this.currentQuestion.type === QuestionType.QRE) {
                 this.gameStatus = GameStatus.CorrectionFinished;
+                this.gameInfo.time = 0;
                 if (this.gameInfo.currentQuestionIndex + 1 >= this.questionsLength) {
                     this.gameStatus = GameStatus.GameFinished;
                 }
@@ -259,12 +250,11 @@ export class OrganizerService {
             this.playerListService.resetPlayerList();
             this.answersQRL = [];
             this.pointsAfterCorrection = [];
-            this.totalNumberOfAnswers = [0, 0, 0];
+            // this.totalNumberOfAnswers = [0, 0, 0];
             this.gameInfo.currentIndex = 0;
             this.gameModifiers = { paused: false, alertMode: false };
             this.gameInfo.currentQuestionIndex = nextQuestion.index;
             this.currentQuestion = nextQuestion.question;
-            this.initializeCorrectAnswers();
         });
     }
 

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MAX_CHOICES, MAX_POINTS, MIN_CHOICES, MIN_POINTS, STEP } from '@app/constants/constants';
+import { QreAttributes } from '@app/interfaces/qre-attributes';
 import { Question } from '@app/interfaces/question';
 import { QuestionChoice } from '@app/interfaces/question-choice';
 import { QuestionType } from '@app/interfaces/question-type';
@@ -54,10 +55,47 @@ export class QuestionValidationService {
         );
         return !isDuplicate;
     }
+    toleranceValid(qreAttributes: QreAttributes | undefined): boolean {
+        if (qreAttributes) {
+            const interval = qreAttributes.maxBound - qreAttributes.minBound;
+            if (interval > 0) {
+                // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+                const maxTolerance = interval / 4;
+                return qreAttributes.tolerance <= maxTolerance;
+            }
+        }
+        return false;
+    }
+    minBoundValid(qreAttributes: QreAttributes | undefined): boolean {
+        if (qreAttributes) {
+            return qreAttributes.minBound < qreAttributes.goodAnswer && qreAttributes.minBound < qreAttributes.maxBound;
+        }
+        return false;
+    }
+    maxBoundValid(qreAttributes: QreAttributes | undefined): boolean {
+        if (qreAttributes) {
+            return qreAttributes.maxBound > qreAttributes.minBound && qreAttributes.maxBound > qreAttributes.goodAnswer;
+        }
+        return false;
+    }
+    goodAnswerValid(qreAttributes: QreAttributes | undefined): boolean {
+        if (qreAttributes) {
+            return qreAttributes.goodAnswer > qreAttributes.minBound && qreAttributes.goodAnswer < qreAttributes.maxBound;
+        }
+        return false;
+    }
 
     isQuestionValid(question: Question): boolean {
-        if (question.type === QuestionType.QCM) return this.isQcmValid(question);
-        else return this.isQrlValid(question);
+        switch (question.type) {
+            case QuestionType.QCM:
+                return this.isQcmValid(question);
+            case QuestionType.QRL:
+                return this.isQrlValid(question);
+            case QuestionType.QRE:
+                return this.isQreValid(question);
+            default:
+                return false;
+        }
     }
 
     isQrlValid(qrl: Question) {
@@ -74,6 +112,16 @@ export class QuestionValidationService {
         );
     }
 
+    isQreValid(question: Question): boolean {
+        return (
+            !this.commonValidationService.isStringEmpty(question.text) &&
+            this.arePointsValid(question.points) &&
+            this.toleranceValid(question.qreAttributes) &&
+            this.minBoundValid(question.qreAttributes) &&
+            this.maxBoundValid(question.qreAttributes) &&
+            this.goodAnswerValid(question.qreAttributes)
+        );
+    }
     verifyQuestion(question: Question, errorMessages: string[], index: number) {
         if (!this.commonValidationService.isValidStringValue(question.text))
             errorMessages.push('La question #' + index + ' doit avoir un champ "text" valide');

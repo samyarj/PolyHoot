@@ -9,6 +9,7 @@ export enum ChatEvents {
 export enum QuestionType {
     QCM = 'QCM',
     QRL = 'QRL',
+    QRE = 'QRE',
 }
 export enum GameState {
     HOME = 1,

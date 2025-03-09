@@ -13,8 +13,8 @@ import { Observable, Subject } from 'rxjs';
 })
 export class JoinGameService {
     popUpMessage: string = '';
-    gameIdValidated: boolean = false;
-    wrongPin: boolean = false;
+    canAccessGame: boolean = false;
+    wrongGameId: boolean = false;
     gameLocked = false;
     lobbys: Lobby[] = [];
     lobbysSource: Subject<Lobby[]>;
@@ -31,6 +31,8 @@ export class JoinGameService {
         this.lobbysSource = new Subject<Lobby[]>();
         this.lobbysObservable = this.lobbysSource.asObservable();
         this.handleLobbys();
+        this.handleJoinGame();
+        this.handleIdValidation();
         this.user$ = this.authService.user$;
         this.user$.subscribe((user) => {
             if (user) {
@@ -41,27 +43,16 @@ export class JoinGameService {
 
     validGameId(gameId: string) {
         this.socketService.send(JoinEvents.ValidateGameId, gameId);
-        this.handleIdValidation(gameId);
-    }
-
-    joinGame(gameId: string, playerName: string) {
-        const data = { gameId, playerName };
-        this.socketService.send(JoinEvents.Join, data);
-        this.handleJoinGame(gameId, playerName);
     }
 
     redirectToPage(page: string) {
         this.router.navigate([page]);
     }
 
-    updateGameIdValidated(value: boolean) {
-        this.gameIdValidated = value;
-    }
-
     resetService() {
         this.popUpMessage = '';
-        this.gameIdValidated = false;
-        this.wrongPin = false;
+        this.canAccessGame = false;
+        this.wrongGameId = false;
     }
     getAllLobbys() {
         this.socketService.send(GameEvents.GetCurrentGames);
@@ -73,33 +64,31 @@ export class JoinGameService {
         this.handleLockedLobby();
         this.handleUpdateLobby();
     }
-    private handleIdValidation(gameId: string) {
-        this.handleValidId(gameId);
+    private handleIdValidation() {
+        this.handleValidId();
         this.handleInvalidId();
         this.handleRoomLocked();
     }
 
-    private handleJoinGame(gameId: string, playerName: string) {
-        this.handleCanJoinGame(gameId, playerName);
-        this.handleExistingName();
+    private handleJoinGame() {
+        this.handleCanJoinGame();
         this.handleBannedName();
-        this.handleOrganizerName();
         this.handleCantJoinGame();
         this.handleRoomLocked();
     }
 
-    private handleValidId(gameId: string) {
-        this.socketService.on(JoinEvents.ValidId, () => {
-            this.gameIdValidated = true;
-            this.wrongPin = false;
+    private handleValidId() {
+        this.socketService.on(JoinEvents.ValidId, (gameId: string) => {
+            this.wrongGameId = false;
             this.popUpMessage = '';
-            this.joinGame(gameId, this.username);
+            const data = { gameId, playerName: this.username };
+            this.socketService.send(JoinEvents.Join, data);
         });
     }
 
     private handleInvalidId() {
         this.socketService.on(JoinErrors.InvalidId, () => {
-            this.gameIdValidated = false;
+            this.canAccessGame = false;
             this.popUpMessage = "Le code d'accès est invalide. Essayez à nouveau.";
             this.showPopUp();
         });
@@ -107,46 +96,32 @@ export class JoinGameService {
 
     private handleRoomLocked() {
         this.socketService.on(JoinErrors.RoomLocked, () => {
-            this.gameIdValidated = false;
+            this.canAccessGame = false;
             this.popUpMessage = "La partie est verrouillée. Veuillez demander l'accès à l'organisateur ou essayez un différent code.";
             this.showPopUp();
         });
     }
 
-    private handleCanJoinGame(gameId: string, playerName: string) {
-        this.socketService.on(JoinEvents.CanJoin, () => {
-            this.socketService.roomId = gameId;
-            this.socketService.playerName = playerName;
-            this.socketService.canChat = true;
+    private handleCanJoinGame() {
+        this.socketService.on(JoinEvents.CanJoin, (data: { playerName: string; gameId: string }) => {
+            this.socketService.roomId = data.gameId;
+            this.socketService.playerName = data.playerName;
             this.socketService.isOrganizer = false;
             this.redirectToPage('/waiting');
         });
     }
 
-    private handleExistingName() {
-        this.socketService.on(JoinErrors.ExistingName, () => {
-            this.popUpMessage = 'Ce nom est déjà utilisé. Veuillez choisir un autre nom.';
-            this.showPopUp();
-        });
-    }
-
     private handleBannedName() {
         this.socketService.on(JoinErrors.BannedName, () => {
-            this.popUpMessage = 'Ce nom est banni. Veuillez choisir un autre nom.';
-            this.showPopUp();
-        });
-    }
-
-    private handleOrganizerName() {
-        this.socketService.on(JoinErrors.OrganizerName, () => {
-            this.popUpMessage = "Vous ne pouvez pas vous appeler 'organisateur'. Veuillez choisir un autre nom.";
+            console.log('BannedName reçu du serveur');
+            this.popUpMessage = 'Vous avez été banni de cette partie, vous ne pouvez pas la rejoindre.';
             this.showPopUp();
         });
     }
 
     private handleCantJoinGame() {
         this.socketService.on(JoinErrors.Generic, () => {
-            this.popUpMessage = 'Ce nom est invalide. Veuillez choisir un autre nom.';
+            this.popUpMessage = 'Une erreur fait en sorte que vous ne pouvez pas joindre la partie';
             this.showPopUp();
         });
     }
@@ -191,9 +166,10 @@ export class JoinGameService {
     }
 
     private showPopUp() {
-        this.wrongPin = true;
+        console.log('Dans popUp');
+        this.wrongGameId = true;
         setTimeout(() => {
-            this.wrongPin = false;
+            this.wrongGameId = false;
             this.popUpMessage = '';
         }, TIMER_VALUE);
     }

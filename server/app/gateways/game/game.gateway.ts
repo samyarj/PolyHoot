@@ -13,15 +13,7 @@ export class GameGateway {
     constructor(
         private gameManager: GameManagerService,
         private historyManager: HistoryManagerService,
-    ) {}
-
-    @SubscribeMessage(GameEvents.SelectFromPlayer)
-    handleSelected(@ConnectedSocket() client: Socket, @MessageBody() data: { choice: number }): void {
-        const roomId = Array.from(client.rooms.values())[1];
-        const game = this.gameManager.getGameByRoomId(roomId);
-        const choiceSignal = game.handleChoiceChange(client, data.choice);
-        game.organizer.socket.emit(GameEvents.PlayerChoiceToOrganizer, choiceSignal);
-    }
+    ) { }
 
     @SubscribeMessage(TimerEvents.Pause)
     handlePauseGame(@ConnectedSocket() client: Socket) {
@@ -99,19 +91,21 @@ export class GameGateway {
     }
 
     @SubscribeMessage(GameEvents.FinalizePlayerAnswer)
-    handlePlayerFinalizeAnswer(@ConnectedSocket() client: Socket) {
+    handleFinalizePlayerAnswer(@ConnectedSocket() client: Socket, @MessageBody() answerData: { choiceSelected: boolean[]; qreAnswer: number }) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {
-            game.finalizePlayerAnswer(client);
+            game.finalizePlayerAnswer(client, answerData);
         }
     }
 
     @SubscribeMessage(GameEvents.QRLAnswerSubmitted)
-    handleQRLAnswer(@ConnectedSocket() client: Socket, @MessageBody() data: { player: string; playerAnswer: string }) {
+    handleQRLAnswer(@ConnectedSocket() client: Socket, @MessageBody() playerAnswer: string) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
-        game.organizer.socket.emit(GameEvents.QRLAnswerSubmitted, data);
+        console.log('2:Data reçue du serveur ', playerAnswer);
+        const playerName = game.players.find((player) => player.socket === client).name;
+        game.organizer.socket.emit(GameEvents.QRLAnswerSubmitted, { playerName, playerAnswer });
     }
 
     @SubscribeMessage(JoinEvents.ValidateGameId)
@@ -136,17 +130,13 @@ export class GameGateway {
         const canJoinGame = this.gameManager.joinGame(gameId, playerName, client);
         const game = this.gameManager.getGameByRoomId(gameId);
         if (canJoinGame) {
-            const playerName = game.players.map((player) => player.name);
-            client.emit(JoinEvents.CanJoin, { playerNames: playerName, gameId: gameId });
+            const playerNames = game.players.map((player) => player.name);
+            client.emit(JoinEvents.CanJoin, { playerNames, gameId });
             const roomId = Array.from(client.rooms.values())[1];
-            this.server.emit(JoinEvents.JoinSuccess, { playerNames: playerName, roomId });
+            this.server.emit(JoinEvents.JoinSuccess, { playerNames, roomId });
             this.gameManager.socketRoomsMap.set(client, data.gameId);
-        } else if (game.playerExists(playerName)) {
-            client.emit(JoinErrors.ExistingName);
         } else if (game.isPlayerBanned(playerName)) {
             client.emit(JoinErrors.BannedName);
-        } else if (game.isNameOrganizer(playerName)) {
-            client.emit(JoinErrors.OrganizerName);
         } else if (game.isLocked) {
             client.emit(JoinErrors.RoomLocked);
         } else {
@@ -184,8 +174,8 @@ export class GameGateway {
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {
             game.bannedNames.push(playerName.toLowerCase());
-            const bannedPlayer = game.players.find((player) => player.name === playerName);
-            bannedPlayer.socket.emit(GameEvents.PlayerBanned);
+            const player = game.players.find((player) => player.name === playerName);
+            player.socket.emit(GameEvents.PlayerBanned);
             game.removePlayer(playerName);
         }
         const playerNames = this.gameManager.getGameByRoomId(roomId).players.map((player) => player.name);
@@ -195,7 +185,7 @@ export class GameGateway {
     @SubscribeMessage(GameEvents.CorrectionFinished)
     handleCorrectionFinished(
         @ConnectedSocket() client: Socket,
-        @MessageBody() data: { pointsTotal: { playerName: string; points: number }[]; answers: number[] },
+        @MessageBody() data: { pointsTotal: { playerName: string; points: number }[] /*  answers: number[]  */ },
     ) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
@@ -210,7 +200,7 @@ export class GameGateway {
             const results = game.getResults();
             if (results) this.server.to(roomId).emit(GameEvents.SendResults, results);
             game.gameState = GameState.RESULTS;
-            this.historyManager.saveGameRecordToDB(roomId, results.players);
+            this.historyManager.saveGameRecordToDB(roomId, results);
         }
     }
 }

@@ -27,16 +27,16 @@ export class GameClientService {
     currentQuestion: Question;
     currentQuestionIndex = 0;
     gamePaused: boolean = false;
-    playerInfo: PlayerInfo = { submitted: false, userFirst: false, choiceSelected: [], waitingForQuestion: false };
+    playerInfo: PlayerInfo = { submitted: false, userFirst: false, choiceSelected: [], waitingForQuestion: false, exactAnswer: false };
     playerPoints: number = 0;
     pointsReceived: number = 0;
     quizTitle: string;
     shouldDisconnect: boolean = true;
     time: number = 0;
     answer: string = '';
+    qreAnswer: number;
     private finalAnswer: boolean;
     private realShowAnswers: boolean;
-    private socketsInitialized: boolean = false;
 
     // constructeur a 4 parametres permis selon les charges et le prof, etant donne la nature des attributs
     // eslint-disable-next-line max-params
@@ -46,6 +46,8 @@ export class GameClientService {
         private resultService: ResultsService,
         private messageHandlerService: MessageHandlerService,
     ) {
+        console.log(this.socketHandler.playerName);
+        this.handleSockets();
         this.resetAttributes();
     }
 
@@ -62,7 +64,6 @@ export class GameClientService {
             if (this.currentQuestion.choices && this.currentQuestion.choices[indexChoice]) {
                 this.currentQuestion.choices[indexChoice].isSelected = !this.currentQuestion.choices[indexChoice].isSelected;
                 this.playerInfo.choiceSelected[indexChoice] = !this.playerInfo.choiceSelected[indexChoice];
-                this.socketHandler.send(GameEvents.SelectFromPlayer, { choice: indexChoice });
                 return true;
             }
         }
@@ -75,27 +76,21 @@ export class GameClientService {
 
         if (!this.finalAnswer && this.time > 0) {
             this.finalAnswer = true;
-            this.socketHandler.send(GameEvents.FinalizePlayerAnswer);
+            this.socketHandler.send(GameEvents.FinalizePlayerAnswer, {
+                choiceSelected: this.playerInfo.choiceSelected,
+                qreAnswer: this.qreAnswer,
+            });
         }
     }
-
-    handleSockets() {
-        if (!this.socketsInitialized) {
-            this.handleWaitingForCorrection();
-            this.handleTimerValue();
-            this.goToNextQuestion();
-            this.getTitle();
-            this.playerPointsUpdate();
-            this.organizerHasDisconnected();
-            this.showEndResults();
-            this.resultService.handleResultsSockets();
-            this.socketsInitialized = true;
-        }
+    sendAnswerForCorrection(answer: string) {
+        this.socketHandler.send(GameEvents.QRLAnswerSubmitted, answer);
+        console.log('Data envoyée au serveur ', answer);
     }
 
     resetAttributes() {
         this.choiceFeedback = ChoiceFeedback.Idle;
         this.answer = '';
+        this.qreAnswer = 0;
         this.gamePaused = false;
         this.finalAnswer = false;
         this.realShowAnswers = false;
@@ -131,9 +126,6 @@ export class GameClientService {
     signalUserConnect() {
         this.socketHandler.send(ConnectEvents.UserToGame);
     }
-    sendAnswerForCorrection(answer: string) {
-        this.socketHandler.send(GameEvents.QRLAnswerSubmitted, { player: this.socketHandler.playerName, playerAnswer: answer });
-    }
 
     abandonGame() {
         this.messageHandlerService.confirmationDialog(ConfirmationMessage.AbandonGame, () => {
@@ -142,8 +134,19 @@ export class GameClientService {
         });
     }
 
+    private handleSockets() {
+        this.handleWaitingForCorrection();
+        this.handleTimerValue();
+        this.goToNextQuestion();
+        this.getTitle();
+        this.playerPointsUpdate();
+        this.organizerHasDisconnected();
+        this.showEndResults();
+        this.resultService.handleResultsSockets();
+    }
     private handleTimerValue() {
         this.socketHandler.on(TimerEvents.Paused, (pauseState: boolean) => {
+            console.log('1');
             this.gamePaused = pauseState;
         });
         this.socketHandler.on(TimerEvents.AlertModeStarted, () => {
@@ -163,12 +166,14 @@ export class GameClientService {
             this.time = time;
         });
         this.socketHandler.on(TimerEvents.End, (time: number) => {
+            this.playerInfo.submitted = true;
             this.time = time;
         });
     }
 
     private handleWaitingForCorrection() {
         this.socketHandler.on(GameEvents.WaitingForCorrection, () => {
+            this.time = 0;
             this.choiceFeedback = ChoiceFeedback.AwaitingCorrection;
         });
     }
@@ -180,11 +185,14 @@ export class GameClientService {
                 this.playerInfo.submitted = false;
                 this.currentQuestionIndex = nextQuestion.index;
                 this.currentQuestion = nextQuestion.question;
+                if (this.currentQuestion.type === 'QRE' && this.currentQuestion.qreAttributes)
+                    this.qreAnswer = this.currentQuestion.qreAttributes.minBound;
             }
         });
     }
     private playerPointsUpdate() {
-        this.socketHandler.on(GameEvents.PlayerPointsUpdate, (playerQuestionInfo: { points: number; isFirst: boolean }) => {
+        this.socketHandler.on(GameEvents.PlayerPointsUpdate, (playerQuestionInfo: { points: number; isFirst: boolean; exactAnswer: boolean }) => {
+            this.time = 0;
             if (playerQuestionInfo.points === this.playerPoints + this.currentQuestion.points) {
                 this.choiceFeedback = ChoiceFeedback.Correct;
             } else if (playerQuestionInfo.points === this.playerPoints) {
@@ -196,7 +204,10 @@ export class GameClientService {
                 this.playerInfo.userFirst = playerQuestionInfo.isFirst;
                 this.choiceFeedback = ChoiceFeedback.First;
             }
-
+            if (playerQuestionInfo.exactAnswer) {
+                this.playerInfo.exactAnswer = playerQuestionInfo.exactAnswer;
+                this.choiceFeedback = ChoiceFeedback.Exact;
+            }
             this.playerPoints = playerQuestionInfo.points;
             this.pointsReceived = playerQuestionInfo.points;
             this.playerInfo.userFirst = playerQuestionInfo.isFirst;
@@ -220,7 +231,6 @@ export class GameClientService {
             this.shouldDisconnect = false;
             this.router.navigate([AppRoute.RESULTS]);
             this.alertSoundPlayer.stop();
-            this.socketHandler.canChat = true;
         });
     }
 }
