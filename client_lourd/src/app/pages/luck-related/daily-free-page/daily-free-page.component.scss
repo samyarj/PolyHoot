@@ -191,7 +191,6 @@
                     .divider {
                         position: relative;
                         width: var(--navbar-separator-size);
-                        top: 5%; /* Adjusts starting position */
                         width: 2px;
                         flex-shrink: 0;
                         height: 90%; /* Makes the border 90% of the parent */

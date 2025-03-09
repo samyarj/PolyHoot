@@ -160,6 +160,61 @@ export class UserService {
         }
     }
 
+    async updatePity(uid: string, pity: number): Promise<boolean> {
+        const userRef = await this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+
+        if (pity < 0 || pity > 100) {
+            return false;
+        } else {
+            await userRef.update({ pity: pity });
+            return true;
+        }
+    }
+
+    async updateNextDailyFree(uid: string) {
+        const userRef = await this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+
+        const currentTimestamp = new Date();
+        if (!userDoc.data().nextDailyFree) {
+            await userRef.update({ nextDailyFree: currentTimestamp });
+            return true;
+        }
+        if (currentTimestamp > userDoc.data().nextDailyFree.toDate()) {
+            currentTimestamp.setDate(currentTimestamp.getDate() + 1);
+            await userRef.update({ nextDailyFree: currentTimestamp });
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    async canClaimDailyFreeUser(uid: string) {
+        const userRef = await this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+        const currentTimestamp = new Date();
+        if (!userDoc.data().nextDailyFree) {
+            await userRef.update({ nextDailyFree: currentTimestamp });
+            return true;
+        }
+
+        if (currentTimestamp > userDoc.data().nextDailyFree.toDate()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private async getUserFromFirestore(uid: string): Promise<admin.firestore.DocumentData> {
         const userDoc = await this.firestore.collection('users').doc(uid).get();
         if (!userDoc.exists) throw new UnauthorizedException("L'utilisateur n'existe pas.");
@@ -196,6 +251,28 @@ export class UserService {
             nWins: userDoc.nWins || 0,
             isOnline: true,
             pity: userDoc.pity || 0,
+            nextDailyFree: userDoc.nextDailyFree || null,
         };
+    }
+
+    async updateUserAvatar(uid: string, avatarUrl: string): Promise<void> {
+        const userRef = this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+
+        if (!userDoc.exists) {
+            throw new UnauthorizedException("L'utilisateur n'existe pas.");
+        }
+
+        // Update the avatarEquipped field
+        await userRef.update({ avatarEquipped: avatarUrl });
+
+        // Add the new avatar to the user's inventory if it's not already there
+        const userData = userDoc.data();
+        const avatars = userData.inventory?.avatars || [];
+        if (!avatars.includes(avatarUrl)) {
+            await userRef.update({
+                'inventory.avatars': admin.firestore.FieldValue.arrayUnion(avatarUrl),
+            });
+        }
     }
 }
