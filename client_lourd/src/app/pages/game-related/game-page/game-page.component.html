@@ -70,7 +70,8 @@
                         [disabled]="submitted"
                     ></textarea>
                     <div *ngIf="currentQuestion.type === 'QRE'" id="range-selection-section">
-                        <input *ngIf="currentQuestion.qreAttributes"
+                        <input
+                            *ngIf="currentQuestion.qreAttributes"
                             type="range"
                             id="range-input"
                             [min]="currentQuestion.qreAttributes.minBound"
@@ -83,6 +84,7 @@
                             <span>Borne maximale: {{ currentQuestion.qreAttributes.maxBound }}</span>
                             <span>Votre réponse: {{ qreAnswer }}</span>
                             <span>Marge de tolérance: {{ currentQuestion.qreAttributes.tolerance }}</span>
+                            <span *ngIf="this.showAnswers">Bonne réponse:{{ currentQuestion.qreAttributes.goodAnswer }}</span>
                         </div>
                     </div>
                     <button [disabled]="submitted" id="submit-choice-button" (click)="finalizeAnswer()">Submit</button>
