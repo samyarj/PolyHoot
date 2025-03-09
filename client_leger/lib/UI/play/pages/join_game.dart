@@ -53,10 +53,20 @@ class _JoinGameState extends ConsumerState<JoinGame> {
                       return Card(
                         color: colorScheme.secondaryContainer,
                         child: ListTile(
-                          title: Text(
-                            lobby.title,
-                            style: TextStyle(
-                                color: colorScheme.onSecondaryContainer),
+                          title: Row(
+                            children: [
+                              Text(
+                                lobby.title,
+                                style: TextStyle(
+                                    color: colorScheme.onSecondaryContainer),
+                              ),
+                              Spacer(),
+                              Text(
+                                'Joueur(s): ${lobby.nbPlayers}',
+                                style: TextStyle(
+                                    color: colorScheme.onSecondaryContainer),
+                              ),
+                            ],
                           ),
                           trailing: IconButton(
                             icon: Icon(Icons.add_circle,

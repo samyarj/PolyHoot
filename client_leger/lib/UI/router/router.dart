@@ -8,6 +8,7 @@ import 'package:client_leger/UI/play/pages/join_game.dart';
 import 'package:client_leger/UI/play/pages/organizer_game_page.dart';
 import 'package:client_leger/UI/play/pages/player_game_page.dart';
 import 'package:client_leger/UI/play/pages/playpage.dart';
+import 'package:client_leger/UI/play/pages/result_page.dart';
 import 'package:client_leger/UI/play/pages/waiting_page.dart';
 import 'package:client_leger/UI/quiz/quiz_page.dart';
 import 'package:client_leger/UI/router/routes.dart';
@@ -85,6 +86,10 @@ final GoRouter router = GoRouter(
                   path: Paths.organizerVue,
                   builder: (context, state) => const OrganizerGamePage(),
                 ),
+                GoRoute(
+                  path: Paths.resultsView,
+                  builder: (context, state) => const ResultsPage(),
+                )
               ],
             ),
           ],

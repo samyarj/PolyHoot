@@ -8,6 +8,7 @@ class Paths {
   static const String waitingPage = 'waiting_page';
   static const String playerVue = 'player_vue';
   static const String organizerVue = 'organizer_vue';
+  static const String resultsView = 'results_view';
   static const String quiz = '/quiz';
   static const String equipped = '/equipped';
   static const String coins = '/coins';

@@ -184,6 +184,7 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
 
   @override
   void dispose() {
+    AppLogger.i("Disposing WaitingPageNotifier");
     _socketManager.socket.off(GameEvents.PlayerLeft.value);
     _socketManager.socket.off(JoinEvents.JoinSuccess.value);
     _socketManager.socket.off(GameEvents.PlayerBanned.value);

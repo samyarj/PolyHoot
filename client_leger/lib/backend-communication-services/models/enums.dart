@@ -13,3 +13,34 @@ extension QuestionTypeExtension on QuestionType {
     }
   }
 }
+
+enum ChoiceFeedback {
+  First,
+  Correct,
+  Partial,
+  Incorrect,
+  Awaiting,
+  AwaitingCorrection,
+  Idle,
+}
+
+extension ChoiceFeedbackExtension on ChoiceFeedback {
+  String get name {
+    switch (this) {
+      case ChoiceFeedback.First:
+        return 'first';
+      case ChoiceFeedback.Correct:
+        return 'correct';
+      case ChoiceFeedback.Partial:
+        return 'partial';
+      case ChoiceFeedback.Incorrect:
+        return 'incorrect';
+      case ChoiceFeedback.Awaiting:
+        return 'awaiting';
+      case ChoiceFeedback.AwaitingCorrection:
+        return 'awaitingCorrection';
+      case ChoiceFeedback.Idle:
+        return 'idle';
+    }
+  }
+}
