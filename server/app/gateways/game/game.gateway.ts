@@ -127,7 +127,6 @@ export class GameGateway {
             client.emit(JoinEvents.CanJoin, { playerNames, gameId });
             const roomId = Array.from(client.rooms.values())[1];
             this.server.emit(JoinEvents.JoinSuccess, { playerNames, roomId });
-            this.server.emit(JoinEvents.JoinSuccess, { playerNames, roomId });
             this.gameManager.socketRoomsMap.set(client, data.gameId);
         } else if (game.isPlayerBanned(playerName)) {
             client.emit(JoinErrors.BannedName);
