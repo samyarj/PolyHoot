@@ -1,7 +1,7 @@
 import { AuthGuard } from '@app/guards/auth/auth.guard';
 import { AuthenticatedRequest } from '@app/interface/authenticated-request';
 import { UserService } from '@app/services/auth/user.service';
-import { Controller, Get, HttpStatus, Logger, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Logger, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import {
     ApiBadRequestResponse,
     ApiConflictResponse,
@@ -76,6 +76,22 @@ export class AuthController {
         } catch (error) {
             this.logger.error(`Error fetching profile: ${error.message}`);
 
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
+        }
+    }
+
+    @UseGuards(AuthGuard)
+    @ApiOkResponse({ description: 'Avatar successfully updated' })
+    @ApiBadRequestResponse({ description: 'Invalid request' })
+    @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+    @Post('update-avatar')
+    async updateAvatar(@Req() req: AuthenticatedRequest, @Body('avatarUrl') avatarUrl: string, @Res() response: Response) {
+        this.logger.log(`Updating avatar for user: ${req.user.displayName}`);
+        try {
+            await this.userService.updateUserAvatar(req.user.uid, avatarUrl);
+            response.status(HttpStatus.OK).json({ message: 'Avatar updated successfully' });
+        } catch (error) {
+            this.logger.error(`Error updating avatar: ${error.message}`);
             response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
         }
     }

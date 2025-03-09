@@ -1,0 +1,33 @@
+<div class="gen">
+    <div>
+        <h2>Select an Avatar</h2>
+        <div class="avatar-selection">
+            <div class="avatar-option">
+                <img src="avatar1.jpg" alt="Avatar" />
+            </div>
+
+            <input type="file" (change)="onFileSelected($event)" accept="image/*" #fileInput style="display: none" />
+            <button (click)="fileInput.click()" class="upload-btn">Choose Avatar</button>
+            <button (click)="onUpload()" class="upload-btn">Upload Avatar</button>
+        </div>
+    </div>
+
+    <div>
+        <h2>Account Settings</h2>
+        <form>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required />
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required />
+
+            <button type="submit">Update Settings</button>
+        </form>
+    </div>
+
+    <div>
+        <h2>Statistics</h2>
+        <p>Total Actions: 0</p>
+        <p>Last Login: N/A</p>
+    </div>
+</div>
