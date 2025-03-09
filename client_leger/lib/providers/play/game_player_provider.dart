@@ -108,12 +108,15 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
           time: 0,
           shouldNavigateToResults: false,
         )) {
-    AppLogger.i("GamePlayerNotifier initialized");
     _setupListeners();
+    signalUserConnect();
     getTitle();
+    AppLogger.i("GamePlayerNotifier initialized");
   }
 
   void _setupListeners() {
+    AppLogger.i("Setting up listeners in game player provider");
+
     _socketManager.webSocketReceiver(GameEvents.WaitingForCorrection.value,
         (_) {
       state = state.copyWith(choiceFeedback: ChoiceFeedback.AwaitingCorrection);
@@ -152,7 +155,7 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
 
     _socketManager.webSocketReceiver(GameEvents.NextQuestion.value,
         (nextQuestion) {
-      AppLogger.i("Next question received");
+      AppLogger.i("Next question received in game player provider");
       if (nextQuestion != null && nextQuestion['index'] != null) {
         resetAttributes();
         state = state.copyWith(
@@ -268,6 +271,7 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
   }
 
   void _updateTitle(title) {
+    AppLogger.i("Title received in game player provider");
     state = state.copyWith(quizTitle: title as String);
   }
 
