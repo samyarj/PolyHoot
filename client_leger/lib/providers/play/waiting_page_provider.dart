@@ -94,14 +94,12 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
 
     _socketManager.webSocketReceiver(GameEvents.PlayerBanned.value, (_) {
       state = state.copyWith(banned: true);
-      //_resetAttributes();
       AppLogger.i("Player was banned");
     });
 
     _socketManager.webSocketReceiver(DisconnectEvents.OrganizerHasLeft.value,
         (_) {
       state = state.copyWith(organizerDisconnected: true);
-      //_resetAttributes();
       AppLogger.i("Organizer has left");
     });
 
@@ -121,7 +119,6 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
       if (state.players.isNotEmpty) {
         startGame();
       }
-      //_resetAttributes();
       AppLogger.i("Game countdown ended");
     });
 
@@ -142,7 +139,6 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
     } else {
       _socketManager.webSocketSender(DisconnectEvents.Player.value);
     }
-    //_resetAttributes();
   }
 
   void banPlayer(String playerName) {
@@ -184,6 +180,7 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
 
   @override
   void dispose() {
+    if (!mounted) return;
     AppLogger.i("Disposing WaitingPageNotifier");
     _socketManager.socket.off(GameEvents.PlayerLeft.value);
     _socketManager.socket.off(JoinEvents.JoinSuccess.value);
@@ -193,7 +190,6 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
     _socketManager.socket.off(TimerEvents.GameCountdownValue.value);
     _socketManager.socket.off(TimerEvents.GameCountdownEnd.value);
     _socketManager.socket.off(GameEvents.Title.value);
-    if (!mounted) return;
     _resetAttributes();
     super.dispose();
   }

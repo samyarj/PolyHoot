@@ -27,8 +27,11 @@ class _JoinGameState extends ConsumerState<JoinGame> {
     final colorScheme = Theme.of(context).colorScheme;
     ref.listen(joinGameProvider, (previous, next) {
       if (next.isJoined) {
-        Future.delayed(const Duration(milliseconds: 200), () {});
-        ref.read(joinGameProvider.notifier).resetAttributes();
+        //Future.delayed(const Duration(milliseconds: 200), () {});
+        // Future.microtask(() {
+        //   ref.invalidate(joinGameProvider);
+        // });
+        //ref.read(joinGameProvider.notifier).resetAttributes();
         WidgetsBinding.instance.addPostFrameCallback((_) {
           GoRouter.of(context).go('${Paths.play}/${Paths.waitingPage}');
         });

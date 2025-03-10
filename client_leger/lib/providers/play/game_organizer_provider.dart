@@ -1,10 +1,13 @@
+// import 'package:client_leger/backend-communication-services/models/enums.dart';
+// import 'package:client_leger/backend-communication-services/models/player_info.dart';
 // import 'package:client_leger/backend-communication-services/models/question.dart';
 // import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 // import 'package:client_leger/utilities/logger.dart';
 // import 'package:client_leger/utilities/socket_events.dart';
 // import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// final organizerProvider = StateNotifierProvider.autoDispose<OrganizerNotifier, OrganizerState>((ref) {
+// final organizerProvider =
+//     StateNotifierProvider.autoDispose<OrganizerNotifier, OrganizerState>((ref) {
 //   return OrganizerNotifier();
 // });
 
@@ -96,8 +99,10 @@
 //       gameStatus: gameStatus ?? this.gameStatus,
 //       shouldDisconnect: shouldDisconnect ?? this.shouldDisconnect,
 //       totalNumberOfAnswers: totalNumberOfAnswers ?? this.totalNumberOfAnswers,
-//       pointsAfterCorrection: pointsAfterCorrection ?? this.pointsAfterCorrection,
-//       isCorrectAnswersArray: isCorrectAnswersArray ?? this.isCorrectAnswersArray,
+//       pointsAfterCorrection:
+//           pointsAfterCorrection ?? this.pointsAfterCorrection,
+//       isCorrectAnswersArray:
+//           isCorrectAnswersArray ?? this.isCorrectAnswersArray,
 //     );
 //   }
 // }
@@ -117,10 +122,18 @@
 //           answer: '',
 //           choiceFeedback: ChoiceFeedback.Idle,
 //           currentQuestion: Question(type: '', text: '', points: 0),
-//           playerInfo: PlayerInfo(submitted: false, userFirst: false, choiceSelected: [false, false, false, false], waitingForQuestion: false),
+//           playerInfo: PlayerInfo(
+//               submitted: false,
+//               userFirst: false,
+//               choiceSelected: [false, false, false, false],
+//               waitingForQuestion: false),
 //           time: 0,
 //           answersQRL: [],
-//           gameInfo: GameInfo(time: 0, currentQuestionIndex: 0, currentIndex: 0, playersInGame: 0),
+//           gameInfo: GameInfo(
+//               time: 0,
+//               currentQuestionIndex: 0,
+//               currentIndex: 0,
+//               playersInGame: 0),
 //           gameModifiers: Modifiers(paused: false, alertMode: false),
 //           gameStatus: GameStatus.WaitingForAnswers,
 //           shouldDisconnect: true,
@@ -141,12 +154,18 @@
 //         // Play alert sound
 //       });
 
-//       _socketManager.webSocketReceiver(TimerEvents.QuestionCountdownValue.value, (time) {
-//         state = state.copyWith(gamePaused: false, playerInfo: state.playerInfo.copyWith(waitingForQuestion: true), time: time);
+//       _socketManager.webSocketReceiver(TimerEvents.QuestionCountdownValue.value,
+//           (time) {
+//         state = state.copyWith(
+//             gamePaused: false,
+//             playerInfo: state.playerInfo.copyWith(waitingForQuestion: true),
+//             time: time);
 //       });
 
-//       _socketManager.webSocketReceiver(TimerEvents.QuestionCountdownEnd.value, (_) {
-//         state = state.copyWith(playerInfo: state.playerInfo.copyWith(waitingForQuestion: false));
+//       _socketManager.webSocketReceiver(TimerEvents.QuestionCountdownEnd.value,
+//           (_) {
+//         state = state.copyWith(
+//             playerInfo: state.playerInfo.copyWith(waitingForQuestion: false));
 //         // Stop alert sound
 //       });
 
@@ -158,11 +177,14 @@
 //         state = state.copyWith(time: time);
 //       });
 
-//       _socketManager.webSocketReceiver(GameEvents.WaitingForCorrection.value, (_) {
-//         state = state.copyWith(choiceFeedback: ChoiceFeedback.AwaitingCorrection);
+//       _socketManager.webSocketReceiver(GameEvents.WaitingForCorrection.value,
+//           (_) {
+//         state =
+//             state.copyWith(choiceFeedback: ChoiceFeedback.AwaitingCorrection);
 //       });
 
-//       _socketManager.webSocketReceiver(GameEvents.NextQuestion.value, (nextQuestion) {
+//       _socketManager.webSocketReceiver(GameEvents.NextQuestion.value,
+//           (nextQuestion) {
 //         if (nextQuestion != null && nextQuestion['index'] != null) {
 //           resetAttributes();
 //           state = state.copyWith(
@@ -173,8 +195,10 @@
 //         }
 //       });
 
-//       _socketManager.webSocketReceiver(GameEvents.PlayerPointsUpdate.value, (playerQuestionInfo) {
-//         if (playerQuestionInfo['points'] == state.playerPoints + state.currentQuestion.points) {
+//       _socketManager.webSocketReceiver(GameEvents.PlayerPointsUpdate.value,
+//           (playerQuestionInfo) {
+//         if (playerQuestionInfo['points'] ==
+//             state.playerPoints + state.currentQuestion.points) {
 //           state = state.copyWith(choiceFeedback: ChoiceFeedback.Correct);
 //         } else if (playerQuestionInfo['points'] == state.playerPoints) {
 //           state = state.copyWith(choiceFeedback: ChoiceFeedback.Incorrect);
@@ -183,18 +207,21 @@
 //         }
 //         if (playerQuestionInfo['isFirst']) {
 //           state = state.copyWith(
-//             playerInfo: state.playerInfo.copyWith(userFirst: playerQuestionInfo['isFirst']),
+//             playerInfo: state.playerInfo
+//                 .copyWith(userFirst: playerQuestionInfo['isFirst']),
 //             choiceFeedback: ChoiceFeedback.First,
 //           );
 //         }
 //         state = state.copyWith(
 //           playerPoints: playerQuestionInfo['points'],
 //           realShowAnswers: true,
-//           playerInfo: state.playerInfo.copyWith(choiceSelected: [false, false, false, false]),
+//           playerInfo: state.playerInfo
+//               .copyWith(choiceSelected: [false, false, false, false]),
 //         );
 //       });
 
-//       _socketManager.webSocketReceiver(DisconnectEvents.OrganizerHasLeft.value, (_) {
+//       _socketManager.webSocketReceiver(DisconnectEvents.OrganizerHasLeft.value,
+//           (_) {
 //         // Navigate to home
 //         if (!_socketManager.isOrganizer) {
 //           // Show error dialog
@@ -215,16 +242,22 @@
 
 //   void selectChoice(int indexChoice) {
 //     if (state.time > 0 && !state.finalAnswer) {
-//       if (state.currentQuestion.choices != null && state.currentQuestion.choices[indexChoice] != null) {
-//         state.currentQuestion.choices[indexChoice].isSelected = !state.currentQuestion.choices[indexChoice].isSelected;
-//         state.playerInfo.choiceSelected[indexChoice] = !state.playerInfo.choiceSelected[indexChoice];
-//         _socketManager.webSocketSender(GameEvents.SelectFromPlayer.value, {'choice': indexChoice});
+//       if (state.currentQuestion.choices != null &&
+//           state.currentQuestion.choices[indexChoice] != null) {
+//         state.currentQuestion.choices[indexChoice].isSelected =
+//             !state.currentQuestion.choices[indexChoice].isSelected;
+//         state.playerInfo.choiceSelected[indexChoice] =
+//             !state.playerInfo.choiceSelected[indexChoice];
+//         _socketManager.webSocketSender(
+//             GameEvents.SelectFromPlayer.value, {'choice': indexChoice});
 //       }
 //     }
 //   }
 
 //   void finalizeAnswer() {
-//     state = state.copyWith(playerInfo: state.playerInfo.copyWith(submitted: true), choiceFeedback: ChoiceFeedback.Awaiting);
+//     state = state.copyWith(
+//         playerInfo: state.playerInfo.copyWith(submitted: true),
+//         choiceFeedback: ChoiceFeedback.Awaiting);
 //     if (!state.finalAnswer && state.time > 0) {
 //       state = state.copyWith(finalAnswer: true);
 //       _socketManager.webSocketSender(GameEvents.FinalizePlayerAnswer.value);
@@ -268,7 +301,8 @@
 //   }
 
 //   void sendAnswerForCorrection(String answer) {
-//     _socketManager.webSocketSender(GameEvents.QRLAnswerSubmitted.value, {'player': _socketManager.playerName, 'playerAnswer': answer});
+//     _socketManager.webSocketSender(GameEvents.QRLAnswerSubmitted.value,
+//         {'player': _socketManager.playerName, 'playerAnswer': answer});
 //   }
 
 //   void abandonGame() {
@@ -293,11 +327,14 @@
 //     updateTotalAnswersArray(value);
 //     updatePointsForPlayer(value);
 
-//     final isLastQuestion = state.gameInfo.currentIndex >= state.answersQRL.length - 1;
+//     final isLastQuestion =
+//         state.gameInfo.currentIndex >= state.answersQRL.length - 1;
 //     if (isLastQuestion) {
 //       sendInfoToUsers();
 //     } else {
-//       state = state.copyWith(gameInfo: state.gameInfo.copyWith(currentIndex: state.gameInfo.currentIndex + 1));
+//       state = state.copyWith(
+//           gameInfo: state.gameInfo
+//               .copyWith(currentIndex: state.gameInfo.currentIndex + 1));
 //     }
 //   }
 
@@ -313,7 +350,8 @@
 //     initializeCorrectAnswers();
 //     state = state.copyWith(
 //       gameStatus: GameStatus.WaitingForAnswers,
-//       gameModifiers: state.gameModifiers.copyWith(paused: false, alertMode: false),
+//       gameModifiers:
+//           state.gameModifiers.copyWith(paused: false, alertMode: false),
 //       gameInfo: state.gameInfo.copyWith(time: 0),
 //       currentQuestion: DEFAULT_QUESTION,
 //       shouldDisconnect: true,
@@ -321,12 +359,18 @@
 //   }
 
 //   void updatePointsForPlayer(QRLGrade value) {
-//     final foundPlayer = state.playerListService.playerList.firstWhere((player) => player.name == state.answersQRL[state.gameInfo.currentIndex].player);
+//     final foundPlayer = state.playerListService.playerList.firstWhere(
+//         (player) =>
+//             player.name ==
+//             state.answersQRL[state.gameInfo.currentIndex].player);
 //     if (foundPlayer != null && foundPlayer.isInGame) {
-//       final additionalPoints = state.currentQuestion.points * (value / 100); // Conversion en pourcentage
+//       final additionalPoints = state.currentQuestion.points *
+//           (value / 100); // Conversion en pourcentage
 //       state = state.copyWith(pointsAfterCorrection: [
 //         ...state.pointsAfterCorrection,
-//         PointsUpdateQRL(playerName: foundPlayer.name, points: foundPlayer.points + additionalPoints),
+//         PointsUpdateQRL(
+//             playerName: foundPlayer.name,
+//             points: foundPlayer.points + additionalPoints),
 //       ]);
 //     }
 //   }
@@ -338,7 +382,8 @@
 //   }
 
 //   void sendInfoToUsers() {
-//     state = state.copyWith(gameStatus: GameStatus.CorrectionFinished, answersQRL: []);
+//     state = state
+//         .copyWith(gameStatus: GameStatus.CorrectionFinished, answersQRL: []);
 //     _socketManager.webSocketSender(GameEvents.CorrectionFinished.value, {
 //       'pointsTotal': state.pointsAfterCorrection,
 //       'answers': state.totalNumberOfAnswers,
@@ -363,9 +408,12 @@
 //   }
 
 //   void handleQRLAnswer() {
-//     _socketManager.webSocketReceiver(GameEvents.QRLAnswerSubmitted.value, (data) {
-//       state = state.copyWith(answersQRL: [...state.answersQRL, AnswerQRL.fromJson(data)]);
-//       state.answersQRL.sort((a, b) => a.player.toLowerCase().compareTo(b.player.toLowerCase()));
+//     _socketManager.webSocketReceiver(GameEvents.QRLAnswerSubmitted.value,
+//         (data) {
+//       state = state.copyWith(
+//           answersQRL: [...state.answersQRL, AnswerQRL.fromJson(data)]);
+//       state.answersQRL.sort(
+//           (a, b) => a.player.toLowerCase().compareTo(b.player.toLowerCase()));
 //     });
 //   }
 
@@ -376,22 +424,30 @@
 //   }
 
 //   void handlePlayerStatus() {
-//     _socketManager.webSocketReceiver(GameEvents.PlayerStatusUpdate.value, (player) {
-//       state.playerListService.updatePlayerPresence(player['name'], player['isInGame']);
+//     _socketManager.webSocketReceiver(GameEvents.PlayerStatusUpdate.value,
+//         (player) {
+//       state.playerListService
+//           .updatePlayerPresence(player['name'], player['isInGame']);
 //       if (!player['isInGame']) {
-//         state = state.copyWith(answersQRL: state.answersQRL.where((playerGraded) => playerGraded.player != player['name']).toList());
+//         state = state.copyWith(
+//             answersQRL: state.answersQRL
+//                 .where((playerGraded) => playerGraded.player != player['name'])
+//                 .toList());
 //       }
 //     });
 //   }
 
 //   void handlePlayerPoints() {
-//     _socketManager.webSocketReceiver(GameEvents.OrganizerPointsUpdate.value, (player) {
-//       state.playerListService.updatePlayerPoints(player['name'], player['points']);
+//     _socketManager.webSocketReceiver(GameEvents.OrganizerPointsUpdate.value,
+//         (player) {
+//       state.playerListService
+//           .updatePlayerPoints(player['name'], player['points']);
 //     });
 //   }
 
 //   void handlePlayerList() {
-//     _socketManager.webSocketReceiver(GameEvents.SendPlayerList.value, (playerList) {
+//     _socketManager.webSocketReceiver(GameEvents.SendPlayerList.value,
+//         (playerList) {
 //       if (playerList.isEmpty) {
 //         // Navigate to create
 //         // Show error dialog
@@ -399,8 +455,11 @@
 //         return;
 //       }
 //       state = state.copyWith(
-//         gameInfo: state.gameInfo.copyWith(playersInGame: playerList.where((player) => player['isInGame']).length),
-//         playerListService: state.playerListService.copyWith(playerList: playerList, noPlayers: playerList.length),
+//         gameInfo: state.gameInfo.copyWith(
+//             playersInGame:
+//                 playerList.where((player) => player['isInGame']).length),
+//         playerListService: state.playerListService
+//             .copyWith(playerList: playerList, noPlayers: playerList.length),
 //       );
 //     });
 //   }
@@ -415,20 +474,24 @@
 //     _socketManager.webSocketReceiver(TimerEvents.Value.value, (time) {
 //       state = state.copyWith(gameInfo: state.gameInfo.copyWith(time: time));
 //     });
-//     _socketManager.webSocketReceiver(TimerEvents.QuestionCountdownValue.value, (time) {
+//     _socketManager.webSocketReceiver(TimerEvents.QuestionCountdownValue.value,
+//         (time) {
 //       state = state.copyWith(gameInfo: state.gameInfo.copyWith(time: time));
 //     });
 //     _socketManager.webSocketReceiver(TimerEvents.Paused.value, (pauseState) {
-//       state = state.copyWith(gameModifiers: state.gameModifiers.copyWith(paused: pauseState));
+//       state = state.copyWith(
+//           gameModifiers: state.gameModifiers.copyWith(paused: pauseState));
 //     });
 //     _socketManager.webSocketReceiver(TimerEvents.AlertModeStarted.value, (_) {
-//       state = state.copyWith(gameModifiers: state.gameModifiers.copyWith(alertMode: true));
+//       state = state.copyWith(
+//           gameModifiers: state.gameModifiers.copyWith(alertMode: true));
 //       // Play alert sound
 //     });
 //   }
 
 //   void handleTimerEnd() {
-//     _socketManager.webSocketReceiver(TimerEvents.QuestionCountdownEnd.value, (_) {
+//     _socketManager.webSocketReceiver(TimerEvents.QuestionCountdownEnd.value,
+//         (_) {
 //       // Stop alert sound
 //     });
 
@@ -438,13 +501,15 @@
 //   }
 
 //   void handleQuestionsLength() {
-//     _socketManager.webSocketReceiver(GameEvents.QuestionsLength.value, (length) {
+//     _socketManager.webSocketReceiver(GameEvents.QuestionsLength.value,
+//         (length) {
 //       state = state.copyWith(questionsLength: length);
 //     });
 //   }
 
 //   void handleNextQuestion() {
-//     _socketManager.webSocketReceiver(GameEvents.ProceedToNextQuestion.value, (_) {
+//     _socketManager.webSocketReceiver(GameEvents.ProceedToNextQuestion.value,
+//         (_) {
 //       if (state.currentQuestion.type == QuestionType.QCM) {
 //         state = state.copyWith(gameStatus: GameStatus.CorrectionFinished);
 //         if (state.gameInfo.currentQuestionIndex + 1 >= state.questionsLength) {
@@ -452,14 +517,17 @@
 //         }
 //       }
 //     });
-//     _socketManager.webSocketReceiver(GameEvents.NextQuestion.value, (nextQuestion) {
+//     _socketManager.webSocketReceiver(GameEvents.NextQuestion.value,
+//         (nextQuestion) {
 //       state.playerListService.resetPlayerList();
 //       state = state.copyWith(
 //         answersQRL: [],
 //         pointsAfterCorrection: [],
 //         totalNumberOfAnswers: [0, 0, 0],
-//         gameInfo: state.gameInfo.copyWith(currentIndex: 0, currentQuestionIndex: nextQuestion['index']),
-//         gameModifiers: state.gameModifiers.copyWith(paused: false, alertMode: false),
+//         gameInfo: state.gameInfo.copyWith(
+//             currentIndex: 0, currentQuestionIndex: nextQuestion['index']),
+//         gameModifiers:
+//             state.gameModifiers.copyWith(paused: false, alertMode: false),
 //         currentQuestion: Question.fromJson(nextQuestion['question']),
 //       );
 //       initializeCorrectAnswers();

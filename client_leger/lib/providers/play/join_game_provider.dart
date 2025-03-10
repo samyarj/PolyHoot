@@ -177,6 +177,7 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
 
   @override
   void dispose() {
+    if (!mounted) return;
     AppLogger.i("Disposing JoinGameService");
     _socketManager.socket.off(JoinEvents.LobbyCreated.value);
     _socketManager.socket.off(GameEvents.End.value);
@@ -189,7 +190,7 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
     _socketManager.socket.off(JoinErrors.BannedName.value);
     _socketManager.socket.off(JoinEvents.ValidId.value);
     _socketManager.socket.off(JoinEvents.CanJoin.value);
-    if (!mounted) return;
+
     resetAttributes();
     super.dispose();
   }
