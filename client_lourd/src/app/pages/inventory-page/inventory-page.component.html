@@ -59,6 +59,7 @@
                 <p *ngIf="!canEquip && waitingForServerEquip">En attente de synchronisation des données avec le serveur.</p>
             </div>
             <button
+                class="equip-button"
                 [ngClass]="{
                     'custom-button-big': canEquip,
                     'custom-button-big-disabled': !canEquip

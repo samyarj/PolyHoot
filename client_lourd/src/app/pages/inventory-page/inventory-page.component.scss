@@ -183,7 +183,7 @@
             flex-direction: column;
             justify-content: space-around;
             align-items: center;
-
+            z-index: 10;
             .selected {
                 height: 50%;
                 aspect-ratio: 1 / 1;
@@ -254,4 +254,8 @@
             }
         }
     }
+}
+
+.equip-button {
+    z-index: 999;
 }
