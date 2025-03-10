@@ -9,7 +9,6 @@ import { Subject } from 'rxjs';
 export class WaitingPageService {
     players: string[] = [];
     gameLocked = false;
-    isInitialized = false;
     time: number | null;
     gameTitle: string;
 
@@ -22,7 +21,10 @@ export class WaitingPageService {
     timerEndSource = new Subject<boolean>();
     timerEnd$ = this.timerEndSource.asObservable();
 
-    constructor(private socketService: SocketClientService) {}
+    constructor(private socketService: SocketClientService) {
+        this.handleUserSockets();
+        this.handleGameSockets();
+    }
 
     get playerName() {
         return this.socketService.playerName;
@@ -60,14 +62,6 @@ export class WaitingPageService {
 
     startGameCountdown(time: number) {
         this.socketService.send(GameEvents.StartGameCountdown, time);
-    }
-
-    handleSocketEvents() {
-        if (!this.isInitialized) {
-            this.handleUserSockets();
-            this.handleGameSockets();
-            this.isInitialized = true;
-        }
     }
 
     private handleUserSockets() {

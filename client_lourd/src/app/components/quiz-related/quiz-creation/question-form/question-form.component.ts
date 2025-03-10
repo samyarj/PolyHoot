@@ -2,6 +2,7 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { EMPTY_STRING, MAX_CHOICES, MIN_CHOICES } from '@app/constants/constants';
 import { ButtonType } from '@app/constants/enum-class';
+import { EMPTY_QRE_QUESTION } from '@app/constants/mock-constants';
 import { Question } from '@app/interfaces/question';
 import { QuestionChoice } from '@app/interfaces/question-choice';
 import { QuestionType } from '@app/interfaces/question-type';
@@ -21,6 +22,10 @@ export class QuestionFormComponent implements OnChanges {
     @Input() submitButton: string = ButtonType.ADD;
     questionType: string = QuestionType.QCM;
     isTypeLocked: boolean = false;
+    goodAnswer: number;
+    minBound: number;
+    maxBound: number;
+    tolerance: number;
 
     constructor(
         private questionValidationService: QuestionValidationService,
@@ -28,9 +33,8 @@ export class QuestionFormComponent implements OnChanges {
     ) {}
 
     submitQuestion() {
-        if (this.question.type === QuestionType.QRL) delete this.question['choices'];
+        if (this.question.type !== QuestionType.QCM) delete this.question['choices'];
         this.questionSubmitted.emit(this.question);
-        this.resetAnswers();
     }
 
     toggleAnswer(choice: QuestionChoice): void {
@@ -82,8 +86,21 @@ export class QuestionFormComponent implements OnChanges {
     }
 
     onQuestionTypeChange() {
-        if (this.questionType === QuestionType.QRL) this.question.type = QuestionType.QRL;
-        else if (this.questionType === QuestionType.QCM) this.question.type = QuestionType.QCM;
+        switch (this.questionType) {
+            case QuestionType.QRL: {
+                this.question.type = QuestionType.QRL;
+                break;
+            }
+            case QuestionType.QCM: {
+                this.question.type = QuestionType.QCM;
+                break;
+            }
+            case QuestionType.QRE: {
+                this.question.type = QuestionType.QRE;
+                this.question.qreAttributes = JSON.parse(JSON.stringify(EMPTY_QRE_QUESTION.qreAttributes));
+                break;
+            }
+        }
     }
 
     ngOnChanges() {
@@ -96,5 +113,17 @@ export class QuestionFormComponent implements OnChanges {
                 this.isTypeLocked = false;
             }
         }
+    }
+    toleranceValid() {
+        return this.questionValidationService.toleranceValid(this.question.qreAttributes);
+    }
+    minBoundValid() {
+        return this.questionValidationService.minBoundValid(this.question.qreAttributes);
+    }
+    maxBoundValid() {
+        return this.questionValidationService.maxBoundValid(this.question.qreAttributes);
+    }
+    goodAnswerValid() {
+        return this.questionValidationService.goodAnswerValid(this.question.qreAttributes);
     }
 }

@@ -41,7 +41,7 @@ export class OrganizerPageComponent implements OnDestroy {
     }
     get playerBeingCorrected() {
         if (this.answersArray[this.currentIndex]) {
-            return this.answersArray[this.currentIndex].player;
+            return this.answersArray[this.currentIndex].playerName;
         }
         return '';
     }
@@ -57,10 +57,6 @@ export class OrganizerPageComponent implements OnDestroy {
     }
     get question() {
         return this.organizerService.currentQuestion;
-    }
-
-    get isCorrectAnswersArray() {
-        return this.organizerService.isCorrectAnswersArray;
     }
 
     get timeLeft() {

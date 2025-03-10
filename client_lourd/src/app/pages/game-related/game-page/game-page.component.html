@@ -36,6 +36,9 @@
                     <p *ngIf="currentQuestion.type === 'QCM' && choiceFeedback === 'first'" style="color: white">
                         Félicitations, vous êtes le premier à avoir bien répondu! Un bonus de point de 20% vous est accordé
                     </p>
+                    <p *ngIf="currentQuestion.type === 'QRE' && choiceFeedback === 'exact'" style="color: white">
+                        Félicitations, c'était la réponse exacte! Un bonus de point de 20% vous est accordé
+                    </p>
                     <p *ngIf="choiceFeedback === 'correct'" style="color: white">
                         Bonne réponse{{ currentQuestion.type === 'QCM' ? ', mais pas la première!' : '!' }} Tous les points sont accordés.
                     </p>
@@ -66,6 +69,24 @@
                         maxlength="{{ MAX_CHARACTERS }}"
                         [disabled]="submitted"
                     ></textarea>
+                    <div *ngIf="currentQuestion.type === 'QRE'" id="range-selection-section">
+                        <input
+                            *ngIf="currentQuestion.qreAttributes"
+                            type="range"
+                            id="range-input"
+                            [min]="currentQuestion.qreAttributes.minBound"
+                            [max]="currentQuestion.qreAttributes.maxBound"
+                            [(ngModel)]="qreAnswer"
+                            [disabled]="submitted"
+                        />
+                        <div id="range-values" *ngIf="currentQuestion.qreAttributes">
+                            <span>Borne minimale: {{ currentQuestion.qreAttributes.minBound }}</span>
+                            <span>Borne maximale: {{ currentQuestion.qreAttributes.maxBound }}</span>
+                            <span>Votre réponse: {{ qreAnswer }}</span>
+                            <span>Marge de tolérance: {{ currentQuestion.qreAttributes.tolerance }}</span>
+                            <span *ngIf="this.showAnswers">Bonne réponse:{{ currentQuestion.qreAttributes.goodAnswer }}</span>
+                        </div>
+                    </div>
                     <button [disabled]="submitted" id="submit-choice-button" (click)="finalizeAnswer()">Submit</button>
                 </div>
                 <button id="abandon-button" (click)="abandonGame()">Abandonner</button>

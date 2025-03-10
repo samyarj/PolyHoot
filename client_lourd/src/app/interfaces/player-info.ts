@@ -3,4 +3,5 @@ export interface PlayerInfo {
     userFirst: boolean;
     choiceSelected: boolean[];
     waitingForQuestion: boolean;
+    exactAnswer: boolean;
 }
