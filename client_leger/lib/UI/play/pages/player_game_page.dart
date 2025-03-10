@@ -147,6 +147,7 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
                   setState(() {});
                 },
               ),
+              // if (playerGameState.currentQuestion.type == QuestionType.QRE.name)
             buildFeedbackMessage(playerGameState.choiceFeedback,
                 playerGameState.currentQuestion),
             ElevatedButton(

@@ -171,6 +171,7 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
           currentQuestionIndex: nextQuestion['index'],
           currentQuestion: Question.fromJson(nextQuestion['question']),
         );
+        
       }
     });
 
@@ -257,6 +258,7 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
         waitingForQuestion: false,
         choiceSelected: [false, false, false, false],
       ),
+      qreAnswer: 0,
       shouldDisconnect: true,
     );
     if (state.currentQuestion.choices != null) {
@@ -295,7 +297,8 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
 
   @override
   void dispose() {
-    AppLogger.i("Disposing GamePlayerNotifier");
+    if (!mounted) return;
+    AppLogger.i("Disposing GamePlayerProvider");
     _socketManager.socket.off(GameEvents.WaitingForCorrection.value);
     _socketManager.socket.off(TimerEvents.Paused.value);
     _socketManager.socket.off(TimerEvents.AlertModeStarted.value);
@@ -307,8 +310,6 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
     _socketManager.socket.off(GameEvents.PlayerPointsUpdate.value);
     _socketManager.socket.off(DisconnectEvents.OrganizerHasLeft.value);
     _socketManager.socket.off(GameEvents.SendResults.value);
-
-    if (!mounted) return;
     resetAttributes();
     super.dispose();
   }

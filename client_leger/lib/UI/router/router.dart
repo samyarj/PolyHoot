@@ -13,6 +13,7 @@ import 'package:client_leger/UI/play/pages/waiting_page.dart';
 import 'package:client_leger/UI/quiz/quiz_page.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/UI/signup/signup_page.dart';
+import 'package:client_leger/providers/play/game_player_provider.dart';
 import 'package:client_leger/providers/play/join_game_provider.dart';
 import 'package:client_leger/providers/play/waiting_page_provider.dart';
 import 'package:client_leger/providers/user_provider.dart' as user_provider;
@@ -81,6 +82,11 @@ final GoRouter router = GoRouter(
                 GoRoute(
                   path: Paths.playerVue,
                   builder: (context, state) => const PlayerGamePage(),
+                  onExit: (context, state) async {
+                    final container = ProviderScope.containerOf(context);
+                    container.read(gameClientProvider.notifier).dispose();
+                    return true;
+                  },
                 ),
                 GoRoute(
                   path: Paths.organizerVue,
