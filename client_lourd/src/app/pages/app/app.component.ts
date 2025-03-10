@@ -18,6 +18,9 @@ export class AppComponent {
         public themeService: ThemeService,
         private router: Router,
     ) {
+        if (authService.isAuthenticated()) {
+            router.navigate(['/home']);
+        }
         combineLatest([this.authService.loadingToken$.pipe(startWith(true)), new Promise((resolve) => setTimeout(resolve, MIN_LOADING_TIME))])
             .pipe(map(([isLoading]) => isLoading))
             .subscribe((loading) => this.showSpinner$.next(loading));

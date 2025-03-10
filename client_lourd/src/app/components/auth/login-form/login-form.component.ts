@@ -19,6 +19,9 @@ export class LoginFormComponent {
         private router: Router,
         private route: ActivatedRoute, // private themeService: ThemeService,
     ) {
+        if (authService.isAuthenticated()) {
+            router.navigate(['/home']);
+        }
         this.loginForm = this.fb.group({
             identifier: ['', [Validators.required]],
             password: ['', Validators.required],
