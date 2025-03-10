@@ -13,6 +13,7 @@ import 'package:client_leger/UI/play/pages/waiting_page.dart';
 import 'package:client_leger/UI/quiz/quiz_page.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/UI/signup/signup_page.dart';
+import 'package:client_leger/models/player_data.dart';
 import 'package:client_leger/providers/play/game_player_provider.dart';
 import 'package:client_leger/providers/play/join_game_provider.dart';
 import 'package:client_leger/providers/play/waiting_page_provider.dart';
@@ -94,7 +95,10 @@ final GoRouter router = GoRouter(
                 ),
                 GoRoute(
                   path: Paths.resultsView,
-                  builder: (context, state) => const ResultsPage(),
+                  builder: (context, state) {
+                    final playerList = state.extra as List<PlayerData>;
+                    return ResultsPage(playerList: playerList);
+                  },
                 )
               ],
             ),

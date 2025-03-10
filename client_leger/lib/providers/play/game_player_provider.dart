@@ -1,5 +1,6 @@
 import 'package:client_leger/classes/sound_player.dart';
 import 'package:client_leger/models/enums.dart';
+import 'package:client_leger/models/player_data.dart';
 import 'package:client_leger/models/player_info.dart';
 import 'package:client_leger/models/question.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
@@ -94,6 +95,7 @@ class GamePlayerState {
 class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
   final WebSocketManager _socketManager = WebSocketManager.instance;
   SoundPlayer alertSoundPlayer = SoundPlayer();
+  List<PlayerData> resultPlayerList = [];
 
   GamePlayerNotifier()
       : super(GamePlayerState(
@@ -214,7 +216,12 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
       );
     });
 
-    _socketManager.webSocketReceiver(GameEvents.SendResults.value, (_) {
+    _socketManager.webSocketReceiver(GameEvents.SendResults.value, (data) {
+      AppLogger.i("Results received in game player provider $data");
+      final List<dynamic> jsonData = data as List<dynamic>;
+      resultPlayerList = jsonData
+          .map((json) => PlayerData.fromJson(json as Map<String, dynamic>))
+          .toList();
       alertSoundPlayer.stop();
       state = state.copyWith(
           shouldDisconnect: false, shouldNavigateToResults: true);
@@ -226,6 +233,10 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
       state = state.copyWith(organizerDisconnected: true);
       AppLogger.i("Organizer has left the game");
     });
+  }
+
+  List<PlayerData> getResultPlayerList() {
+    return resultPlayerList;
   }
 
   bool selectChoice(int indexChoice) {

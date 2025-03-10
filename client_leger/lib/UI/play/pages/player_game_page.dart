@@ -3,6 +3,7 @@ import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/enums.dart';
+import 'package:client_leger/models/player_data.dart';
 import 'package:client_leger/providers/play/game_player_provider.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:client_leger/utilities/socket_events.dart';
@@ -24,6 +25,7 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
   bool shouldDisconnect = true;
   static const int MAX_CHARACTERS = 200;
   final TextEditingController _QRLanswerController = TextEditingController();
+  List<PlayerData> resultPlayerList = [];
 
   @override
   void dispose() {
@@ -53,7 +55,10 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
       if (next.shouldNavigateToResults) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           shouldDisconnect = false;
-          GoRouter.of(context).go('${Paths.play}/${Paths.resultsView}');
+          resultPlayerList = playerGameNotifier.getResultPlayerList();
+          AppLogger.i("playerList in playergamepage is $resultPlayerList");
+          GoRouter.of(context).go('${Paths.play}/${Paths.resultsView}',
+              extra: resultPlayerList);
         });
       } else if (next.organizerDisconnected) {
         showErrorDialog(context, "L'organisateur a quitté la partie.");
@@ -156,26 +161,33 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
               ),
             if (playerGameState.currentQuestion.type == QuestionType.QRE.name &&
                 playerGameState.currentQuestion.qreAttributes != null) ...[
-              NumberPicker(
-                value: playerGameState.qreAnswer,
-                minValue:
-                    playerGameState.currentQuestion.qreAttributes!.minBound,
-                maxValue:
-                    playerGameState.currentQuestion.qreAttributes!.maxBound,
-                axis: Axis.vertical,
-                onChanged: playerGameState.playerInfo.submitted ||
-                        playerGameState.time == 0
-                    ? (value) {}
-                    : (value) {
-                        setState(() {
-                          playerGameNotifier.setQreAnswer(value);
-                        });
-                      },
-                textStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    fontSize: 18),
-                selectedTextStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.primary, fontSize: 34),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                  color: Colors.blue,
+                ),
+                child: NumberPicker(
+                  value: playerGameState.qreAnswer,
+                  minValue:
+                      playerGameState.currentQuestion.qreAttributes!.minBound,
+                  maxValue:
+                      playerGameState.currentQuestion.qreAttributes!.maxBound,
+                  axis: Axis.vertical,
+                  onChanged: playerGameState.playerInfo.submitted ||
+                          playerGameState.time == 0
+                      ? (value) {}
+                      : (value) {
+                          setState(() {
+                            playerGameNotifier.setQreAnswer(value);
+                          });
+                        },
+                  textStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontSize: 18),
+                  selectedTextStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontSize: 34),
+                ),
               ),
               SizedBox(height: 16),
               Text(
