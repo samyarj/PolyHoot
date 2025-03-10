@@ -34,13 +34,15 @@ class __ConfirmationDialogState extends State<_ConfirmationDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Confirmation'),
+      title: Text('Confirmation',
+          style: TextStyle(color: Theme.of(context).colorScheme.primary)),
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
             Text(
               widget.message,
-              style: TextStyle(fontSize: 18),
+              style: TextStyle(
+                  fontSize: 18, color: Theme.of(context).colorScheme.primary),
             ),
             if (_isLoading)
               Padding(

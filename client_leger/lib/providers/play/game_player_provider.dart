@@ -29,58 +29,59 @@ class GamePlayerState {
   final bool finalAnswer;
   final bool realShowAnswers;
   final bool shouldNavigateToResults;
+  final int qreAnswer;
 
-  GamePlayerState({
-    required this.pointsReceived,
-    required this.shouldDisconnect,
-    required this.quizTitle,
-    required this.playerPoints,
-    required this.currentQuestionIndex,
-    required this.gamePaused,
-    required this.finalAnswer,
-    required this.realShowAnswers,
-    required this.answer,
-    required this.choiceFeedback,
-    required this.currentQuestion,
-    required this.playerInfo,
-    required this.time,
-    required this.shouldNavigateToResults,
-  });
+  GamePlayerState(
+      {required this.pointsReceived,
+      required this.shouldDisconnect,
+      required this.quizTitle,
+      required this.playerPoints,
+      required this.currentQuestionIndex,
+      required this.gamePaused,
+      required this.finalAnswer,
+      required this.realShowAnswers,
+      required this.answer,
+      required this.choiceFeedback,
+      required this.currentQuestion,
+      required this.playerInfo,
+      required this.time,
+      required this.shouldNavigateToResults,
+      required this.qreAnswer});
 
-  GamePlayerState copyWith({
-    String? quizTitle,
-    int? playerPoints,
-    int? currentQuestionIndex,
-    bool? gamePaused,
-    bool? finalAnswer,
-    bool? realShowAnswers,
-    bool? socketsInitialized,
-    String? answer,
-    ChoiceFeedback? choiceFeedback,
-    Question? currentQuestion,
-    PlayerInfo? playerInfo,
-    int? time,
-    int? pointsReceived,
-    bool? shouldDisconnect,
-    bool? shouldNavigateToResults,
-  }) {
+  GamePlayerState copyWith(
+      {String? quizTitle,
+      int? playerPoints,
+      int? currentQuestionIndex,
+      bool? gamePaused,
+      bool? finalAnswer,
+      bool? realShowAnswers,
+      bool? socketsInitialized,
+      String? answer,
+      ChoiceFeedback? choiceFeedback,
+      Question? currentQuestion,
+      PlayerInfo? playerInfo,
+      int? time,
+      int? pointsReceived,
+      bool? shouldDisconnect,
+      bool? shouldNavigateToResults,
+      int? qreAnswer}) {
     return GamePlayerState(
-      pointsReceived: pointsReceived ?? this.pointsReceived,
-      shouldDisconnect: shouldDisconnect ?? this.shouldDisconnect,
-      quizTitle: quizTitle ?? this.quizTitle,
-      playerPoints: playerPoints ?? this.playerPoints,
-      currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
-      gamePaused: gamePaused ?? this.gamePaused,
-      finalAnswer: finalAnswer ?? this.finalAnswer,
-      realShowAnswers: realShowAnswers ?? this.realShowAnswers,
-      answer: answer ?? this.answer,
-      choiceFeedback: choiceFeedback ?? this.choiceFeedback,
-      currentQuestion: currentQuestion ?? this.currentQuestion,
-      playerInfo: playerInfo ?? this.playerInfo,
-      time: time ?? this.time,
-      shouldNavigateToResults:
-          shouldNavigateToResults ?? this.shouldNavigateToResults,
-    );
+        pointsReceived: pointsReceived ?? this.pointsReceived,
+        shouldDisconnect: shouldDisconnect ?? this.shouldDisconnect,
+        quizTitle: quizTitle ?? this.quizTitle,
+        playerPoints: playerPoints ?? this.playerPoints,
+        currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
+        gamePaused: gamePaused ?? this.gamePaused,
+        finalAnswer: finalAnswer ?? this.finalAnswer,
+        realShowAnswers: realShowAnswers ?? this.realShowAnswers,
+        answer: answer ?? this.answer,
+        choiceFeedback: choiceFeedback ?? this.choiceFeedback,
+        currentQuestion: currentQuestion ?? this.currentQuestion,
+        playerInfo: playerInfo ?? this.playerInfo,
+        time: time ?? this.time,
+        shouldNavigateToResults:
+            shouldNavigateToResults ?? this.shouldNavigateToResults,
+        qreAnswer: qreAnswer ?? this.qreAnswer);
   }
 }
 
@@ -106,6 +107,7 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
               choiceSelected: [false, false, false, false],
               waitingForQuestion: false),
           time: 0,
+          qreAnswer: 0,
           shouldNavigateToResults: false,
         )) {
     _setupListeners();
@@ -220,8 +222,6 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
             !(state.currentQuestion.choices![indexChoice].isSelected!);
         state.playerInfo.choiceSelected[indexChoice] =
             !state.playerInfo.choiceSelected[indexChoice];
-        _socketManager.webSocketSender(
-            GameEvents.SelectFromPlayer.value, {'choice': indexChoice});
         return true;
       }
     }
@@ -229,13 +229,17 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
   }
 
   void finalizeAnswer() {
+    AppLogger.i("Finalizing answer in game player provider");
     state = state.copyWith(
         playerInfo: state.playerInfo.copyWith(submitted: true),
         choiceFeedback: ChoiceFeedback.Awaiting);
 
     if (!state.finalAnswer && state.time > 0) {
       state = state.copyWith(finalAnswer: true);
-      _socketManager.webSocketSender(GameEvents.FinalizePlayerAnswer.value);
+      _socketManager.webSocketSender(GameEvents.FinalizePlayerAnswer.value, {
+        "choiceSelected": state.playerInfo.choiceSelected,
+        "qreAnswer": state.qreAnswer,
+      });
     }
   }
 
@@ -284,15 +288,9 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
   }
 
   void sendAnswerForCorrection(String answer) {
-    _socketManager.webSocketSender(GameEvents.QRLAnswerSubmitted.value,
-        {'player': _socketManager.playerName, 'playerAnswer': answer});
+    _socketManager.webSocketSender(GameEvents.QRLAnswerSubmitted.value, answer);
   }
 
-  void abandonGame() {
-    // Show confirmation dialog
-    // Navigate to home
-    // Stop alert sound
-  }
 
   @override
   void dispose() {

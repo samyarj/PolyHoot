@@ -13,7 +13,7 @@ class QuestionChoice {
     return QuestionChoice(
       text: json['text'],
       isCorrect: json['isCorrect'],
-      isSelected: json['isSelected'],
+      isSelected: json['isSelected'] ?? false,
     );
   }
 

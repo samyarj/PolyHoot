@@ -1,6 +1,7 @@
 enum QuestionType {
   QCM,
   QRL,
+  QRE,
 }
 
 extension QuestionTypeExtension on QuestionType {
@@ -10,6 +11,8 @@ extension QuestionTypeExtension on QuestionType {
         return 'QCM';
       case QuestionType.QRL:
         return 'QRL';
+      case QuestionType.QRE:
+        return 'QRE';
     }
   }
 }
@@ -22,6 +25,7 @@ enum ChoiceFeedback {
   Awaiting,
   AwaitingCorrection,
   Idle,
+  Exact,
 }
 
 extension ChoiceFeedbackExtension on ChoiceFeedback {
@@ -41,6 +45,8 @@ extension ChoiceFeedbackExtension on ChoiceFeedback {
         return 'awaitingCorrection';
       case ChoiceFeedback.Idle:
         return 'idle';
+      case ChoiceFeedback.Exact:
+        return 'exact';
     }
   }
 }

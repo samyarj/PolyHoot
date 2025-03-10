@@ -1,9 +1,14 @@
+import 'package:client_leger/UI/confirmation/confirmation_dialog.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/models/enums.dart';
+import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/providers/play/game_player_provider.dart';
+import 'package:client_leger/utilities/logger.dart';
+import 'package:client_leger/utilities/socket_events.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:client_leger/UI/play/widgets/feedback_message.dart';
 
 class PlayerGamePage extends ConsumerStatefulWidget {
   const PlayerGamePage({super.key});
@@ -14,6 +19,24 @@ class PlayerGamePage extends ConsumerStatefulWidget {
 
 class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
   int? _selectedChoiceIndex;
+  final WebSocketManager _socketManager = WebSocketManager.instance;
+  bool shouldDisconnect = true;
+
+  @override
+  void dispose() {
+    if (shouldDisconnect) {
+      AppLogger.i("Disconnecting player from game");
+      _socketManager.webSocketSender(DisconnectEvents.Player.value);
+    }
+    super.dispose();
+  }
+
+  void abandonGame() {
+    showConfirmationDialog(
+        context, "Êtes-vous sûr de vouloir abandonner la partie?", () async {
+      GoRouter.of(context).go(Paths.play);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,43 +47,98 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
     ref.listen(gameClientProvider, (previous, next) {
       if (next.shouldNavigateToResults) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          shouldDisconnect = false;
           GoRouter.of(context).go('${Paths.play}/${Paths.resultsView}');
         });
       }
     });
 
-    return Column(
-      children: [
-        Row(
-          children: [
-            Text(playerGameState.currentQuestion.points.toString(),
-                style: TextStyle(color: colorScheme.onSurface)),
-            Text(playerGameState.currentQuestion.text),
-            Text(
-              playerGameState.time.toString(),
-            ),
-          ],
-        ),
-        if (playerGameState.currentQuestion.type == QuestionType.QCM.name)
-          ...playerGameState.currentQuestion.choices!
-              .asMap()
-              .entries
-              .map((entry) {
-            int choiceIndex = entry.key;
-            final choice = entry.value;
-            return ListTile(
-              title: Text(choice.text),
-              leading: Radio(
-                value: choice,
-                groupValue: _selectedChoiceIndex,
-                onChanged: (value) {
-                  _selectedChoiceIndex = choiceIndex;
-                  playerGameNotifier.selectChoice(choiceIndex);
-                },
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          SizedBox(height: 16),
+          Text(playerGameState.quizTitle,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          SizedBox(height: 16),
+          Text("Vos points: ${playerGameState.playerPoints.toString()}",
+              style: TextStyle(color: colorScheme.onSurface, fontSize: 20)),
+          SizedBox(height: 16),
+          Row(
+            children: [
+              Text(
+                "${playerGameState.currentQuestion.points.toString()} points",
+                style: TextStyle(color: colorScheme.onSurface, fontSize: 20),
               ),
-            );
-          }),
-      ],
+              SizedBox(width: 16),
+              if (playerGameState.playerInfo.waitingForQuestion)
+                Text(
+                  "La prochaine question commence dans ${playerGameState.time} seconde${playerGameState.time == 1 ? '' : 's'}.",
+                  style: TextStyle(color: colorScheme.onSurface, fontSize: 20),
+                ),
+              if (!playerGameState.playerInfo.waitingForQuestion)
+                Expanded(
+                  child: Text(playerGameState.currentQuestion.text,
+                      style: TextStyle(fontSize: 20)),
+                ),
+              Column(
+                children: [
+                  if (!playerGameState.playerInfo.waitingForQuestion)
+                    Text(
+                      playerGameState.time.toString(),
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  if (playerGameState.gamePaused)
+                    Text(
+                      "Jeu en pause",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                ],
+              )
+            ],
+          ),
+          SizedBox(height: 16),
+          if (playerGameState.currentQuestion.type == QuestionType.QCM.name)
+            ...playerGameState.currentQuestion.choices!
+                .asMap()
+                .entries
+                .map((entry) {
+              int choiceIndex = entry.key;
+              final choice = entry.value;
+              return ListTile(
+                title: Text(choice.text, style: TextStyle(fontSize: 20)),
+                leading: Checkbox(
+                  value: playerGameState.playerInfo.choiceSelected[choiceIndex],
+                  onChanged: (value) {
+                    setState(() {
+                      playerGameNotifier.selectChoice(choiceIndex);
+                    });
+                  },
+                ),
+              );
+            }),
+          buildFeedbackMessage(
+              playerGameState.choiceFeedback, playerGameState.currentQuestion),
+          ElevatedButton(
+            onPressed: playerGameState.finalAnswer
+                ? null
+                : () {
+                    playerGameNotifier.finalizeAnswer();
+                  },
+            child: Text("Soumettre", style: TextStyle(fontSize: 20)),
+          ),
+          Spacer(),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: ElevatedButton(
+              onPressed: () {
+                abandonGame();
+              },
+              child: Text("Abandonner", style: TextStyle(fontSize: 20)),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
