@@ -1,8 +1,8 @@
 import 'package:client_leger/UI/confirmation/confirmation_dialog.dart';
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/router/routes.dart';
-import 'package:client_leger/models/enums.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
+import 'package:client_leger/models/enums.dart';
 import 'package:client_leger/providers/play/game_player_provider.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:client_leger/utilities/socket_events.dart';
@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:client_leger/UI/play/widgets/feedback_message.dart';
+import 'package:numberpicker/numberpicker.dart';
 
 class PlayerGamePage extends ConsumerStatefulWidget {
   const PlayerGamePage({super.key});
@@ -147,11 +148,52 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
                   setState(() {});
                 },
               ),
-              // if (playerGameState.currentQuestion.type == QuestionType.QRE.name)
+            if (playerGameState.currentQuestion.type == QuestionType.QRE.name &&
+                playerGameState.currentQuestion.qreAttributes != null) ...[
+              NumberPicker(
+                value: playerGameState.qreAnswer,
+                minValue:
+                    playerGameState.currentQuestion.qreAttributes!.minBound,
+                maxValue:
+                    playerGameState.currentQuestion.qreAttributes!.maxBound,
+                axis: Axis.vertical,
+                onChanged: playerGameState.playerInfo.submitted ||
+                        playerGameState.time == 0
+                    ? (value) {}
+                    : (value) {
+                        setState(() {
+                          playerGameNotifier.setQreAnswer(value);
+                        });
+                      },
+                textStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontSize: 18),
+                selectedTextStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.primary, fontSize: 34),
+              ),
+              SizedBox(height: 16),
+              Text(
+                  'Borne minimale: ${playerGameState.currentQuestion.qreAttributes!.minBound}',
+                  style: TextStyle(fontSize: 20)),
+              Text(
+                  'Borne maximale: ${playerGameState.currentQuestion.qreAttributes!.maxBound}',
+                  style: TextStyle(fontSize: 20)),
+              Text('Votre réponse: ${playerGameState.qreAnswer}',
+                  style: TextStyle(fontSize: 20)),
+              Text(
+                  'Marge de tolérance: ${playerGameState.currentQuestion.qreAttributes!.tolerance}',
+                  style: TextStyle(fontSize: 20)),
+              if (playerGameState.realShowAnswers)
+                Text(
+                    'Bonne réponse: ${playerGameState.currentQuestion.qreAttributes!.goodAnswer}',
+                    style: TextStyle(fontSize: 20)),
+              SizedBox(height: 16),
+            ],
             buildFeedbackMessage(playerGameState.choiceFeedback,
                 playerGameState.currentQuestion),
             ElevatedButton(
-              onPressed: playerGameState.playerInfo.submitted
+              onPressed: playerGameState.playerInfo.submitted ||
+                      playerGameState.time == 0
                   ? null
                   : () {
                       playerGameNotifier.finalizeAnswer();

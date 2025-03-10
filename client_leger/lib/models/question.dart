@@ -1,3 +1,4 @@
+import 'qre_attributes.dart';
 import 'question_choice.dart';
 
 class Question {
@@ -7,6 +8,7 @@ class Question {
   int points;
   List<QuestionChoice>? choices;
   String? lastModified;
+  QreAttributes? qreAttributes;
 
   Question({
     this.id,
@@ -15,6 +17,7 @@ class Question {
     required this.points,
     this.choices,
     this.lastModified,
+    this.qreAttributes,
   });
 
   factory Question.fromJson(Map<String, dynamic> json) {
@@ -29,6 +32,9 @@ class Question {
               .toList()
           : null,
       lastModified: json['lastModified'],
+      qreAttributes: json['qreAttributes'] != null
+          ? QreAttributes.fromJson(json['qreAttributes'])
+          : null,
     );
   }
 
@@ -40,6 +46,7 @@ class Question {
       'points': points,
       'choices': choices?.map((choice) => choice.toJson()).toList(),
       'lastModified': lastModified,
+      'qreAttributes': qreAttributes?.toJson(),
     };
   }
 }

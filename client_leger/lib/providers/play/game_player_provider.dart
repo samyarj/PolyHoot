@@ -166,12 +166,21 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
       AppLogger.i("Next question received in game player provider");
       if (nextQuestion != null && nextQuestion['index'] != null) {
         resetAttributes();
+        final currentQuestion = Question.fromJson(nextQuestion['question']);
+        final int? qreAnswer;
+
+        if (currentQuestion.type == QuestionType.QRE.name &&
+            currentQuestion.qreAttributes != null) {
+          qreAnswer = currentQuestion.qreAttributes!.minBound;
+        } else {
+          qreAnswer = null;
+        }
+
         state = state.copyWith(
-          playerInfo: state.playerInfo.copyWith(submitted: false),
-          currentQuestionIndex: nextQuestion['index'],
-          currentQuestion: Question.fromJson(nextQuestion['question']),
-        );
-        
+            playerInfo: state.playerInfo.copyWith(submitted: false),
+            currentQuestionIndex: nextQuestion['index'],
+            currentQuestion: currentQuestion,
+            qreAnswer: qreAnswer ?? state.qreAnswer);
       }
     });
 
@@ -258,7 +267,6 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
         waitingForQuestion: false,
         choiceSelected: [false, false, false, false],
       ),
-      qreAnswer: 0,
       shouldDisconnect: true,
     );
     if (state.currentQuestion.choices != null) {
@@ -293,6 +301,10 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
 
   void sendAnswerForCorrection(String answer) {
     _socketManager.webSocketSender(GameEvents.QRLAnswerSubmitted.value, answer);
+  }
+
+  void setQreAnswer(int answer) {
+    state = state.copyWith(qreAnswer: answer);
   }
 
   @override
