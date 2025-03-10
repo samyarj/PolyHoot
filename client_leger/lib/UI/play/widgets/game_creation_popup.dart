@@ -1,5 +1,5 @@
 import 'package:client_leger/UI/router/routes.dart';
-import 'package:client_leger/backend-communication-services/models/quiz.dart';
+import 'package:client_leger/models/quiz.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/utilities/socket_events.dart';
 import 'package:flutter/material.dart';

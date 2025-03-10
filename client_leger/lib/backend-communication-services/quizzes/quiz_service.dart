@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:client_leger/backend-communication-services/environment.dart';
-import 'package:client_leger/backend-communication-services/models/enums.dart';
-import 'package:client_leger/backend-communication-services/models/question.dart';
-import 'package:client_leger/backend-communication-services/models/quiz.dart';
+import 'package:client_leger/models/enums.dart';
+import 'package:client_leger/models/question.dart';
+import 'package:client_leger/models/quiz.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:http/http.dart' as http;
 

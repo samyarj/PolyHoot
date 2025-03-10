@@ -1,5 +1,5 @@
-import 'package:client_leger/backend-communication-services/models/enums.dart';
-import 'package:client_leger/backend-communication-services/models/question.dart';
+import 'package:client_leger/models/enums.dart';
+import 'package:client_leger/models/question.dart';
 import 'package:flutter/material.dart';
 
 Widget buildFeedbackMessage(

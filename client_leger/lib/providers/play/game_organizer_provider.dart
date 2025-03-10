@@ -1,559 +1,519 @@
-// import 'package:client_leger/backend-communication-services/models/enums.dart';
-// import 'package:client_leger/backend-communication-services/models/player_info.dart';
-// import 'package:client_leger/backend-communication-services/models/question.dart';
-// import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
-// import 'package:client_leger/utilities/logger.dart';
-// import 'package:client_leger/utilities/socket_events.dart';
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
 
-// final organizerProvider =
-//     StateNotifierProvider.autoDispose<OrganizerNotifier, OrganizerState>((ref) {
-//   return OrganizerNotifier();
-// });
+import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
+import 'package:client_leger/classes/sound_player.dart';
+import 'package:client_leger/models/game-related/answer_qrl.dart';
+import 'package:client_leger/models/game-related/modfiers.dart';
+import 'package:client_leger/models/game-related/partial_player.dart';
+import 'package:client_leger/models/game-related/points_update_qrl.dart';
+import 'package:client_leger/models/game_info.dart';
+import 'package:client_leger/utilities/logger.dart';
+import 'package:client_leger/utilities/socket_events.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// // ref: organizer.service.ts dans le lourd
+// Constants similar to those in organizer.constants.ts
+const DEFAULT_QUESTION = {
+  'id': '12',
+  'points': 15,
+  'choices': [
+    {'text': ''},
+    {'text': ''},
+    {'text': ''},
+    {'text': ''}
+  ],
+  'type': 'QCM',
+  'text': '',
+};
 
-// class OrganizerState {
-//   final String quizTitle;
-//   final int playerPoints;
-//   final int currentQuestionIndex;
-//   final bool gamePaused;
-//   final bool finalAnswer;
-//   final bool realShowAnswers;
-//   final bool socketsInitialized;
-//   final String answer;
-//   final ChoiceFeedback choiceFeedback;
-//   final Question currentQuestion;
-//   final PlayerInfo playerInfo;
-//   final int time;
-//   final List<AnswerQRL> answersQRL;
-//   final GameInfo gameInfo;
-//   final Modifiers gameModifiers;
-//   final GameStatus gameStatus;
-//   final bool shouldDisconnect;
-//   final List<int> totalNumberOfAnswers;
-//   final List<PointsUpdateQRL> pointsAfterCorrection;
-//   final List<bool> isCorrectAnswersArray;
+const TIME_TO_NEXT_ANSWER = 3000;
 
-//   OrganizerState({
-//     required this.quizTitle,
-//     required this.playerPoints,
-//     required this.currentQuestionIndex,
-//     required this.gamePaused,
-//     required this.finalAnswer,
-//     required this.realShowAnswers,
-//     required this.socketsInitialized,
-//     required this.answer,
-//     required this.choiceFeedback,
-//     required this.currentQuestion,
-//     required this.playerInfo,
-//     required this.time,
-//     required this.answersQRL,
-//     required this.gameInfo,
-//     required this.gameModifiers,
-//     required this.gameStatus,
-//     required this.shouldDisconnect,
-//     required this.totalNumberOfAnswers,
-//     required this.pointsAfterCorrection,
-//     required this.isCorrectAnswersArray,
-//   });
+final organizerProvider =
+    StateNotifierProvider.autoDispose<OrganizerNotifier, OrganizerState>((ref) {
+  return OrganizerNotifier(WebSocketManager.instance);
+});
 
-//   OrganizerState copyWith({
-//     String? quizTitle,
-//     int? playerPoints,
-//     int? currentQuestionIndex,
-//     bool? gamePaused,
-//     bool? finalAnswer,
-//     bool? realShowAnswers,
-//     bool? socketsInitialized,
-//     String? answer,
-//     ChoiceFeedback? choiceFeedback,
-//     Question? currentQuestion,
-//     PlayerInfo? playerInfo,
-//     int? time,
-//     List<AnswerQRL>? answersQRL,
-//     GameInfo? gameInfo,
-//     Modifiers? gameModifiers,
-//     GameStatus? gameStatus,
-//     bool? shouldDisconnect,
-//     List<int>? totalNumberOfAnswers,
-//     List<PointsUpdateQRL>? pointsAfterCorrection,
-//     List<bool>? isCorrectAnswersArray,
-//   }) {
-//     return OrganizerState(
-//       quizTitle: quizTitle ?? this.quizTitle,
-//       playerPoints: playerPoints ?? this.playerPoints,
-//       currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
-//       gamePaused: gamePaused ?? this.gamePaused,
-//       finalAnswer: finalAnswer ?? this.finalAnswer,
-//       realShowAnswers: realShowAnswers ?? this.realShowAnswers,
-//       socketsInitialized: socketsInitialized ?? this.socketsInitialized,
-//       answer: answer ?? this.answer,
-//       choiceFeedback: choiceFeedback ?? this.choiceFeedback,
-//       currentQuestion: currentQuestion ?? this.currentQuestion,
-//       playerInfo: playerInfo ?? this.playerInfo,
-//       time: time ?? this.time,
-//       answersQRL: answersQRL ?? this.answersQRL,
-//       gameInfo: gameInfo ?? this.gameInfo,
-//       gameModifiers: gameModifiers ?? this.gameModifiers,
-//       gameStatus: gameStatus ?? this.gameStatus,
-//       shouldDisconnect: shouldDisconnect ?? this.shouldDisconnect,
-//       totalNumberOfAnswers: totalNumberOfAnswers ?? this.totalNumberOfAnswers,
-//       pointsAfterCorrection:
-//           pointsAfterCorrection ?? this.pointsAfterCorrection,
-//       isCorrectAnswersArray:
-//           isCorrectAnswersArray ?? this.isCorrectAnswersArray,
-//     );
-//   }
-// }
+class OrganizerState {
+  final List<AnswerQRL> answersQRL;
+  final Map<String, dynamic> currentQuestion;
+  final GameInfo gameInfo;
+  final Modifiers gameModifiers;
+  final GameStatus gameStatus;
+  final bool shouldDisconnect;
+  final List<PartialPlayer> playerList;
+  final List<PointsUpdateQRL> pointsAfterCorrection;
+  final int questionsLength;
 
-// class OrganizerNotifier extends StateNotifier<OrganizerState> {
-//   final WebSocketManager _socketManager = WebSocketManager.instance;
+  OrganizerState({
+    required this.answersQRL,
+    required this.currentQuestion,
+    required this.gameInfo,
+    required this.gameModifiers,
+    required this.gameStatus,
+    required this.shouldDisconnect,
+    required this.playerList,
+    required this.pointsAfterCorrection,
+    required this.questionsLength,
+  });
 
-//   OrganizerNotifier()
-//       : super(OrganizerState(
-//           quizTitle: '',
-//           playerPoints: 0,
-//           currentQuestionIndex: 0,
-//           gamePaused: false,
-//           finalAnswer: false,
-//           realShowAnswers: false,
-//           socketsInitialized: false,
-//           answer: '',
-//           choiceFeedback: ChoiceFeedback.Idle,
-//           currentQuestion: Question(type: '', text: '', points: 0),
-//           playerInfo: PlayerInfo(
-//               submitted: false,
-//               userFirst: false,
-//               choiceSelected: [false, false, false, false],
-//               waitingForQuestion: false),
-//           time: 0,
-//           answersQRL: [],
-//           gameInfo: GameInfo(
-//               time: 0,
-//               currentQuestionIndex: 0,
-//               currentIndex: 0,
-//               playersInGame: 0),
-//           gameModifiers: Modifiers(paused: false, alertMode: false),
-//           gameStatus: GameStatus.WaitingForAnswers,
-//           shouldDisconnect: true,
-//           totalNumberOfAnswers: [0, 0, 0],
-//           pointsAfterCorrection: [],
-//           isCorrectAnswersArray: [],
-//         )) {
-//     _setupListeners();
-//   }
+  OrganizerState copyWith({
+    List<AnswerQRL>? answersQRL,
+    Map<String, dynamic>? currentQuestion,
+    GameInfo? gameInfo,
+    Modifiers? gameModifiers,
+    GameStatus? gameStatus,
+    bool? shouldDisconnect,
+    List<PartialPlayer>? playerList,
+    List<PointsUpdateQRL>? pointsAfterCorrection,
+    int? questionsLength,
+  }) {
+    return OrganizerState(
+      answersQRL: answersQRL ?? this.answersQRL,
+      currentQuestion: currentQuestion ?? this.currentQuestion,
+      gameInfo: gameInfo ?? this.gameInfo,
+      gameModifiers: gameModifiers ?? this.gameModifiers,
+      gameStatus: gameStatus ?? this.gameStatus,
+      shouldDisconnect: shouldDisconnect ?? this.shouldDisconnect,
+      playerList: playerList ?? this.playerList,
+      pointsAfterCorrection:
+          pointsAfterCorrection ?? this.pointsAfterCorrection,
+      questionsLength: questionsLength ?? this.questionsLength,
+    );
+  }
+}
 
-//   void _setupListeners() {
-//     if (!state.socketsInitialized) {
-//       _socketManager.webSocketReceiver(TimerEvents.Paused.value, (pauseState) {
-//         state = state.copyWith(gamePaused: pauseState);
-//       });
+class OrganizerNotifier extends StateNotifier<OrganizerState> {
+  final WebSocketManager _socketManager;
+  SoundPlayer alertSoundPlayer = SoundPlayer();
 
-//       _socketManager.webSocketReceiver(TimerEvents.AlertModeStarted.value, (_) {
-//         // Play alert sound
-//       });
+  OrganizerNotifier(this._socketManager)
+      : super(OrganizerState(
+          answersQRL: [],
+          currentQuestion: DEFAULT_QUESTION,
+          gameInfo: GameInfo(
+            time: 0,
+            currentQuestionIndex: 0,
+            currentIndex: 0,
+            playersInGame: 0,
+          ),
+          gameModifiers: Modifiers(
+            paused: false,
+            alertMode: false,
+          ),
+          gameStatus: GameStatus.WaitingForAnswers,
+          shouldDisconnect: true,
+          playerList: [],
+          pointsAfterCorrection: [],
+          questionsLength: 0,
+        )) {
+    _initializeListeners();
+    AppLogger.i("OrganizerNotifier initialized");
+  }
 
-//       _socketManager.webSocketReceiver(TimerEvents.QuestionCountdownValue.value,
-//           (time) {
-//         state = state.copyWith(
-//             gamePaused: false,
-//             playerInfo: state.playerInfo.copyWith(waitingForQuestion: true),
-//             time: time);
-//       });
+  String get roomId => _socketManager.roomId ?? '';
 
-//       _socketManager.webSocketReceiver(TimerEvents.QuestionCountdownEnd.value,
-//           (_) {
-//         state = state.copyWith(
-//             playerInfo: state.playerInfo.copyWith(waitingForQuestion: false));
-//         // Stop alert sound
-//       });
+  void nextQuestion() {
+    state = state.copyWith(gameStatus: GameStatus.WaitingForNextQuestion);
+    _socketManager.webSocketSender(GameEvents.StartQuestionCountdown.value);
+    Timer(const Duration(milliseconds: TIME_TO_NEXT_ANSWER), () {
+      state = state.copyWith(gameStatus: GameStatus.WaitingForAnswers);
+    });
+  }
 
-//       _socketManager.webSocketReceiver(TimerEvents.Value.value, (time) {
-//         state = state.copyWith(time: time);
-//       });
+  void showResults() {
+    _socketManager.webSocketSender(GameEvents.ShowResults.value);
+  }
 
-//       _socketManager.webSocketReceiver(TimerEvents.End.value, (time) {
-//         state = state.copyWith(time: time);
-//       });
+  void gradeAnswer(int value) {
+    _updatePointsForPlayer(value);
 
-//       _socketManager.webSocketReceiver(GameEvents.WaitingForCorrection.value,
-//           (_) {
-//         state =
-//             state.copyWith(choiceFeedback: ChoiceFeedback.AwaitingCorrection);
-//       });
+    final isLastQuestion =
+        state.gameInfo.currentIndex >= state.answersQRL.length - 1;
+    if (isLastQuestion) {
+      _sendInfoToUsers();
+    } else {
+      final updatedGameInfo = GameInfo(
+        time: state.gameInfo.time,
+        currentQuestionIndex: state.gameInfo.currentQuestionIndex,
+        currentIndex: state.gameInfo.currentIndex + 1,
+        playersInGame: state.gameInfo.playersInGame,
+      );
+      state = state.copyWith(gameInfo: updatedGameInfo);
+    }
+  }
 
-//       _socketManager.webSocketReceiver(GameEvents.NextQuestion.value,
-//           (nextQuestion) {
-//         if (nextQuestion != null && nextQuestion['index'] != null) {
-//           resetAttributes();
-//           state = state.copyWith(
-//             playerInfo: state.playerInfo.copyWith(submitted: false),
-//             currentQuestionIndex: nextQuestion['index'],
-//             currentQuestion: Question.fromJson(nextQuestion['question']),
-//           );
-//         }
-//       });
+  void signalUserDisconnect() {
+    _socketManager
+        .webSocketSender(DisconnectEvents.OrganizerDisconnected.value);
+    alertSoundPlayer.stop();
+  }
 
-//       _socketManager.webSocketReceiver(GameEvents.PlayerPointsUpdate.value,
-//           (playerQuestionInfo) {
-//         if (playerQuestionInfo['points'] ==
-//             state.playerPoints + state.currentQuestion.points) {
-//           state = state.copyWith(choiceFeedback: ChoiceFeedback.Correct);
-//         } else if (playerQuestionInfo['points'] == state.playerPoints) {
-//           state = state.copyWith(choiceFeedback: ChoiceFeedback.Incorrect);
-//         } else {
-//           state = state.copyWith(choiceFeedback: ChoiceFeedback.Partial);
-//         }
-//         if (playerQuestionInfo['isFirst']) {
-//           state = state.copyWith(
-//             playerInfo: state.playerInfo
-//                 .copyWith(userFirst: playerQuestionInfo['isFirst']),
-//             choiceFeedback: ChoiceFeedback.First,
-//           );
-//         }
-//         state = state.copyWith(
-//           playerPoints: playerQuestionInfo['points'],
-//           realShowAnswers: true,
-//           playerInfo: state.playerInfo
-//               .copyWith(choiceSelected: [false, false, false, false]),
-//         );
-//       });
+  void signalUserConnect() {
+    _socketManager.webSocketSender(ConnectEvents.UserToGame.value);
+  }
 
-//       _socketManager.webSocketReceiver(DisconnectEvents.OrganizerHasLeft.value,
-//           (_) {
-//         // Navigate to home
-//         if (!_socketManager.isOrganizer) {
-//           // Show error dialog
-//           // Stop alert sound
-//         }
-//       });
+  void pauseGame() {
+    _socketManager.webSocketSender(TimerEvents.Pause.value);
+  }
 
-//       _socketManager.webSocketReceiver(GameEvents.SendResults.value, (_) {
-//         state = state.copyWith(shouldDisconnect: false);
-//         // Navigate to results
-//         // Stop alert sound
-//         _socketManager.canChat = true;
-//       });
+  void startAlertMode() {
+    _socketManager.webSocketSender(TimerEvents.AlertGameMode.value);
+  }
 
-//       state = state.copyWith(socketsInitialized: true);
-//     }
-//   }
+  void abandonGame() {
+    // Implement a dialog service similar to messageHandlerService
+    // For now, we'll just navigate and stop sound
+    // This would typically require a navigation service
+    alertSoundPlayer.stop();
+  }
 
-//   void selectChoice(int indexChoice) {
-//     if (state.time > 0 && !state.finalAnswer) {
-//       if (state.currentQuestion.choices != null &&
-//           state.currentQuestion.choices[indexChoice] != null) {
-//         state.currentQuestion.choices[indexChoice].isSelected =
-//             !state.currentQuestion.choices[indexChoice].isSelected;
-//         state.playerInfo.choiceSelected[indexChoice] =
-//             !state.playerInfo.choiceSelected[indexChoice];
-//         _socketManager.webSocketSender(
-//             GameEvents.SelectFromPlayer.value, {'choice': indexChoice});
-//       }
-//     }
-//   }
+  void _updatePointsForPlayer(int value) {
+    final currentAnswer = state.answersQRL[state.gameInfo.currentIndex];
+    final foundPlayerIndex = state.playerList.indexWhere(
+      (player) => player.name == currentAnswer.playerName && player.isInGame,
+    );
 
-//   void finalizeAnswer() {
-//     state = state.copyWith(
-//         playerInfo: state.playerInfo.copyWith(submitted: true),
-//         choiceFeedback: ChoiceFeedback.Awaiting);
-//     if (!state.finalAnswer && state.time > 0) {
-//       state = state.copyWith(finalAnswer: true);
-//       _socketManager.webSocketSender(GameEvents.FinalizePlayerAnswer.value);
-//     }
-//   }
+    if (foundPlayerIndex != -1) {
+      // Convert value to percentage (assuming value is 0-100 like QRLGrade)
+      final additionalPoints = state.currentQuestion['points'] * (value / 100);
 
-//   void resetAttributes() {
-//     state = state.copyWith(
-//       choiceFeedback: ChoiceFeedback.Idle,
-//       answer: '',
-//       gamePaused: false,
-//       finalAnswer: false,
-//       realShowAnswers: false,
-//       playerInfo: state.playerInfo.copyWith(
-//         userFirst: false,
-//         waitingForQuestion: false,
-//         choiceSelected: [false, false, false, false],
-//       ),
-//       shouldDisconnect: true,
-//     );
-//     if (state.currentQuestion.choices != null) {
-//       for (var choice in state.currentQuestion.choices) {
-//         choice.isSelected = false;
-//       }
-//     }
-//   }
+      // Create updated points list
+      final updatedPointsAfterCorrection =
+          List<PointsUpdateQRL>.from(state.pointsAfterCorrection);
+      updatedPointsAfterCorrection.add(
+        PointsUpdateQRL(
+          playerName: state.playerList[foundPlayerIndex].name,
+          points: state.playerList[foundPlayerIndex].points + additionalPoints,
+        ),
+      );
 
-//   void getTitle() {
-//     _socketManager.webSocketSender(JoinEvents.TitleRequest.value, (title) {
-//       state = state.copyWith(quizTitle: title);
-//     });
-//   }
+      state =
+          state.copyWith(pointsAfterCorrection: updatedPointsAfterCorrection);
+    }
+  }
 
-//   void signalUserDisconnect() {
-//     _socketManager.webSocketSender(DisconnectEvents.Player.value);
-//     // Stop alert sound
-//   }
+  void _sendInfoToUsers() {
+    state = state.copyWith(
+      gameStatus: GameStatus.CorrectionFinished,
+      answersQRL: [],
+    );
 
-//   void signalUserConnect() {
-//     _socketManager.webSocketSender(ConnectEvents.UserToGame.value);
-//   }
+    _socketManager.webSocketSender(GameEvents.CorrectionFinished.value, {
+      'pointsTotal': state.pointsAfterCorrection,
+    });
 
-//   void sendAnswerForCorrection(String answer) {
-//     _socketManager.webSocketSender(GameEvents.QRLAnswerSubmitted.value,
-//         {'player': _socketManager.playerName, 'playerAnswer': answer});
-//   }
+    if (state.gameInfo.currentQuestionIndex + 1 >= state.questionsLength) {
+      state = state.copyWith(gameStatus: GameStatus.GameFinished);
+    }
+  }
 
-//   void abandonGame() {
-//     // Show confirmation dialog
-//     // Navigate to home
-//     // Stop alert sound
-//   }
+  void _initializeListeners() {
+    _handleQRLAnswer();
+    _handleEveryoneSubmitted();
+    _handlePlayerStatus();
+    _handlePlayerPoints();
+    _handlePlayerList();
+    _handleTimerValue();
+    _handleTimerEnd();
+    _handleQuestionsLength();
+    _handleNextQuestion();
+    _handleResultsSockets();
+    _handleGameEnded();
+  }
 
-//   void nextQuestion() {
-//     state = state.copyWith(gameStatus: GameStatus.WaitingForNextQuestion);
-//     _socketManager.webSocketSender(GameEvents.StartQuestionCountdown.value);
-//     Future.delayed(Duration(seconds: TIME_TO_NEXT_ANSWER), () {
-//       state = state.copyWith(gameStatus: GameStatus.WaitingForAnswers);
-//     });
-//   }
+  void _handleQRLAnswer() {
+    _socketManager.webSocketReceiver(GameEvents.QRLAnswerSubmitted.value,
+        (data) {
+      if (data is Map<String, dynamic>) {
+        final answer = AnswerQRL(
+          playerName: data['playerName'],
+          playerAnswer: data['playerAnswer'],
+        );
 
-//   void showResults() {
-//     _socketManager.webSocketSender(GameEvents.ShowResults.value);
-//   }
+        final updatedAnswers = List<AnswerQRL>.from(state.answersQRL)
+          ..add(answer);
+        updatedAnswers.sort((a, b) =>
+            a.playerName.toLowerCase().compareTo(b.playerName.toLowerCase()));
 
-//   void gradeAnswer(QRLGrade value) {
-//     updateTotalAnswersArray(value);
-//     updatePointsForPlayer(value);
+        state = state.copyWith(answersQRL: updatedAnswers);
+        AppLogger.i("QRL Answer received from: ${answer.playerName}");
+      }
+    });
+  }
 
-//     final isLastQuestion =
-//         state.gameInfo.currentIndex >= state.answersQRL.length - 1;
-//     if (isLastQuestion) {
-//       sendInfoToUsers();
-//     } else {
-//       state = state.copyWith(
-//           gameInfo: state.gameInfo
-//               .copyWith(currentIndex: state.gameInfo.currentIndex + 1));
-//     }
-//   }
+  void _handleEveryoneSubmitted() {
+    _socketManager.webSocketReceiver(GameEvents.EveryoneSubmitted.value, (_) {
+      final updatedGameInfo = GameInfo(
+        time: 0,
+        currentQuestionIndex: state.gameInfo.currentQuestionIndex,
+        currentIndex: state.gameInfo.currentIndex,
+        playersInGame: state.gameInfo.playersInGame,
+      );
 
-//   void pauseGame() {
-//     _socketManager.webSocketSender(TimerEvents.Pause.value);
-//   }
+      state = state.copyWith(
+        gameInfo: updatedGameInfo,
+        gameStatus: GameStatus.OrganizerCorrecting,
+      );
 
-//   void startAlertMode() {
-//     _socketManager.webSocketSender(TimerEvents.AlertGameMode.value);
-//   }
+      AppLogger.i("Everyone submitted their answers");
+    });
+  }
 
-//   void initializeAttributes() {
-//     initializeCorrectAnswers();
-//     state = state.copyWith(
-//       gameStatus: GameStatus.WaitingForAnswers,
-//       gameModifiers:
-//           state.gameModifiers.copyWith(paused: false, alertMode: false),
-//       gameInfo: state.gameInfo.copyWith(time: 0),
-//       currentQuestion: DEFAULT_QUESTION,
-//       shouldDisconnect: true,
-//     );
-//   }
+  void _handlePlayerStatus() {
+    _socketManager.webSocketReceiver(GameEvents.PlayerStatusUpdate.value,
+        (data) {
+      if (data is Map<String, dynamic>) {
+        final String playerName = data['name'];
+        final bool isInGame = data['isInGame'];
 
-//   void updatePointsForPlayer(QRLGrade value) {
-//     final foundPlayer = state.playerListService.playerList.firstWhere(
-//         (player) =>
-//             player.name ==
-//             state.answersQRL[state.gameInfo.currentIndex].player);
-//     if (foundPlayer != null && foundPlayer.isInGame) {
-//       final additionalPoints = state.currentQuestion.points *
-//           (value / 100); // Conversion en pourcentage
-//       state = state.copyWith(pointsAfterCorrection: [
-//         ...state.pointsAfterCorrection,
-//         PointsUpdateQRL(
-//             playerName: foundPlayer.name,
-//             points: foundPlayer.points + additionalPoints),
-//       ]);
-//     }
-//   }
+        // Update player list
+        final updatedPlayerList = List<PartialPlayer>.from(state.playerList);
+        final playerIndex =
+            updatedPlayerList.indexWhere((p) => p.name == playerName);
+        if (playerIndex != -1) {
+          updatedPlayerList[playerIndex] = PartialPlayer(
+            name: playerName,
+            isInGame: isInGame,
+            points: updatedPlayerList[playerIndex].points,
+          );
+        }
 
-//   void updateTotalAnswersArray(QRLGrade value) {
-//     if (value == QRLGrade.Wrong) state.totalNumberOfAnswers[0] += 1;
-//     if (value == QRLGrade.Partial) state.totalNumberOfAnswers[1] += 1;
-//     if (value == QRLGrade.Correct) state.totalNumberOfAnswers[2] += 1;
-//   }
+        // Filter answers if player left
+        List<AnswerQRL> updatedAnswers = state.answersQRL;
+        if (!isInGame) {
+          updatedAnswers = state.answersQRL
+              .where((answer) => answer.playerName != playerName)
+              .toList();
+        }
 
-//   void sendInfoToUsers() {
-//     state = state
-//         .copyWith(gameStatus: GameStatus.CorrectionFinished, answersQRL: []);
-//     _socketManager.webSocketSender(GameEvents.CorrectionFinished.value, {
-//       'pointsTotal': state.pointsAfterCorrection,
-//       'answers': state.totalNumberOfAnswers,
-//     });
-//     if (state.gameInfo.currentQuestionIndex + 1 >= state.questionsLength) {
-//       state = state.copyWith(gameStatus: GameStatus.GameFinished);
-//     }
-//   }
+        state = state.copyWith(
+          playerList: updatedPlayerList,
+          answersQRL: updatedAnswers,
+        );
 
-//   void initializeCorrectAnswers() {
-//     state = state.copyWith(isCorrectAnswersArray: []);
-//     final choices = state.currentQuestion.choices;
-//     if (choices != null) {
-//       for (final choice in choices) {
-//         if (choice.isCorrect) {
-//           state.isCorrectAnswersArray.add(true);
-//         } else {
-//           state.isCorrectAnswersArray.add(false);
-//         }
-//       }
-//     }
-//   }
+        AppLogger.i("Player $playerName status updated: isInGame=$isInGame");
+      }
+    });
+  }
 
-//   void handleQRLAnswer() {
-//     _socketManager.webSocketReceiver(GameEvents.QRLAnswerSubmitted.value,
-//         (data) {
-//       state = state.copyWith(
-//           answersQRL: [...state.answersQRL, AnswerQRL.fromJson(data)]);
-//       state.answersQRL.sort(
-//           (a, b) => a.player.toLowerCase().compareTo(b.player.toLowerCase()));
-//     });
-//   }
+  void _handlePlayerPoints() {
+    _socketManager.webSocketReceiver(GameEvents.OrganizerPointsUpdate.value,
+        (data) {
+      if (data is Map<String, dynamic>) {
+        final String playerName = data['name'];
+        final double points = data['points'].toDouble();
 
-//   void handleEveryoneSubmitted() {
-//     _socketManager.webSocketReceiver(GameEvents.EveryoneSubmitted.value, (_) {
-//       state = state.copyWith(gameStatus: GameStatus.OrganizerCorrecting);
-//     });
-//   }
+        final updatedPlayerList = List<PartialPlayer>.from(state.playerList);
+        final playerIndex =
+            updatedPlayerList.indexWhere((p) => p.name == playerName);
 
-//   void handlePlayerStatus() {
-//     _socketManager.webSocketReceiver(GameEvents.PlayerStatusUpdate.value,
-//         (player) {
-//       state.playerListService
-//           .updatePlayerPresence(player['name'], player['isInGame']);
-//       if (!player['isInGame']) {
-//         state = state.copyWith(
-//             answersQRL: state.answersQRL
-//                 .where((playerGraded) => playerGraded.player != player['name'])
-//                 .toList());
-//       }
-//     });
-//   }
+        if (playerIndex != -1) {
+          updatedPlayerList[playerIndex] = PartialPlayer(
+            name: playerName,
+            isInGame: updatedPlayerList[playerIndex].isInGame,
+            points: points,
+          );
 
-//   void handlePlayerPoints() {
-//     _socketManager.webSocketReceiver(GameEvents.OrganizerPointsUpdate.value,
-//         (player) {
-//       state.playerListService
-//           .updatePlayerPoints(player['name'], player['points']);
-//     });
-//   }
+          state = state.copyWith(playerList: updatedPlayerList);
+          AppLogger.i("Player $playerName points updated: $points");
+        }
+      }
+    });
+  }
 
-//   void handlePlayerList() {
-//     _socketManager.webSocketReceiver(GameEvents.SendPlayerList.value,
-//         (playerList) {
-//       if (playerList.isEmpty) {
-//         // Navigate to create
-//         // Show error dialog
-//         signalUserDisconnect();
-//         return;
-//       }
-//       state = state.copyWith(
-//         gameInfo: state.gameInfo.copyWith(
-//             playersInGame:
-//                 playerList.where((player) => player['isInGame']).length),
-//         playerListService: state.playerListService
-//             .copyWith(playerList: playerList, noPlayers: playerList.length),
-//       );
-//     });
-//   }
+  void _handlePlayerList() {
+    _socketManager.webSocketReceiver(GameEvents.SendPlayerList.value, (data) {
+      if (data is List) {
+        final List<PartialPlayer> playerList = data.map((player) {
+          return PartialPlayer(
+            name: player['name'],
+            isInGame: player['isInGame'],
+            points: player['points'] ?? 0,
+          );
+        }).toList();
 
-//   void handlePlayerListSockets() {
-//     handlePlayerStatus();
-//     handlePlayerPoints();
-//     handlePlayerList();
-//   }
+        if (playerList.isEmpty) {
+          // Handle empty player list - this would typically involve navigation
+          signalUserDisconnect();
+          AppLogger.w("All players left the game");
+          return;
+        }
 
-//   void handleTimerValue() {
-//     _socketManager.webSocketReceiver(TimerEvents.Value.value, (time) {
-//       state = state.copyWith(gameInfo: state.gameInfo.copyWith(time: time));
-//     });
-//     _socketManager.webSocketReceiver(TimerEvents.QuestionCountdownValue.value,
-//         (time) {
-//       state = state.copyWith(gameInfo: state.gameInfo.copyWith(time: time));
-//     });
-//     _socketManager.webSocketReceiver(TimerEvents.Paused.value, (pauseState) {
-//       state = state.copyWith(
-//           gameModifiers: state.gameModifiers.copyWith(paused: pauseState));
-//     });
-//     _socketManager.webSocketReceiver(TimerEvents.AlertModeStarted.value, (_) {
-//       state = state.copyWith(
-//           gameModifiers: state.gameModifiers.copyWith(alertMode: true));
-//       // Play alert sound
-//     });
-//   }
+        final playersInGame =
+            playerList.where((player) => player.isInGame).length;
+        final updatedGameInfo =
+            state.gameInfo.copyWith(playersInGame: playersInGame);
 
-//   void handleTimerEnd() {
-//     _socketManager.webSocketReceiver(TimerEvents.QuestionCountdownEnd.value,
-//         (_) {
-//       // Stop alert sound
-//     });
+        state = state.copyWith(
+          playerList: playerList,
+          gameInfo: updatedGameInfo,
+        );
 
-//     _socketManager.webSocketReceiver(TimerEvents.End.value, (_) {
-//       _socketManager.webSocketSender(GameEvents.QuestionEndByTimer.value);
-//     });
-//   }
+        AppLogger.i(
+            "Player list updated: ${playerList.length} players, $playersInGame active");
+      }
+    });
+  }
 
-//   void handleQuestionsLength() {
-//     _socketManager.webSocketReceiver(GameEvents.QuestionsLength.value,
-//         (length) {
-//       state = state.copyWith(questionsLength: length);
-//     });
-//   }
+  void _handleTimerValue() {
+    _socketManager.webSocketReceiver(TimerEvents.Value.value, (time) {
+      final updatedGameInfo = state.gameInfo.copyWith(time: time);
+      state = state.copyWith(gameInfo: updatedGameInfo);
+      AppLogger.i("Timer value updated: $time");
+    });
 
-//   void handleNextQuestion() {
-//     _socketManager.webSocketReceiver(GameEvents.ProceedToNextQuestion.value,
-//         (_) {
-//       if (state.currentQuestion.type == QuestionType.QCM) {
-//         state = state.copyWith(gameStatus: GameStatus.CorrectionFinished);
-//         if (state.gameInfo.currentQuestionIndex + 1 >= state.questionsLength) {
-//           state = state.copyWith(gameStatus: GameStatus.GameFinished);
-//         }
-//       }
-//     });
-//     _socketManager.webSocketReceiver(GameEvents.NextQuestion.value,
-//         (nextQuestion) {
-//       state.playerListService.resetPlayerList();
-//       state = state.copyWith(
-//         answersQRL: [],
-//         pointsAfterCorrection: [],
-//         totalNumberOfAnswers: [0, 0, 0],
-//         gameInfo: state.gameInfo.copyWith(
-//             currentIndex: 0, currentQuestionIndex: nextQuestion['index']),
-//         gameModifiers:
-//             state.gameModifiers.copyWith(paused: false, alertMode: false),
-//         currentQuestion: Question.fromJson(nextQuestion['question']),
-//       );
-//       initializeCorrectAnswers();
-//     });
-//   }
+    _socketManager.webSocketReceiver(TimerEvents.QuestionCountdownValue.value,
+        (time) {
+      final updatedGameInfo = state.gameInfo.copyWith(time: time);
+      state = state.copyWith(gameInfo: updatedGameInfo);
+      AppLogger.i("Question countdown value: $time");
+    });
 
-//   void handleTimeSockets() {
-//     handleTimerValue();
-//     handleTimerEnd();
-//     handleQuestionsLength();
-//     handleNextQuestion();
-//   }
+    _socketManager.webSocketReceiver(TimerEvents.Paused.value, (pauseState) {
+      final updatedModifiers = state.gameModifiers.copyWith(paused: pauseState);
+      state = state.copyWith(gameModifiers: updatedModifiers);
+      AppLogger.i("Game paused state: $pauseState");
+    });
 
-//   void handleResultsSockets() {
-//     _socketManager.webSocketReceiver(GameEvents.SendResults.value, (_) {
-//       state = state.copyWith(shouldDisconnect: false);
-//       // Navigate to results
-//       // Stop alert sound
-//     });
-//   }
+    _socketManager.webSocketReceiver(TimerEvents.AlertModeStarted.value, (_) {
+      final updatedModifiers = state.gameModifiers.copyWith(alertMode: true);
+      state = state.copyWith(gameModifiers: updatedModifiers);
+      alertSoundPlayer.play();
+      AppLogger.i("Alert mode started");
+    });
+  }
 
-//   void handleGameEnded() {
-//     _socketManager.webSocketReceiver(ConnectEvents.AllPlayersLeft.value, (_) {
-//       // Navigate to create
-//       // Show error dialog
-//       // Stop alert sound
-//     });
-//   }
-// }
+  void _handleTimerEnd() {
+    _socketManager.webSocketReceiver(TimerEvents.QuestionCountdownEnd.value,
+        (_) {
+      alertSoundPlayer.stop();
+      AppLogger.i("Question countdown ended");
+    });
+
+    _socketManager.webSocketReceiver(TimerEvents.End.value, (_) {
+      _socketManager.webSocketSender(GameEvents.QuestionEndByTimer.value);
+      AppLogger.i("Timer ended, question ended by timer");
+    });
+  }
+
+  void _handleQuestionsLength() {
+    _socketManager.webSocketReceiver(GameEvents.QuestionsLength.value,
+        (length) {
+      state = state.copyWith(questionsLength: length);
+      AppLogger.i("Questions length: $length");
+    });
+  }
+
+  void _handleNextQuestion() {
+    _socketManager.webSocketReceiver(GameEvents.ProceedToNextQuestion.value,
+        (_) {
+      if (state.currentQuestion['type'] == 'QCM' ||
+          state.currentQuestion['type'] == 'QRE') {
+        final updatedGameInfo = state.gameInfo.copyWith(time: 0);
+
+        GameStatus newStatus = GameStatus.CorrectionFinished;
+        if (state.gameInfo.currentQuestionIndex + 1 >= state.questionsLength) {
+          newStatus = GameStatus.GameFinished;
+        }
+
+        state = state.copyWith(
+          gameStatus: newStatus,
+          gameInfo: updatedGameInfo,
+        );
+
+        AppLogger.i("Proceeding to next question automatically");
+      }
+    });
+
+    _socketManager.webSocketReceiver(GameEvents.NextQuestion.value, (data) {
+      if (data is Map<String, dynamic>) {
+        final updatedGameInfo = GameInfo(
+          time: state.gameInfo.time,
+          currentQuestionIndex: data['index'],
+          currentIndex: 0,
+          playersInGame: state.gameInfo.playersInGame,
+        );
+
+        final updatedModifiers = Modifiers(
+          paused: false,
+          alertMode: false,
+        );
+
+        state = state.copyWith(
+          answersQRL: [],
+          pointsAfterCorrection: [],
+          gameInfo: updatedGameInfo,
+          gameModifiers: updatedModifiers,
+          currentQuestion: data['question'],
+        );
+
+        AppLogger.i("Next question received: ${data['index']}");
+      }
+    });
+  }
+
+  void _handleResultsSockets() {
+    _socketManager.webSocketReceiver(GameEvents.SendResults.value, (_) {
+      state = state.copyWith(shouldDisconnect: false);
+      alertSoundPlayer.stop();
+      // This would typically involve navigation
+      AppLogger.i("Game results received");
+    });
+  }
+
+  void _handleGameEnded() {
+    _socketManager.webSocketReceiver(ConnectEvents.AllPlayersLeft.value, (_) {
+      // This would typically involve navigation and showing an error dialog
+      alertSoundPlayer.stop();
+      AppLogger.w("All players left the game");
+    });
+  }
+
+  void _resetAttributes() {
+    state = OrganizerState(
+      answersQRL: [],
+      currentQuestion: DEFAULT_QUESTION,
+      gameInfo: GameInfo(
+        time: 0,
+        currentQuestionIndex: 0,
+        currentIndex: 0,
+        playersInGame: 0,
+      ),
+      gameModifiers: Modifiers(
+        paused: false,
+        alertMode: false,
+      ),
+      gameStatus: GameStatus.WaitingForAnswers,
+      shouldDisconnect: true,
+      playerList: [],
+      pointsAfterCorrection: [],
+      questionsLength: 0,
+    );
+  }
+
+  @override
+  void dispose() {
+    if (!mounted) return;
+    AppLogger.i("Disposing OrganizerNotifier");
+
+    _socketManager.socket.off(GameEvents.QRLAnswerSubmitted.value);
+    _socketManager.socket.off(GameEvents.EveryoneSubmitted.value);
+    _socketManager.socket.off(GameEvents.PlayerStatusUpdate.value);
+    _socketManager.socket.off(GameEvents.OrganizerPointsUpdate.value);
+    _socketManager.socket.off(GameEvents.SendPlayerList.value);
+    _socketManager.socket.off(TimerEvents.Value.value);
+    _socketManager.socket.off(TimerEvents.QuestionCountdownValue.value);
+    _socketManager.socket.off(TimerEvents.Paused.value);
+    _socketManager.socket.off(TimerEvents.AlertModeStarted.value);
+    _socketManager.socket.off(TimerEvents.QuestionCountdownEnd.value);
+    _socketManager.socket.off(TimerEvents.End.value);
+    _socketManager.socket.off(GameEvents.QuestionsLength.value);
+    _socketManager.socket.off(GameEvents.ProceedToNextQuestion.value);
+    _socketManager.socket.off(GameEvents.NextQuestion.value);
+    _socketManager.socket.off(GameEvents.SendResults.value);
+    _socketManager.socket.off(ConnectEvents.AllPlayersLeft.value);
+
+    _resetAttributes();
+    alertSoundPlayer.stop();
+    super.dispose();
+  }
+}

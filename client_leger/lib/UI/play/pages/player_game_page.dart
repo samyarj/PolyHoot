@@ -1,7 +1,7 @@
 import 'package:client_leger/UI/confirmation/confirmation_dialog.dart';
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/router/routes.dart';
-import 'package:client_leger/backend-communication-services/models/enums.dart';
+import 'package:client_leger/models/enums.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/providers/play/game_player_provider.dart';
 import 'package:client_leger/utilities/logger.dart';

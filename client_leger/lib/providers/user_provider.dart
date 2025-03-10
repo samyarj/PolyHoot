@@ -3,8 +3,7 @@ import 'dart:convert';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
-import 'package:client_leger/backend-communication-services/models/user.dart'
-    as user_model;
+import 'package:client_leger/models/user.dart' as user_model;
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

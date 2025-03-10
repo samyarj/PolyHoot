@@ -1,4 +1,4 @@
-import 'package:client_leger/backend-communication-services/models/lobby.dart';
+import 'package:client_leger/models/lobby.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:client_leger/utilities/socket_events.dart';

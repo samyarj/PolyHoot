@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
-import 'package:client_leger/backend-communication-services/models/chat_message.dart';
+import 'package:client_leger/models/chat_message.dart';
 import 'package:client_leger/business/channel_manager.dart';
 import 'package:client_leger/providers/user_provider.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
