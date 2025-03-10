@@ -59,7 +59,7 @@ export class CoinFlipGame {
 
     async submitChoice(client: AuthenticatedSocket, betChoice: { choice: string; bet: number }) {
         const isUserAlreadyInList = this.isUserAlreadyInList(client);
-        if (!isUserAlreadyInList) {
+        if (!isUserAlreadyInList || this.gameState !== CoinFlipGameState.BettingPhase) {
             const submitStatus = await this.userService.updateUserCoins(client.user.uid, -1 * betChoice.bet);
             if (submitStatus) {
                 this.addUserToList(client, betChoice);
