@@ -215,6 +215,83 @@ export class UserService {
         }
     }
 
+    async equipTheme(uid: string, theme: string): Promise<boolean> {
+        const userRef = await this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+        const themes = userDoc.data().inventory?.themes || [];
+        if (themes.includes(theme) || theme === 'dark' || theme === 'light') {
+            //considers default themes.
+            await userRef.update({ 'config.themeEquipped': theme });
+            return true;
+        }
+        return false;
+    }
+
+    async equipAvatar(uid: string, avatarURL: string): Promise<boolean> {
+        const userRef = await this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+        const avatars = userDoc.data().inventory?.avatars || [];
+        // default avatar so it doesn't change/show errors.
+        avatars.push('https://res.cloudinary.com/dtu6fkkm9/image/upload/v1737478954/default-avatar_qcaycl.jpg');
+
+        if (avatars.includes(avatarURL)) {
+            await userRef.update({ avatarEquipped: avatarURL });
+            return true;
+        }
+        return false;
+    }
+
+    async equipBanner(uid: string, bannerURL: string): Promise<boolean> {
+        const userRef = await this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+        const banners = userDoc.data().inventory?.banners || [];
+
+        if (banners.includes(bannerURL)) {
+            await userRef.update({ borderEquipped: bannerURL });
+            return true;
+        } else if (bannerURL === '') {
+            return true;
+        }
+        return false;
+    }
+
+    async addToInventory(uid: string, category: string, rewardLink: string | number) {
+        const userRef = await this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+        const themes = userDoc.data().inventory?.themes || [];
+        const banners = userDoc.data().inventory?.banners || [];
+        const avatars = userDoc.data().inventory?.avatars || [];
+        if (category === 'avatar' && !avatars.includes(rewardLink)) {
+            await userRef.update({
+                'inventory.avatars': admin.firestore.FieldValue.arrayUnion(rewardLink),
+            });
+            return true;
+        } else if (category === 'banner' && !banners.includes(rewardLink)) {
+            await userRef.update({
+                'inventory.banners': admin.firestore.FieldValue.arrayUnion(rewardLink),
+            });
+            return true;
+        } else if (category === 'theme' && !themes.includes(rewardLink)) {
+            await userRef.update({
+                'inventory.themes': admin.firestore.FieldValue.arrayUnion(rewardLink),
+            });
+            return true;
+        }
+        return false;
+    }
+
     private async getUserFromFirestore(uid: string): Promise<admin.firestore.DocumentData> {
         const userDoc = await this.firestore.collection('users').doc(uid).get();
         if (!userDoc.exists) throw new UnauthorizedException("L'utilisateur n'existe pas.");
@@ -251,7 +328,7 @@ export class UserService {
             nWins: userDoc.nWins || 0,
             isOnline: true,
             pity: userDoc.pity || 0,
-            nextDailyFree: userDoc.nextDailyFree || null,
+            nextDailyFree: userDoc.nextDailyFree || new Date(),
         };
     }
 

@@ -31,4 +31,13 @@ export class LootBoxWinDialogComponent {
     onClose(): void {
         this.dialogRef.close();
     }
+
+    coinShow(value: number | string, limit: number, upperlimit: number) {
+        if (typeof value === 'number') {
+            if (value >= limit && value < upperlimit) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

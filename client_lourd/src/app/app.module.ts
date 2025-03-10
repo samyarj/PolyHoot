@@ -25,6 +25,7 @@ import { LoginFormComponent } from './components/auth/login-form/login-form.comp
 import { SignUpFormComponent } from './components/auth/sign-up-form/sign-up-form.component';
 import { ChatComponent } from './components/chat/chat.component';
 import { Chat2Component } from './components/chat/chat2/chat2.component';
+import { AvatarBannerComponent } from './components/general-elements/avatar-banner/avatar-banner.component';
 import { ConfirmationDialogComponent } from './components/general-elements/confirmation-dialog/confirmation-dialog.component';
 import { ErrorDialogComponent } from './components/general-elements/error-dialog/error-dialog.component';
 import { LootBoxWinDialogComponent } from './components/general-elements/lootbox-win-dialog/lootbox-win-dialog.component';
@@ -56,6 +57,7 @@ import { CoinFlipPageComponent } from './pages/luck-related/coin-flip-page/coin-
 import { DailyFreePageComponent } from './pages/luck-related/daily-free-page/daily-free-page.component';
 import { LootBoxPageComponent } from './pages/luck-related/loot-box-page/loot-box-page.component';
 import { LuckMainPageComponent } from './pages/luck-related/luck-main-page/luck-main-page.component';
+import { ProfilePageComponent } from './pages/profile-page/profile-page.component';
 import { AdminPageComponent } from './pages/quiz-question-related/admin-page/admin-page.component';
 import { AdminQuizCreateComponent } from './pages/quiz-question-related/create-quiz/admin-create-quiz';
 import { HistoryPageComponent } from './pages/quiz-question-related/history/history.component';
@@ -66,13 +68,15 @@ import { ShopPageComponent } from './pages/shop-related/shop-page/shop-page.comp
 import { TransferPageComponent } from './pages/shop-related/transfer-page/transfer-page.component';
 import { GlobalChatComponent } from './pages/test-components-page/global-chat.component';
 import { WaitingPageComponent } from './pages/waiting-page/waiting-page.component';
+import { AuthService } from './services/auth/auth.service';
 import { QuestionService } from './services/back-end-communication-services/question-service/question.service';
 import { QuizService } from './services/back-end-communication-services/quiz-service/quiz.service';
 import { FirebaseChatService } from './services/chat-services/firebase/firebase-chat.service';
 import { FrenchPaginatorIntlService } from './services/general-services/french-paginator/french-paginator-intl.service';
+import { InventoryService } from './services/general-services/inventory.service';
 import { GlobalErrorHandlerService } from './services/global-error-handler.service';
+import { ThemeService } from './services/ui-services/theme/theme.service';
 import { SocketClientService } from './services/websocket-services/general/socket-client-manager.service';
-import { ProfilePageComponent } from './pages/profile-page/profile-page.component';
 
 /**
  * Main module that is used in main.ts.
@@ -130,12 +134,16 @@ import { ProfilePageComponent } from './pages/profile-page/profile-page.componen
         TransferPageComponent,
         LootBoxComponent,
         ProfilePageComponent,
+        AvatarBannerComponent,
     ],
     providers: [
+        AuthService,
         QuizService,
         QuestionService,
         SocketClientService,
         FirebaseChatService,
+        ThemeService,
+        InventoryService,
         { provide: WINDOW, useValue: window },
         { provide: MatPaginatorIntl, useClass: FrenchPaginatorIntlService },
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },

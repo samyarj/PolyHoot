@@ -93,6 +93,15 @@ export class DailyFreePageComponent implements OnInit, OnDestroy {
         this.startTimer();
     }
 
+    coinShow(value: number | string, limit: number, upperlimit: number) {
+        if (typeof value === 'number') {
+            if (value >= limit && value < upperlimit) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     startTimer() {
         if (!this.intervalSubscription && !this.canClaim) {
             // eslint-disable-next-line @typescript-eslint/no-magic-numbers

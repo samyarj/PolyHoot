@@ -34,11 +34,6 @@ const routes: Routes = [
         path: 'home',
         component: MainPageComponent,
         canActivate: [authGuard],
-        // children: [
-        //     { path: '', redirectTo: 'patch-notes', pathMatch: 'full' },
-        //     { path: 'patch-notes', component: PatchNotesComponent, canActivate: [authGuard] },
-        //     { path: 'game-info', component: GameInfoComponent, canActivate: [authGuard] },
-        // ],
     },
 
     { path: 'login', component: LoginPageComponent },

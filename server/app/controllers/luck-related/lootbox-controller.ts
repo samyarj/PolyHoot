@@ -28,7 +28,7 @@ export class LootBoxController {
             const lootBoxes: LootBoxContainer[] = this.lootBoxService.getBoxes(user.pity);
             response.status(HttpStatus.OK).json(lootBoxes);
         } catch (error) {
-            this.logger.error(`Error fetching profile: ${error.message}`);
+            this.logger.error(`Error fetching lootboxes for: ${error.message}`);
 
             response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
         }
@@ -45,7 +45,7 @@ export class LootBoxController {
             const reward = await this.lootBoxService.openBox(payload.id, user.uid, user.pity);
             response.status(HttpStatus.OK).json(reward);
         } catch (error) {
-            this.logger.error(`Error fetching profile: ${error.message}`);
+            this.logger.error(`Error opening lootbox for: ${error.message}`);
 
             response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
         }
@@ -76,7 +76,7 @@ export class LootBoxController {
             }
             response.status(HttpStatus.OK).json({ lootbox: dailyFree, canClaim: canClaim, hoursLeft: hoursLeft, minutesLeft: minutesLeft });
         } catch (error) {
-            this.logger.error(`Error fetching profile: ${error.message}`);
+            this.logger.error(`Error fetching daily free for: ${error.message}`);
 
             response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
         }
@@ -97,7 +97,7 @@ export class LootBoxController {
                 response.status(HttpStatus.OK).json(reward);
             }
         } catch (error) {
-            this.logger.error(`Error fetching profile: ${error.message}`);
+            this.logger.error(`Error claiming dailyFree for: ${error.message}`);
 
             response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
         }

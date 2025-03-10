@@ -4,10 +4,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthController } from './controllers/auth/auth.controller';
 import { ChatChannelsController } from './controllers/chat-channels/chat-channels.controller';
 import { HistoryController } from './controllers/history/history.controller';
+import { InventoryController } from './controllers/inventory.controller';
 import { LootBoxController } from './controllers/luck-related/lootbox-controller';
 import { PasswordValidationController } from './controllers/password-validation/password-validation.controller';
 import { QuestionController } from './controllers/question/question.controller';
 import { QuizController } from './controllers/quiz/quiz.controller';
+import { ShopController } from './controllers/shop.controller';
 import { ChatGateway } from './gateways/chat/chat.gateway';
 import { CoinflipGateway } from './gateways/coinflip/coinflip.gateway';
 import { ConnectionGateway } from './gateways/connection/connection.gateway';
@@ -24,9 +26,11 @@ import { CoinflipManagerService } from './services/coinflip-manager/coinflip-man
 import { GameManagerService } from './services/game-manager/game-manager.service';
 import { GameRecordService } from './services/game-record/game-record.service';
 import { HistoryManagerService } from './services/history-manager/history-manager.service';
+import { InventoryService } from './services/inventory.service';
 import { LootBoxService } from './services/lootbox/lootbox.service';
 import { QuestionService } from './services/question/question.service';
 import { QuizService } from './services/quiz/quiz.service';
+import { ShopService } from './services/shop.service';
 
 @Module({
     imports: [
@@ -56,12 +60,14 @@ import { QuizService } from './services/quiz/quiz.service';
         CoinflipGateway,
         CoinflipManagerService,
         LootBoxService,
+        InventoryService,
         GameRecordService,
         ConnectionGateway,
         GameManagerService,
         HistoryManagerService,
         UserService,
         ChatChannelsService,
+        ShopService,
     ],
 
     controllers: [
@@ -72,6 +78,8 @@ import { QuizService } from './services/quiz/quiz.service';
         HistoryController,
         ChatChannelsController,
         LootBoxController,
+        InventoryController,
+        ShopController,
     ],
 })
 export class AppModule {}
