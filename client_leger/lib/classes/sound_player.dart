@@ -1,9 +1,7 @@
 import 'dart:async';
-
 import 'package:audioplayers/audioplayers.dart';
 
-const String ALERT_SOUND_PATH =
-    "assets/sounds/alert.mp3"; // Update with actual path
+const String ALERT_SOUND_PATH = "sounds/alert_sound.mp3";
 const double ALERT_SOUND_INTENSITY_DECREMENTATION = 0.01;
 const Duration ALERT_SOUND_DECREASE_INTERVAL = Duration(milliseconds: 200);
 

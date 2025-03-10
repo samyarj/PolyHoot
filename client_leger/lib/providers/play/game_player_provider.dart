@@ -1,3 +1,4 @@
+import 'package:client_leger/classes/sound_player.dart';
 import 'package:client_leger/models/enums.dart';
 import 'package:client_leger/models/player_info.dart';
 import 'package:client_leger/models/question.dart';
@@ -92,6 +93,7 @@ class GamePlayerState {
 
 class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
   final WebSocketManager _socketManager = WebSocketManager.instance;
+  SoundPlayer alertSoundPlayer = SoundPlayer();
 
   GamePlayerNotifier()
       : super(GamePlayerState(
@@ -135,7 +137,7 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
     });
 
     _socketManager.webSocketReceiver(TimerEvents.AlertModeStarted.value, (_) {
-      // Play alert sound
+      alertSoundPlayer.play();
     });
 
     _socketManager.webSocketReceiver(TimerEvents.QuestionCountdownValue.value,
@@ -150,7 +152,7 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
         (_) {
       state = state.copyWith(
           playerInfo: state.playerInfo.copyWith(waitingForQuestion: false));
-      // Stop alert sound
+      alertSoundPlayer.stop();
     });
 
     _socketManager.webSocketReceiver(TimerEvents.Value.value, (time) {
@@ -213,13 +215,14 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
     });
 
     _socketManager.webSocketReceiver(GameEvents.SendResults.value, (_) {
+      alertSoundPlayer.stop();
       state = state.copyWith(
           shouldDisconnect: false, shouldNavigateToResults: true);
-      // Stop alert sound
     });
 
     _socketManager.webSocketReceiver(DisconnectEvents.OrganizerHasLeft.value,
         (_) {
+      alertSoundPlayer.stop();
       state = state.copyWith(organizerDisconnected: true);
       AppLogger.i("Organizer has left the game");
     });
@@ -293,6 +296,7 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
 
   void signalUserDisconnect() {
     _socketManager.webSocketSender(DisconnectEvents.Player.value);
+    alertSoundPlayer.stop();
   }
 
   void signalUserConnect() {
@@ -305,6 +309,10 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
 
   void setQreAnswer(int answer) {
     state = state.copyWith(qreAnswer: answer);
+  }
+
+  void stopAlertSound() {
+    alertSoundPlayer.stop();
   }
 
   @override

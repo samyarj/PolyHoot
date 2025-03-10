@@ -35,9 +35,10 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
     super.dispose();
   }
 
-  void abandonGame() {
+  void abandonGame(GamePlayerNotifier playerGameNotifier) {
     showConfirmationDialog(
         context, "Êtes-vous sûr de vouloir abandonner la partie?", () async {
+      playerGameNotifier.stopAlertSound();
       GoRouter.of(context).go(Paths.play);
     });
   }
@@ -64,7 +65,7 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
       physics: NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16.0),
       child: SizedBox(
-        height: 600,
+        height: 625,
         child: Column(
           children: [
             SizedBox(height: 16),
@@ -117,7 +118,12 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
                 int choiceIndex = entry.key;
                 final choice = entry.value;
                 return ListTile(
-                  title: Text(choice.text, style: TextStyle(fontSize: 20)),
+                  title: Text(choice.text,
+                      style: TextStyle(
+                          fontSize: 20,
+                          color: playerGameState.realShowAnswers
+                              ? (choice.isCorrect! ? Colors.green : Colors.red)
+                              : colorScheme.onSurface)),
                   leading: Checkbox(
                     value:
                         playerGameState.playerInfo.choiceSelected[choiceIndex],
@@ -211,7 +217,7 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
               alignment: Alignment.bottomRight,
               child: ElevatedButton(
                 onPressed: () {
-                  abandonGame();
+                  abandonGame(playerGameNotifier);
                 },
                 child: Text("Abandonner", style: TextStyle(fontSize: 20)),
               ),
