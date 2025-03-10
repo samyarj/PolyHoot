@@ -98,14 +98,14 @@
             <input
                 *ngIf="question.qreAttributes"
                 type="number"
-                min = 0
+                min = "0"
                 [(ngModel)]="question.qreAttributes.tolerance"
                 name="tolerance"
                 required
                 #toleranceInput="ngModel"
             />
             <div>
-                <small *ngIf="!toleranceValid()" class="text-danger"> La marge de tolérance ne peut pas dépasser 1/4 de l'intervalle. </small>
+                <small *ngIf="!toleranceValid()" class="text-danger"> La marge de tolérance doit être supérieure à 0 et ne peut dépasser 1/4 de l'intervalle. </small>
                 <small *ngIf="!minBoundValid()" class="text-danger">
                     La borne minimale doit être inférieure à la bonne réponse.<br />
                 </small>

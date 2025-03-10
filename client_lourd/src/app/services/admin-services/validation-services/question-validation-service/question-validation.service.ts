@@ -57,6 +57,7 @@ export class QuestionValidationService {
     }
     toleranceValid(qreAttributes: QreAttributes | undefined): boolean {
         if (qreAttributes) {
+            if (qreAttributes.tolerance < 0) return false;
             const interval = qreAttributes.maxBound - qreAttributes.minBound;
             if (interval > 0) {
                 // eslint-disable-next-line @typescript-eslint/no-magic-numbers
