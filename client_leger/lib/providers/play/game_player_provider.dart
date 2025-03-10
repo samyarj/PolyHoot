@@ -30,6 +30,7 @@ class GamePlayerState {
   final bool realShowAnswers;
   final bool shouldNavigateToResults;
   final int qreAnswer;
+  final bool organizerDisconnected;
 
   GamePlayerState(
       {required this.pointsReceived,
@@ -46,7 +47,8 @@ class GamePlayerState {
       required this.playerInfo,
       required this.time,
       required this.shouldNavigateToResults,
-      required this.qreAnswer});
+      required this.qreAnswer,
+      required this.organizerDisconnected});
 
   GamePlayerState copyWith(
       {String? quizTitle,
@@ -64,7 +66,8 @@ class GamePlayerState {
       int? pointsReceived,
       bool? shouldDisconnect,
       bool? shouldNavigateToResults,
-      int? qreAnswer}) {
+      int? qreAnswer,
+      bool? organizerDisconnected}) {
     return GamePlayerState(
         pointsReceived: pointsReceived ?? this.pointsReceived,
         shouldDisconnect: shouldDisconnect ?? this.shouldDisconnect,
@@ -81,7 +84,9 @@ class GamePlayerState {
         time: time ?? this.time,
         shouldNavigateToResults:
             shouldNavigateToResults ?? this.shouldNavigateToResults,
-        qreAnswer: qreAnswer ?? this.qreAnswer);
+        qreAnswer: qreAnswer ?? this.qreAnswer,
+        organizerDisconnected:
+            organizerDisconnected ?? this.organizerDisconnected);
   }
 }
 
@@ -91,6 +96,7 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
   GamePlayerNotifier()
       : super(GamePlayerState(
           pointsReceived: 0,
+          organizerDisconnected: false,
           shouldDisconnect: true,
           quizTitle: '',
           playerPoints: 0,
@@ -196,20 +202,16 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
       );
     });
 
-    _socketManager.webSocketReceiver(DisconnectEvents.OrganizerHasLeft.value,
-        (_) {
-      // Navigate to home
-      if (!_socketManager.isOrganizer) {
-        // Show error dialog
-        // Stop alert sound
-      }
-    });
-
     _socketManager.webSocketReceiver(GameEvents.SendResults.value, (_) {
       state = state.copyWith(
           shouldDisconnect: false, shouldNavigateToResults: true);
-      // Navigate to results
       // Stop alert sound
+    });
+
+    _socketManager.webSocketReceiver(DisconnectEvents.OrganizerHasLeft.value,
+        (_) {
+      state = state.copyWith(organizerDisconnected: true);
+      AppLogger.i("Organizer has left the game");
     });
   }
 
@@ -291,7 +293,6 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
     _socketManager.webSocketSender(GameEvents.QRLAnswerSubmitted.value, answer);
   }
 
-
   @override
   void dispose() {
     AppLogger.i("Disposing GamePlayerNotifier");
@@ -306,6 +307,7 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
     _socketManager.socket.off(GameEvents.PlayerPointsUpdate.value);
     _socketManager.socket.off(DisconnectEvents.OrganizerHasLeft.value);
     _socketManager.socket.off(GameEvents.SendResults.value);
+
     if (!mounted) return;
     resetAttributes();
     super.dispose();

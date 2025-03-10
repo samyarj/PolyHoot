@@ -1,4 +1,5 @@
 import 'package:client_leger/UI/confirmation/confirmation_dialog.dart';
+import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/models/enums.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
@@ -52,6 +53,9 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
           shouldDisconnect = false;
           GoRouter.of(context).go('${Paths.play}/${Paths.resultsView}');
         });
+      } else if (next.organizerDisconnected) {
+        showErrorDialog(context, "L'organisateur a quitté la partie.");
+        GoRouter.of(context).go(Paths.play);
       }
     });
 
@@ -59,7 +63,7 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
       physics: NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16.0),
       child: SizedBox(
-        height: MediaQuery.of(context).size.height,
+        height: 600,
         child: Column(
           children: [
             SizedBox(height: 16),
@@ -130,7 +134,7 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
                 'Caractères restants : ${MAX_CHARACTERS - _QRLanswerController.text.length}',
                 style: TextStyle(color: colorScheme.onSurface, fontSize: 16),
               ),
-            if (playerGameState.currentQuestion.type == 'QRL')
+            if (playerGameState.currentQuestion.type == QuestionType.QRL.name)
               TextField(
                 controller: _QRLanswerController,
                 maxLength: MAX_CHARACTERS,
