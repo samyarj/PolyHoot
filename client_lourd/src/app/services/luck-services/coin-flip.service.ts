@@ -113,7 +113,7 @@ export class CoinFlipService {
 
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
-                if (this.betAmount > 0 && this.betAmount % 1 === 0) {
+                if (this.betAmount > 0 && this.betAmount % 1 === 0 && this.gameState === CoinFlipGameState.BettingPhase) {
                     this.socketService.send(
                         CoinFlipEvents.SubmitChoice,
                         { choice: this.selectedSide, bet: this.betAmount },
@@ -123,19 +123,37 @@ export class CoinFlipService {
                             } else {
                                 this.matdialog.open(ErrorDialogComponent, {
                                     width: WIDTH_SIZE,
-                                    data: { message: 'Vous ne pouvez pas parier plus de coins que ce que vous avez!', reloadOnClose: false },
+                                    data: {
+                                        message:
+                                            'Vous ne pouvez pas parier plus de coins que ceux détenus ou bien parier en dehors de la phase de mise!',
+                                        reloadOnClose: false,
+                                    },
                                 });
                             }
                         },
                     );
+                } else if (this.betAmount === 0 || this.betAmount % 1 !== 0) {
+                    this.matdialog.open(ErrorDialogComponent, {
+                        width: WIDTH_SIZE,
+                        data: { message: 'Vous ne pouvez pas parier 0 coins.', reloadOnClose: false },
+                    });
+                } else if (this.gameState !== CoinFlipGameState.BettingPhase) {
+                    this.errorOutsideBettingPhase();
                 }
             }
         });
     }
 
+    errorOutsideBettingPhase() {
+        this.matdialog.open(ErrorDialogComponent, {
+            width: WIDTH_SIZE,
+            data: { message: 'Vous ne pouvez pas parier en dehors de la phase de mise.', reloadOnClose: false },
+        });
+    }
+
     updateBetAmount(value: number) {
-        if (value < 0) {
-            return 0;
+        if (value < 0 || typeof value !== 'number') {
+            return Number(0);
         }
         if (value % 1 !== 0) {
             return Math.ceil(Number(value));

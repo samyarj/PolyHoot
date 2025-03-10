@@ -1,3 +1,5 @@
+import { Timestamp } from '@angular/fire/firestore';
+
 export interface User {
     uid: string; // Primary Key
     username: string; // Must be unique
@@ -29,4 +31,5 @@ export interface User {
     nWins?: number; // Number of wins
     isOnline?: boolean; // Online status
     pity?: number; // Pity counter
+    nextDailyFree?: Timestamp; // Next date where user can get daily free
 }

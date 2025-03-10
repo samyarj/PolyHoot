@@ -1,0 +1,25 @@
+import { Injectable } from '@nestjs/common';
+import * as toStream from 'buffer-to-stream';
+import { UploadApiErrorResponse, UploadApiResponse, v2 } from 'cloudinary';
+import { Multer } from 'multer';
+
+@Injectable()
+export class CloudinaryService {
+    async uploadImage(file: Multer.File): Promise<UploadApiResponse | UploadApiErrorResponse> {
+        // Check file size limit (1 MB = 1,000,000 bytes)
+        if (file.size > 1000000) {
+            throw new Error('File size exceeds 1 MB');
+        }
+        // Verify file is an image
+        if (!file.mimetype.startsWith('image')) {
+            throw new Error('Only image files are allowed');
+        }
+        return new Promise((resolve, reject) => {
+            const upload = v2.uploader.upload_stream({ folder: 'avatars' }, (error, result) => {
+                if (error) return reject(error);
+                resolve(result);
+            });
+            toStream(file.buffer).pipe(upload);
+        });
+    }
+}

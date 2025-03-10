@@ -160,8 +160,8 @@ export class SignUpFormComponent implements OnInit {
     private handleUserSuccess(user: User): void {
         this.successMessage = 'Sign-up successful! Welcome!';
         const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-        this.router.navigate([returnUrl]);
         this.authService.setUser(user);
+        this.router.navigate([returnUrl]);
         this.isLoading = false;
     }
 

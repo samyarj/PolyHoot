@@ -7,7 +7,7 @@
         </ul>
 
         <ul class="right-list">
-            <li class="item-background-hover end-category" routerLinkActive="item-background-active">
+            <li class="item-background-hover end-category" routerLink="profile" routerLinkActive="item-background-active">
                 <i class="fa-solid fa-user"></i>
             </li>
             <li class="item-background-hover end-category" routerLink="quiz-question-management" routerLinkActive="item-background-active">
@@ -27,13 +27,6 @@
                 <i class="fa-solid fa-clover"></i>
             </li>
             <li *ngIf="user$ | async as user">Coins: {{ user.coins }}</li>
-            <li>
-                <button (click)="toggleTheme()">
-                    <img src="https://fav.farm/🌙" alt="Dark mode" />
-                    /
-                    <img src="https://fav.farm/☀️" alt="Light mode" />
-                </button>
-            </li>
         </ul>
     </nav>
 </header>

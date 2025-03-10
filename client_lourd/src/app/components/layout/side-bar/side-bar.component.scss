@@ -51,21 +51,31 @@
 }
 
 /* Avatar */
-.username{
+
+.avatar-container {
+    display: flex;
+    width: 60%;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px;
+    margin-left: 10%;
+    justify-content: space-between;
+}
+
+.username {
     color: var(--text-color);
     font-size: 1.5rem;
-    margin-left: 10px;
-    flex-grow: 1;
 }
 
 .avatar {
-    width: auto;
     height: 75px;
+    width: 75px;
     border-radius: 50%;
-    margin: 8px;
-    object-fit: cover;
-    border: 2px solid #ddd;
     transition: transform 0.2s ease;
+}
+
+.avatar.dropdown-toggle::after {
+    content: none;
 }
 
 .avatar:hover {
@@ -89,27 +99,27 @@
 }
 
 //notification button
-.notification-container{
+.notification-container {
     padding: 20px;
-    button{
+    button {
         background: none;
         border: none;
     }
-    i{
+    i {
         color: var(--tertiary-color);
         font-size: 2rem;
     }
 }
 
 // Social menu
-.social-menu{    
+.social-menu {
     padding-top: 25px;
     padding-left: 15px;
     padding-bottom: 15px;
     border-bottom: 1px solid var(--tertiary-color);
 }
 
-.social-menu-title{
+.social-menu-title {
     color: var(--tertiary-color);
     font-style: italic;
     font-weight: bold;
@@ -117,7 +127,7 @@
     flex-grow: 1;
 }
 
-.social-menu-content{
+.social-menu-content {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -145,24 +155,24 @@ ul.friend-menu {
 }
 
 // add friend configuration
-.add-friend{
-    .add-friend-button{
+.add-friend {
+    .add-friend-button {
         background: none;
         border: none;
     }
-    i{
+    i {
         color: var(--tertiary-color);
         font-size: 1.3rem;
     }
 }
 
 // friend list configuration
-.friend-list{
-    .friend-list-button{
+.friend-list {
+    .friend-list-button {
         background: none;
         border: none;
     }
-    i{
+    i {
         color: var(--tertiary-color);
         font-size: 1.3rem;
     }
@@ -176,35 +186,35 @@ div.friend-request {
     width: 100%;
     border: var(--tertiary-color) 1px solid;
     border-radius: 5%;
-    
+
     .friend-request-button {
         background: none;
         border: none;
         display: flex;
         align-items: center;
-        justify-content: space-between; 
-        width: 100%; 
+        justify-content: space-between;
+        width: 100%;
     }
 
-    li { 
+    li {
         height: 100%;
         display: flex;
         position: relative;
         font-size: var(--navbar-font-size);
         justify-content: center;
         align-items: center;
-        padding: 10px 15px; 
+        padding: 10px 15px;
     }
-    span{
+    span {
         color: var(--tertiary-color);
         font-size: 1.3rem;
         flex-grow: 1;
     }
-    .friend-request-number{
+    .friend-request-number {
         background-color: var(--tertiary-color);
         border-radius: 20%;
         margin-right: 20px;
-        span{
+        span {
             color: var(--primary-color);
             font-size: 1.3rem;
             font-weight: bold;
@@ -214,13 +224,13 @@ div.friend-request {
 }
 
 //chat configuration
-.chat-menu{    
+.chat-menu {
     padding-top: 25px;
     padding-left: 15px;
     padding-bottom: 15px;
 }
 
-.chat-menu-title{
+.chat-menu-title {
     color: var(--tertiary-color);
     font-style: italic;
     font-weight: bold;
@@ -228,14 +238,13 @@ div.friend-request {
     flex-grow: 1;
 }
 
-img.my-channels-icon{
-    width: 15px; 
+img.my-channels-icon {
+    width: 15px;
     height: 20px;
-
 }
 
-img.global-channels-icon{
-    width: 15px; 
+img.global-channels-icon {
+    width: 15px;
     height: 20px;
 }
 

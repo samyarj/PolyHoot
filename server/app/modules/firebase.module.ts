@@ -1,5 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import * as admin from 'firebase-admin';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Global()
 @Module({
@@ -14,5 +15,6 @@ import * as admin from 'firebase-admin';
         },
     ],
     exports: ['FIREBASE_ADMIN'],
+    imports: [CloudinaryModule],
 })
 export class FirebaseModule {}

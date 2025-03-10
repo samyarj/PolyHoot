@@ -119,6 +119,7 @@ export class ConnectionGateway implements OnGatewayDisconnect {
             this.gameManager.socketRoomsMap.delete(client);
             const clientIds = this.server.sockets.adapter.rooms.get(roomId);
             if ((clientIds && clientIds.size === 0) || !clientIds) {
+                this.server.emit(GameEvents.End, roomId);
                 this.gameManager.endGame(roomId);
                 this.chatService.deleteHistory(roomId);
             }

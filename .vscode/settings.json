@@ -10,5 +10,6 @@
     "eslint.workingDirectories": ["./client_lourd", "./serveur"],
     "eslint.probe": ["javascript", "typescript", "html", "vue", "markdown"],
     "eslint.validate": ["javascript", "typescript", "html", "vue", "markdown"],
-    "cmake.sourceDirectory": "C:/Users/Elias/LOG3900-210/client_leger/linux"
+    "cmake.sourceDirectory": "C:/Users/Elias/LOG3900-210/client_leger/linux",
+    "cSpell.words": ["LOOTBOX"]
 }

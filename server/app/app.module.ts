@@ -4,9 +4,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthController } from './controllers/auth/auth.controller';
 import { ChatChannelsController } from './controllers/chat-channels/chat-channels.controller';
 import { HistoryController } from './controllers/history/history.controller';
+import { InventoryController } from './controllers/inventory.controller';
+import { LootBoxController } from './controllers/luck-related/lootbox-controller';
 import { PasswordValidationController } from './controllers/password-validation/password-validation.controller';
 import { QuestionController } from './controllers/question/question.controller';
 import { QuizController } from './controllers/quiz/quiz.controller';
+import { ShopController } from './controllers/shop.controller';
 import { ChatGateway } from './gateways/chat/chat.gateway';
 import { CoinflipGateway } from './gateways/coinflip/coinflip.gateway';
 import { ConnectionGateway } from './gateways/connection/connection.gateway';
@@ -14,6 +17,7 @@ import { GameGateway } from './gateways/game/game.gateway';
 import { GameRecordSchema, gameRecordSchema } from './model/schema/game-record/game-record-schema';
 import { Question, questionSchema } from './model/schema/question/question';
 import { Quiz, quizSchema } from './model/schema/quiz/quiz';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { FirebaseModule } from './modules/firebase.module';
 import { UserService } from './services/auth/user.service';
 import { ChatChannelsService } from './services/chat-channels/chat-channels.service';
@@ -22,8 +26,11 @@ import { CoinflipManagerService } from './services/coinflip-manager/coinflip-man
 import { GameManagerService } from './services/game-manager/game-manager.service';
 import { GameRecordService } from './services/game-record/game-record.service';
 import { HistoryManagerService } from './services/history-manager/history-manager.service';
+import { InventoryService } from './services/inventory.service';
+import { LootBoxService } from './services/lootbox/lootbox.service';
 import { QuestionService } from './services/question/question.service';
 import { QuizService } from './services/quiz/quiz.service';
+import { ShopService } from './services/shop.service';
 
 @Module({
     imports: [
@@ -41,6 +48,7 @@ import { QuizService } from './services/quiz/quiz.service';
             { name: GameRecordSchema.name, schema: gameRecordSchema, collection: 'history' },
         ]),
         FirebaseModule,
+        CloudinaryModule,
     ],
     providers: [
         Logger,
@@ -51,14 +59,27 @@ import { QuizService } from './services/quiz/quiz.service';
         ChatGateway,
         CoinflipGateway,
         CoinflipManagerService,
+        LootBoxService,
+        InventoryService,
         GameRecordService,
         ConnectionGateway,
         GameManagerService,
         HistoryManagerService,
         UserService,
         ChatChannelsService,
+        ShopService,
     ],
 
-    controllers: [QuestionController, QuizController, AuthController, PasswordValidationController, HistoryController, ChatChannelsController],
+    controllers: [
+        QuestionController,
+        QuizController,
+        AuthController,
+        PasswordValidationController,
+        HistoryController,
+        ChatChannelsController,
+        LootBoxController,
+        InventoryController,
+        ShopController,
+    ],
 })
 export class AppModule {}

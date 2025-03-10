@@ -3,96 +3,36 @@
         <div class="shop-section">
             <div class="section-title">Avatars</div>
             <div class="grid">
-                <div class="square">
-                    <div class="item-title">Avatar1</div>
-                    <div class="price">10 coins</div>
-                </div>
-                <div class="square">
-                    <div class="item-title">Avatar2</div>
-                    <div class="price">10 coins</div>
-                </div>
-                <div class="square">
-                    <div class="item-title">Avatar3</div>
-                    <div class="price">10 coins</div>
-                </div>
-                <div class="square">
-                    <div class="item-title">Avatar4</div>
-                    <div class="price">10 coins</div>
-                </div>
-                <div class="square">
-                    <div class="item-title">Avatar5</div>
-                    <div class="price">10 coins</div>
-                </div>
-                <div class="square">
-                    <div class="item-title">Avatar6</div>
-                    <div class="price">10 coins</div>
+                <div *ngFor="let avatar of shop.avatars" class="square" (click)="submitBuy('avatar', avatar.link)">
+                    <img [src]="avatar.link" alt="avatar" class="square-avatar" />
+                    <div class="price">{{ avatar.price }} coins</div>
                 </div>
                 <!-- Add more avatars -->
             </div>
+            <p *ngIf="shop.avatars.length === 0">Vous detenez déjà tous les avatars de la boutique!</p>
         </div>
         <div class="shop-section">
-            <div class="section-title">Bordure d'avatar</div>
+            <div class="section-title">Bannière d'avatar</div>
             <div class="grid">
-                <div class="square">
-                    <div class="item-title">Border1</div>
-                    <div class="price">10 coins</div>
+                <div *ngFor="let banner of shop.banners" class="square" (click)="submitBuy('banner', banner.link)">
+                    <img [src]="banner.link" alt="avatar" class="square-banner" />
+                    <div class="price">{{ banner.price }} coins</div>
                 </div>
-                <div class="square">
-                    <div class="item-title">Border2</div>
-                    <div class="price">10 coins</div>
-                </div>
-                <div class="square">
-                    <div class="item-title">Border3</div>
-                    <div class="price">10 coins</div>
-                </div>
-                <div class="square">
-                    <div class="item-title">Border4</div>
-                    <div class="price">10 coins</div>
-                </div>
-                <div class="square">
-                    <div class="item-title">Border5</div>
-                    <div class="price">10 coins</div>
-                </div>
-                <div class="square">
-                    <div class="item-title">Border6</div>
-                    <div class="price">10 coins</div>
-                </div>
-                <div class="square">
-                    <div class="item-title">Border1</div>
-                    <div class="price">10 coins</div>
-                </div>
-                <div class="square">
-                    <div class="item-title">Border2</div>
-                    <div class="price">10 coins</div>
-                </div>
-                <div class="square">
-                    <div class="item-title">Border3</div>
-                    <div class="price">10 coins</div>
-                </div>
-                <div class="square">
-                    <div class="item-title">Border4</div>
-                    <div class="price">10 coins</div>
-                </div>
-                <div class="square">
-                    <div class="item-title">Border5</div>
-                    <div class="price">10 coins</div>
-                </div>
-                <div class="square">
-                    <div class="item-title">Border6</div>
-                    <div class="price">10 coins</div>
-                </div>
-
                 <!-- Add more borders -->
             </div>
+            <p *ngIf="shop.banners.length === 0">Vous detenez déjà toutes les bannières d'avatar de la boutique!</p>
         </div>
         <div class="shop-section">
             <div class="section-title">Thèmes de couleur</div>
             <div class="grid">
-                <div class="square">Theme1</div>
-                <div class="square">Theme2</div>
-                <div class="square">Theme3</div>
-                <!-- Add more themes -->
+                <div *ngFor="let theme of shop.themes" class="square theme" [attr.data-theme]="theme.link" (click)="submitBuy('theme', theme.link)">
+                    <p>
+                        {{ theme.link }}
+                    </p>
+                    <div class="price">{{ theme.price }} coins</div>
+                </div>
             </div>
+            <p *ngIf="shop.themes.length === 0">Vous detenez déjà tous les thèmes de la boutique!</p>
         </div>
     </div>
 </div>

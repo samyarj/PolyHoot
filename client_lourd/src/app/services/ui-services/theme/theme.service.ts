@@ -1,23 +1,42 @@
 import { Injectable } from '@angular/core';
+import { User } from '@app/interfaces/user';
+import { AuthService } from '@app/services/auth/auth.service';
+import { Observer } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ThemeService {
-    private currentTheme = 'dark';
+    private defaultThemes: string[] = ['dark', 'light'];
+    private ownedThemes: string[] = [];
+    private ownedThemesObserver: Partial<Observer<User | null>> = {
+        next: (user: User | null) => {
+            if (user) {
+                if (user?.inventory?.themes) {
+                    this.ownedThemes = user?.inventory?.themes;
+                }
+                if (user?.config?.themeEquipped) {
+                    if (user.config.themeEquipped !== 'default') {
+                        this.setTheme(user?.config?.themeEquipped);
+                    } else {
+                        this.setTheme('dark');
+                    }
+                } else {
+                    this.setTheme('dark');
+                }
+            }
+        },
+    };
+    constructor(private authService: AuthService) {
+        this.setTheme('light');
+        this.authService.user$.subscribe(this.ownedThemesObserver);
+    }
 
-    setTheme(theme: 'dark' | 'light') {
+    get themes() {
+        return [...this.ownedThemes, ...this.defaultThemes];
+    }
+
+    setTheme(theme: string) {
         document.documentElement.setAttribute('data-theme', theme);
-        this.currentTheme = theme;
-        localStorage.setItem('theme', theme); // Save theme preference
-    }
-
-    getTheme(): 'dark' | 'light' {
-        return (localStorage.getItem('theme') as 'dark' | 'light') || 'dark';
-    }
-
-    toggleTheme() {
-        const newTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
-        this.setTheme(newTheme);
     }
 }

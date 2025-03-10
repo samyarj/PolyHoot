@@ -1,0 +1,186 @@
+.loot-box-wrapper {
+    position: relative;
+    width: 400px;
+    height: 300px;
+    overflow: hidden;
+    border-radius: 30px;
+}
+
+// .loot-box-wrapper.very-rare {
+//     box-shadow:
+//         0 0 30px rgba(255, 215, 0, 0.8),
+//         0 0 50px rgba(255, 105, 180, 0.6),
+//         0 0 70px rgba(102, 0, 255, 0.6);
+// }
+
+// .loot-box-wrapper.rare {
+//     box-shadow:
+//         0 0 30px rgba(0, 204, 255, 0.6),
+//         0 0 50px rgba(0, 102, 204, 0.6);
+// }
+
+// .loot-box-wrapper.common {
+//     box-shadow:
+//         0 0 20px rgba(170, 170, 170, 0.3),
+//         0 0 40px rgba(140, 140, 140, 0.3);
+// }
+
+.cover-box {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--primary-color);
+    color: var(--text-color);
+    transition: 3s;
+    border-radius: 30px;
+    z-index: 5;
+    &.open {
+        z-index: 5;
+        opacity: 0;
+        transform: scale(5) rotate(1800deg);
+    }
+}
+
+.win-container {
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    background-color: var(--primary-color);
+    border: 4px solid var(--tertiary-color);
+    border-radius: 30px;
+    box-shadow: inset 0px 0px 10px color-mix(in srgb, var(--tertiary-color) 80%, transparent);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    overflow: hidden;
+    .title {
+        color: var(--text-color);
+        font-size: 16px;
+    }
+
+    .reward-div {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: var(--text-color);
+
+        .item-img-coins {
+            height: 70px;
+            aspect-ratio: 1 / 1;
+            background: var(--primary-color);
+            padding: 15px;
+            border-radius: 100%;
+            margin-top: 10px;
+
+            svg {
+                height: 100%;
+                width: 100%;
+            }
+        }
+    }
+
+    .button {
+        display: flex;
+        align-items: center; /* Vertical centering */
+        justify-content: center; /* Horizontal centering */
+        text-align: center;
+        background-color: white;
+        color: black;
+        border: 3px solid black;
+        border-radius: 50px;
+        transition: transform 0.2s ease-in-out;
+        &:hover {
+            background: linear-gradient(0deg, black 0%, white 47.5%);
+            cursor: pointer;
+            border: 3px solid black;
+        }
+
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+        height: 40px;
+    }
+}
+
+.item-img-theme {
+    height: 70px;
+    aspect-ratio: 1 / 1;
+    background: var(--primary-color);
+    border-radius: 100%;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.item-img {
+    height: 70%;
+    aspect-ratio: 1 / 1;
+    background: var(--primary-color);
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.item-img-av {
+    height: 70px;
+    z-index: 1;
+    aspect-ratio: 1 / 1;
+    background: var(--primary-color);
+    border-radius: 100%;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.item-img-theme {
+    background: linear-gradient(to bottom, var(--primary-color) 55%, var(--secondary-color) 85%);
+    border: 3px solid var(--tertiary-color);
+    color: var(--text-color);
+}
+
+.very-rare {
+    background: linear-gradient(135deg, #ffcc00 10%, #ff66ff 50%, #6600ff 90%);
+    box-shadow:
+        inset 0 0 10px rgba(255, 215, 0, 0.8),
+        inset 0 0 15px rgba(255, 105, 180, 0.5);
+    font-weight: bold;
+    text-transform: uppercase;
+    text-align: center;
+
+    .title,
+    .reward-div {
+        color: black;
+    }
+}
+
+.rare {
+    background: linear-gradient(135deg, #003399 10%, #0066cc 50%, #003399 90%);
+    box-shadow: inset 0 0 10px rgba(0, 204, 255, 0.6);
+    font-weight: bold;
+    text-transform: uppercase;
+    text-align: center;
+    .title,
+    .reward-div {
+        color: rgb(255, 255, 255);
+    }
+}
+
+.common {
+    background: linear-gradient(135deg, #888888 10%, #6f6f6f 50%, #888888 90%);
+    box-shadow: inset 0 0 10px rgba(170, 170, 170, 0.3);
+    font-weight: bold;
+    text-align: center;
+    .title,
+    .reward-div {
+        color: rgb(255, 255, 255);
+    }
+}

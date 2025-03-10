@@ -13,6 +13,64 @@
     --navbar-font-size: 16px;
     --navbar-separator-size: 2px;
 }
+
+// Common Backdrop
+.backdrop-dialog-common {
+    width: 50%;
+    aspect-ratio: 4/ 3;
+    background: radial-gradient(circle, rgba(136, 136, 136, 0.7) 10%, rgba(111, 111, 111, 0) 50%);
+
+    border-radius: 30%;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+// Rare Backdrop
+.backdrop-dialog-rare {
+    width: 50%;
+    aspect-ratio: 4/ 3;
+    background: radial-gradient(
+        circle,
+        rgba(0, 51, 153, 0.84) 10%,
+        rgba(0, 102, 204, 0.482) 20%,
+        rgba(0, 204, 255, 0.365) 30%,
+        rgba(111, 111, 111, 0) 50%
+    );
+
+    border-radius: 30%;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+// Very Rare Backdrop
+.backdrop-dialog-very-rare {
+    width: 70%;
+    aspect-ratio: 4/ 3;
+    background: radial-gradient(
+        circle,
+        rgba(255, 204, 0, 0.737) 10%,
+        rgba(255, 102, 255, 0.475) 20%,
+        rgba(102, 0, 255, 0.308) 30%,
+        rgba(111, 111, 111, 0) 50%
+    );
+
+    border-radius: 30%;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+// MatDialog Border radius.
+.custom-container {
+    border-radius: 30px !important;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0) !important;
+}
 // ******************************
 // Tutorial for themes
 // primary-color:
@@ -34,6 +92,102 @@
     --active-bg: rgba(255, 255, 255, 0.4);
 }
 
+[data-theme='sunset'] {
+    --primary-color: #3b0066; /* Deep purple, a bit darker for a more refined look */
+    --secondary-color: #ff4fa1; /* Softer, more balanced pink that blends well with the purple */
+    --tertiary-color: #ffbb33; /* Warm amber-orange for a more sunset-like feel */
+    --text-color: #fce4ff; /* Soft lavender to match the purple tone but still easy to read */
+
+    /* Header Colors */
+    --nav-bg: #330033; /* Darker purple for a sophisticated look */
+    --hover-bg: rgba(255, 0, 225, 0.3); /* Slightly stronger pink hover effect */
+    --active-bg: rgba(255, 170, 0, 0.5); /* More noticeable orange glow for active state */
+}
+
+[data-theme='neon'] {
+    --primary-color: #0d0d0d; /* Almost black */
+    --secondary-color: #ff00ff; /* Neon magenta */
+    --tertiary-color: #00ffff; /* Electric cyan */
+    --text-color: #f0f0f0; /* Light gray for readability */
+
+    /* Header Colors */
+    --nav-bg: #1a1a1a; /* Dark gray */
+    --hover-bg: rgba(255, 0, 255, 0.2); /* Magenta glow */
+    --active-bg: rgba(0, 255, 255, 0.4); /* Cyan glow */
+}
+
+[data-theme='lava'] {
+    --primary-color: #4a0000; /* Dark volcanic red */
+    --secondary-color: #b30000; /* Intense lava red */
+    --tertiary-color: #ff4500; /* Bright molten orange */
+    --text-color: #ffddc1; /* Soft warm yellow for readability */
+
+    /* Header Colors */
+    --nav-bg: #330000; /* Deep ember red */
+    --hover-bg: rgba(255, 69, 0, 0.2); /* Orange glow */
+    --active-bg: rgba(179, 0, 0, 0.4); /* Red glow */
+}
+
+[data-theme='inferno'] {
+    --primary-color: #1a0000; /* Almost black, deep abyss */
+    --secondary-color: #ff0000; /* Pure, burning red */
+    --tertiary-color: #ff6a00; /* Fiery, superheated orange */
+    --text-color: #ffffff; /* White-hot glow for readability */
+
+    /* Header Colors */
+    --nav-bg: #300000; /* Dark ember tone */
+    --hover-bg: rgba(255, 0, 0, 0.3); /* Red heat glow */
+    --active-bg: rgba(255, 106, 0, 0.4); /* Orange fire effect */
+}
+
+[data-theme='emerald'] {
+    --primary-color: #003d00; /* Deep forest green */
+    --secondary-color: #007a33; /* Rich emerald */
+    --tertiary-color: #00cc66; /* Vibrant leafy green */
+    --text-color: #e0ffe0; /* Soft pale green for readability */
+
+    /* Header Colors */
+    --nav-bg: #002600; /* Dark mossy green */
+    --hover-bg: rgba(0, 204, 102, 0.2); /* Light green glow */
+    --active-bg: rgba(0, 122, 51, 0.4); /* Emerald highlight */
+}
+
+[data-theme='toxic'] {
+    --primary-color: #001a00; /* Almost black with a green tint */
+    --secondary-color: #00ff00; /* Pure neon green */
+    --tertiary-color: #33ff33; /* Electric lime */
+    --text-color: #ffffff; /* Bright white for strong contrast */
+
+    /* Header Colors */
+    --nav-bg: #003300; /* Dark radioactive green */
+    --hover-bg: rgba(0, 255, 0, 0.2); /* Neon green glow */
+    --active-bg: rgba(51, 255, 51, 0.4); /* Bright lime highlight */
+}
+
+[data-theme='vice'] {
+    --primary-color: #2d1f7f; /* Dark purple, a bit like the gloves' fabric */
+    --secondary-color: #ff009e; /* Neon pink, inspired by the Vice gloves' color */
+    --tertiary-color: #00c6ff; /* Electric cyan, for a glowing accent */
+    --text-color: #ffffff; /* Bright white text for sharp contrast */
+
+    /* Header Colors */
+    --nav-bg: #1a0d4a; /* Dark purple background to keep things edgy */
+    --hover-bg: rgba(255, 0, 158, 0.2); /* Neon pink glow when hovered */
+    --active-bg: rgba(0, 198, 255, 0.4); /* Cyan highlight on active state */
+}
+
+[data-theme='gold'] {
+    --primary-color: #3d2b00; /* Deep dark gold (brass-like) */
+    --secondary-color: #b8860b; /* Goldenrod for a rich accent */
+    --tertiary-color: #ffd700; /* Bright metallic gold */
+    --text-color: #fff8dc; /* Soft creamy white for contrast */
+
+    /* Header Colors */
+    --nav-bg: #2a1c00; /* Dark bronze */
+    --hover-bg: rgba(255, 215, 0, 0.2); /* Light golden glow */
+    --active-bg: rgba(184, 134, 11, 0.4); /* Warm gold highlight */
+}
+
 [data-theme='light'] {
     --primary-color: #ffffff;
     --secondary-color: #71cdff;
@@ -44,6 +198,18 @@
     --nav-bg: #ffffff;
     --hover-bg: rgba(0, 0, 0, 0.2);
     --active-bg: rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='celestial'] {
+    --primary-color: #1a0033; /* Deep galactic purple, like the void of space */
+    --secondary-color: #ffcc00; /* Radiant star gold for an opulent accent */
+    --tertiary-color: #00b5e2; /* Galactic blue, reminiscent of nebulae and rare minerals */
+    --text-color: #e5e5e5; /* Soft cosmic gray for text, easy on the eyes but elegant */
+
+    /* Header Colors */
+    --nav-bg: #0d0011; /* A very dark purple, almost black, for a sophisticated touch */
+    --hover-bg: rgba(255, 204, 0, 0.5); /* Subtle golden glow when hovering over items */
+    --active-bg: rgba(0, 181, 226, 0.7); /* Shimmering blue highlight on active elements */
 }
 
 /* You can add global styles to this file, and also import other style files */

@@ -27,7 +27,6 @@ export class GamePageComponent implements OnDestroy {
         }
         this.gameClientService.getTitle();
         this.gameClientService.resetInformationFields();
-        this.gameClientService.handleSockets();
         this.gameClientService.resetAttributes();
         this.gameClientService.playerPoints = 0;
         this.gameClientService.signalUserConnect();
@@ -87,8 +86,14 @@ export class GamePageComponent implements OnDestroy {
     get answer(): string {
         return this.gameClientService.answer;
     }
+    get qreAnswer(): number {
+        return this.gameClientService.qreAnswer;
+    }
     set answer(value: string) {
         this.gameClientService.answer = value;
+    }
+    set qreAnswer(value: number) {
+        this.gameClientService.qreAnswer = value;
     }
     // J'ai remplace le window:unload par window:beforeunload pour que le localStorage soit modifie avant que la page soit dechargee
     @HostListener('window:beforeunload')
