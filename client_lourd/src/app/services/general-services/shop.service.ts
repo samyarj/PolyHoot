@@ -73,12 +73,12 @@ export class ShopService {
             .pipe(catchError((error) => this.messageHandler.handleHttpError(error)));
     }
 
-    buyItem(type: string, itemURL: string): Observable<boolean> {
+    buyItem(type: string, itemURL: string): Observable<boolean | null> {
         const options = {
             headers: { authorization: `Bearer ${this.tokenID}` },
         };
         return this.http
-            .post<boolean>(`${this.baseUrl}/shop`, { type, itemURL }, options)
+            .post<boolean | null>(`${this.baseUrl}/shop`, { type, itemURL }, options)
             .pipe(catchError((error) => this.messageHandler.handleHttpError(error)));
     }
 }

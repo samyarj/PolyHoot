@@ -44,8 +44,21 @@ export class ShopController {
     async setAvatar(@Body() body: { type: string; itemURL: string }, @Req() req: AuthenticatedRequest, @Res() response: Response) {
         this.logger.log(`Equipping theme for user : ${req.user.displayName}`);
         try {
-            const isItemAddedToInventory: boolean = await this.userService.addToInventory(req.user.uid, body.type, body.itemURL);
-            response.status(HttpStatus.OK).json(isItemAddedToInventory);
+            const itemPrice: number | null = this.shopService.getPriceByLink(body.itemURL);
+            if (itemPrice === null) {
+                throw new Error("L'item n'est pas présent dans la boutique!");
+            }
+
+            const canAffordItem: boolean = await this.userService.updateUserCoins(req.user.uid, -1 * itemPrice);
+            if (canAffordItem) {
+                const isItemAddedToInventory: boolean | null = await this.userService.addToInventory(req.user.uid, body.type, body.itemURL);
+                if (!isItemAddedToInventory) {
+                    await this.userService.updateUserCoins(req.user.uid, itemPrice); //give back money
+                }
+                response.status(HttpStatus.OK).json(isItemAddedToInventory);
+            } else {
+                response.status(HttpStatus.OK).json(null); // not enough money
+            }
         } catch (error) {
             this.logger.error(`Error fetching profile: ${error.message}`);
 

@@ -4,6 +4,7 @@ import { ConfirmationDialogComponent } from '@app/components/general-elements/co
 import { ErrorDialogComponent } from '@app/components/general-elements/error-dialog/error-dialog.component';
 import { WIDTH_SIZE } from '@app/constants/constants';
 import { ShopService } from '@app/services/general-services/shop.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
     selector: 'app-shop-page',
@@ -14,6 +15,7 @@ export class ShopPageComponent {
     constructor(
         private shopService: ShopService,
         private matdialog: MatDialog,
+        private toastr: ToastrService,
     ) {
         this.shopService.getShop();
     }
@@ -52,20 +54,33 @@ export class ShopPageComponent {
 
     buyItem(type: string, itemURL: string) {
         this.shopService.buyItem(type, itemURL).subscribe({
-            next: (isItemAddedToInventory: boolean) => {
-                if (isItemAddedToInventory === false) {
-                    this.matdialog.open(ErrorDialogComponent, {
-                        width: '400px',
-                        data: {
-                            message: "Vous possèdez déjà l'item obtenu. Vous recevrez le prix de la lootBox en retour dans votre compte.",
-                            reloadOnClose: false,
-                        },
-                    });
-                } else {
-                    this.matdialog.open(ConfirmationDialogComponent, {
-                        width: WIDTH_SIZE,
-                        data: 'Merci pour votre achat. Vous pouvez consulter votre achat dans votre inventaire.',
-                    });
+            next: (isItemAddedToInventory: boolean | null) => {
+                switch (isItemAddedToInventory) {
+                    case false: {
+                        this.matdialog.open(ErrorDialogComponent, {
+                            width: '400px',
+                            data: {
+                                message: "Vous possèdez déjà l'item obtenu. Vous serez ramboursé sur l'item.",
+                                reloadOnClose: false,
+                            },
+                        });
+
+                        break;
+                    }
+                    case true: {
+                        this.toastr.success('Merci pour votre achat, vous le retrouverez dans votre inventaire.', 'Succès');
+                        break;
+                    }
+                    case null: {
+                        this.matdialog.open(ErrorDialogComponent, {
+                            width: '400px',
+                            data: {
+                                message: "Vous n'avez pas assez d'argent pour vous procurer l'item :(.",
+                                reloadOnClose: false,
+                            },
+                        });
+                        break;
+                    }
                 }
                 this.shopService.getShop();
             },
