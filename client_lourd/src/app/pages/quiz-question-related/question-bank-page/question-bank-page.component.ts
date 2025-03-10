@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { EMPTY_QUESTION } from '@app/constants/mock-constants';
+import { EMPTY_QCM_QUESTION } from '@app/constants/mock-constants';
 import { Question } from '@app/interfaces/question';
 import { QuestionValidationService } from '@app/services/admin-services/validation-services/question-validation-service/question-validation.service';
 import { QuestionService } from '@app/services/back-end-communication-services/question-service/question.service';
@@ -49,7 +49,7 @@ export class QuestionBankPageComponent {
 
     addNewQuestion() {
         this.showForm = true;
-        this.emptyQuestion = { lastModified: new Date().toString(), ...JSON.parse(JSON.stringify(EMPTY_QUESTION)) };
+        this.emptyQuestion = { lastModified: new Date().toString(), ...JSON.parse(JSON.stringify(EMPTY_QCM_QUESTION)) };
     }
 
     handleModifiedQuestion(modifiedQuestion: Question) {

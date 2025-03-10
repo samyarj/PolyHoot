@@ -9,7 +9,6 @@ export class SocketClientService {
     socket: Socket;
     roomId: string;
     playerName: string;
-    canChat: boolean;
     isOrganizer: boolean;
 
     isSocketAlive() {

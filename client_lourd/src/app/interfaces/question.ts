@@ -1,3 +1,4 @@
+import { QreAttributes } from './qre-attributes';
 import { QuestionChoice } from './question-choice';
 
 export interface Question {
@@ -6,5 +7,6 @@ export interface Question {
     text: string;
     points: number;
     choices?: QuestionChoice[];
+    qreAttributes?: QreAttributes;
     lastModified?: string;
 }

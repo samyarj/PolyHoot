@@ -31,9 +31,6 @@ export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
     get name() {
         return this.chatService.getUserName();
     }
-    get canChat() {
-        return this.chatService.canChat;
-    }
 
     ngOnInit(): void {
         this.messagesSubscription = this.chatService.allChatMessagesObservable.subscribe(this.messagesObserver);
@@ -60,11 +57,6 @@ export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
     }
 
     sendMessageToRoom() {
-        if (!this.canChat) {
-            this.inputMessage = '';
-            this.messageHandlerService.popUpErrorDialog('Vous avez été restreint de discuter dans le clavardage');
-            return;
-        }
         if (this.isLengthInRange() && this.isNotEmpty()) {
             const hasBeenSent: boolean = this.chatService.sendMessageToRoom(this.inputMessage);
             this.inputMessage = '';

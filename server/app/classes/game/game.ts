@@ -23,8 +23,6 @@ export class Game {
     playersRemoved: Player[];
     organizer: Player;
     private playersReadyForNext: boolean;
-    private answersPerChoice: number[];
-    private choicesHistory: number[][] = [];
     private currentQuestionIndex: number;
     private lastFinalizeCall: number | null;
     private lastFinalizePlayer: Player;
@@ -42,7 +40,6 @@ export class Game {
         const index = this.players.findIndex((player) => player.name.toLowerCase() === playerName.toLowerCase());
         const outRangeIndex = -1;
         if (index !== outRangeIndex) {
-            this.players[index].socket.emit(GameEvents.PlayerBanned);
             this.players[index].socket.leave(this.roomId);
             return this.players.splice(index, 1);
         }
@@ -50,17 +47,7 @@ export class Game {
 
     validPlayer(playerName: string): boolean {
         const trimmedPlayerName = playerName.trim();
-        return (
-            trimmedPlayerName &&
-            !this.playerExists(trimmedPlayerName) &&
-            !this.isPlayerBanned(trimmedPlayerName) &&
-            !this.isNameOrganizer(trimmedPlayerName)
-        );
-    }
-
-    playerExists(playerName: string): boolean {
-        const player = this.getPlayerByName(playerName);
-        return !!player;
+        return trimmedPlayerName && !this.isPlayerBanned(trimmedPlayerName) && !this.isNameOrganizer(trimmedPlayerName);
     }
 
     isPlayerBanned(playerName: string): boolean {
@@ -85,7 +72,7 @@ export class Game {
 
     startGame() {
         this.givePlayerList();
-        const timeDuration = this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QCM ? this.quiz.duration : TIME_FOR_QRL;
+        const timeDuration = this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QRL ? TIME_FOR_QRL : this.quiz.duration;
         this.timer.startTimer(timeDuration, TimerEvents.Value, TimerEvents.End);
         return { question: this.quiz.questions[this.currentQuestionIndex], index: this.currentQuestionIndex, length: this.quiz.questions.length };
     }
@@ -114,7 +101,7 @@ export class Game {
                 this.playersReadyForNext = false;
                 this.lastFinalizeCall = null;
                 this.currentQuestionIndex++;
-                const timeDuration = this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QCM ? this.quiz.duration : TIME_FOR_QRL;
+                const timeDuration = this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QRL ? TIME_FOR_QRL : this.quiz.duration;
                 this.timer.startTimer(timeDuration, TimerEvents.Value, TimerEvents.End);
                 this.timer.isPaused = false;
                 return { question: this.quiz.questions[this.currentQuestionIndex], index: this.currentQuestionIndex };
@@ -132,7 +119,7 @@ export class Game {
                 player.isInGame = false;
                 playerList.push({ name: player.name, points: player.points, isInGame: player.isInGame, noBonusesObtained: player.noBonusesObtained });
             });
-            const resultsData = { questions: this.quiz.questions, players: playerList, choicesHistory: this.choicesHistory };
+            const resultsData = playerList;
             return resultsData;
         }
     }
@@ -143,19 +130,14 @@ export class Game {
         });
     }
 
-    handleChoiceChange(@ConnectedSocket() client: Socket, indexChoice: number) {
-        const targetedPlayer: Player = this.findTargetedPlayer(client);
-        targetedPlayer.currentChoices[indexChoice] = !targetedPlayer.currentChoices[indexChoice];
-        return { selected: targetedPlayer.currentChoices[indexChoice] ? true : false, choice: indexChoice };
-    }
-    updatePointsQRL(data: { pointsTotal: { playerName: string; points: number }[]; answers: number[] }) {
+    updatePointsQRL(data: { pointsTotal: { playerName: string; points: number }[] /* answers: number[] */ }) {
+        console.log('PointsTotal', data.pointsTotal);
         data.pointsTotal.forEach((dataPlayer) => {
             const client = this.players.find((player) => player.name === dataPlayer.playerName);
-            client.socket.emit(GameEvents.PlayerPointsUpdate, { points: dataPlayer.points, isFirst: false });
+            client.socket.emit(GameEvents.PlayerPointsUpdate, { points: dataPlayer.points, isFirst: false, exactAnswer: false });
             this.organizer.socket.emit(GameEvents.OrganizerPointsUpdate, { name: dataPlayer.playerName, points: dataPlayer.points });
             client.points = dataPlayer.points;
         });
-        this.choicesHistory.push(data.answers);
     }
     startGameCountdown(timerValue: number) {
         this.timer.startTimer(timerValue, TimerEvents.GameCountdownValue, TimerEvents.GameCountdownEnd);
@@ -174,21 +156,31 @@ export class Game {
         });
     }
 
-    finalizePlayerAnswer(@ConnectedSocket() client: Socket) {
+    finalizePlayerAnswer(@ConnectedSocket() client: Socket, answerData: { choiceSelected: boolean[]; qreAnswer: number }) {
         const targetedPlayer: Player = this.findTargetedPlayer(client);
         targetedPlayer.submitted = true;
+        targetedPlayer.currentChoices = answerData.choiceSelected;
+        targetedPlayer.qreAnswer = answerData.qreAnswer;
         if (!targetedPlayer.verifyIfAnswersCorrect(this.quiz.questions[this.currentQuestionIndex])) {
             targetedPlayer.isFirst = false;
             return this.checkAndPrepareForNextQuestion();
         }
-        const currentFinalizeTime: number = Date.now();
-        if (!this.lastFinalizeCall) {
-            this.handleFirstAnswer(targetedPlayer, currentFinalizeTime);
-            return this.checkAndPrepareForNextQuestion();
-        }
+        if (this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QCM) {
+            const currentFinalizeTime: number = Date.now();
+            if (!this.lastFinalizeCall) {
+                this.handleFirstAnswer(targetedPlayer, currentFinalizeTime);
+                return this.checkAndPrepareForNextQuestion();
+            }
 
-        this.handleLaterAnswer(currentFinalizeTime);
-        targetedPlayer.isFirst = false;
+            this.handleLaterAnswer(currentFinalizeTime);
+            targetedPlayer.isFirst = false;
+        } else if (this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QRE) {
+            const question = this.quiz.questions[this.currentQuestionIndex];
+            if (question.qreAttributes.tolerance !== 0 && targetedPlayer.qreAnswer === question.qreAttributes.goodAnswer) {
+                targetedPlayer.exactAnswer = true;
+                targetedPlayer.noBonusesObtained++;
+            }
+        }
         this.checkAndPrepareForNextQuestion();
     }
     checkAndPrepareForNextQuestion(@ConnectedSocket() client?: Socket) {
@@ -201,12 +193,8 @@ export class Game {
         }
     }
     preparePlayersForNextQuestion() {
-        this.answersPerChoice = Array(this.quiz.questions[this.currentQuestionIndex].choices?.length).fill(0);
         this.updatePlayerAnswersAndPoints();
         this.emitNextQuestionEvents();
-        if (this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QCM) {
-            this.choicesHistory.push(this.answersPerChoice);
-        }
         this.prepareForNextRound();
         this.emitCorrectionEvents();
     }
@@ -245,24 +233,18 @@ export class Game {
         this.lastFinalizeCall = null;
         this.timer = new Timer(roomId, client);
         this.playersReadyForNext = false;
-        this.choicesHistory = [];
     }
 
-    private getPlayerByName(playerName: string): Player | undefined {
-        return this.players.find((player) => player.name.toLowerCase() === playerName.toLowerCase());
-    }
     private updatePlayerAnswersAndPoints() {
         this.players.forEach((player: Player) => {
-            const answers = player.currentChoices;
             const currentQuestion = this.quiz.questions[this.currentQuestionIndex];
-            if (currentQuestion.type === QuestionType.QCM) {
-                answers.forEach((selected, index) => {
-                    if (selected) {
-                        this.answersPerChoice[index]++;
-                    }
-                });
+            if (currentQuestion.type === QuestionType.QCM || currentQuestion.type === QuestionType.QRE) {
                 player.updatePlayerPoints(this.quiz.questions[this.currentQuestionIndex]);
-                player.socket.emit(GameEvents.PlayerPointsUpdate, { points: player.points, isFirst: player.isFirst });
+                player.socket.emit(GameEvents.PlayerPointsUpdate, {
+                    points: player.points,
+                    isFirst: player.isFirst,
+                    exactAnswer: player.exactAnswer,
+                });
                 this.organizer.socket.emit(GameEvents.OrganizerPointsUpdate, { name: player.name, points: player.points });
             }
             player.prepareForNextQuestion();
@@ -285,9 +267,7 @@ export class Game {
         }
     }
     private handleFirstAnswer(targetedPlayer: Player, currentFinalizeTime: number) {
-        if (this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QCM) {
-            targetedPlayer.noBonusesObtained++;
-        }
+        targetedPlayer.noBonusesObtained++;
         this.lastFinalizeCall = currentFinalizeTime;
         this.lastFinalizePlayer = targetedPlayer;
         targetedPlayer.isFirst = true;
@@ -295,9 +275,7 @@ export class Game {
     private handleLaterAnswer(currentFinalizeTime: number) {
         if (currentFinalizeTime - this.lastFinalizeCall < ANSWER_TIME_INTERVAL) {
             this.lastFinalizePlayer.isFirst = false;
-            if (this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QCM) {
-                this.lastFinalizePlayer.noBonusesObtained--;
-            }
+            this.lastFinalizePlayer.noBonusesObtained--;
         }
     }
 }

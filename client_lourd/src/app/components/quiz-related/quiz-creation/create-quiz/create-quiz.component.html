@@ -68,7 +68,7 @@
             [submitButton]="submitQuestionButton"
             [question]="currentQuestion"
             (questionSubmitted)="onQuestionSubmitted($event)"
-            (emptyQuestion)="emptyCurrentQuestion()"
+            (emptyQuestion)="emptyCurrentQuestion($event)"
         >
         </app-question-form>
     </div>

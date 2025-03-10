@@ -2,8 +2,8 @@
     <app-header-game [title]="title"></app-header-game>
     <img id="owl-image" src="assets/pictures/button-owl.png" />
     <div class="split-container">
-        <div *ngIf="!gameIdValidated" class="left-container">
-            <div *ngIf="wrongPin" class="wrong-input">
+        <div *ngIf="!canAccessGame" class="left-container">
+            <div *ngIf="wrongGameId" class="wrong-input">
                 <p>{{ popUpMessage }}</p>
             </div>
 
@@ -37,7 +37,7 @@
                 </div>
             </form>
         </div>
-        <div *ngIf="!gameIdValidated" class="right-container">
+        <div *ngIf="!canAccessGame" class="right-container">
             <div *ngFor="let lobby of lobbys; let i = index">
                 <span> {{ lobby.title }} </span>
                 <span> {{ ' Nombre de joueurs : ' + lobby.nbPlayers }} </span><br />
