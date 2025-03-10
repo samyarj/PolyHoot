@@ -128,14 +128,19 @@ export class CoinFlipService {
                             }
                         },
                     );
+                } else {
+                    this.matdialog.open(ErrorDialogComponent, {
+                        width: WIDTH_SIZE,
+                        data: { message: 'Vous ne pouvez pas parier 0 coins.', reloadOnClose: false },
+                    });
                 }
             }
         });
     }
 
     updateBetAmount(value: number) {
-        if (value < 0) {
-            return 0;
+        if (value < 0 || typeof value !== 'number') {
+            return Number(0);
         }
         if (value % 1 !== 0) {
             return Math.ceil(Number(value));
