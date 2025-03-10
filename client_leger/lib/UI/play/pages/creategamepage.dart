@@ -1,5 +1,5 @@
 import 'package:client_leger/UI/play/widgets/game_creation_popup.dart';
-import 'package:client_leger/backend-communication-services/models/quiz.dart';
+import 'package:client_leger/models/quiz.dart';
 import 'package:client_leger/backend-communication-services/quizzes/quiz_service.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:flutter/material.dart';

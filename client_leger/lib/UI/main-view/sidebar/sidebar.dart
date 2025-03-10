@@ -1,7 +1,6 @@
 import 'package:client_leger/UI/chat/chatwindow.dart';
 import 'package:client_leger/UI/main-view/sidebar/channels.dart';
-import 'package:client_leger/backend-communication-services/models/user.dart'
-    as user_model;
+import 'package:client_leger/models/user.dart' as user_model;
 import 'package:flutter/material.dart';
 
 class SideBar extends StatefulWidget {

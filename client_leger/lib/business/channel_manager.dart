@@ -1,6 +1,6 @@
 import 'package:client_leger/backend-communication-services/chat/firebase_chat_service.dart';
-import 'package:client_leger/backend-communication-services/models/chat_channels.dart';
-import 'package:client_leger/backend-communication-services/models/chat_message.dart';
+import 'package:client_leger/models/chat_channels.dart';
+import 'package:client_leger/models/chat_message.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChannelManager {
