@@ -62,12 +62,16 @@ export class FirebaseChatService {
         }
     }
 
+    getChatChannelsCollection() {
+        return this.chatChannelsCollection;
+    }
+
     /**
      * Get a real-time stream of the latest 50 messages from the global chat.
      */
 
     getMessages(channel: string): Observable<FirebaseChatMessage[]> {
-        const messagesCollection = channel === 'General' ? this.globalChatCollection : collection(this.firestore, `chatChannels/${channel}/messages`)
+        const messagesCollection = channel === 'General' ? this.globalChatCollection : collection(this.firestore, `chatChannels/${channel}/messages`);
         const messagesQuery = query(messagesCollection, orderBy('date', 'desc'), limit(MESSAGES_LIMIT));
 
         return new Observable<FirebaseChatMessage[]>((observer) => {
@@ -196,6 +200,11 @@ export class FirebaseChatService {
 
     async createChannel(channel: string): Promise<void> {
         try {
+            const user = this.authService.getUser();
+            if (!user) {
+                throw new Error('User is not authenticated');
+            }
+
             const channelDocRef = doc(this.chatChannelsCollection, channel);
             const channelDoc = await getDoc(channelDocRef);
 
@@ -205,10 +214,15 @@ export class FirebaseChatService {
 
             const newChannelData = {
                 name: channel,
-                users: [],
+                users: [user.uid],
             };
 
             await setDoc(channelDocRef, newChannelData);
+
+            const userDocRef = doc(this.usersCollection, user.uid);
+            await updateDoc(userDocRef, {
+                joinedChannels: arrayUnion(channel),
+            });
         } catch (error) {
             console.error('Error creating channel:', error);
             throw new Error('Failed to create channel.');
@@ -239,9 +253,16 @@ export class FirebaseChatService {
 
             const currentUserUid = user.uid;
             const channelDocRef = doc(this.chatChannelsCollection, channel);
+            const userDocRef = doc(this.usersCollection, currentUserUid);
 
+            // Add the user to the channel's user list
             await updateDoc(channelDocRef, {
                 users: arrayUnion(currentUserUid),
+            });
+
+            // Add the channel to the user's joinedChannels list
+            await updateDoc(userDocRef, {
+                joinedChannels: arrayUnion(channel),
             });
         } catch (error) {
             console.error('Error joining channel:', error);
@@ -259,8 +280,16 @@ export class FirebaseChatService {
             const currentUserUid = user.uid;
             const channelDocRef = doc(this.chatChannelsCollection, channel);
 
+            const userDocRef = doc(this.usersCollection, currentUserUid);
+
+            // Remove the user from the channel's user list
             await updateDoc(channelDocRef, {
                 users: arrayRemove(currentUserUid),
+            });
+
+            // Remove the channel from the user's joinedChannels list
+            await updateDoc(userDocRef, {
+                joinedChannels: arrayRemove(channel),
             });
         } catch (error) {
             console.error('Error quitting channel:', error);
@@ -277,6 +306,22 @@ export class FirebaseChatService {
             const messagesSnapshot = await getDocs(messagesCollectionRef);
             const deletePromises = messagesSnapshot.docs.map((doc) => deleteDoc(doc.ref));
             await Promise.all(deletePromises);
+
+            // Remove the channel from the joinedChannels field of all users
+            const channelDoc = await getDoc(channelDocRef);
+            if (channelDoc.exists()) {
+                const channelData = channelDoc.data();
+                const users = channelData.users || [];
+
+                const userUpdatePromises = users.map(async (userId: string) => {
+                    const userDocRef = doc(this.usersCollection, userId);
+                    await updateDoc(userDocRef, {
+                        joinedChannels: arrayRemove(channelName),
+                    });
+                });
+
+                await Promise.all(userUpdatePromises);
+            }
 
             // Delete the channel document
             await deleteDoc(channelDocRef);
