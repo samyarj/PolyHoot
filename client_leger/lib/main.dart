@@ -1,5 +1,6 @@
 import 'package:client_leger/UI/router/router.dart';
 import 'package:client_leger/providers/theme_provider.dart';
+import 'package:client_leger/utilities/logger.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,7 +9,12 @@ import 'package:intl/date_symbol_data_local.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  try {
+    await Firebase.initializeApp();
+    AppLogger.i("Firebase initialized");
+  } catch (e) {
+    AppLogger.e("Firebase initialization failed: $e");
+  }
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,

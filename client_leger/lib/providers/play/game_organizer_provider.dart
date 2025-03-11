@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
+import 'package:client_leger/classes/sound_player.dart';
 import 'package:client_leger/models/game-related/answer_qrl.dart';
 import 'package:client_leger/models/game-related/modfiers.dart';
 import 'package:client_leger/models/game-related/partial_player.dart';
@@ -79,7 +80,7 @@ class OrganizerState {
 
 class OrganizerNotifier extends StateNotifier<OrganizerState> {
   final WebSocketManager _socketManager;
-  //SoundPlayer alertSoundPlayer = SoundPlayer();
+  SoundPlayer alertSoundPlayer = SoundPlayer();
   List<PlayerData> resultPlayerList = [];
 
   OrganizerNotifier(this._socketManager)
@@ -152,13 +153,14 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
 
   void startAlertMode() {
     _socketManager.webSocketSender(TimerEvents.AlertGameMode.value);
+    AppLogger.i("Alert mode started");
   }
 
   void abandonGame() {
     // Implement a dialog service similar to messageHandlerService
     // For now, we'll just navigate and stop sound
     // This would typically require a navigation service
-    //alertSoundPlayer.stop();
+    alertSoundPlayer.stop();
     _signalUserDisconnect();
     AppLogger.i("Abandoning game");
   }
@@ -166,7 +168,7 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
   void _signalUserDisconnect() {
     _socketManager
         .webSocketSender(DisconnectEvents.OrganizerDisconnected.value);
-    //alertSoundPlayer.stop();
+    alertSoundPlayer.stop();
     AppLogger.i("Organizer disconnected from game");
   }
 
@@ -387,7 +389,7 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
     _socketManager.webSocketReceiver(TimerEvents.AlertModeStarted.value, (_) {
       final updatedModifiers = state.gameModifiers.copyWith(alertMode: true);
       state = state.copyWith(gameModifiers: updatedModifiers);
-      //alertSoundPlayer.play();
+      alertSoundPlayer.play();
       AppLogger.i("Alert mode started");
     });
   }
@@ -395,7 +397,7 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
   void _handleTimerEnd() {
     _socketManager.webSocketReceiver(TimerEvents.QuestionCountdownEnd.value,
         (_) {
-      //alertSoundPlayer.stop();
+      alertSoundPlayer.stop();
       AppLogger.i("Question countdown ended");
     });
 
@@ -475,7 +477,7 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
 
   void _handleResultsSockets() {
     _socketManager.webSocketReceiver(GameEvents.SendResults.value, (data) {
-      //alertSoundPlayer.stop();
+      alertSoundPlayer.stop();
       final List<dynamic> jsonData = data as List<dynamic>;
       resultPlayerList = jsonData
           .map((json) => PlayerData.fromJson(json as Map<String, dynamic>))
@@ -490,7 +492,7 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
   void _handleGameEnded() {
     _socketManager.webSocketReceiver(ConnectEvents.AllPlayersLeft.value, (_) {
       // This would typically involve navigation and showing an error dialog
-      //alertSoundPlayer.stop();
+      alertSoundPlayer.stop();
       state = state.copyWith(allPlayersLeft: true);
       _signalUserDisconnect();
       AppLogger.w("All players left the game");
@@ -550,7 +552,7 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
     _socketManager.socket.off(ConnectEvents.AllPlayersLeft.value);
 
     _resetAttributes();
-    //alertSoundPlayer.stop();
+    alertSoundPlayer.stop();
     super.dispose();
   }
 }
