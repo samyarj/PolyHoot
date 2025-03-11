@@ -147,8 +147,10 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
     });
 
     _socketManager.webSocketReceiver(JoinEvents.CanJoin.value, (data) {
-      AppLogger.i("Player can join game: $data");
-      _socketManager.roomId = data['gameId'];
+      AppLogger.i("Player can join game: $data we set room id");
+      final _roomId = data['gameId'];
+      _socketManager.setRoomId(
+          _roomId); // bug if I give directly data['gameId']. Do not change.
       _socketManager.isOrganizer = false;
       state = state.copyWith(isJoined: true);
       AppLogger.i("Player joined successfully → Room ID: ${data['gameId']}");

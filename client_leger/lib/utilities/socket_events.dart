@@ -130,3 +130,15 @@ enum QRLGrade {
   final int value;
   const QRLGrade(this.value);
 }
+
+enum ChatEvents {
+  RoomMessage('roomMessage'),
+  SystemMessage('systemMessage'),
+  MessageAdded('messageAdded'),
+  GetHistory('getHistory'),
+  RoomLeft('roomLeft'),
+  ChatStatusChange('chatStatusChange');
+
+  final String value;
+  const ChatEvents(this.value);
+}
