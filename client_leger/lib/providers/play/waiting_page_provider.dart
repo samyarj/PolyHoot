@@ -94,6 +94,7 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
 
     _socketManager.webSocketReceiver(GameEvents.PlayerBanned.value, (_) {
       state = state.copyWith(banned: true);
+      _socketManager.removeRoomId();
       AppLogger.i("Player was banned");
     });
 
@@ -101,6 +102,7 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
         (_) {
       state = state.copyWith(organizerDisconnected: true);
       AppLogger.i("Organizer has left");
+      _socketManager.removeRoomId();
     });
 
     _socketManager.webSocketReceiver(GameEvents.AlertLockToggled.value, (data) {
@@ -139,6 +141,7 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
     } else {
       _socketManager.webSocketSender(DisconnectEvents.Player.value);
     }
+    _socketManager.removeRoomId();
   }
 
   void banPlayer(String playerName) {

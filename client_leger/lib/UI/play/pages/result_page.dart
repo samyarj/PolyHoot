@@ -38,6 +38,9 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
     AppLogger.i("DisconnectEvents.UserFromResults $_nameForDisconnect");
     _socketManager.webSocketSender(
         DisconnectEvents.UserFromResults.value, _nameForDisconnect);
+    AppLogger.i(
+        "DisconnectEvents.UserFromResults $_nameForDisconnect & removing room id");
+    _socketManager.removeRoomId();
     super.dispose();
   }
 

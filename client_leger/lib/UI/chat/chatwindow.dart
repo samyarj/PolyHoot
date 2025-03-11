@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/models/chat_message.dart';
@@ -107,7 +106,7 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
 
   String formatDate(Timestamp timestamp) {
     return DateFormat('HH:mm:ss').format(
-        timestamp.toDate().toUtc().subtract(Duration(hours: 5))); // UTC-5
+        timestamp.toDate().toUtc().subtract(Duration(hours: 4))); // UTC-5
   }
 
   @override
