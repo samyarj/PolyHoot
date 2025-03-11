@@ -35,7 +35,7 @@ class ControlSection extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Player list
-          PlayerList(),
+          SortablePlayerList(),
           const SizedBox(height: 20),
 
           // Abandon button
