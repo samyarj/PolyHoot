@@ -170,6 +170,7 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
         .webSocketSender(DisconnectEvents.OrganizerDisconnected.value);
     alertSoundPlayer.stop();
     AppLogger.i("Organizer disconnected from game");
+    _socketManager.removeRoomId();
   }
 
   void _updatePointsForPlayer(int value) {
@@ -492,10 +493,10 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
   void _handleGameEnded() {
     _socketManager.webSocketReceiver(ConnectEvents.AllPlayersLeft.value, (_) {
       // This would typically involve navigation and showing an error dialog
+      AppLogger.w("All players left the game");
       alertSoundPlayer.stop();
       state = state.copyWith(allPlayersLeft: true);
       _signalUserDisconnect();
-      AppLogger.w("All players left the game");
     });
   }
 

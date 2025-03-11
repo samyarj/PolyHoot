@@ -134,7 +134,7 @@ class GameCreationPopup {
     final socket = WebSocketManager.instance;
 
     socket.webSocketSender(JoinEvents.Create.value, quiz.toJson(), (roomId) {
-      socket.roomId = roomId;
+      socket.setRoomId(roomId);
       socket.isOrganizer = true;
       Navigator.pop(context);
       GoRouter.of(context).push('${Paths.play}/${Paths.waitingPage}');
