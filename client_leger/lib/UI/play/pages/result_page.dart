@@ -1,16 +1,46 @@
+import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/player_data.dart';
+import 'package:client_leger/providers/user_provider.dart';
+import 'package:client_leger/utilities/logger.dart';
+import 'package:client_leger/utilities/socket_events.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ResultsPage extends StatefulWidget {
+class ResultsPage extends ConsumerStatefulWidget {
   const ResultsPage({super.key, required this.playerList});
 
   final List<PlayerData> playerList;
 
   @override
-  State<ResultsPage> createState() => _ResultsPageState();
+  ConsumerState<ResultsPage> createState() => _ResultsPageState();
 }
 
-class _ResultsPageState extends State<ResultsPage> {
+class _ResultsPageState extends ConsumerState<ResultsPage> {
+  final WebSocketManager _socketManager = WebSocketManager.instance;
+  late final String _username;
+  late final bool _isOrganizer;
+  late final String _nameForDisconnect;
+
+  @override
+  void initState() {
+    _username = ref.read(userProvider).value!.username;
+    _isOrganizer = !widget.playerList.any((player) => player.name == _username);
+    if (_isOrganizer) {
+      _nameForDisconnect = "organizer";
+    } else {
+      _nameForDisconnect = _username;
+    }
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    AppLogger.i("DisconnectEvents.UserFromResults $_nameForDisconnect");
+    _socketManager.webSocketSender(
+        DisconnectEvents.UserFromResults.value, _nameForDisconnect);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
