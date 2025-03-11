@@ -1,16 +1,36 @@
 import 'package:client_leger/backend-communication-services/environment.dart';
 import 'package:client_leger/utilities/logger.dart';
+import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 final class WebSocketManager {
   static final WebSocketManager instance = WebSocketManager();
 
   String? roomId;
+  final ValueNotifier<String?> currentRoomIdNotifier =
+      ValueNotifier<String?>(null);
+
   bool isOrganizer = false;
   String? playerName;
 
   String _fetchBaseUrl() {
     return Environment.serverUrlSocket;
+  }
+
+  void setRoomId(String newRoomId) {
+    AppLogger.i("Setting roomId: $newRoomId");
+    roomId = newRoomId;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      currentRoomIdNotifier.value = newRoomId;
+    });
+  }
+
+  void removeRoomId() {
+    AppLogger.i("Removing roomId $roomId room Id= null");
+    roomId = null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      currentRoomIdNotifier.value = null;
+    });
   }
 
   IO.Socket get socket => IO.io(

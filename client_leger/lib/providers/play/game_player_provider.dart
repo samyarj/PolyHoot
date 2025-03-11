@@ -231,7 +231,9 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
         (_) {
       alertSoundPlayer.stop();
       state = state.copyWith(organizerDisconnected: true);
-      AppLogger.i("Organizer has left the game");
+      _socketManager.removeRoomId();
+      AppLogger.i(
+          "Organizer has left the game + we removed roomId from socket manager");
     });
   }
 
@@ -308,6 +310,9 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
   void signalUserDisconnect() {
     _socketManager.webSocketSender(DisconnectEvents.Player.value);
     alertSoundPlayer.stop();
+    _socketManager.removeRoomId();
+    AppLogger.i(
+        "User disconnected from game + we removed roomId from socket manager");
   }
 
   void signalUserConnect() {

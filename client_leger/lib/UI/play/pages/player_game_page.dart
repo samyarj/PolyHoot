@@ -30,8 +30,9 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
   @override
   void dispose() {
     if (shouldDisconnect) {
-      AppLogger.i("Disconnecting player from game");
+      AppLogger.i("Disconnecting player from game and removing roomId");
       _socketManager.webSocketSender(DisconnectEvents.Player.value);
+      _socketManager.removeRoomId();
     }
     _QRLanswerController.dispose();
     super.dispose();
