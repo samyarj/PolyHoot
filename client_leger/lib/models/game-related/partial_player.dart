@@ -2,7 +2,7 @@
 class PartialPlayer {
   final String name;
   final bool isInGame;
-  final double points;
+  final int points;
   final bool submitted;
 
   PartialPlayer({
@@ -16,7 +16,7 @@ class PartialPlayer {
   PartialPlayer copyWith({
     String? name,
     bool? isInGame,
-    double? points,
+    int? points,
     bool? submitted,
   }) {
     return PartialPlayer(
