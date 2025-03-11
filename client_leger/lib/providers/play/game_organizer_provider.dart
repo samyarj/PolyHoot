@@ -7,23 +7,11 @@ import 'package:client_leger/models/game-related/modfiers.dart';
 import 'package:client_leger/models/game-related/partial_player.dart';
 import 'package:client_leger/models/game-related/points_update_qrl.dart';
 import 'package:client_leger/models/game_info.dart';
+import 'package:client_leger/models/player_data.dart';
+import 'package:client_leger/models/question.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:client_leger/utilities/socket_events.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-// Constants similar to those in organizer.constants.ts
-const DEFAULT_QUESTION = {
-  'id': '12',
-  'points': 15,
-  'choices': [
-    {'text': ''},
-    {'text': ''},
-    {'text': ''},
-    {'text': ''}
-  ],
-  'type': 'QCM',
-  'text': '',
-};
 
 const TIME_TO_NEXT_ANSWER = 3000;
 
@@ -34,11 +22,12 @@ final organizerProvider =
 
 class OrganizerState {
   final List<AnswerQRL> answersQRL;
-  final Map<String, dynamic> currentQuestion;
+  final Question currentQuestion;
   final GameInfo gameInfo;
   final Modifiers gameModifiers;
   final GameStatus gameStatus;
   final bool shouldDisconnect;
+  final bool shouldNavigateToResults;
   final List<PartialPlayer> playerList;
   final List<PointsUpdateQRL> pointsAfterCorrection;
   final int questionsLength;
@@ -50,6 +39,7 @@ class OrganizerState {
     required this.gameModifiers,
     required this.gameStatus,
     required this.shouldDisconnect,
+    required this.shouldNavigateToResults,
     required this.playerList,
     required this.pointsAfterCorrection,
     required this.questionsLength,
@@ -57,11 +47,12 @@ class OrganizerState {
 
   OrganizerState copyWith({
     List<AnswerQRL>? answersQRL,
-    Map<String, dynamic>? currentQuestion,
+    Question? currentQuestion,
     GameInfo? gameInfo,
     Modifiers? gameModifiers,
     GameStatus? gameStatus,
     bool? shouldDisconnect,
+    bool? shouldNavigateToResults,
     List<PartialPlayer>? playerList,
     List<PointsUpdateQRL>? pointsAfterCorrection,
     int? questionsLength,
@@ -73,6 +64,8 @@ class OrganizerState {
       gameModifiers: gameModifiers ?? this.gameModifiers,
       gameStatus: gameStatus ?? this.gameStatus,
       shouldDisconnect: shouldDisconnect ?? this.shouldDisconnect,
+      shouldNavigateToResults:
+          shouldNavigateToResults ?? this.shouldNavigateToResults,
       playerList: playerList ?? this.playerList,
       pointsAfterCorrection:
           pointsAfterCorrection ?? this.pointsAfterCorrection,
@@ -84,11 +77,13 @@ class OrganizerState {
 class OrganizerNotifier extends StateNotifier<OrganizerState> {
   final WebSocketManager _socketManager;
   SoundPlayer alertSoundPlayer = SoundPlayer();
+  List<PlayerData> resultPlayerList = [];
 
   OrganizerNotifier(this._socketManager)
       : super(OrganizerState(
           answersQRL: [],
-          currentQuestion: DEFAULT_QUESTION,
+          currentQuestion:
+              Question(id: '0', type: 'QCM', text: '', points: 0, choices: []),
           gameInfo: GameInfo(
             time: 0,
             currentQuestionIndex: 0,
@@ -101,6 +96,7 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
           ),
           gameStatus: GameStatus.WaitingForAnswers,
           shouldDisconnect: true,
+          shouldNavigateToResults: false,
           playerList: [],
           pointsAfterCorrection: [],
           questionsLength: 0,
@@ -174,7 +170,7 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
 
     if (foundPlayerIndex != -1) {
       // Convert value to percentage (assuming value is 0-100 like QRLGrade)
-      final additionalPoints = state.currentQuestion['points'] * (value / 100);
+      final additionalPoints = state.currentQuestion.points * (value / 100);
 
       // Create updated points list
       final updatedPointsAfterCorrection =
@@ -273,6 +269,7 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
           updatedPlayerList[playerIndex] = PartialPlayer(
             name: playerName,
             isInGame: isInGame,
+            submitted: false,
             points: updatedPlayerList[playerIndex].points,
           );
         }
@@ -309,6 +306,7 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
         if (playerIndex != -1) {
           updatedPlayerList[playerIndex] = PartialPlayer(
             name: playerName,
+            submitted: updatedPlayerList[playerIndex].submitted,
             isInGame: updatedPlayerList[playerIndex].isInGame,
             points: points,
           );
@@ -328,6 +326,7 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
             name: player['name'],
             isInGame: player['isInGame'],
             points: player['points'] ?? 0,
+            submitted: player['submitted'] ?? false,
           );
         }).toList();
 
@@ -406,8 +405,8 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
   void _handleNextQuestion() {
     _socketManager.webSocketReceiver(GameEvents.ProceedToNextQuestion.value,
         (_) {
-      if (state.currentQuestion['type'] == 'QCM' ||
-          state.currentQuestion['type'] == 'QRE') {
+      if (state.currentQuestion.type == 'QCM' ||
+          state.currentQuestion.type == 'QRE') {
         final updatedGameInfo = state.gameInfo.copyWith(time: 0);
 
         GameStatus newStatus = GameStatus.CorrectionFinished;
@@ -426,6 +425,13 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
 
     _socketManager.webSocketReceiver(GameEvents.NextQuestion.value, (data) {
       if (data is Map<String, dynamic>) {
+        final updatedPlayerList = state.playerList.map((player) {
+          if (player.isInGame) {
+            return player.copyWith(submitted: false);
+          }
+          return player;
+        }).toList();
+
         final updatedGameInfo = GameInfo(
           time: state.gameInfo.time,
           currentQuestionIndex: data['index'],
@@ -444,6 +450,7 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
           gameInfo: updatedGameInfo,
           gameModifiers: updatedModifiers,
           currentQuestion: data['question'],
+          playerList: updatedPlayerList,
         );
 
         AppLogger.i("Next question received: ${data['index']}");
@@ -451,10 +458,19 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
     });
   }
 
+  List<PlayerData> getResultPlayerList() {
+    return resultPlayerList;
+  }
+
   void _handleResultsSockets() {
-    _socketManager.webSocketReceiver(GameEvents.SendResults.value, (_) {
-      state = state.copyWith(shouldDisconnect: false);
+    _socketManager.webSocketReceiver(GameEvents.SendResults.value, (data) {
       alertSoundPlayer.stop();
+      final List<dynamic> jsonData = data as List<dynamic>;
+      resultPlayerList = jsonData
+          .map((json) => PlayerData.fromJson(json as Map<String, dynamic>))
+          .toList();
+      state = state.copyWith(
+          shouldDisconnect: false, shouldNavigateToResults: true);
       // This would typically involve navigation
       AppLogger.i("Game results received");
     });
@@ -471,7 +487,13 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
   void _resetAttributes() {
     state = OrganizerState(
       answersQRL: [],
-      currentQuestion: DEFAULT_QUESTION,
+      currentQuestion: Question(
+        id: '0',
+        type: 'QCM',
+        text: '',
+        points: 0,
+        choices: [],
+      ),
       gameInfo: GameInfo(
         time: 0,
         currentQuestionIndex: 0,
@@ -484,6 +506,7 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
       ),
       gameStatus: GameStatus.WaitingForAnswers,
       shouldDisconnect: true,
+      shouldNavigateToResults: false,
       playerList: [],
       pointsAfterCorrection: [],
       questionsLength: 0,

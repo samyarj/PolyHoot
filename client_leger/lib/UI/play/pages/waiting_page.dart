@@ -178,7 +178,7 @@ class WaitingPage extends ConsumerWidget {
                                           ref
                                               .read(
                                                   waitingPageProvider.notifier)
-                                              .startGameCountdown(5);
+                                              .startGameCountdown(1);
                                         },
                                   style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.green),
