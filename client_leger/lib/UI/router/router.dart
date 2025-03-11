@@ -84,6 +84,8 @@ final GoRouter router = GoRouter(
                   path: Paths.playerVue,
                   builder: (context, state) => const PlayerGamePage(),
                   onExit: (context, state) async {
+                    AppLogger.i(
+                        "onExit of PlayerGamePage: gameClientProvider will be disposed");
                     final container = ProviderScope.containerOf(context);
                     container.read(gameClientProvider.notifier).dispose();
                     return true;

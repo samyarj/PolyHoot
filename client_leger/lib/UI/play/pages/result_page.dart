@@ -15,43 +15,46 @@ class _ResultsPageState extends State<ResultsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Results Page'),
+        title: Text('Résultats'),
       ),
-      body: ListView.builder(
-        itemCount: widget.playerList.length,
-        itemBuilder: (context, index) {
-          final player = widget.playerList[index];
-          return Container(
-            padding: EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Colors.grey),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: ListView.builder(
+          itemCount: widget.playerList.length,
+          itemBuilder: (context, index) {
+            final player = widget.playerList[index];
+            return Container(
+              padding: EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey),
+                ),
               ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  player.name,
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    decoration: player.isInGame
-                        ? TextDecoration.none
-                        : TextDecoration.lineThrough,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    player.name,
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      decoration: player.isInGame
+                          ? TextDecoration.none
+                          : TextDecoration.lineThrough,
+                    ),
                   ),
-                ),
-                Text(
-                  '${player.points} points',
-                  style: TextStyle(fontSize: 18.0),
-                ),
-                Text(
-                  '${player.noBonusesObtained} bonus',
-                  style: TextStyle(fontSize: 18.0),
-                ),
-              ],
-            ),
-          );
-        },
+                  Text(
+                    '${player.points} points',
+                    style: TextStyle(fontSize: 18.0),
+                  ),
+                  Text(
+                    '${player.noBonusesObtained} bonus',
+                    style: TextStyle(fontSize: 18.0),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
