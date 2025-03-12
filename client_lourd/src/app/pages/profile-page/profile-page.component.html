@@ -2,13 +2,26 @@
     <div>
         <h2>Select an Avatar</h2>
         <div class="avatar-selection">
-            <div class="avatar-option">
-                <img src="avatar1.jpg" alt="Avatar" />
+            <div class="avatar-grid">
+                <div
+                    *ngFor="let avatar of defaultAvatars"
+                    class="avatar-option"
+                    [class.selected]="avatar === selectedAvatar"
+                    (click)="selectAvatar(avatar)"
+                >
+                    <img [src]="avatar" alt="Default Avatar" class="avatar-image" />
+                </div>
             </div>
 
-            <input type="file" (change)="onFileSelected($event)" accept="image/*" #fileInput style="display: none" />
-            <button (click)="fileInput.click()" class="upload-btn">Choose Avatar</button>
-            <button (click)="onUpload()" class="upload-btn">Upload Avatar</button>
+            <div class="button-section">
+                <button class="equip-btn" [disabled]="!selectedAvatar" (click)="equipSelectedAvatar()">Equip Selected Avatar</button>
+
+                <div class="upload-section">
+                    <input type="file" (change)="onFileSelected($event)" accept="image/*" #fileInput style="display: none" />
+                    <button (click)="fileInput.click()" class="upload-btn">Choose Custom Avatar</button>
+                    <button (click)="onUpload()" class="upload-btn" [disabled]="!selectedFile">Upload Avatar</button>
+                </div>
+            </div>
         </div>
     </div>
 
