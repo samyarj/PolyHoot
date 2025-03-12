@@ -144,7 +144,7 @@
                         <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un canal" class="search-input" />
                         <div class="channel-list">
                             <div *ngIf="filteredJoinedChannels().length === 0" class="no-channels-message">
-                                <p>Vous n'avez rejoint aucun canal. Veuillez en ajouter un.</p>
+                                <p>Vous n'avez rejoint aucun canal. Veuillez en rejoindre un.</p>
                             </div>
                             <div *ngFor="let channel of filteredJoinedChannels()" class="my-channels">
                                 <div (click)="selectChannel(channel)">{{ channel }}</div>
