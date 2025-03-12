@@ -5,14 +5,16 @@ void showErrorDialog(BuildContext context, String errorMessage) {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text("Erreur"),
+        title: Text("Erreur",
+            style: TextStyle(color: Theme.of(context).colorScheme.error)),
         content: ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: 600, 
+            maxWidth: 600,
           ),
           child: Text(
             errorMessage,
-            style: TextStyle(fontSize: 16),
+            style: TextStyle(
+                fontSize: 16, color: Theme.of(context).colorScheme.primary),
           ),
         ),
         actions: <Widget>[

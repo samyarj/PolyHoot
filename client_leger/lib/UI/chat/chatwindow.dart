@@ -1,10 +1,10 @@
 import 'dart:async';
-
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
-import 'package:client_leger/backend-communication-services/models/chat_message.dart';
+import 'package:client_leger/models/chat_message.dart';
 import 'package:client_leger/business/channel_manager.dart';
-import 'package:client_leger/providers/user/user_provider.dart';
+import 'package:client_leger/providers/user_provider.dart';
+import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -106,7 +106,7 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
 
   String formatDate(Timestamp timestamp) {
     return DateFormat('HH:mm:ss').format(
-        timestamp.toDate().toUtc().subtract(Duration(hours: 5))); // UTC-5
+        timestamp.toDate().toUtc().subtract(Duration(hours: 4))); // UTC-5
   }
 
   @override
@@ -129,9 +129,9 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                           child: Column(
                             children: [
                               SizedBox(
-                                height: 500,
+                                height: 475,
                                 child: isLoadingInitialMessages
-                                    ? Center(child: CircularProgressIndicator())
+                                    ? Center(child: ThemedProgressIndicator())
                                     : RefreshIndicator(
                                         onRefresh: _onRefresh,
                                         child: ListView.builder(
@@ -332,8 +332,12 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                   decoration: InputDecoration(
                                     hintText: 'Écrivez un message...',
                                     suffixIcon: IconButton(
-                                      icon: Icon(Icons.send),
+                                      icon:
+                                          Icon(Icons.send, color: Colors.white),
                                       onPressed: () => sendMessage(),
+                                    ),
+                                    hintStyle: TextStyle(
+                                      color: Colors.white,
                                     ),
                                   ),
                                   textInputAction: TextInputAction.send,
@@ -349,7 +353,7 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                 ),
               );
             },
-            loading: () => Center(child: CircularProgressIndicator()),
+            loading: () => Center(child: ThemedProgressIndicator()),
             error: (error, stack) => Center(child: Text('Error: $error'))));
   }
 }

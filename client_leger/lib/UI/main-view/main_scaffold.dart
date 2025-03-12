@@ -1,9 +1,10 @@
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/main-view/sidebar/sidebar.dart';
-import 'package:client_leger/UI/play/playbutton.dart';
+import 'package:client_leger/UI/play/widgets/playbutton.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
-import 'package:client_leger/providers/user/user_provider.dart';
+import 'package:client_leger/providers/user_provider.dart';
+import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -48,6 +49,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
   @override
   Widget build(BuildContext context) {
     final userState = ref.watch(userProvider);
+    final colorScheme = Theme.of(context).colorScheme;
     return userState.when(data: (user) {
       WebSocketManager.instance
           .webSocketSender("identifyMobileClient", user?.uid);
@@ -109,9 +111,21 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                 itemBuilder: (context) => [
                   PopupMenuItem<int>(
                     value: 1,
-                    child: Text('Déconnexion'),
+                    child: Text(
+                      'Déconnexion',
+                      style: TextStyle(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface), // Dynamic text color
+                    ),
                   ),
                 ],
+                color: Theme.of(context)
+                    .colorScheme
+                    .surface, // Dynamic background color
+                shadowColor: Theme.of(context)
+                    .colorScheme
+                    .shadow, // Dynamic shadow color
                 offset: Offset(0, 48),
                 child: CircleAvatar(
                   radius: 23,
@@ -144,7 +158,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     }, loading: () {
       return const Scaffold(
         body: Center(
-          child: CircularProgressIndicator(),
+          child: ThemedProgressIndicator(),
         ),
       );
     }, error: (error, stack) {

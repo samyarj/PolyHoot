@@ -1,4 +1,6 @@
 import 'package:client_leger/UI/router/router.dart';
+import 'package:client_leger/providers/theme_provider.dart';
+import 'package:client_leger/utilities/logger.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,7 +9,12 @@ import 'package:intl/date_symbol_data_local.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  try {
+    await Firebase.initializeApp();
+    AppLogger.i("Firebase initialized");
+  } catch (e) {
+    AppLogger.e("Firebase initialization failed: $e");
+  }
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
@@ -23,18 +30,16 @@ Future<void> main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(themeProvider);
+
     return MaterialApp.router(
       title: 'PolyHoot',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF00115A)),
-        useMaterial3: true,
-      ),
+      theme: theme,
       routerConfig: router,
     );
   }

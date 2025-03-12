@@ -13,7 +13,7 @@ export class GameGateway {
     constructor(
         private gameManager: GameManagerService,
         private historyManager: HistoryManagerService,
-    ) {}
+    ) { }
 
     @SubscribeMessage(TimerEvents.Pause)
     handlePauseGame(@ConnectedSocket() client: Socket) {
@@ -55,6 +55,14 @@ export class GameGateway {
         if (game) game.preparePlayersForNextQuestion();
     }
 
+    @SubscribeMessage(GameEvents.GetCurrentPlayers)
+    handleCurrentPlayers(@ConnectedSocket() client: Socket, @MessageBody() data: { roomId: string }) {
+        const roomId = data.roomId;
+        const game = this.gameManager.getGameByRoomId(roomId);
+        const playerNames = game.players.map((player) => player.name);
+        return playerNames;
+    }
+
     @SubscribeMessage(GameEvents.GetCurrentGames)
     handleGetCurrentGames(@ConnectedSocket() client: Socket) {
         const currentGamesInfos = [];
@@ -78,7 +86,6 @@ export class GameGateway {
         game.gameState = GameState.WAITING;
         this.gameManager.socketRoomsMap.set(client, roomId);
         const lobbyInfos = { title: quiz.title, nbPlayers: game.players.length, roomId: roomId, isLocked: game.isLocked };
-        console.log('Dans createGame avec ces infos ', lobbyInfos);
         this.server.emit(JoinEvents.LobbyCreated, lobbyInfos);
         return roomId;
     }

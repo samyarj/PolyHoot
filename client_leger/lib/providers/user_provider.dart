@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
-import 'package:client_leger/backend-communication-services/models/user.dart'
-    as user_model;
+import 'package:client_leger/models/user.dart' as user_model;
+import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -36,6 +36,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       AppLogger.d("Firebase user: $firebaseUser");
       if (firebaseUser == null) {
         state = const AsyncValue.data(null);
+        WebSocketManager.instance.playerName = null;
+
         return;
       }
       if (await auth_service.isUserOnline(firebaseUser.email!)) {
@@ -54,6 +56,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
         final user = user_model.User.fromJson(userJson);
         state = AsyncValue.data(user);
         isLoggedIn.value = true;
+        WebSocketManager.instance.playerName = user.username;
       } else {
         throw Exception('Server error: ${response.reasonPhrase}');
       }
@@ -81,6 +84,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
         final user = user_model.User.fromJson(userJson);
         state = AsyncValue.data(user);
         isLoggedIn.value = true;
+        WebSocketManager.instance.playerName = user.username;
       } else {
         throw Exception("Failed to create user: ${response.reasonPhrase}");
       }
@@ -173,6 +177,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
 
       await FirebaseAuth.instance.signOut();
       state = const AsyncValue.data(null);
+      WebSocketManager.instance.playerName = null;
       isLoggedIn.value = false;
     } catch (e, stack) {
       AppLogger.e("Logout error: $e");

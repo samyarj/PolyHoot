@@ -3,16 +3,25 @@ import 'package:client_leger/UI/equipped/equipped_page.dart';
 import 'package:client_leger/UI/forgot-password/password_reset_page.dart';
 import 'package:client_leger/UI/login/login_page.dart';
 import 'package:client_leger/UI/main-view/main_scaffold.dart';
-import 'package:client_leger/UI/play/creategamepage.dart';
-import 'package:client_leger/UI/play/playpage.dart';
+import 'package:client_leger/UI/play/pages/creategamepage.dart';
+import 'package:client_leger/UI/play/pages/join_game.dart';
+import 'package:client_leger/UI/play/pages/organizer_game_page.dart';
+import 'package:client_leger/UI/play/pages/player_game_page.dart';
+import 'package:client_leger/UI/play/pages/playpage.dart';
+import 'package:client_leger/UI/play/pages/result_page.dart';
+import 'package:client_leger/UI/play/pages/waiting_page.dart';
 import 'package:client_leger/UI/quiz/quiz_page.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/UI/signup/signup_page.dart';
-import 'package:client_leger/providers/user/user_provider.dart'
-    as user_provider;
+import 'package:client_leger/models/player_data.dart';
+import 'package:client_leger/providers/play/game_player_provider.dart';
+import 'package:client_leger/providers/play/join_game_provider.dart';
+import 'package:client_leger/providers/play/waiting_page_provider.dart';
+import 'package:client_leger/providers/user_provider.dart' as user_provider;
 import 'package:client_leger/utilities/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -53,6 +62,46 @@ final GoRouter router = GoRouter(
                   path: Paths.gameCreation,
                   builder: (context, state) => const GameCreationPage(),
                 ),
+                GoRoute(
+                  path: Paths.joinGame,
+                  builder: (context, state) => JoinGame(),
+                  onExit: (context, state) {
+                    final container = ProviderScope.containerOf(context);
+                    container.read(joinGameProvider.notifier).dispose();
+                    return true;
+                  },
+                ),
+                GoRoute(
+                  path: Paths.waitingPage,
+                  builder: (context, state) => WaitingPage(),
+                  onExit: (context, state) async {
+                    final container = ProviderScope.containerOf(context);
+                    container.read(waitingPageProvider.notifier).dispose();
+                    return true;
+                  },
+                ),
+                GoRoute(
+                  path: Paths.playerVue,
+                  builder: (context, state) => const PlayerGamePage(),
+                  onExit: (context, state) async {
+                    AppLogger.i(
+                        "onExit of PlayerGamePage: gameClientProvider will be disposed");
+                    final container = ProviderScope.containerOf(context);
+                    container.read(gameClientProvider.notifier).dispose();
+                    return true;
+                  },
+                ),
+                GoRoute(
+                  path: Paths.organizerVue,
+                  builder: (context, state) => const OrganizerGamePage(),
+                ),
+                GoRoute(
+                  path: Paths.resultsView,
+                  builder: (context, state) {
+                    final playerList = state.extra as List<PlayerData>;
+                    return ResultsPage(playerList: playerList);
+                  },
+                )
               ],
             ),
           ],

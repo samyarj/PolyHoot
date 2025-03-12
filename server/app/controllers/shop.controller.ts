@@ -21,7 +21,7 @@ export class ShopController {
     @ApiInternalServerErrorResponse({ description: 'Internal server error' })
     @Get('shop')
     async getShop(@Req() req: AuthenticatedRequest, @Res() response: Response) {
-        this.logger.log(`Equipping theme for user : ${req.user.displayName}`);
+        this.logger.log(`Getting shop for user : ${req.user.displayName}`);
         try {
             const user = await this.userService.getUserByUid(req.user.uid);
             const shop: {
@@ -31,7 +31,7 @@ export class ShopController {
             } = this.shopService.getShop(user.inventory);
             response.status(HttpStatus.OK).json(shop);
         } catch (error) {
-            this.logger.error(`Error fetching profile: ${error.message}`);
+            this.logger.error(`Error getting shop: ${error.message}`);
 
             response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
         }
@@ -42,7 +42,7 @@ export class ShopController {
     @ApiInternalServerErrorResponse({ description: 'Internal server error' })
     @Post('shop')
     async setAvatar(@Body() body: { type: string; itemURL: string }, @Req() req: AuthenticatedRequest, @Res() response: Response) {
-        this.logger.log(`Equipping theme for user : ${req.user.displayName}`);
+        this.logger.log(`Buying ${body.type} from shop for user : ${req.user.displayName}`);
         try {
             const itemPrice: number | null = this.shopService.getPriceByLink(body.itemURL);
             if (itemPrice === null) {
@@ -60,7 +60,7 @@ export class ShopController {
                 response.status(HttpStatus.OK).json(null); // not enough money
             }
         } catch (error) {
-            this.logger.error(`Error fetching profile: ${error.message}`);
+            this.logger.error(`Error buying ${body.type} from shop: ${error.message}`);
 
             response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
         }

@@ -184,9 +184,7 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
                   textStyle: const TextStyle(fontSize: 18),
                 ),
                 child: _isLoading
-                    ? CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      )
+                    ? CircularProgressIndicator()
                     : Text(
                         'Réinitialiser mon mot de passe',
                         style: TextStyle(
