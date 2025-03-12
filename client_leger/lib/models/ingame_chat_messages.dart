@@ -12,7 +12,7 @@ class InGameChatMessage {
   factory InGameChatMessage.fromJson(Map<String, dynamic> json) {
     return InGameChatMessage(
       message: json['message'],
-      author: json['author'],
+      author: json['author'] ?? "inconnu",
       date: json['date'] != null ? DateTime.parse(json['date']) : null,
     );
   }

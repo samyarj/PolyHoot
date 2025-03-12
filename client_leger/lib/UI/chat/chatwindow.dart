@@ -129,7 +129,7 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                           child: Column(
                             children: [
                               SizedBox(
-                                height: 500,
+                                height: 475,
                                 child: isLoadingInitialMessages
                                     ? Center(child: ThemedProgressIndicator())
                                     : RefreshIndicator(
@@ -332,8 +332,12 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                   decoration: InputDecoration(
                                     hintText: 'Écrivez un message...',
                                     suffixIcon: IconButton(
-                                      icon: Icon(Icons.send),
+                                      icon:
+                                          Icon(Icons.send, color: Colors.white),
                                       onPressed: () => sendMessage(),
+                                    ),
+                                    hintStyle: TextStyle(
+                                      color: Colors.white,
                                     ),
                                   ),
                                   textInputAction: TextInputAction.send,
