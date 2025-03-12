@@ -143,6 +143,9 @@
                         <h2>Mes canaux de discussion</h2>
                         <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un canal" class="search-input" />
                         <div class="channel-list">
+                            <div *ngIf="filteredJoinedChannels().length === 0" class="no-channels-message">
+                                <p>Vous n'avez rejoint aucun canal. Veuillez en ajouter un.</p>
+                            </div>
                             <div *ngFor="let channel of filteredJoinedChannels()" class="my-channels">
                                 <div (click)="selectChannel(channel)">{{ channel }}</div>
                                 <div class="channel-buttons">
@@ -160,6 +163,9 @@
                         <h2>Canaux de discussion disponible</h2>
                         <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un canal" class="search-input" />
                         <div class="channel-list">
+                            <div *ngIf="filteredChannels().length === 0" class="no-channels-message">
+                                <p>Aucun canal n'a été créé. Veuillez en créer un pour commencer à discuter.</p>
+                            </div>
                             <div *ngFor="let channel of filteredChannels()" class="join-channels">
                                 <div (click)="selectChannel(channel.name)">{{ channel.name }}</div>
                                 <button (click)="deleteChannel(channel.name)" class="delete-channel-button">
@@ -177,6 +183,7 @@
                         <input type="text" [(ngModel)]="newChannelName" name="newChannelName" placeholder="Nom du canal" required />
                         <button type="submit">Créer</button>
                     </form>
+                    <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
                 </div>
             </div>
         </div>

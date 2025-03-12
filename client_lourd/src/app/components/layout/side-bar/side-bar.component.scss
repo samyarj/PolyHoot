@@ -320,6 +320,12 @@ img.global-channels-icon {
     flex-direction: column;
 }
 
+.no-channels-message {
+    p {
+        padding-top: 15px;
+        color: var(--tertiary-color);
+    }
+}
 .delete-channel-button,
 .leave-channel-button {
     background: none;

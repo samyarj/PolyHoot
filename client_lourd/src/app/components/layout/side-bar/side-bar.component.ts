@@ -31,6 +31,7 @@ export class SideBarComponent implements OnInit, OnDestroy {
     newChannelName: string = '';
     selectedChannel: string | null = null;
     searchTerm: string = '';
+    errorMessage: string = '';
 
     constructor(
         private authService: AuthService,
@@ -129,12 +130,22 @@ export class SideBarComponent implements OnInit, OnDestroy {
                     throw new Error('User is not authenticated');
                 }
 
+                const existingChannel = this.channels.find((channel) => channel.name.toLowerCase() === this.newChannelName.trim().toLowerCase());
+                if (existingChannel) {
+                    this.errorMessage = 'Le nom du canal existe déjà. Veuillez choisir un autre nom.';
+                    setTimeout(() => {
+                        this.errorMessage = '';
+                    }, 4000);
+                    return;
+                }
+
                 await this.firebaseChatService.createChannel(this.newChannelName.trim());
                 await this.firebaseChatService.joinChannel(this.newChannelName.trim());
                 this.selectedChannel = this.newChannelName.trim();
                 this.selectedChannelMessages = []; // Clear the messages array
                 this.selectedChannelMessagesLoading = true; // Set loading state
                 this.newChannelName = '';
+                this.errorMessage = '';
 
                 const tab3 = document.querySelector('[href="#tab3"]') as HTMLElement;
                 if (tab3) {
