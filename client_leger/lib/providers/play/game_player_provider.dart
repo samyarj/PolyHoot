@@ -1,0 +1,352 @@
+import 'package:client_leger/classes/sound_player.dart';
+import 'package:client_leger/models/enums.dart';
+import 'package:client_leger/models/player_data.dart';
+import 'package:client_leger/models/player_info.dart';
+import 'package:client_leger/models/question.dart';
+import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
+import 'package:client_leger/utilities/logger.dart';
+import 'package:client_leger/utilities/socket_events.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final gameClientProvider =
+    StateNotifierProvider.autoDispose<GamePlayerNotifier, GamePlayerState>(
+        (ref) {
+  return GamePlayerNotifier();
+});
+
+// ref: game-client.service.ts dans le lourd
+
+class GamePlayerState {
+  final ChoiceFeedback choiceFeedback;
+  final Question currentQuestion;
+  final int currentQuestionIndex;
+  final bool gamePaused;
+  final PlayerInfo playerInfo;
+  final int playerPoints;
+  final int pointsReceived;
+  final String quizTitle;
+  final bool shouldDisconnect;
+  final int time;
+  final String answer;
+  final bool finalAnswer;
+  final bool realShowAnswers;
+  final bool shouldNavigateToResults;
+  final int qreAnswer;
+  final bool organizerDisconnected;
+
+  GamePlayerState(
+      {required this.pointsReceived,
+      required this.shouldDisconnect,
+      required this.quizTitle,
+      required this.playerPoints,
+      required this.currentQuestionIndex,
+      required this.gamePaused,
+      required this.finalAnswer,
+      required this.realShowAnswers,
+      required this.answer,
+      required this.choiceFeedback,
+      required this.currentQuestion,
+      required this.playerInfo,
+      required this.time,
+      required this.shouldNavigateToResults,
+      required this.qreAnswer,
+      required this.organizerDisconnected});
+
+  GamePlayerState copyWith(
+      {String? quizTitle,
+      int? playerPoints,
+      int? currentQuestionIndex,
+      bool? gamePaused,
+      bool? finalAnswer,
+      bool? realShowAnswers,
+      bool? socketsInitialized,
+      String? answer,
+      ChoiceFeedback? choiceFeedback,
+      Question? currentQuestion,
+      PlayerInfo? playerInfo,
+      int? time,
+      int? pointsReceived,
+      bool? shouldDisconnect,
+      bool? shouldNavigateToResults,
+      int? qreAnswer,
+      bool? organizerDisconnected}) {
+    return GamePlayerState(
+        pointsReceived: pointsReceived ?? this.pointsReceived,
+        shouldDisconnect: shouldDisconnect ?? this.shouldDisconnect,
+        quizTitle: quizTitle ?? this.quizTitle,
+        playerPoints: playerPoints ?? this.playerPoints,
+        currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
+        gamePaused: gamePaused ?? this.gamePaused,
+        finalAnswer: finalAnswer ?? this.finalAnswer,
+        realShowAnswers: realShowAnswers ?? this.realShowAnswers,
+        answer: answer ?? this.answer,
+        choiceFeedback: choiceFeedback ?? this.choiceFeedback,
+        currentQuestion: currentQuestion ?? this.currentQuestion,
+        playerInfo: playerInfo ?? this.playerInfo,
+        time: time ?? this.time,
+        shouldNavigateToResults:
+            shouldNavigateToResults ?? this.shouldNavigateToResults,
+        qreAnswer: qreAnswer ?? this.qreAnswer,
+        organizerDisconnected:
+            organizerDisconnected ?? this.organizerDisconnected);
+  }
+}
+
+class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
+  final WebSocketManager _socketManager = WebSocketManager.instance;
+  SoundPlayer alertSoundPlayer = SoundPlayer();
+  List<PlayerData> resultPlayerList = [];
+
+  GamePlayerNotifier()
+      : super(GamePlayerState(
+          pointsReceived: 0,
+          organizerDisconnected: false,
+          shouldDisconnect: true,
+          quizTitle: '',
+          playerPoints: 0,
+          currentQuestionIndex: 0,
+          gamePaused: false,
+          finalAnswer: false,
+          realShowAnswers: false,
+          answer: '',
+          choiceFeedback: ChoiceFeedback.Idle,
+          currentQuestion: Question(type: '', text: '', points: 0),
+          playerInfo: PlayerInfo(
+              submitted: false,
+              userFirst: false,
+              choiceSelected: [false, false, false, false],
+              waitingForQuestion: false),
+          time: 0,
+          qreAnswer: 0,
+          shouldNavigateToResults: false,
+        )) {
+    _setupListeners();
+    signalUserConnect();
+    getTitle();
+    AppLogger.i("GamePlayerNotifier initialized");
+  }
+
+  void _setupListeners() {
+    AppLogger.i("Setting up listeners in game player provider");
+
+    _socketManager.webSocketReceiver(GameEvents.WaitingForCorrection.value,
+        (_) {
+      state = state.copyWith(choiceFeedback: ChoiceFeedback.AwaitingCorrection);
+    });
+
+    _socketManager.webSocketReceiver(TimerEvents.Paused.value, (pauseState) {
+      state = state.copyWith(gamePaused: pauseState);
+    });
+
+    _socketManager.webSocketReceiver(TimerEvents.AlertModeStarted.value, (_) {
+      alertSoundPlayer.play();
+    });
+
+    _socketManager.webSocketReceiver(TimerEvents.QuestionCountdownValue.value,
+        (time) {
+      state = state.copyWith(
+          gamePaused: false,
+          playerInfo: state.playerInfo.copyWith(waitingForQuestion: true),
+          time: time);
+    });
+
+    _socketManager.webSocketReceiver(TimerEvents.QuestionCountdownEnd.value,
+        (_) {
+      state = state.copyWith(
+          playerInfo: state.playerInfo.copyWith(waitingForQuestion: false));
+      alertSoundPlayer.stop();
+    });
+
+    _socketManager.webSocketReceiver(TimerEvents.Value.value, (time) {
+      state = state.copyWith(time: time);
+    });
+
+    _socketManager.webSocketReceiver(TimerEvents.End.value, (time) {
+      state = state.copyWith(time: time);
+    });
+
+    _socketManager.webSocketReceiver(GameEvents.NextQuestion.value,
+        (nextQuestion) {
+      AppLogger.i("Next question received in game player provider");
+      if (nextQuestion != null && nextQuestion['index'] != null) {
+        resetAttributes();
+        final currentQuestion = Question.fromJson(nextQuestion['question']);
+        final int? qreAnswer;
+
+        if (currentQuestion.type == QuestionType.QRE.name &&
+            currentQuestion.qreAttributes != null) {
+          qreAnswer = currentQuestion.qreAttributes!.minBound;
+        } else {
+          qreAnswer = null;
+        }
+
+        state = state.copyWith(
+            playerInfo: state.playerInfo.copyWith(submitted: false),
+            currentQuestionIndex: nextQuestion['index'],
+            currentQuestion: currentQuestion,
+            qreAnswer: qreAnswer ?? state.qreAnswer);
+      }
+    });
+
+    _socketManager.webSocketReceiver(GameEvents.PlayerPointsUpdate.value,
+        (playerQuestionInfo) {
+      ChoiceFeedback feedback;
+      if (playerQuestionInfo['points'] ==
+          state.playerPoints + state.currentQuestion.points) {
+        feedback = ChoiceFeedback.Correct;
+      } else if (playerQuestionInfo['points'] == state.playerPoints) {
+        feedback = ChoiceFeedback.Incorrect;
+      } else {
+        feedback = ChoiceFeedback.Partial;
+      }
+
+      bool isFirst = playerQuestionInfo['isFirst'];
+      int points = playerQuestionInfo['points'];
+      if (playerQuestionInfo['isFirst']) {
+        feedback = ChoiceFeedback.First;
+      }
+
+      state = state.copyWith(
+        playerPoints: points,
+        pointsReceived: points,
+        realShowAnswers: true,
+        choiceFeedback: feedback,
+        playerInfo: state.playerInfo.copyWith(
+            choiceSelected: [false, false, false, false], userFirst: isFirst),
+      );
+    });
+
+    _socketManager.webSocketReceiver(GameEvents.SendResults.value, (data) {
+      AppLogger.i("Results received in game player provider $data");
+      final List<dynamic> jsonData = data as List<dynamic>;
+      resultPlayerList = jsonData
+          .map((json) => PlayerData.fromJson(json as Map<String, dynamic>))
+          .toList();
+      alertSoundPlayer.stop();
+      state = state.copyWith(
+          shouldDisconnect: false, shouldNavigateToResults: true);
+    });
+
+    _socketManager.webSocketReceiver(DisconnectEvents.OrganizerHasLeft.value,
+        (_) {
+      alertSoundPlayer.stop();
+      state = state.copyWith(organizerDisconnected: true);
+      _socketManager.removeRoomId();
+      AppLogger.i(
+          "Organizer has left the game + we removed roomId from socket manager");
+    });
+  }
+
+  List<PlayerData> getResultPlayerList() {
+    return resultPlayerList;
+  }
+
+  bool selectChoice(int indexChoice) {
+    if (state.time > 0 && !state.finalAnswer) {
+      if (state.currentQuestion.choices != null &&
+          // ignore: unnecessary_null_comparison
+          state.currentQuestion.choices![indexChoice] != null) {
+        state.currentQuestion.choices![indexChoice].isSelected =
+            !(state.currentQuestion.choices![indexChoice].isSelected!);
+        state.playerInfo.choiceSelected[indexChoice] =
+            !state.playerInfo.choiceSelected[indexChoice];
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void finalizeAnswer() {
+    AppLogger.i("Finalizing answer in game player provider");
+    state = state.copyWith(
+        playerInfo: state.playerInfo.copyWith(submitted: true),
+        choiceFeedback: ChoiceFeedback.Awaiting);
+
+    if (!state.finalAnswer && state.time > 0) {
+      state = state.copyWith(finalAnswer: true);
+      _socketManager.webSocketSender(GameEvents.FinalizePlayerAnswer.value, {
+        "choiceSelected": state.playerInfo.choiceSelected,
+        "qreAnswer": state.qreAnswer,
+      });
+    }
+  }
+
+  void resetAttributes() {
+    state = state.copyWith(
+      choiceFeedback: ChoiceFeedback.Idle,
+      answer: '',
+      gamePaused: false,
+      finalAnswer: false,
+      realShowAnswers: false,
+      playerInfo: state.playerInfo.copyWith(
+        userFirst: false,
+        waitingForQuestion: false,
+        choiceSelected: [false, false, false, false],
+      ),
+      shouldDisconnect: true,
+    );
+    if (state.currentQuestion.choices != null) {
+      for (final choice in state.currentQuestion.choices!) {
+        choice.isSelected = false;
+      }
+    }
+  }
+
+  void resetCurrentQuestionFields() {
+    state = state.copyWith(
+        currentQuestion: Question(type: '', text: '', points: 0));
+  }
+
+  void getTitle() {
+    _socketManager.webSocketSender(
+        JoinEvents.TitleRequest.value, null, _updateTitle);
+  }
+
+  void _updateTitle(title) {
+    AppLogger.i("Title received in game player provider");
+    state = state.copyWith(quizTitle: title as String);
+  }
+
+  void signalUserDisconnect() {
+    _socketManager.webSocketSender(DisconnectEvents.Player.value);
+    alertSoundPlayer.stop();
+    _socketManager.removeRoomId();
+    AppLogger.i(
+        "User disconnected from game + we removed roomId from socket manager");
+  }
+
+  void signalUserConnect() {
+    _socketManager.webSocketSender(ConnectEvents.UserToGame.value);
+  }
+
+  void sendAnswerForCorrection(String answer) {
+    _socketManager.webSocketSender(GameEvents.QRLAnswerSubmitted.value, answer);
+  }
+
+  void setQreAnswer(int answer) {
+    state = state.copyWith(qreAnswer: answer);
+  }
+
+  void stopAlertSound() {
+    alertSoundPlayer.stop();
+  }
+
+  @override
+  void dispose() {
+    if (!mounted) return;
+    AppLogger.i("Disposing GamePlayerProvider");
+    _socketManager.socket.off(GameEvents.WaitingForCorrection.value);
+    _socketManager.socket.off(TimerEvents.Paused.value);
+    _socketManager.socket.off(TimerEvents.AlertModeStarted.value);
+    _socketManager.socket.off(TimerEvents.QuestionCountdownValue.value);
+    _socketManager.socket.off(TimerEvents.QuestionCountdownEnd.value);
+    _socketManager.socket.off(TimerEvents.Value.value);
+    _socketManager.socket.off(TimerEvents.End.value);
+    _socketManager.socket.off(GameEvents.NextQuestion.value);
+    _socketManager.socket.off(GameEvents.PlayerPointsUpdate.value);
+    _socketManager.socket.off(DisconnectEvents.OrganizerHasLeft.value);
+    _socketManager.socket.off(GameEvents.SendResults.value);
+    resetAttributes();
+    super.dispose();
+  }
+}

@@ -44,6 +44,9 @@ dependencies:
   intl: ^0.20.2
   socket_io_client: ^3.0.2
   flutter_riverpod: ^2.6.1
+  toastification: ^3.0.1
+  audioplayers: ^6.3.0
+  numberpicker: ^2.1.2
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +75,7 @@ flutter:
     - assets/logo.png
     - assets/welcome-page-bg.png
     - assets/default-avatar.png
+    - assets/sounds/alert_sound.mp3
     
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

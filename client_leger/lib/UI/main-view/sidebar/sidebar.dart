@@ -1,7 +1,8 @@
 import 'package:client_leger/UI/chat/chatwindow.dart';
+import 'package:client_leger/UI/chat/ingame_chatwindow.dart';
 import 'package:client_leger/UI/main-view/sidebar/channels.dart';
-import 'package:client_leger/backend-communication-services/models/user.dart'
-    as user_model;
+import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
+import 'package:client_leger/models/user.dart' as user_model;
 import 'package:flutter/material.dart';
 
 class SideBar extends StatefulWidget {
@@ -15,6 +16,8 @@ class SideBar extends StatefulWidget {
 
 class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final socketManager = WebSocketManager.instance;
+
   final ValueNotifier<String?> _recentChannelNotifier =
       ValueNotifier<String?>(null);
 
@@ -93,8 +96,16 @@ class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
   }
 
   Widget _buildIngameChat() {
-    return Center(
-        child: Text('Ingame Chat', style: TextStyle(color: Colors.white)));
+    return ValueListenableBuilder<String?>(
+      valueListenable: socketManager.currentRoomIdNotifier,
+      builder: (context, currentRoomId, child) {
+        return currentRoomId == null
+            ? Center(
+                child: Text('Pas de partie courante.',
+                    style: TextStyle(color: Colors.white)))
+            : InGameChatWindow();
+      },
+    );
   }
 
   Widget _buildGeneralChat() {

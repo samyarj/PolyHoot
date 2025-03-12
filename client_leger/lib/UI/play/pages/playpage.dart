@@ -7,15 +7,16 @@ class PlayPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SingleChildScrollView(
       child: ConstrainedBox(
         constraints: BoxConstraints(
           minHeight: MediaQuery.of(context).size.height,
         ),
         child: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF00115A), Color(0xFF004080)],
+              colors: [colorScheme.primary, colorScheme.secondary],
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
             ),
@@ -72,7 +73,10 @@ class PlayPage extends StatelessWidget {
                   ),
                   SizedBox(width: 20),
                   ElevatedButton(
-                    onPressed: () => {},
+                    onPressed: () => {
+                      GoRouter.of(context)
+                          .push('${Paths.play}/${Paths.joinGame}')
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black,
