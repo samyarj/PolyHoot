@@ -1,12 +1,15 @@
+p,
+.mb-4,
+.mb-3 {
+    color: var(--text-color);
+}
+
+.mb-4 {
+    font-weight: bold;
+}
+
 .sign-up-container {
-    min-width: 400px;
-    max-width: 600px;
     margin: auto;
-    padding: 2rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    background-color: #fff;
 
     h2 {
         text-align: center;

@@ -1,7 +1,7 @@
 <ng-container *ngIf="(showSpinner$ | async) === false; else loadingTemplate">
     <app-main-header *ngIf="this.authService.isAuthenticated() && !isLoginOrSignUp"></app-main-header>
     <app-side-bar *ngIf="this.authService.isAuthenticated() && !isLoginOrSignUp"></app-side-bar>
-    <div class="main-content">
+    <div class="main-content" [ngClass]="{ 'login-content': !this.authService.isAuthenticated() || isLoginOrSignUp }">
         <router-outlet></router-outlet>
     </div>
 </ng-container>
