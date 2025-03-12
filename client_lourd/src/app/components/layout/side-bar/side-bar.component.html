@@ -90,29 +90,103 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#tab5" title="Canaux de discussion disponible">
-                    <i class="fa-solid fa-list"></i>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#" title="Créer un canal de discussion">
+                <a class="nav-link" data-bs-toggle="tab" href="#tab5" title="Créer un canal de discussion">
                     <i class="fa-solid fa-plus"></i>
                 </a>
             </li>
         </ul>
         <div class="tab-content">
             <div class="tab-pane fade show active" id="tab1">
+                <h2>Canal de discussion global</h2>
                 <app-chat2
-                    [chatMessagesLoading]="chatMessagesLoading"
-                    [chatMessages]="chatMessages"
+                    [chatMessagesLoading]="globalChatMessagesLoading"
+                    [chatMessages]="globalChatMessages"
                     (sendMessageToRoom)="handleSendMessage($event)"
                     (loadOlderMessages)="loadOlderMessages()"
                 ></app-chat2>
             </div>
-            <div class="tab-pane fade" id="tab2">Tab 2 content</div>
-            <div class="tab-pane fade" id="tab3">Tab 3 content</div>
-            <div class="tab-pane fade" id="tab4">Tab 4 content</div>
-            <div class="tab-pane fade" id="tab5">Tab 5 content</div>
+            <div class="tab-pane fade" id="tab2">
+                <h2>Clavardage de partie</h2>
+                <ng-container>
+                    <app-chat></app-chat>
+                </ng-container>
+                <ng-template #notInGame>
+                    <p>Cette fonctionnalité est uniquement disponible lorsque vous êtes en jeu.</p>
+                </ng-template>
+            </div>
+            <div class="tab-pane fade" id="tab3">
+                <h2>Canal : {{ selectedChannel }}</h2>
+                <ng-container *ngIf="selectedChannel; else noChannelSelected">
+                    <app-chat2
+                        [chatMessagesLoading]="selectedChannelMessagesLoading"
+                        [chatMessages]="selectedChannelMessages"
+                        (sendMessageToRoom)="handleSendMessageToChannel($event)"
+                        (loadOlderMessages)="loadOlderMessages()"
+                    ></app-chat2>
+                </ng-container>
+                <ng-template #noChannelSelected>
+                    <p>Aucun canal sélectionné.</p>
+                    <p>Veuillez sélectionner un canal de discussion.</p>
+                </ng-template>
+            </div>
+            <div class="tab-pane fade" id="tab4">
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#tab4-1" title="Mes canaux de discussion"> Mes canaux </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#tab4-2" title="Canaux de discussion disponible"> Canaux à joindre </a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="tab4-1">
+                        <h2>Mes canaux de discussion</h2>
+                        <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un canal" class="search-input" />
+                        <div class="channel-list">
+                            <div *ngIf="filteredJoinedChannels().length === 0" class="no-channels-message">
+                                <p>Vous n'avez rejoint aucun canal. Veuillez en rejoindre un.</p>
+                            </div>
+                            <div *ngFor="let channel of filteredJoinedChannels()" class="my-channels">
+                                <div (click)="selectChannel(channel)">{{ channel }}</div>
+                                <div class="channel-buttons">
+                                    <button (click)="quitChannel(channel)" class="leave-channel-button">
+                                        <i class="fa-solid fa-right-from-bracket"></i>
+                                    </button>
+                                    <button (click)="deleteChannel(channel)" class="delete-channel-button">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="tab4-2">
+                        <h2>Canaux de discussion disponible</h2>
+                        <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un canal" class="search-input" />
+                        <div class="channel-list">
+                            <div *ngIf="filteredChannels().length === 0" class="no-channels-message">
+                                <p>Aucun canal n'a été créé.</p>
+                                <p>Veuillez en créer un pour commencer à discuter.</p>
+                            </div>
+                            <div *ngFor="let channel of filteredChannels()" class="join-channels">
+                                <div (click)="selectChannel(channel.name)">{{ channel.name }}</div>
+                                <button (click)="deleteChannel(channel.name)" class="delete-channel-button">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="tab5">
+                <h2>Créer un canal de discussion</h2>
+                <div class="create-channel-form">
+                    <form (submit)="createChannel()">
+                        <input type="text" [(ngModel)]="newChannelName" name="newChannelName" placeholder="Nom du canal" required />
+                        <button type="submit">Créer</button>
+                    </form>
+                    <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+                </div>
+            </div>
         </div>
     </div>
 </aside>

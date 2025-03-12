@@ -247,3 +247,124 @@ img.global-channels-icon {
     width: 15px;
     height: 20px;
 }
+
+#tab1 {
+    color: var(--tertiary-color);
+    font-style: italic;
+}
+
+//tab2 -Game Chat configuration
+#tab2 {
+    color: var(--tertiary-color);
+    font-style: italic;
+}
+
+//tab3 -Current Chat configuration
+#tab3 {
+    color: var(--tertiary-color);
+    font-style: italic;
+}
+
+//channel list configuration
+#tab4-1 {
+    color: var(--tertiary-color);
+    font-style: italic;
+    max-height: 450px; // Set the maximum height for the list
+    overflow-y: auto; // Enable vertical scrolling
+    input {
+        width: 98%;
+        border: 1px solid var(--tertiary-color);
+        border-radius: 5px;
+    }
+}
+#tab4-2 {
+    color: var(--tertiary-color);
+    font-style: italic;
+    max-height: 450px; // Set the maximum height for the list
+    overflow-y: auto; // Enable vertical scrolling
+    input {
+        width: 98%;
+        border: 1px solid var(--tertiary-color);
+        border-radius: 5px;
+    }
+}
+.my-channels,
+.join-channels {
+    display: flex;
+    visibility: visible;
+    list-style: none;
+    justify-content: space-between;
+    color: var(--tertiary-color);
+    padding: 10px; // Add some padding for better hover effect
+    cursor: pointer; // Change cursor to pointer to indicate clickable items
+    width: 100%;
+    transition:
+        background-color 0.3s,
+        color 0.3s; // Smooth transition for hover effect
+    box-sizing: border-box;
+
+    &:hover {
+        background-color: var(--secondary-color); // Change background color on hover
+        color: var(--primary-color); // Change text color on hover
+    }
+}
+.channel-list {
+    list-style: none;
+    color: var(--tertiary-color);
+    width: 100%;
+}
+
+// Nested tabs container
+.nested-tabs-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.no-channels-message {
+    p {
+        padding-top: 15px;
+        color: var(--tertiary-color);
+    }
+}
+.delete-channel-button,
+.leave-channel-button {
+    background: none;
+    border: none;
+    color: var(--tertiary-color);
+    font-size: 1rem;
+
+    &:hover {
+        color: var(--danger-color); // Change color on hover to indicate deletion
+    }
+}
+
+#tab5 {
+    color: var(--tertiary-color);
+    font-style: italic;
+    .create-channel-form {
+        display: flex;
+        flex-direction: column;
+    }
+    form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    input {
+        width: 98%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid var(--tertiary-color);
+        border-radius: 5px;
+    }
+    button {
+        background-color: var(--tertiary-color);
+        color: var(--primary-color);
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 50%;
+    }
+}
