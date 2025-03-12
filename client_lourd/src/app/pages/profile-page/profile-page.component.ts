@@ -27,7 +27,9 @@ export class ProfilePageComponent {
         this.uploadImgService.uploadImage(this.selectedFile).subscribe({
             next: (response) => {
                 alert(`Image uploaded successfully: ${response.avatarUrl}`);
-                // Optionally, update the avatar image in the UI
+                this.selectedFile = null;
+                const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+                if (fileInput) fileInput.value = '';
             },
             error: (error) => {
                 alert(`Error: ${error.message}`);

@@ -1,5 +1,6 @@
-import { DEFAULT_AVATAR_URL, emptyUser } from '@app/constants';
+import { DEFAULT_AVATAR_URL, DEFAULT_AVATARS, emptyUser } from '@app/constants';
 import { User } from '@app/interface/user';
+import { CloudinaryService } from '@app/modules/cloudinary/cloudinary.service';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { UserCredential } from 'firebase/auth';
@@ -9,6 +10,8 @@ export class UserService {
     private adminAuth = admin.auth();
     private firestore = admin.firestore();
     private usersSocketIdMap = new Map<string, string>();
+
+    constructor(private readonly cloudinaryService: CloudinaryService) {}
 
     addUserToMap(socketId: string, uid: string) {
         this.usersSocketIdMap.set(socketId, uid);
@@ -89,7 +92,7 @@ export class UserService {
             if ((error as { code: string }).code === 'auth/user-not-found') {
                 return { emailExists: false, provider: null };
             }
-            throw new Error('Échec de la vérification de la disponibilité de l’e-mail.');
+            throw new Error("Échec de la vérification de la disponibilité de l'e-mail.");
         }
     }
 
@@ -139,7 +142,7 @@ export class UserService {
             const userDoc = querySnapshot.docs[0].data();
             return userDoc.isOnline || false; // Return true/false based on the `isOnline` field
         } catch (error) {
-            throw new Error('Échec de la vérification du statut en ligne de l’utilisateur.');
+            throw new Error("Échec de la vérification du statut en ligne de l'utilisateur.");
         }
     }
 
@@ -230,21 +233,40 @@ export class UserService {
         return false;
     }
 
+    private async deleteOldUploadedAvatar(currentAvatarUrl: string, avatars: string[]): Promise<void> {
+        if (
+            currentAvatarUrl &&
+            currentAvatarUrl !== DEFAULT_AVATAR_URL &&
+            !avatars.includes(currentAvatarUrl) &&
+            !DEFAULT_AVATARS.includes(currentAvatarUrl)
+        ) {
+            try {
+                await this.cloudinaryService.deleteImage(currentAvatarUrl);
+            } catch (error) {
+                console.error('Failed to delete old avatar:', error);
+            }
+        }
+    }
+
     async equipAvatar(uid: string, avatarURL: string): Promise<boolean> {
         const userRef = await this.firestore.collection('users').doc(uid);
         const userDoc = await userRef.get();
         if (!userDoc.exists) {
             throw new Error("L'utilisateur n'existe pas.");
         }
-        const avatars = userDoc.data().inventory?.avatars || [];
+        const userData = userDoc.data();
+        const avatars = userData.inventory?.avatars || [];
+        const currentAvatarUrl = userData.avatarEquipped;
         // default avatar so it doesn't change/show errors.
         avatars.push('https://res.cloudinary.com/dtu6fkkm9/image/upload/v1737478954/default-avatar_qcaycl.jpg');
 
-        if (avatars.includes(avatarURL)) {
+        const canEquipAvatar = avatars.includes(avatarURL);
+        if (canEquipAvatar) {
             await userRef.update({ avatarEquipped: avatarURL });
-            return true;
+            await this.deleteOldUploadedAvatar(currentAvatarUrl, avatars);
         }
-        return false;
+
+        return canEquipAvatar;
     }
 
     async equipBanner(uid: string, bannerURL: string): Promise<boolean> {
@@ -340,16 +362,12 @@ export class UserService {
             throw new UnauthorizedException("L'utilisateur n'existe pas.");
         }
 
-        // Update the avatarEquipped field
-        await userRef.update({ avatarEquipped: avatarUrl });
-
-        // Add the new avatar to the user's inventory if it's not already there
+        // Get the current avatar URL before updating
         const userData = userDoc.data();
+        const currentAvatarUrl = userData.avatarEquipped;
         const avatars = userData.inventory?.avatars || [];
-        if (!avatars.includes(avatarUrl)) {
-            await userRef.update({
-                'inventory.avatars': admin.firestore.FieldValue.arrayUnion(avatarUrl),
-            });
-        }
+
+        await userRef.update({ avatarEquipped: avatarUrl });
+        await this.deleteOldUploadedAvatar(currentAvatarUrl, avatars);
     }
 }
