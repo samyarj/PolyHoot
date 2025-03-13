@@ -1,33 +1,107 @@
 <div class="gen">
     <div>
-        <h2>Select an Avatar</h2>
+        <h2>Sélectionner un Avatar</h2>
         <div class="avatar-selection">
-            <div class="avatar-option">
-                <img src="avatar1.jpg" alt="Avatar" />
+            <div class="avatar-grid">
+                <div
+                    *ngFor="let avatar of defaultAvatars"
+                    class="avatar-option"
+                    [class.selected]="avatar === selectedAvatar"
+                    (click)="selectAvatar(avatar)"
+                >
+                    <img [src]="avatar" alt="Avatar par défaut" class="avatar-image" />
+                </div>
             </div>
 
-            <input type="file" (change)="onFileSelected($event)" accept="image/*" #fileInput style="display: none" />
-            <button (click)="fileInput.click()" class="upload-btn">Choose Avatar</button>
-            <button (click)="onUpload()" class="upload-btn">Upload Avatar</button>
+            <div class="button-section">
+                <button class="equip-btn" [disabled]="!selectedAvatar" (click)="equipSelectedAvatar()">Équiper l'avatar sélectionné</button>
+
+                <div class="upload-section">
+                    <input type="file" (change)="onFileSelected($event)" accept="image/*" #fileInput style="display: none" />
+                    <button (click)="fileInput.click()" class="upload-btn">Choisir un avatar personnalisé</button>
+                    <button (click)="onUpload()" class="upload-btn" [disabled]="!selectedFile">Téléverser l'avatar</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <div>
-        <h2>Account Settings</h2>
-        <form>
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required />
+        <h2>Paramètres du compte</h2>
+        <form [formGroup]="profileForm" (ngSubmit)="onUsernameSubmit()">
+            <div class="form-group">
+                <label for="username">Pseudonyme:</label>
+                <input
+                    type="text"
+                    id="username"
+                    formControlName="username"
+                    (blur)="checkUsername()"
+                    (input)="onInput($event)"
+                    [class.invalid]="profileForm.get('username')?.invalid && profileForm.get('username')?.touched"
+                    [pattern]="usernamePattern"
+                    [maxlength]="maxUsernameLength"
+                    placeholder="Lettres, chiffres, points, tirets et underscores uniquement"
+                />
 
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required />
+                <div class="validation-messages" *ngIf="profileForm.get('username')?.touched">
+                    <p class="error" *ngIf="profileForm.get('username')?.hasError('required')">Le pseudonyme est requis.</p>
+                    <p class="error" *ngIf="profileForm.get('username')?.hasError('pattern')">
+                        Le pseudonyme doit contenir entre 3 et 20 caractères et ne peut inclure que des lettres, des chiffres, des points, des
+                        underscores ou des tirets.
+                    </p>
+                    <p
+                        class="error"
+                        *ngIf="
+                            !profileForm.get('username')?.invalid &&
+                            isUsernameTaken &&
+                            !isCheckingUsername &&
+                            !isTypingUsername &&
+                            !profileForm.get('username')?.hasError('pattern')
+                        "
+                    >
+                        Ce pseudonyme est déjà utilisé.
+                    </p>
+                </div>
 
-            <button type="submit">Update Settings</button>
+                <div class="status-messages">
+                    <div *ngIf="isCheckingUsername" class="ms-2">
+                        <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                            <span class="visually-hidden">Chargement...</span>
+                        </div>
+                    </div>
+                    <p
+                        class="success"
+                        *ngIf="
+                            !isUsernameTaken &&
+                            !isCheckingUsername &&
+                            !isTypingUsername &&
+                            profileForm.get('username')?.value !== currentUsername &&
+                            !profileForm.get('username')?.hasError('pattern') &&
+                            !profileForm.get('username')?.hasError('required')
+                        "
+                    >
+                        Le pseudonyme est disponible
+                    </p>
+                </div>
+            </div>
+
+            <button
+                type="submit"
+                [disabled]="profileForm.invalid || isUsernameTaken || isCheckingUsername || profileForm.get('username')?.value === currentUsername"
+            >
+                Mettre à jour le pseudonyme
+            </button>
         </form>
     </div>
 
     <div>
-        <h2>Statistics</h2>
-        <p>Total Actions: 0</p>
-        <p>Last Login: N/A</p>
+        <h2>Statistiques</h2>
+        <div class="statistics-container">
+            <p>Parties jouées: {{ totalGamesPlayed }}</p>
+            <p>Parties gagnées: {{ gamesWon }}</p>
+            <p>Moyenne de bonnes réponses: {{ averageCorrectAnswers }}%</p>
+            <p>Temps moyen par partie: {{ averageTimePerGame }}</p>
+            <p>Actions totales: {{ totalActions }}</p>
+            <p>Dernière connexion: {{ lastLogin }}</p>
+        </div>
     </div>
 </div>
