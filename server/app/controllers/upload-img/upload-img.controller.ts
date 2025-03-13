@@ -1,8 +1,9 @@
+import { DEFAULT_AVATARS } from '@app/constants';
 import { AuthGuard } from '@app/guards/auth/auth.guard';
 import { AuthenticatedRequest } from '@app/interface/authenticated-request';
 import { CloudinaryService } from '@app/modules/cloudinary/cloudinary.service';
 import { UserService } from '@app/services/auth/user.service';
-import { Controller, HttpStatus, Post, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Post, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { Multer } from 'multer';
@@ -13,6 +14,15 @@ export class UploadImgController {
         private readonly cloudinaryService: CloudinaryService,
         private readonly userService: UserService,
     ) {}
+
+    @Get('default-avatars')
+    async getDefaultAvatars(@Res() res: Response) {
+        try {
+            return res.status(HttpStatus.OK).json({ avatars: DEFAULT_AVATARS });
+        } catch (error) {
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: error.message });
+        }
+    }
 
     @Post()
     @UseGuards(AuthGuard)

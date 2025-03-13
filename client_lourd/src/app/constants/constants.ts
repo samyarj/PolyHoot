@@ -17,6 +17,7 @@ export const EMPTY_STRING = '';
 export const ID = 'id';
 export const WIDTH_SIZE = '400px';
 export const DISPLAYED_COLUMNS = ['name', 'startingDate', 'playersNumber', 'bestScore'];
+export const RELOAD_DELAY_MS = 2000;
 
 export const ASC = 'asc';
 export const DESC = 'desc';
@@ -36,6 +37,8 @@ export const TOKEN_EXPIRY_TIME = QUARTER_HOUR * MINUTES * MILLISECONDS;
 export const EXPIRY_CHECK_INTERVAL = MINUTES * MILLISECONDS;
 
 export const EMAIL_REGEX = /^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+export const USERNAME_MIN_LENGTH = 3;
+export const USERNAME_MAX_LENGTH = 20;
 export const USERNAME_REGEX = /^[a-zA-Z0-9._]{3,20}$/;
 export const PASSWORD_MIN_LENGTH = 6;
 export const MESSAGES_LIMIT = 30;
