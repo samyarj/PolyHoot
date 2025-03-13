@@ -1,6 +1,6 @@
 <div class="gen">
     <div>
-        <h2>Select an Avatar</h2>
+        <h2>Sélectionner un Avatar</h2>
         <div class="avatar-selection">
             <div class="avatar-grid">
                 <div
@@ -9,27 +9,27 @@
                     [class.selected]="avatar === selectedAvatar"
                     (click)="selectAvatar(avatar)"
                 >
-                    <img [src]="avatar" alt="Default Avatar" class="avatar-image" />
+                    <img [src]="avatar" alt="Avatar par défaut" class="avatar-image" />
                 </div>
             </div>
 
             <div class="button-section">
-                <button class="equip-btn" [disabled]="!selectedAvatar" (click)="equipSelectedAvatar()">Equip Selected Avatar</button>
+                <button class="equip-btn" [disabled]="!selectedAvatar" (click)="equipSelectedAvatar()">Équiper l'avatar sélectionné</button>
 
                 <div class="upload-section">
                     <input type="file" (change)="onFileSelected($event)" accept="image/*" #fileInput style="display: none" />
-                    <button (click)="fileInput.click()" class="upload-btn">Choose Custom Avatar</button>
-                    <button (click)="onUpload()" class="upload-btn" [disabled]="!selectedFile">Upload Avatar</button>
+                    <button (click)="fileInput.click()" class="upload-btn">Choisir un avatar personnalisé</button>
+                    <button (click)="onUpload()" class="upload-btn" [disabled]="!selectedFile">Téléverser l'avatar</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div>
-        <h2>Account Settings</h2>
+        <h2>Paramètres du compte</h2>
         <form [formGroup]="profileForm" (ngSubmit)="onUsernameSubmit()">
             <div class="form-group">
-                <label for="username">Username:</label>
+                <label for="username">Pseudonyme:</label>
                 <input
                     type="text"
                     id="username"
@@ -43,7 +43,7 @@
                 />
 
                 <div class="validation-messages" *ngIf="profileForm.get('username')?.touched">
-                    <p class="error" *ngIf="profileForm.get('username')?.hasError('required')">Pseudonyme est requis.</p>
+                    <p class="error" *ngIf="profileForm.get('username')?.hasError('required')">Le pseudonyme est requis.</p>
                     <p class="error" *ngIf="profileForm.get('username')?.hasError('pattern')">
                         Le pseudonyme doit contenir entre 3 et 20 caractères et ne peut inclure que des lettres, des chiffres, des points, des
                         underscores ou des tirets.
@@ -65,7 +65,7 @@
                 <div class="status-messages">
                     <div *ngIf="isCheckingUsername" class="ms-2">
                         <div class="spinner-border spinner-border-sm text-secondary" role="status">
-                            <span class="visually-hidden">Loading...</span>
+                            <span class="visually-hidden">Chargement...</span>
                         </div>
                     </div>
                     <p
@@ -79,7 +79,7 @@
                             !profileForm.get('username')?.hasError('required')
                         "
                     >
-                        Pseudonyme est disponible
+                        Le pseudonyme est disponible
                     </p>
                 </div>
             </div>
@@ -88,20 +88,20 @@
                 type="submit"
                 [disabled]="profileForm.invalid || isUsernameTaken || isCheckingUsername || profileForm.get('username')?.value === currentUsername"
             >
-                Update Username
+                Mettre à jour le pseudonyme
             </button>
         </form>
     </div>
 
     <div>
-        <h2>Statistics</h2>
+        <h2>Statistiques</h2>
         <div class="statistics-container">
-            <p>Total Games Played: {{ totalGamesPlayed }}</p>
-            <p>Games Won: {{ gamesWon }}</p>
-            <p>Average Correct Answers: {{ averageCorrectAnswers }}%</p>
-            <p>Average Time per Game: {{ averageTimePerGame }}</p>
-            <p>Total Actions: {{ totalActions }}</p>
-            <p>Last Login: {{ lastLogin }}</p>
+            <p>Parties jouées: {{ totalGamesPlayed }}</p>
+            <p>Parties gagnées: {{ gamesWon }}</p>
+            <p>Moyenne de bonnes réponses: {{ averageCorrectAnswers }}%</p>
+            <p>Temps moyen par partie: {{ averageTimePerGame }}</p>
+            <p>Actions totales: {{ totalActions }}</p>
+            <p>Dernière connexion: {{ lastLogin }}</p>
         </div>
     </div>
 </div>

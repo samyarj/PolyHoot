@@ -17,6 +17,7 @@ export const EMPTY_STRING = '';
 export const ID = 'id';
 export const WIDTH_SIZE = '400px';
 export const DISPLAYED_COLUMNS = ['name', 'startingDate', 'playersNumber', 'bestScore'];
+export const RELOAD_DELAY_MS = 2000;
 
 export const ASC = 'asc';
 export const DESC = 'desc';

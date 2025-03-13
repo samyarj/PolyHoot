@@ -2,10 +2,11 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { Auth, updateProfile } from '@angular/fire/auth';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH, USERNAME_REGEX } from '@app/constants/constants';
+import { RELOAD_DELAY_MS, USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH, USERNAME_REGEX } from '@app/constants/constants';
 import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
 import { UploadImgService } from '@app/services/upload-img.service';
+import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
@@ -45,6 +46,7 @@ export class ProfilePageComponent implements OnInit {
         private fb: FormBuilder,
         private http: HttpClient,
         private auth: Auth,
+        private toastr: ToastrService,
     ) {
         this.profileForm = this.fb.group({
             username: ['', [Validators.required, Validators.pattern(USERNAME_REGEX)]],
@@ -85,7 +87,7 @@ export class ProfilePageComponent implements OnInit {
         this.authService.token$.pipe(take(1)).subscribe({
             next: async (token) => {
                 if (!token) {
-                    alert('Authentication token not found. Please try again.');
+                    this.toastr.error('Authentication token not found. Please try again.');
                     return;
                 }
 
@@ -106,19 +108,21 @@ export class ProfilePageComponent implements OnInit {
                         next: (updatedUser) => {
                             this.currentUsername = updatedUser.username;
                             this.authService.setUser(updatedUser);
-                            alert('Username updated successfully!');
-                            window.location.reload();
+                            this.toastr.success('Pseudonyme mis à jour avec succès !');
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, RELOAD_DELAY_MS);
                         },
                         error: (error: Error) => {
-                            alert('Error updating username: ' + error.message);
+                            this.toastr.error('Erreur lors de la mise à jour du pseudonyme : ' + error.message);
                         },
                     });
                 } catch (error) {
-                    alert('Error updating profile: ' + (error as Error).message);
+                    this.toastr.error('Erreur lors de la mise à jour du profil : ' + (error as Error).message);
                 }
             },
             error: (error: Error) => {
-                alert('Error getting authentication token: ' + error.message);
+                this.toastr.error("Erreur lors de la récupération du jeton d'authentification : " + error.message);
             },
         });
     }
@@ -142,19 +146,19 @@ export class ProfilePageComponent implements OnInit {
 
     onUpload(): void {
         if (!this.selectedFile) {
-            alert('Please select an image file to upload.');
+            this.toastr.warning('Veuillez sélectionner une image à téléverser.');
             return;
         }
 
         this.uploadImgService.uploadImage(this.selectedFile).subscribe({
-            next: (response) => {
-                alert(`Image uploaded successfully: ${response.avatarUrl}`);
+            next: () => {
+                this.toastr.success('Image téléversée avec succès');
                 this.selectedFile = null;
                 const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
                 if (fileInput) fileInput.value = '';
             },
             error: (error) => {
-                alert(`Error: ${error.message}`);
+                this.toastr.error(`Erreur : ${error.message}`);
             },
         });
     }
@@ -167,10 +171,10 @@ export class ProfilePageComponent implements OnInit {
         if (this.selectedAvatar) {
             this.uploadImgService.updateSelectedDefaultAvatar(this.selectedAvatar).subscribe({
                 next: () => {
-                    alert('Avatar updated successfully!');
+                    this.toastr.success('Avatar mis à jour avec succès !');
                 },
                 error: (error) => {
-                    alert(`Error equipping avatar: ${error.message}`);
+                    this.toastr.error(`Erreur lors de l'équipement de l'avatar : ${error.message}`);
                 },
             });
         }
