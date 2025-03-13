@@ -370,4 +370,17 @@ export class UserService {
         await userRef.update({ avatarEquipped: avatarUrl });
         await this.deleteOldUploadedAvatar(currentAvatarUrl, avatars);
     }
+
+    async updateUsername(uid: string, newUsername: string): Promise<User> {
+        const usernameExists = await this.isUsernameTaken(newUsername);
+        if (usernameExists) {
+            throw new Error('Ce pseudonyme est déjà pris');
+        }
+
+        // Update the username in Firestore
+        const userRef = this.firestore.collection('users').doc(uid);
+        await userRef.update({ username: newUsername });
+
+        return await this.getUserByUid(uid);
+    }
 }

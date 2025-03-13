@@ -12,6 +12,7 @@ import {
     UserCredential,
 } from '@angular/fire/auth';
 import { Firestore } from '@angular/fire/firestore';
+import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { User } from '@app/interfaces/user';
 import { handleErrorsGlobally } from '@app/utils/rxjs-operators';
@@ -155,6 +156,39 @@ export class AuthService {
                 params: { username },
             })
             .pipe(map((response) => response.usernameExists));
+    }
+
+    handleUsernameCheck(
+        formGroup: FormGroup,
+        currentUsername: string,
+        setIsTyping: (value: boolean) => void,
+        setIsChecking: (value: boolean) => void,
+        setIsTaken: (value: boolean) => void,
+    ): void {
+        const username = formGroup.controls.username.value.toString().trim();
+        formGroup.controls.username.setValue(username);
+        setIsTyping(false);
+
+        if (!username || username === currentUsername || formGroup.get('username')?.hasError('pattern')) {
+            return;
+        }
+
+        setIsTaken(false);
+        setIsChecking(true);
+        formGroup.get('username')?.disable();
+
+        this.checkingUsername(username).subscribe({
+            next: (isTaken) => {
+                setIsChecking(false);
+                setIsTyping(false);
+                setIsTaken(isTaken);
+                formGroup.get('username')?.enable();
+            },
+            error: () => {
+                setIsChecking(false);
+                formGroup.get('username')?.enable();
+            },
+        });
     }
 
     checkingEmail(email: string): Observable<{ emailExists: boolean; provider: string }> {

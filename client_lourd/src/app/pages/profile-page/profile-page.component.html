@@ -27,20 +27,81 @@
 
     <div>
         <h2>Account Settings</h2>
-        <form>
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required />
+        <form [formGroup]="profileForm" (ngSubmit)="onUsernameSubmit()">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input
+                    type="text"
+                    id="username"
+                    formControlName="username"
+                    (blur)="checkUsername()"
+                    (input)="onInput($event)"
+                    [class.invalid]="profileForm.get('username')?.invalid && profileForm.get('username')?.touched"
+                    [pattern]="usernamePattern"
+                    [maxlength]="maxUsernameLength"
+                    placeholder="Lettres, chiffres, points, tirets et underscores uniquement"
+                />
 
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required />
+                <div class="validation-messages" *ngIf="profileForm.get('username')?.touched">
+                    <p class="error" *ngIf="profileForm.get('username')?.hasError('required')">Pseudonyme est requis.</p>
+                    <p class="error" *ngIf="profileForm.get('username')?.hasError('pattern')">
+                        Le pseudonyme doit contenir entre 3 et 20 caractères et ne peut inclure que des lettres, des chiffres, des points, des
+                        underscores ou des tirets.
+                    </p>
+                    <p
+                        class="error"
+                        *ngIf="
+                            !profileForm.get('username')?.invalid &&
+                            isUsernameTaken &&
+                            !isCheckingUsername &&
+                            !isTypingUsername &&
+                            !profileForm.get('username')?.hasError('pattern')
+                        "
+                    >
+                        Ce pseudonyme est déjà utilisé.
+                    </p>
+                </div>
 
-            <button type="submit">Update Settings</button>
+                <div class="status-messages">
+                    <div *ngIf="isCheckingUsername" class="ms-2">
+                        <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    <p
+                        class="success"
+                        *ngIf="
+                            !isUsernameTaken &&
+                            !isCheckingUsername &&
+                            !isTypingUsername &&
+                            profileForm.get('username')?.value !== currentUsername &&
+                            !profileForm.get('username')?.hasError('pattern') &&
+                            !profileForm.get('username')?.hasError('required')
+                        "
+                    >
+                        Pseudonyme est disponible
+                    </p>
+                </div>
+            </div>
+
+            <button
+                type="submit"
+                [disabled]="profileForm.invalid || isUsernameTaken || isCheckingUsername || profileForm.get('username')?.value === currentUsername"
+            >
+                Update Username
+            </button>
         </form>
     </div>
 
     <div>
         <h2>Statistics</h2>
-        <p>Total Actions: 0</p>
-        <p>Last Login: N/A</p>
+        <div class="statistics-container">
+            <p>Total Games Played: {{ totalGamesPlayed }}</p>
+            <p>Games Won: {{ gamesWon }}</p>
+            <p>Average Correct Answers: {{ averageCorrectAnswers }}%</p>
+            <p>Average Time per Game: {{ averageTimePerGame }}</p>
+            <p>Total Actions: {{ totalActions }}</p>
+            <p>Last Login: {{ lastLogin }}</p>
+        </div>
     </div>
 </div>
