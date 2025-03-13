@@ -287,6 +287,21 @@
     height: 50px;
 }
 
+.custom-button-medium-disabled {
+    @extend .custom-button-medium;
+    cursor: not-allowed !important;
+    opacity: 0.6;
+
+    &:hover {
+        background: var(--primary-color);
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        border: 3px solid var(--tertiary-color);
+        box-shadow: none !important; /* Remove any hover shadows */
+        filter: none !important; /* Remove brightness or other effects */
+        transform: none !important; /* Disable animations */
+    }
+}
 .custom-button-cancel-medium {
     @extend .custom-button-cancel;
     font-size: 1rem;
