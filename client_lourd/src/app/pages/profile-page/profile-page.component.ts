@@ -65,6 +65,9 @@ export class ProfilePageComponent implements OnInit {
             this.profileForm.patchValue({
                 username: user.username,
             });
+            // Set statistics
+            this.totalGamesPlayed = user.nGames || 0;
+            this.gamesWon = user.nWins || 0;
         }
     }
 

@@ -29,6 +29,7 @@ export interface User {
     cxnLogs?: string[]; // Connection logs
     playedGameLogs?: string[]; // Logs of played games
     nWins?: number; // Number of wins
+    nGames?: number; // Number of games played
     isOnline?: boolean; // Online status
     pity?: number; // Pity counter
     nextDailyFree?: Timestamp; // Next date where user can get daily free

@@ -348,6 +348,7 @@ export class UserService {
             cxnLogs: userDoc.cxnLogs || [],
             playedGameLogs: userDoc.playedGameLogs || [],
             nWins: userDoc.nWins || 0,
+            nGames: userDoc.nGames || 0,
             isOnline: true,
             pity: userDoc.pity || 0,
             nextDailyFree: userDoc.nextDailyFree || new Date(),
@@ -382,5 +383,16 @@ export class UserService {
         await userRef.update({ username: newUsername });
 
         return await this.getUserByUid(uid);
+    }
+
+    async incrementGames(uid: string): Promise<void> {
+        const userRef = await this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+
+        const currentGames = userDoc.data().nGames || 0;
+        await userRef.update({ nGames: currentGames + 1 });
     }
 }

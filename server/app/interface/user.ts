@@ -1,3 +1,5 @@
+import { PlayerPerformanceMetrics } from './gameStats';
+
 export interface User {
     uid: string; // Primary Key
     username: string; // Must be unique
@@ -26,7 +28,9 @@ export interface User {
     coins?: number; // User's coin balance
     cxnLogs?: string[]; // Connection logs
     playedGameLogs?: string[]; // Logs of played games
+    stats?: PlayerPerformanceMetrics[];
     nWins?: number; // Number of wins
+    nGames?: number; // Number of games played
     isOnline?: boolean; // Online status
     pity?: number; // Pity counter
     nextDailyFree?: Date; // Next date where user can get daily free

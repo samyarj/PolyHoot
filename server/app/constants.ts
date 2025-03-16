@@ -39,6 +39,7 @@ export const emptyUser = {
     cxnLogs: [],
     playedGameLogs: [],
     nWins: 0,
+    nGames: 0,
     isOnline: true,
     pity: 0,
     nextDailyFree: new Date(0, 0, 0),
