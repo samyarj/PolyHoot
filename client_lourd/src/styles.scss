@@ -233,6 +233,22 @@
     }
 }
 
+.custom-button-disabled {
+    @extend .custom-button;
+    cursor: not-allowed !important;
+    opacity: 0.6;
+
+    &:hover {
+        background: var(--primary-color);
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        border: 3px solid var(--tertiary-color);
+        box-shadow: none !important; /* Remove any hover shadows */
+        filter: none !important; /* Remove brightness or other effects */
+        transform: none !important; /* Disable animations */
+    }
+}
+
 .custom-button-cancel {
     display: flex;
     align-items: center; /* Vertical centering */

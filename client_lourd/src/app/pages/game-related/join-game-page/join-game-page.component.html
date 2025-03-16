@@ -1,6 +1,65 @@
 <div class="page-wrapper">
-    <app-header-game [title]="title"></app-header-game>
-    <img id="owl-image" src="assets/pictures/button-owl.png" />
+    <img class="logo" src="assets/pictures/logo.png" />
+    <div class="englobing-div">
+        <div class="content-title">SALONS</div>
+        <div *ngIf="canAccessGame" class="content-div"></div>
+        <div *ngIf="!canAccessGame" class="content-div">
+            <!-- <div *ngIf="!canAccessGame" class="right-container">
+                <div *ngFor="let lobby of lobbys; let i = index">
+                    <span> {{ lobby.title }} </span>
+                    <span> {{ ' Nombre de joueurs : ' + lobby.nbPlayers }} </span><br />
+                    <button
+                        id="submit"
+                        type="button"
+                        class="btn custom-width custom-button"
+                        [disabled]="lobby.isLocked"
+                        (click)="validGameId(lobby.roomId)"
+                    >
+                        Joindre
+                    </button>
+                </div>
+            </div> -->
+            <div *ngFor="let lobby of lobbys; let i = index" class="game-container">
+                <div class="game-info">
+                    <span class="game-title"> {{ lobby.title }} </span>
+                    <div class="specific-game-info">
+                        <div class="players">{{ lobby.nbPlayers }} <i class="fa-solid fa-users"></i></div>
+                        <div class="vertical-separator"></div>
+                        <i class="fa-solid fa-clipboard-question"></i>
+                    </div>
+                </div>
+                <div class="separator"></div>
+                <button id="submit" type="button" class="custom-button-medium" [disabled]="lobby.isLocked" (click)="validGameId(lobby.roomId)">
+                    Joindre
+                </button>
+            </div>
+        </div>
+        <form class="join-code-div" (ngSubmit)="validGameId()" #accessForm="ngForm">
+            <div class="join-section">
+                <div>Code d'accès:</div>
+                <label for="gamePin"></label>
+                <input
+                    id="gamePin"
+                    type="text"
+                    name="gamePin"
+                    [(ngModel)]="gameId"
+                    required
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    minlength="4"
+                    maxlength="4"
+                    placeholder="0000"
+                    autofocus
+                />
+                <button id="submit" type="submit" class="custom-button" [ngClass]="{ 'custom-button-disabled': accessForm.invalid }">Joindre</button>
+            </div>
+            <div *ngIf="accessForm.invalid" class="warning-text">*Le code d'accès doit comporter 4 chiffres.</div>
+            <div *ngIf="wrongGameId" class="warning-text">
+                <p>{{ popUpMessage }}</p>
+            </div>
+        </form>
+    </div>
+    <!-- <img id="owl-image" src="assets/pictures/button-owl.png" />
     <div class="split-container">
         <div *ngIf="!canAccessGame" class="left-container">
             <div *ngIf="wrongGameId" class="wrong-input">
@@ -52,5 +111,5 @@
                 </button>
             </div>
         </div>
-    </div>
+    </div> -->
 </div>
