@@ -2,7 +2,7 @@ import 'package:client_leger/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum AppTheme { dark, light, custom }
+enum AppTheme { dark, light }
 
 class ThemeNotifier extends Notifier<ThemeData> {
   @override
@@ -18,9 +18,9 @@ class ThemeNotifier extends Notifier<ThemeData> {
     switch (theme) {
       case AppTheme.light:
         return AppThemes.lightTheme;
-      case AppTheme.custom:
-        return AppThemes.customTheme;
+
       case AppTheme.dark:
+        return AppThemes.darkTheme;
       default:
         return AppThemes.darkTheme;
     }

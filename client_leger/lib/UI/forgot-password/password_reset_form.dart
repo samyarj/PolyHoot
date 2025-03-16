@@ -16,18 +16,6 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
   final TextEditingController _emailController = TextEditingController();
   final FocusNode _emailFocusNode = FocusNode();
   final GlobalKey<FormFieldState> _emailFieldKey = GlobalKey<FormFieldState>();
-  final greyBorder = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(8),
-    borderSide: BorderSide(
-      color: Colors.grey.shade300,
-    ),
-  );
-  final blueBorder = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(8),
-    borderSide: BorderSide(
-      color: Colors.blue.shade300,
-    ),
-  );
   bool _isLoading = false;
   String? _emailError;
   String _previousValue = '';
@@ -126,47 +114,90 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
 
   @override
   Widget build(BuildContext context) {
+    final textColor = Theme.of(context).colorScheme.onPrimary;
+    final accentColor = Theme.of(context).colorScheme.secondary;
+
+    InputDecoration getInputDecoration(String label) {
+      return InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: textColor, fontSize: 14),
+        hintStyle: TextStyle(color: textColor.withAlpha(179), fontSize: 14),
+        filled: true,
+        fillColor: Colors.black.withAlpha(26),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: accentColor, width: 1.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.red.shade300, width: 1),
+        ),
+        errorStyle: TextStyle(color: Colors.red.shade300, fontSize: 12),
+      );
+    }
+
+    ButtonStyle customButtonStyle = ElevatedButton.styleFrom(
+      backgroundColor: accentColor,
+      foregroundColor: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      elevation: 3,
+      shadowColor: accentColor.withAlpha(128),
+    );
+
     return Container(
-      alignment: Alignment.center,
-      width: 400,
-      padding: EdgeInsets.only(top: 0, bottom: 42, left: 32, right: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
       child: Form(
         key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Réinitialiser le mot de passe',
-                style: TextStyle(
-                  fontSize: 18,
-                ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              'Réinitialiser le mot de passe',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: textColor,
               ),
-              SizedBox(height: 16),
-              Text(
-                "Veuillez entrer l'adresse e-mail que vous avez utilisée pour vous inscrire, et nous vous enverrons un lien pour réinitialiser votre mot de passe par e-mail.",
-                style: TextStyle(
-                    fontSize: 16, color: const Color.fromARGB(255, 78, 77, 77)),
+            ),
+            const SizedBox(height: 15),
+            Text(
+              "Veuillez entrer l'adresse e-mail que vous avez utilisée pour vous inscrire, et nous vous enverrons un lien pour réinitialiser votre mot de passe par e-mail.",
+              style: TextStyle(
+                fontSize: 14,
+                color: textColor,
               ),
-
-              SizedBox(height: 16),
-              // Email Field
-              TextFormField(
-                key: _emailFieldKey,
-                controller: _emailController,
-                focusNode: _emailFocusNode,
-                decoration: InputDecoration(
-                  hintText: 'Entrez votre email',
-                  enabledBorder: greyBorder,
-                  focusedBorder: blueBorder,
-                  errorBorder: greyBorder,
-                  errorText: _emailError,
-                ),
-                validator: validateEmail,
-              ),
-              SizedBox(height: 16),
-              ElevatedButton(
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              key: _emailFieldKey,
+              controller: _emailController,
+              focusNode: _emailFocusNode,
+              style: TextStyle(color: textColor, fontSize: 14),
+              cursorColor: accentColor,
+              decoration:
+                  getInputDecoration('Email').copyWith(errorText: _emailError),
+              validator: validateEmail,
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 40,
+              child: ElevatedButton(
                 onPressed: _isLoading || (_emailError != null)
                     ? null
                     : () {
@@ -174,39 +205,39 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
                           submit(_emailController.text.trim());
                         }
                       },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: Size(double.infinity, 50),
-                  backgroundColor: const Color.fromARGB(255, 19, 99, 236),
-                  foregroundColor: Colors.white, // White text color
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  textStyle: const TextStyle(fontSize: 18),
-                ),
+                style: customButtonStyle,
                 child: _isLoading
-                    ? CircularProgressIndicator()
+                    ? SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
                     : Text(
                         'Réinitialiser mon mot de passe',
-                        style: TextStyle(
-                          fontSize: 18,
-                        ),
+                        style: TextStyle(fontSize: 16),
                       ),
               ),
-              SizedBox(height: 16),
-              TextButton(
-                onPressed: () {
-                  context.go(Paths.logIn);
-                },
-                child: Text(
-                  'Retour à la connexion',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: const Color.fromARGB(255, 19, 99, 236),
-                  ),
-                ),
+            ),
+            TextButton(
+              onPressed: () => context.go(Paths.logIn),
+              style: TextButton.styleFrom(
+                minimumSize: Size.zero,
+                padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-            ],
-          ),
+              child: Text(
+                'Retour à la connexion',
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
         ),
       ),
     );

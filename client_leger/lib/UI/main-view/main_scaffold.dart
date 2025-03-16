@@ -33,8 +33,25 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     setState(() {
       _isLoggingOut = true;
     });
+
     try {
-      await ref.read(userProvider.notifier).logout();
+      // Disconnect socket first
+      WebSocketManager.instance.disconnectFromSocket();
+
+      // Navigate first, *then* logout
+      // This ensures we're completely off the page before state changes
+      if (mounted) {
+        // First set the flag to prevent rebuilds
+        isLoggedIn.value = false;
+
+        // Direct navigation override to login page
+        context.go(Paths.logIn);
+
+        // Use a slightly delayed logout to ensure navigation completes
+        Future.delayed(Duration(milliseconds: 100), () {
+          ref.read(userProvider.notifier).logout();
+        });
+      }
     } catch (e) {
       if (!mounted) return;
       showErrorDialog(context, e.toString());
@@ -50,9 +67,12 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
   Widget build(BuildContext context) {
     final userState = ref.watch(userProvider);
     final colorScheme = Theme.of(context).colorScheme;
+
     return userState.when(data: (user) {
-      WebSocketManager.instance
-          .webSocketSender("identifyMobileClient", user?.uid);
+      if (user != null) {
+        WebSocketManager.instance
+            .webSocketSender("identifyMobileClient", user.uid);
+      }
 
       return Scaffold(
         appBar: AppBar(
@@ -131,7 +151,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                   radius: 23,
                   backgroundImage: user?.avatarEquipped != null
                       ? NetworkImage(user!.avatarEquipped!)
-                      : AssetImage('assets/default_avatar.png'),
+                      : AssetImage('assets/default-avatar.png'),
                 ),
               ),
             ),

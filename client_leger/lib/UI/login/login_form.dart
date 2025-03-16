@@ -4,6 +4,7 @@ import 'package:client_leger/backend-communication-services/error-handlers/globa
 import 'package:client_leger/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 class LoginForm extends ConsumerStatefulWidget {
@@ -17,18 +18,6 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _identifierController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final greyBorder = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(8),
-    borderSide: BorderSide(
-      color: Colors.grey.shade300,
-    ),
-  );
-  final blueBorder = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(8),
-    borderSide: BorderSide(
-      color: Colors.blue.shade300,
-    ),
-  );
 
   @override
   void dispose() {
@@ -62,150 +51,214 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   @override
   Widget build(BuildContext context) {
     final userState = ref.watch(userProvider);
-    return Stack(
-      children: [
-        Container(
-          alignment: Alignment.center,
-          width: 400,
-          padding: EdgeInsets.all(32),
-          child: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Connexion",
-                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 32),
-                  TextFormField(
-                    controller: _identifierController,
-                    decoration: InputDecoration(
-                      labelText: 'Pseudonyme ou Email',
-                      enabledBorder: greyBorder,
-                      focusedBorder: blueBorder,
-                      errorBorder: greyBorder,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Entrez votre pseudonyme ou votre email SVP';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 32),
-                  TextFormField(
-                    controller: _passwordController,
-                    textInputAction: TextInputAction.done,
-                    decoration: InputDecoration(
-                      labelText: 'Mot de passe',
-                      enabledBorder: greyBorder,
-                      focusedBorder: blueBorder,
-                      errorBorder: greyBorder,
-                    ),
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Entrez votre mot de passe SVP';
-                      }
-                      return null;
-                    },
-                    onFieldSubmitted: (_) async {
-                      if (_formKey.currentState!.validate()) {
-                        await signIn();
-                      }
-                    },
-                  ),
-                  SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: userState is AsyncLoading
-                          ? null
-                          : () async {
-                              if (_formKey.currentState!.validate()) {
-                                await signIn();
-                              }
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 19, 99, 236),
-                        foregroundColor: Colors.white, // White text color
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        textStyle: const TextStyle(fontSize: 18),
-                      ),
-                      child: Text('Connexion'),
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  TextButton(
-                    onPressed: () {
-                      context.go(Paths.signUp);
-                    },
-                    child: Text(
-                      "Pas de compte ? S'inscrire",
-                      style: TextStyle(
-                        fontSize: 16,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  // Forgot Password Link
-                  TextButton(
-                    onPressed: () {
-                      context.go(Paths.passwordReset);
-                    },
-                    child: Text(
-                      "Mot de passe oublié ?",
-                      style: TextStyle(
-                        fontSize: 16,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  // Divider
-                  Row(
-                    children: [
-                      Expanded(child: Divider()),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text('ou'),
-                      ),
-                      Expanded(child: Divider()),
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  // Google Login
-                  OutlinedButton.icon(
-                    onPressed:
-                        userState is AsyncLoading ? null : loginWithGoogle,
-                    icon: Icon(Icons.account_circle, size: 20),
-                    label: Text(
-                      'Connexion avec Google',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ],
+    final textColor = Theme.of(context).colorScheme.onPrimary;
+    final accentColor = Theme.of(context).colorScheme.secondary;
+
+    InputDecoration getInputDecoration(String label) {
+      return InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: textColor, fontSize: 14),
+        hintStyle: TextStyle(color: textColor.withAlpha(179), fontSize: 14),
+        filled: true,
+        fillColor: Colors.black.withAlpha(26),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: accentColor, width: 1.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.red.shade300, width: 1),
+        ),
+        errorStyle: TextStyle(color: Colors.red.shade300, fontSize: 12),
+      );
+    }
+
+    ButtonStyle customButtonStyle = ElevatedButton.styleFrom(
+      backgroundColor: accentColor,
+      foregroundColor: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      elevation: 3,
+      shadowColor: accentColor.withAlpha(128),
+    );
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              "Connexion",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: textColor,
               ),
             ),
-          ),
-        ),
-        if (userState is AsyncLoading)
-          Positioned.fill(
-            child: Center(
-              child: CircularProgressIndicator(),
+            const SizedBox(height: 15),
+
+            TextFormField(
+              controller: _identifierController,
+              style: TextStyle(color: textColor, fontSize: 14),
+              cursorColor: accentColor,
+              decoration: getInputDecoration('Email ou Pseudonyme'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Ce champ est requis';
+                }
+                return null;
+              },
             ),
-          ),
-      ],
+            const SizedBox(height: 10),
+
+            TextFormField(
+              controller: _passwordController,
+              style: TextStyle(color: textColor, fontSize: 14),
+              cursorColor: accentColor,
+              decoration: getInputDecoration('Mot de passe'),
+              obscureText: true,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Le mot de passe est requis';
+                }
+                return null;
+              },
+              onFieldSubmitted: (_) async {
+                if (_formKey.currentState!.validate()) {
+                  await signIn();
+                }
+              },
+            ),
+            const SizedBox(height: 15),
+
+            // Login button - more compact
+            SizedBox(
+              width: double.infinity,
+              height: 40,
+              child: ElevatedButton(
+                onPressed: userState is AsyncLoading
+                    ? null
+                    : () async {
+                        if (_formKey.currentState!.validate()) {
+                          await signIn();
+                        }
+                      },
+                style: customButtonStyle,
+                child: userState is AsyncLoading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        'Login',
+                        style: TextStyle(fontSize: 16),
+                      ),
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.only(top: 10, bottom: 3),
+              child: TextButton(
+                onPressed: () => context.go(Paths.signUp),
+                style: TextButton.styleFrom(
+                  minimumSize: Size.zero,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  "Vous n'avez pas de compte ? Inscrivez-vous",
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 12,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.only(top: 3, bottom: 10),
+              child: TextButton(
+                onPressed: () => context.go(Paths.passwordReset),
+                style: TextButton.styleFrom(
+                  minimumSize: Size.zero,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  "Mot de passe oublié ?",
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 12,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 3),
+
+            Row(
+              children: [
+                Expanded(child: Divider(color: textColor.withAlpha(128))),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Text(
+                    'ou',
+                    style: TextStyle(color: textColor, fontSize: 12),
+                  ),
+                ),
+                Expanded(child: Divider(color: textColor.withAlpha(128))),
+              ],
+            ),
+
+            const SizedBox(height: 10),
+
+            // Google login button - more compact
+            SizedBox(
+              width: double.infinity,
+              height: 40,
+              child: OutlinedButton.icon(
+                onPressed: userState is AsyncLoading ? null : loginWithGoogle,
+                icon: const FaIcon(FontAwesomeIcons.google, size: 14),
+                label: const Text(
+                  'Se connecter avec Google',
+                  style: TextStyle(fontSize: 14),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: textColor,
+                  side: BorderSide(color: textColor.withAlpha(128)),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
