@@ -18,6 +18,12 @@ export class Player {
     currentChoices: boolean[];
     qreAnswer: number;
     exactAnswer: boolean;
+    stats: {
+        nQuestions: number;
+        nGoodAnswers: number;
+        rightAnswerPercentage: number;
+        timeSpent: number;
+    };
 
     constructor(name: string, isOrganizer: boolean, @ConnectedSocket() client: Socket) {
         this.name = name;
@@ -29,6 +35,12 @@ export class Player {
         this.submitted = false;
         this.currentChoices = [false, false, false, false];
         this.qreAnswer = null;
+        this.stats = {
+            nQuestions: 0,
+            nGoodAnswers: 0,
+            rightAnswerPercentage: 0,
+            timeSpent: 0,
+        };
     }
 
     prepareForNextQuestion() {
@@ -66,6 +78,14 @@ export class Player {
                 if (this.qreAnswer > maxTolerated || this.qreAnswer < minTolerated) correct = false;
             }
         }
+
+        // Update stats
+        this.stats.nQuestions++;
+        if (correct) {
+            this.stats.nGoodAnswers++;
+        }
+        this.stats.rightAnswerPercentage = (this.stats.nGoodAnswers / this.stats.nQuestions) * 100;
+
         return correct;
     }
 }

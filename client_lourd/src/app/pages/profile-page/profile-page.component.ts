@@ -10,6 +10,8 @@ import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
+const SECONDS_IN_MINUTE = 60;
+
 @Component({
     selector: 'app-profile-page',
     templateUrl: './profile-page.component.html',
@@ -68,6 +70,15 @@ export class ProfilePageComponent implements OnInit {
             // Set statistics
             this.totalGamesPlayed = user.nGames || 0;
             this.gamesWon = user.nWins || 0;
+            this.averageCorrectAnswers = user.stats?.rightAnswerPercentage || 0;
+
+            // Calculate average time per game if we have both total time and games played
+            if (user.stats?.timeSpent && user.nGames) {
+                const averageSeconds = Math.floor(user.stats.timeSpent / user.nGames);
+                const minutes = Math.floor(averageSeconds / SECONDS_IN_MINUTE);
+                const seconds = averageSeconds % SECONDS_IN_MINUTE;
+                this.averageTimePerGame = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
         }
     }
 

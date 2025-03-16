@@ -28,6 +28,12 @@ export interface User {
     coins?: number; // User's coin balance
     cxnLogs?: string[]; // Connection logs
     playedGameLogs?: string[]; // Logs of played games
+    stats?: {
+        nQuestions?: number; // Total number of questions answered
+        nGoodAnswers?: number; // Number of correct answers
+        rightAnswerPercentage?: number; // Percentage of correct answers
+        timeSpent?: number; // Total time spent playing (in seconds)
+    };
     nWins?: number; // Number of wins
     nGames?: number; // Number of games played
     isOnline?: boolean; // Online status

@@ -161,15 +161,18 @@ export class Game {
         targetedPlayer.submitted = true;
         targetedPlayer.currentChoices = answerData.choiceSelected;
         targetedPlayer.qreAnswer = answerData.qreAnswer;
-        if (!targetedPlayer.verifyIfAnswersCorrect(this.quiz.questions[this.currentQuestionIndex])) {
+        const isCorrect = targetedPlayer.verifyIfAnswersCorrect(this.quiz.questions[this.currentQuestionIndex]);
+        if (!isCorrect) {
             targetedPlayer.isFirst = false;
-            return this.checkAndPrepareForNextQuestion();
+            this.checkAndPrepareForNextQuestion();
+            return false;
         }
         if (this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QCM) {
             const currentFinalizeTime: number = Date.now();
             if (!this.lastFinalizeCall) {
                 this.handleFirstAnswer(targetedPlayer, currentFinalizeTime);
-                return this.checkAndPrepareForNextQuestion();
+                this.checkAndPrepareForNextQuestion();
+                return true;
             }
 
             this.handleLaterAnswer(currentFinalizeTime);
@@ -182,6 +185,7 @@ export class Game {
             }
         }
         this.checkAndPrepareForNextQuestion();
+        return true;
     }
     checkAndPrepareForNextQuestion(@ConnectedSocket() client?: Socket) {
         if (client) {

@@ -347,6 +347,12 @@ export class UserService {
             coins: userDoc.coins || 0,
             cxnLogs: userDoc.cxnLogs || [],
             playedGameLogs: userDoc.playedGameLogs || [],
+            stats: userDoc.stats || {
+                nQuestions: 0,
+                nGoodAnswers: 0,
+                rightAnswerPercentage: 0,
+                timeSpent: 0,
+            },
             nWins: userDoc.nWins || 0,
             nGames: userDoc.nGames || 0,
             isOnline: true,
@@ -404,5 +410,31 @@ export class UserService {
         }
         const currentWins = userDoc.data().nWins || 0;
         await userRef.update({ nWins: currentWins + 1 });
+    }
+
+    async updateStats(uid: string, newStats: { nQuestions?: number; nGoodAnswers?: number; timeSpent?: number }): Promise<void> {
+        const userRef = this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+
+        const currentStats = userDoc.data().stats || {
+            nQuestions: 0,
+            nGoodAnswers: 0,
+            rightAnswerPercentage: 0,
+            timeSpent: 0,
+        };
+
+        const updatedStats = {
+            nQuestions: (currentStats.nQuestions || 0) + (newStats.nQuestions || 0),
+            nGoodAnswers: (currentStats.nGoodAnswers || 0) + (newStats.nGoodAnswers || 0),
+            timeSpent: (currentStats.timeSpent || 0) + (newStats.timeSpent || 0),
+        };
+
+        // Calculate the new percentage
+        updatedStats['rightAnswerPercentage'] = updatedStats.nQuestions > 0 ? (updatedStats.nGoodAnswers / updatedStats.nQuestions) * 100 : 0;
+
+        await userRef.update({ stats: updatedStats });
     }
 }

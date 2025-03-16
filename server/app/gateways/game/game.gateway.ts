@@ -97,14 +97,24 @@ export class GameGateway {
     }
 
     @SubscribeMessage(GameEvents.FinalizePlayerAnswer)
-    handleFinalizePlayerAnswer(
+    async handleFinalizePlayerAnswer(
         @ConnectedSocket() client: AuthenticatedSocket,
         @MessageBody() answerData: { choiceSelected: boolean[]; qreAnswer: number },
     ) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {
-            game.finalizePlayerAnswer(client, answerData);
+            const player = game.findTargetedPlayer(client);
+            const wasCorrect = game.finalizePlayerAnswer(client, answerData);
+
+            // Update user stats if they are authenticated
+            if (client.user?.uid) {
+                const newStats = {
+                    nQuestions: 1,
+                    nGoodAnswers: wasCorrect ? 1 : 0,
+                };
+                await this.userService.updateStats(client.user.uid, newStats);
+            }
         }
     }
 
@@ -225,6 +235,16 @@ export class GameGateway {
                 if (winnerSocket?.user?.uid) {
                     console.log('Incrementing wins for user:', winnerSocket.user.uid);
                     await this.userService.incrementWins(winnerSocket.user.uid);
+                }
+
+                // Update time spent for all authenticated players
+                for (const player of game.players) {
+                    const playerSocket = player.socket as AuthenticatedSocket;
+                    if (playerSocket?.user?.uid) {
+                        await this.userService.updateStats(playerSocket.user.uid, {
+                            timeSpent: game.timer.timerValue,
+                        });
+                    }
                 }
 
                 this.server.to(roomId).emit(GameEvents.SendResults, results);

@@ -38,6 +38,12 @@ export const emptyUser = {
     coins: 0,
     cxnLogs: [],
     playedGameLogs: [],
+    stats: {
+        nQuestions: 0,
+        nGoodAnswers: 0,
+        rightAnswerPercentage: 0,
+        timeSpent: 0,
+    },
     nWins: 0,
     nGames: 0,
     isOnline: true,
