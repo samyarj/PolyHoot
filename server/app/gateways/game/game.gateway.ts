@@ -211,14 +211,26 @@ export class GameGateway {
     }
 
     @SubscribeMessage(GameEvents.ShowResults)
-    handleShowResults(@ConnectedSocket() client: AuthenticatedSocket) {
+    async handleShowResults(@ConnectedSocket() client: AuthenticatedSocket) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {
             const results = game.getResults();
-            if (results) this.server.to(roomId).emit(GameEvents.SendResults, results);
-            game.gameState = GameState.RESULTS;
-            this.historyManager.saveGameRecordToDB(roomId, results);
+            if (results) {
+                // Find the player with the highest points who is still in the game
+                const winner = results.filter((player) => player.isInGame).reduce((prev, current) => (prev.points > current.points ? prev : current));
+
+                // Find the winner's socket to get their user ID
+                const winnerSocket = game.players.find((p) => p.name === winner.name)?.socket as AuthenticatedSocket;
+                if (winnerSocket?.user?.uid) {
+                    console.log('Incrementing wins for user:', winnerSocket.user.uid);
+                    await this.userService.incrementWins(winnerSocket.user.uid);
+                }
+
+                this.server.to(roomId).emit(GameEvents.SendResults, results);
+                game.gameState = GameState.RESULTS;
+                this.historyManager.saveGameRecordToDB(roomId, results);
+            }
         }
     }
 }

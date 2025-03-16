@@ -395,4 +395,14 @@ export class UserService {
         const currentGames = userDoc.data().nGames || 0;
         await userRef.update({ nGames: currentGames + 1 });
     }
+
+    async incrementWins(uid: string): Promise<void> {
+        const userRef = this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+        const currentWins = userDoc.data().nWins || 0;
+        await userRef.update({ nWins: currentWins + 1 });
+    }
 }
