@@ -57,6 +57,7 @@ export class PopUpCreationComponent {
         this.dialogRef.close();
         this.dialog.open(ErrorDialogComponent, {
             width: '400px',
+            panelClass: 'custom-container',
             data: { message: this.errorMessage, reloadOnClose: true },
         });
     }

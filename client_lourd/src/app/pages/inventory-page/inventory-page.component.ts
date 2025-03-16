@@ -96,6 +96,7 @@ export class InventoryPageComponent {
                     if (!isAvatarEquipped) {
                         this.matdialog.open(ErrorDialogComponent, {
                             width: '400px',
+                            panelClass: 'custom-container',
                             data: { message: "Vous ne possèdez pas l'avatar que vous voulez équiper.", reloadOnClose: false },
                         });
                     }
@@ -113,6 +114,7 @@ export class InventoryPageComponent {
                     if (!isBannerEquipped) {
                         this.matdialog.open(ErrorDialogComponent, {
                             width: '400px',
+                            panelClass: 'custom-container',
                             data: { message: "Vous ne possèdez pas la bordure d'avatar que vous voulez équiper.", reloadOnClose: false },
                         });
                     }
@@ -130,6 +132,7 @@ export class InventoryPageComponent {
                     if (!isThemeEquipped) {
                         this.matdialog.open(ErrorDialogComponent, {
                             width: '400px',
+                            panelClass: 'custom-container',
                             data: { message: 'Vous ne possèdez pas le thème de couleur que vous voulez équiper.', reloadOnClose: false },
                         });
                     }
