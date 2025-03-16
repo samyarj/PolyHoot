@@ -128,6 +128,7 @@ export class JoinGameService {
 
     private handleLobbyCreation() {
         this.socketService.on(JoinEvents.LobbyCreated, (lobbyInfos: Lobby) => {
+            console.log('created');
             this.lobbys.push(lobbyInfos);
             this.lobbysSource.next(this.lobbys);
         });

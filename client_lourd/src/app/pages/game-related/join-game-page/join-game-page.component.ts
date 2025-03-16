@@ -1,5 +1,8 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { PopUpCreationComponent } from '@app/components/general-elements/pop-up-creation/pop-up-creation.component';
 import { Lobby } from '@app/interfaces/lobby';
+import { Quiz } from '@app/interfaces/quiz';
 import { JoinGameService } from '@app/services/game-services/join-game-service/join-game.service';
 import { Observer, Subscription } from 'rxjs';
 
@@ -21,7 +24,10 @@ export class JoinGamePageComponent implements OnDestroy, OnInit {
         },
     };
     private lobbysSubscription: Subscription;
-    constructor(private joinGameService: JoinGameService) {}
+    constructor(
+        private joinGameService: JoinGameService,
+        private dialog: MatDialog,
+    ) {}
 
     get popUpMessage() {
         return this.joinGameService.popUpMessage;
@@ -53,5 +59,14 @@ export class JoinGamePageComponent implements OnDestroy, OnInit {
 
     redirectToPage(page: string) {
         this.joinGameService.redirectToPage(page);
+    }
+
+    openQuizInfoDialog(quiz: Quiz) {
+        this.dialog.open(PopUpCreationComponent, {
+            width: '50%',
+            backdropClass: 'quiz-info-popup',
+            panelClass: 'custom-container',
+            data: { quiz, isCreate: false },
+        });
     }
 }

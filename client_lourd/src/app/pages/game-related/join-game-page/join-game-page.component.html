@@ -25,18 +25,25 @@
                     <div class="specific-game-info">
                         <div class="players">{{ lobby.nbPlayers }} <i class="fa-solid fa-users"></i></div>
                         <div class="vertical-separator"></div>
-                        <i class="fa-solid fa-clipboard-question"></i>
+                        <i (click)="openQuizInfoDialog(lobby.quiz)" class="fa-solid fa-clipboard-question"></i>
                     </div>
                 </div>
                 <div class="separator"></div>
-                <button id="submit" type="button" class="custom-button-medium" [disabled]="lobby.isLocked" (click)="validGameId(lobby.roomId)">
-                    Joindre
+                <button
+                    id="submit"
+                    type="button"
+                    class="custom-button-medium"
+                    [ngClass]="{ 'custom-button-medium-disabled': lobby.isLocked }"
+                    [disabled]="lobby.isLocked"
+                    (click)="validGameId(lobby.roomId)"
+                >
+                    {{ lobby.isLocked ? 'Vérouillé' : 'Joindre' }}
                 </button>
             </div>
         </div>
         <form class="join-code-div" (ngSubmit)="validGameId()" #accessForm="ngForm">
             <div class="join-section">
-                <div>Code d'accès:</div>
+                <div>Rentrez le code d'accès ici:</div>
                 <label for="gamePin"></label>
                 <input
                     id="gamePin"
