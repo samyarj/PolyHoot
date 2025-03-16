@@ -11,6 +11,9 @@
                 <div class="question-content">
                     {{ this.question.text }}
                 </div>
+                <div id="question-image" *ngIf="this.question.image">
+                    <img [src]="this.question.image" alt="Question Image" style="width: auto; height: auto;" />
+                </div>
                 <div class="timer">
                     <p>Temps Restant</p>
                     <p *ngIf="gameStatus !== 'waitingForNextQuestion'">{{ timeLeft }}</p>

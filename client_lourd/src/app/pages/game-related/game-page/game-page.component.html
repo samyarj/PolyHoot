@@ -23,6 +23,9 @@
                             {{ this.currentQuestion.text }}
                         </p>
                     </div>
+                    <div id="question-image" *ngIf="currentQuestion.image">
+                        <img [src]="currentQuestion.image" alt="Question Image"style="width: auto; height: auto;" />
+                    </div>
                     <div id="question-additional-info">
                         <div id="question-number">Question # {{ currentIndex + 1 }}</div>
                         <div id="question-points">{{ currentQuestion.points }} pts</div>

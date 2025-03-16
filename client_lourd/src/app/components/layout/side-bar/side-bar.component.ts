@@ -50,7 +50,6 @@ export class SideBarComponent implements OnInit, OnDestroy {
             next: (channels) => {
                 const currentUserId = this.authService.getUser()?.uid || '';
                 this.channels = channels.map((channel) => chatChannelFromJson(channel, currentUserId));
-                console.log('Channels:', this.channels); // Debug statement
             },
             error: (err) => {
                 console.error('Error while fetching channels:', err);
@@ -61,7 +60,6 @@ export class SideBarComponent implements OnInit, OnDestroy {
         this.userSubscription = this.authService.user$.subscribe((user) => {
             if (user) {
                 this.joinedChannels = user.joinedChannels || [];
-                console.log('Joined Channels:', this.joinedChannels); // Debug statement
             }
         });
     }
