@@ -7,6 +7,7 @@ import 'package:client_leger/providers/user_provider.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 class MainScaffold extends ConsumerStatefulWidget {
@@ -75,13 +76,12 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
               ),
             ),
             PlayButton(
-              onPressed: () => widget.statefulNavigationShell.goBranch(
-                  0), // Go to the Play branch (without clearing nav stack; saves the state!)
+              onPressed: () => context.go(Paths.play),
             ),
             IconButton(
-              icon: const Icon(Icons.edit),
+              icon: const FaIcon(FontAwesomeIcons.clover),
               iconSize: 34,
-              onPressed: () => context.go(Paths.quiz),
+              onPressed: () => context.go(Paths.luck),
             ),
             IconButton(
               icon: const Icon(Icons.backpack),
