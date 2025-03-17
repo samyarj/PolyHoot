@@ -6,10 +6,10 @@ class AnimatedTitleWidget extends StatefulWidget {
   final double fontSize;
 
   const AnimatedTitleWidget({
-    Key? key,
+    super.key,
     required this.title,
     this.fontSize = 64,
-  }) : super(key: key);
+  });
 
   @override
   State<AnimatedTitleWidget> createState() => _AnimatedTitleWidgetState();
@@ -25,7 +25,7 @@ class _AnimatedTitleWidgetState extends State<AnimatedTitleWidget>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
 
     _glowAnimation = Tween<double>(begin: 2.0, end: 20.0).animate(

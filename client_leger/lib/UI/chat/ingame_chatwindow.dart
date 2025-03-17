@@ -183,15 +183,17 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                                             colorScheme
                                                                 .secondary
                                                                 .withValues(
-                                                                    alpha: 0.8),
+                                                                    alpha: 0.4),
                                                             colorScheme
                                                                 .secondary
+                                                                .withValues(
+                                                                    alpha: 0.7),
                                                           ]
                                                         : [
                                                             colorScheme.surface
                                                                 .withValues(
-                                                                    alpha: 0.8),
-                                                            colorScheme.surface
+                                                                    alpha: 0.6),
+                                                            colorScheme.surface,
                                                           ],
                                                     begin: Alignment.topLeft,
                                                     end: Alignment.bottomRight,

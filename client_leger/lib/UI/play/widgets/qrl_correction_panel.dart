@@ -39,7 +39,9 @@ class QRLCorrectionPanel extends StatelessWidget {
 
           // Player name
           Text(
-            '${state.gameInfo.currentIndex < state.answersQRL.length ? state.answersQRL[state.gameInfo.currentIndex].playerName : ""}',
+            state.gameInfo.currentIndex < state.answersQRL.length
+                ? state.answersQRL[state.gameInfo.currentIndex].playerName
+                : "",
             style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

@@ -61,13 +61,9 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
   Widget build(BuildContext context) {
     final userState = ref.watch(userProvider);
     final colorScheme = Theme.of(context).colorScheme;
-    final screenWidth = MediaQuery.of(context).size.width;
-
     return userState.when(data: (user) {
-      if (user != null) {
-        WebSocketManager.instance
-            .webSocketSender("identifyMobileClient", user.uid);
-      }
+      WebSocketManager.instance
+          .webSocketSender("identifyMobileClient", user?.uid);
 
       return Scaffold(
         appBar: PreferredSize(
@@ -143,38 +139,35 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                           ),
                         ),
 
-                        // Tool icons
-                        if (screenWidth > 768) ...[
-                          Spacer(),
-                          IconButton(
-                            icon: Icon(Icons.person),
-                            iconSize: 28,
-                            color: colorScheme.tertiary,
-                            onPressed: () => {},
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.build),
-                            iconSize: 28,
-                            color: colorScheme.tertiary,
-                            onPressed: () => context.go(Paths.quiz),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.backpack),
-                            iconSize: 28,
-                            color: colorScheme.tertiary,
-                            onPressed: () => context.go(Paths.equipped),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.attach_money),
-                            iconSize: 28,
-                            color: colorScheme.tertiary,
-                            onPressed: () => context.go(Paths.coins),
-                          ),
-                        ],
+                        Spacer(),
+                        IconButton(
+                          icon: Icon(Icons.person),
+                          iconSize: 28,
+                          color: colorScheme.tertiary,
+                          onPressed: () => {},
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.build),
+                          iconSize: 28,
+                          color: colorScheme.tertiary,
+                          onPressed: () => context.go(Paths.quiz),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.backpack),
+                          iconSize: 28,
+                          color: colorScheme.tertiary,
+                          onPressed: () => context.go(Paths.equipped),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.attach_money),
+                          iconSize: 28,
+                          color: colorScheme.tertiary,
+                          onPressed: () => context.go(Paths.coins),
+                        ),
                       ],
                     ),
                   ),
-                  SizedBox(
+                  Container(
                     width: sidebarWidth - 20,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -253,6 +246,8 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
             ),
           ),
         ),
+        //),
+        //),
         body: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

@@ -11,7 +11,7 @@ class GameCreationPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final softSecondary = Color.lerp(colorScheme.secondary, Colors.white, 0.2);
-    final ScrollController _scrollController = ScrollController();
+    final ScrollController scrollController = ScrollController();
 
     return Container(
       width: double.infinity,
@@ -58,7 +58,7 @@ class GameCreationPage extends StatelessWidget {
                     width: MediaQuery.of(context).size.width * 0.6,
                     padding: const EdgeInsets.symmetric(vertical: 20.0),
                     child: RawScrollbar(
-                      controller: _scrollController,
+                      controller: scrollController,
                       thumbColor: colorScheme.secondary.withValues(alpha: 0.7),
                       radius: const Radius.circular(20),
                       thickness: 8,
@@ -66,7 +66,7 @@ class GameCreationPage extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.only(right: 45),
                         child: ListView.builder(
-                          controller: _scrollController,
+                          controller: scrollController,
                           physics: ClampingScrollPhysics(),
                           itemCount: quizzes.length,
                           padding: const EdgeInsets.symmetric(vertical: 10.0),

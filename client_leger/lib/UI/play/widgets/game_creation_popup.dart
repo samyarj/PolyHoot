@@ -6,7 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class GameCreationPopup {
-  static void show(BuildContext context, Quiz quiz) {
+  /// Shows a game creation popup
+  /// @param context The build context
+  /// @param quiz The quiz to display
+  /// @param forCreation Whether to show the create game button (defaults to true)
+  static void show(
+    BuildContext context,
+    Quiz quiz, {
+    bool forCreation = true,
+    int questionListHeight = 220,
+  }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final ScrollController scrollController = ScrollController();
@@ -102,8 +111,8 @@ class GameCreationPopup {
                           ),
                         ),
                         const SizedBox(height: 5),
-                        Container(
-                            height: 220,
+                        SizedBox(
+                            height: questionListHeight.toDouble(),
                             child: ScrollbarTheme(
                               data: ScrollbarThemeData(
                                 thumbColor: WidgetStateProperty.all(colorScheme
@@ -140,33 +149,35 @@ class GameCreationPopup {
                               ),
                             )),
                         const SizedBox(height: 20),
-                        Align(
-                          alignment: Alignment.center,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              _createGame(context, quiz);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: colorScheme.surface,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(40),
-                                side: BorderSide(
-                                    color: colorScheme.secondary, width: 2),
+                        // Only show the button if forCreation is true
+                        if (forCreation)
+                          Align(
+                            alignment: Alignment.center,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                _createGame(context, quiz);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: colorScheme.surface,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(40),
+                                  side: BorderSide(
+                                      color: colorScheme.secondary, width: 2),
+                                ),
+                                elevation: 0,
                               ),
-                              elevation: 0,
-                            ),
-                            child: Text(
-                              "Créer une partie",
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: colorScheme.onPrimary,
-                                fontWeight: FontWeight.bold,
+                              child: Text(
+                                "Créer une partie",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: colorScheme.onPrimary,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ),

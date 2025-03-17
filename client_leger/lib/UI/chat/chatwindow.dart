@@ -248,16 +248,19 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                                     .secondary
                                                                     .withValues(
                                                                         alpha:
-                                                                            0.8),
+                                                                            0.4),
                                                                 colorScheme
-                                                                    .secondary,
+                                                                    .secondary
+                                                                    .withValues(
+                                                                        alpha:
+                                                                            0.7),
                                                               ]
                                                             : [
                                                                 colorScheme
                                                                     .surface
                                                                     .withValues(
                                                                         alpha:
-                                                                            0.8),
+                                                                            0.6),
                                                                 colorScheme
                                                                     .surface,
                                                               ],

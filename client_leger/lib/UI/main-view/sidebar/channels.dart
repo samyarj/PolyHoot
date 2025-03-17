@@ -80,7 +80,7 @@ class Channels extends ConsumerWidget {
                     unselectedLabelColor: colorScheme.tertiary,
                     labelStyle: TextStyle(fontSize: 18),
                     indicator: BoxDecoration(
-                      color: colorScheme.secondary.withValues(alpha: 0.4),
+                      color: colorScheme.secondary.withValues(alpha: 0.55),
                     ),
                     indicatorSize: TabBarIndicatorSize.tab,
                     tabs: [

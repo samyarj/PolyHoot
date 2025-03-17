@@ -1,8 +1,10 @@
 import 'dart:ui';
 
 import 'package:client_leger/UI/global/header_title.dart';
+import 'package:client_leger/UI/play/widgets/game_creation_popup.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/providers/play/join_game_provider.dart';
+import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -195,13 +197,27 @@ class _JoinGameState extends ConsumerState<JoinGame> {
                                                         ), // Divider
                                                         const SizedBox(
                                                             width: 10),
-                                                        // Lock Icon
-                                                        Icon(
-                                                          lobby.isLocked
-                                                              ? Icons.lock
-                                                              : Icons.lock_open,
-                                                          color: colorScheme
-                                                              .onPrimary,
+
+                                                        GestureDetector(
+                                                          onTap: () {
+                                                            final quiz = joinNotifier
+                                                                .getQuizByTitle(
+                                                                    lobby
+                                                                        .title);
+                                                            AppLogger.i(
+                                                                "Showing quiz: ${quiz.title}");
+                                                            GameCreationPopup.show(
+                                                                context, quiz,
+                                                                forCreation:
+                                                                    false,
+                                                                questionListHeight:
+                                                                    280);
+                                                          },
+                                                          child: Icon(
+                                                            Icons.description,
+                                                            color: colorScheme
+                                                                .onPrimary,
+                                                          ),
                                                         ),
                                                       ],
                                                     ),
@@ -209,35 +225,75 @@ class _JoinGameState extends ConsumerState<JoinGame> {
                                                 ),
                                               ),
                                               ElevatedButton(
-                                                onPressed: () {
-                                                  joinNotifier.validGameId(
-                                                      lobby.roomId);
-                                                },
+                                                onPressed: lobby.isLocked
+                                                    ? null
+                                                    : () {
+                                                        joinNotifier
+                                                            .validGameId(
+                                                                lobby.roomId);
+                                                      },
                                                 style: ElevatedButton.styleFrom(
                                                   backgroundColor:
                                                       colorScheme.primary,
+                                                  disabledBackgroundColor:
+                                                      colorScheme.primary
+                                                          .withValues(
+                                                              alpha: 0.75),
+                                                  foregroundColor:
+                                                      colorScheme.onPrimary,
+                                                  disabledForegroundColor:
+                                                      colorScheme.onPrimary
+                                                          .withValues(
+                                                              alpha: 0.75),
                                                   shape: RoundedRectangleBorder(
                                                     borderRadius:
                                                         const BorderRadius.all(
                                                             Radius.circular(
                                                                 40)),
-                                                    side: BorderSide(
-                                                      color:
-                                                          colorScheme.tertiary,
-                                                      width: 2,
+                                                    side: lobby.isLocked
+                                                        ? BorderSide.none
+                                                        : BorderSide(
+                                                            color: colorScheme
+                                                                .tertiary,
+                                                            width: 2.5,
+                                                          ),
+                                                  ),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Text(
+                                                      'Rejoindre',
+                                                      style: TextStyle(
+                                                        color: lobby.isLocked
+                                                            ? colorScheme
+                                                                .onPrimary
+                                                                .withValues(
+                                                                    alpha: 0.75)
+                                                            : colorScheme
+                                                                .onPrimary,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
                                                     ),
-                                                  ),
+                                                    const SizedBox(width: 8),
+                                                    Icon(
+                                                      lobby.isLocked
+                                                          ? Icons.lock
+                                                          : Icons.lock_open,
+                                                      color: lobby.isLocked
+                                                          ? colorScheme
+                                                              .onPrimary
+                                                              .withValues(
+                                                                  alpha: 0.75)
+                                                          : colorScheme
+                                                              .onPrimary,
+                                                    ),
+                                                  ],
                                                 ),
-                                                child: Text(
-                                                  'Rejoindre',
-                                                  style: TextStyle(
-                                                    color:
-                                                        colorScheme.onPrimary,
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              )
+                                              ),
                                             ],
                                           ),
                                         ),
@@ -253,7 +309,7 @@ class _JoinGameState extends ConsumerState<JoinGame> {
 
                     // Room Code Input
                     Container(
-                      width: MediaQuery.of(context).size.width * 0.35,
+                      width: MediaQuery.of(context).size.width * 0.33,
                       decoration: BoxDecoration(
                         color: colorScheme.surface.withValues(alpha: 0.7),
                         borderRadius: BorderRadius.circular(30),
@@ -263,7 +319,7 @@ class _JoinGameState extends ConsumerState<JoinGame> {
                         ),
                       ),
                       padding: const EdgeInsets.symmetric(
-                          vertical: 20, horizontal: 25),
+                          vertical: 15, horizontal: 25),
                       child: Form(
                         key: _formKey,
                         child: Column(
@@ -360,12 +416,12 @@ class _JoinGameState extends ConsumerState<JoinGame> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 18),
                             Center(
                               child: Text(
                                 "Le code d'accès doit comporter 4 chiffres.",
                                 style: TextStyle(
-                                  color: colorScheme.onPrimary,
+                                  color: colorScheme.tertiary,
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                 ),
