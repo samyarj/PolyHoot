@@ -33,6 +33,13 @@ class Quiz {
     );
   }
 
+  factory Quiz.empty() => Quiz(
+      title: '',
+      description: '',
+      questions: [],
+      lastModification: '',
+      duration: 0);
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

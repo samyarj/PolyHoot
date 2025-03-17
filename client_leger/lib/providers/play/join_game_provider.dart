@@ -1,5 +1,6 @@
-import 'package:client_leger/models/lobby.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
+import 'package:client_leger/models/lobby.dart';
+import 'package:client_leger/models/quiz.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:client_leger/utilities/socket_events.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -67,7 +68,8 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
       AppLogger.i("New lobby created: $lobbyData");
       final lobby = Lobby.fromJson(lobbyData);
       state = state.copyWith(lobbys: [...state.lobbys, lobby]);
-      AppLogger.i("New lobby created: ${lobby.title} (ID: ${lobby.roomId})");
+      AppLogger.i(
+          "New lobby created: ${lobby.title} (ID: ${lobby.roomId}) (Quiz: ${lobby.quiz.title})");
     });
 
     _socketManager.webSocketReceiver(GameEvents.End.value, (roomId) {
@@ -148,9 +150,8 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
 
     _socketManager.webSocketReceiver(JoinEvents.CanJoin.value, (data) {
       AppLogger.i("Player can join game: $data we set room id");
-      final _roomId = data['gameId'];
-      _socketManager.setRoomId(
-          _roomId); // bug if I give directly data['gameId']. Do not change.
+      final roomId = data['gameId'];
+      _socketManager.setRoomId(roomId);
       _socketManager.isOrganizer = false;
       state = state.copyWith(isJoined: true);
       AppLogger.i("Player joined successfully → Room ID: ${data['gameId']}");
@@ -165,6 +166,16 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
   void getAllLobbys() {
     AppLogger.i("Fetching all available lobbies...");
     _socketManager.webSocketSender(GameEvents.GetCurrentGames.value);
+  }
+
+  Quiz getQuizByTitle(String quizTitle) {
+    AppLogger.w("Fetching quiz by title: $quizTitle");
+
+    final lobby = state.lobbys.firstWhere(
+      (lobby) => lobby.quiz.title == quizTitle,
+    );
+
+    return lobby.quiz;
   }
 
   void resetAttributes() {

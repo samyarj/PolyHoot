@@ -13,7 +13,7 @@ export class GameGateway {
     constructor(
         private gameManager: GameManagerService,
         private historyManager: HistoryManagerService,
-    ) { }
+    ) {}
 
     @SubscribeMessage(TimerEvents.Pause)
     handlePauseGame(@ConnectedSocket() client: Socket) {
@@ -72,6 +72,7 @@ export class GameGateway {
                 nbPlayers: game.players.length,
                 roomId: game.roomId,
                 isLocked: game.isLocked,
+                quiz: game.quiz,
             });
         });
         this.server.emit(GameEvents.GetCurrentGames, currentGamesInfos);
@@ -85,7 +86,7 @@ export class GameGateway {
         const game = this.gameManager.getGameByRoomId(roomId);
         game.gameState = GameState.WAITING;
         this.gameManager.socketRoomsMap.set(client, roomId);
-        const lobbyInfos = { title: quiz.title, nbPlayers: game.players.length, roomId: roomId, isLocked: game.isLocked };
+        const lobbyInfos = { title: quiz.title, nbPlayers: game.players.length, roomId: roomId, isLocked: game.isLocked, quiz: quiz };
         this.server.emit(JoinEvents.LobbyCreated, lobbyInfos);
         return roomId;
     }
@@ -177,6 +178,7 @@ export class GameGateway {
             const player = game.players.find((player) => player.name === playerName);
             player.socket.emit(GameEvents.PlayerBanned);
             game.removePlayer(playerName);
+            this.gameManager.socketRoomsMap.delete(player.socket);
         }
         const playerNames = this.gameManager.getGameByRoomId(roomId).players.map((player) => player.name);
         this.server.emit(GameEvents.PlayerLeft, { playerNames, roomId });

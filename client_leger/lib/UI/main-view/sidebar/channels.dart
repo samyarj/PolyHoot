@@ -3,8 +3,8 @@ import 'package:client_leger/UI/confirmation/confirmation_messages.dart';
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/main-view/sidebar/channel_search.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
-import 'package:client_leger/models/chat_channels.dart';
 import 'package:client_leger/business/channel_manager.dart';
+import 'package:client_leger/models/chat_channels.dart';
 import 'package:client_leger/providers/user_provider.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:flutter/material.dart';
@@ -31,9 +31,11 @@ class Channels extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     List<ChatChannel> userChannels = [];
     List<ChatChannel> joinableChannels = [];
     String currentUserUid = ref.read(userProvider).value!.uid;
+
     return StreamBuilder<List<ChatChannel>>(
         stream: channelManager.fetchAllChannels(currentUserUid),
         builder: (context, snapshot) {
@@ -43,13 +45,19 @@ class Channels extends ConsumerWidget {
 
           if (snapshot.hasError) {
             showErrorDialog(context, getCustomError(snapshot.error));
-            return Text(getCustomError(snapshot.error));
+            return Text(
+              getCustomError(snapshot.error),
+              style: TextStyle(color: colorScheme.onPrimary),
+            );
           }
 
           final channels = snapshot.data ?? [];
 
           if (channels.isEmpty) {
-            return const Text('Aucun canal trouvé');
+            return Text(
+              'Aucun canal trouvé',
+              style: TextStyle(color: colorScheme.onPrimary),
+            );
           }
 
           userChannels =
@@ -68,15 +76,13 @@ class Channels extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TabBar(
-                    labelColor: Colors.white,
-                    unselectedLabelColor: Colors.white,
+                    labelColor: colorScheme.onPrimary,
+                    unselectedLabelColor: colorScheme.tertiary,
                     labelStyle: TextStyle(fontSize: 18),
                     indicator: BoxDecoration(
-                      color: const Color.fromARGB(164, 68, 137,
-                          255), // Highlight color for the selected tab
+                      color: colorScheme.secondary.withValues(alpha: 0.55),
                     ),
-                    indicatorSize:
-                        TabBarIndicatorSize.tab, // Make the indicator cove
+                    indicatorSize: TabBarIndicatorSize.tab,
                     tabs: [
                       Tab(
                         text: 'Vos canaux',
@@ -87,7 +93,8 @@ class Channels extends ConsumerWidget {
                   Expanded(
                     child: TabBarView(
                       children: [
-                        _buildUserChannels(userChannels, currentUserUid),
+                        _buildUserChannels(
+                            userChannels, currentUserUid, colorScheme),
                         _buildJoinChannels(joinableChannels, currentUserUid),
                       ],
                     ),
@@ -99,12 +106,13 @@ class Channels extends ConsumerWidget {
         });
   }
 
-  _buildUserChannels(List<ChatChannel> userChannels, String currentUserUid) {
+  _buildUserChannels(List<ChatChannel> userChannels, String currentUserUid,
+      ColorScheme colorScheme) {
     if (userChannels.isEmpty) {
       return Center(
         child: Text(
           'Vous êtes dans aucun canal.',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: colorScheme.onPrimary),
         ),
       );
     }
@@ -118,13 +126,14 @@ class Channels extends ConsumerWidget {
           child: ListTile(
             title: Text(
               channel.name,
-              style: TextStyle(color: Colors.white, fontSize: 18),
+              style: TextStyle(color: colorScheme.onPrimary, fontSize: 18),
             ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: Icon(Icons.exit_to_app, size: 30, color: Colors.white),
+                  icon: Icon(Icons.exit_to_app,
+                      size: 30, color: colorScheme.onPrimary),
                   onPressed: () async {
                     await showConfirmationDialog(
                       context,
@@ -135,7 +144,8 @@ class Channels extends ConsumerWidget {
                   },
                 ),
                 IconButton(
-                  icon: Icon(Icons.delete, size: 30, color: Colors.white),
+                  icon: Icon(Icons.delete,
+                      size: 30, color: colorScheme.onPrimary),
                   onPressed: () async {
                     await showConfirmationDialog(
                       context,
