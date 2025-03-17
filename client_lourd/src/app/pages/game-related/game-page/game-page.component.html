@@ -1,34 +1,37 @@
 <div *ngIf="quizReady" class="gameContainer">
-    <app-header-game [title]="this.quizTitle" [onLogoClick]="abandonGame.bind(this)"></app-header-game>
-    <div id="header-separator"></div>
     <div id="main-container">
         <div id="question-container">
             <div id="current-question">
-                <div id="user-points">
-                    Mes Points<strong>{{ playerPoints }}</strong>
-                </div>
-                <div *ngIf="time" id="timer">
-                    Temps Restant
-                    <strong *ngIf="!waitingForQuestion">{{ time }}</strong>
-                    <div *ngIf="gamePaused">PAUSE</div>
-                </div>
-                <div *ngIf="!time" id="timer">
-                    Temps
-                    <strong>ECOULÉ</strong>
-                </div>
                 <div id="question-info">
+                    <div id="game-additional-info">
+                        <div *ngIf="time" id="timer">
+                            Temps Restant
+                            <strong *ngIf="!waitingForQuestion">&nbsp;{{ time }}</strong>
+                            <div *ngIf="gamePaused">&nbsp;PAUSE</div>
+                        </div>
+                        <div *ngIf="!time" id="timer">
+                            Temps&nbsp;
+                            <strong>ECOULÉ</strong>
+                        </div>
+                        <div id="user-points">
+                            Mes Points&nbsp;
+                            <strong>{{ playerPoints }}</strong>
+                        </div>
+                    </div>
                     <div id="question-text">
-                        <p *ngIf="waitingForQuestion">La prochaine question commence dans {{ time }} seconde{{ time === 0 ? '.' : 's.' }}</p>
-                        <p *ngIf="!waitingForQuestion">
+                        <div *ngIf="waitingForQuestion" class="question-text-content">
+                            La prochaine question commence dans {{ time }} seconde{{ time === 0 ? '.' : 's.' }}
+                        </div>
+                        <div class="question-text-content" *ngIf="!waitingForQuestion">
                             {{ this.currentQuestion.text }}
-                        </p>
+                        </div>
+                        <div class="question-img" *ngIf="!waitingForQuestion">Image</div>
                     </div>
                     <div id="question-additional-info">
                         <div id="question-number">Question # {{ currentIndex + 1 }}</div>
                         <div id="question-points">{{ currentQuestion.points }} pts</div>
                     </div>
                 </div>
-                <div id="filler"></div>
                 <div id="answer-section">
                     <p id="character-limit" *ngIf="currentQuestion.type === 'QRL' && !submitted">
                         Caractères restants : {{ MAX_CHARACTERS - answer.length }}
@@ -69,30 +72,54 @@
                         maxlength="{{ MAX_CHARACTERS }}"
                         [disabled]="submitted"
                     ></textarea>
+
                     <div *ngIf="currentQuestion.type === 'QRE'" id="range-selection-section">
-                        <input
-                            *ngIf="currentQuestion.qreAttributes"
-                            type="range"
-                            id="range-input"
-                            [min]="currentQuestion.qreAttributes.minBound"
-                            [max]="currentQuestion.qreAttributes.maxBound"
-                            [(ngModel)]="qreAnswer"
-                            [disabled]="submitted"
-                        />
+                        <label *ngIf="!showAnswers && currentQuestion.qreAttributes" for="range-input" class="range-label">
+                            Sélectionnez une valeur entre {{ currentQuestion.qreAttributes.minBound }} et {{ currentQuestion.qreAttributes.maxBound }}
+                        </label>
+
+                        <span *ngIf="showAnswers && currentQuestion.qreAttributes" for="range-input" class="correct-answer">
+                            Réponse exacte:&nbsp;<strong>{{ currentQuestion.qreAttributes.goodAnswer }}</strong>
+                        </span>
+                        <div class="range-container">
+                            <output id="range-value">{{ qreAnswer }}</output>
+                            <input
+                                *ngIf="currentQuestion.qreAttributes"
+                                type="range"
+                                id="range-input"
+                                [min]="currentQuestion.qreAttributes.minBound"
+                                [max]="currentQuestion.qreAttributes.maxBound"
+                                [(ngModel)]="qreAnswer"
+                                [disabled]="submitted"
+                            />
+                        </div>
                         <div id="range-values" *ngIf="currentQuestion.qreAttributes">
-                            <span>Borne minimale: {{ currentQuestion.qreAttributes.minBound }}</span>
-                            <span>Borne maximale: {{ currentQuestion.qreAttributes.maxBound }}</span>
-                            <span>Votre réponse: {{ qreAnswer }}</span>
-                            <span>Marge de tolérance: {{ currentQuestion.qreAttributes.tolerance }}</span>
-                            <span *ngIf="this.showAnswers">Bonne réponse:{{ currentQuestion.qreAttributes.goodAnswer }}</span>
+                            <span class="range-info"
+                                >Borne minimale:&nbsp;<strong>{{ currentQuestion.qreAttributes.minBound }}</strong></span
+                            >
+                            <span class="range-info"
+                                >Marge de tolérance:&nbsp;<strong>±{{ currentQuestion.qreAttributes.tolerance }}</strong></span
+                            >
+                            <span class="range-info"
+                                >Borne maximale:&nbsp;<strong>{{ currentQuestion.qreAttributes.maxBound }}</strong></span
+                            >
                         </div>
                     </div>
-                    <button [disabled]="submitted" id="submit-choice-button" (click)="finalizeAnswer()">Submit</button>
+
+                    <button
+                        [disabled]="submitted"
+                        id="submit-choice-button"
+                        [ngClass]="{
+                            'custom-button-big': !submitted,
+                            'custom-button-big-disabled': submitted
+                        }"
+                        (click)="finalizeAnswer()"
+                    >
+                        Soumettre
+                    </button>
                 </div>
-                <button id="abandon-button" (click)="abandonGame()">Abandonner</button>
+                <button class="custom-button-medium" id="abandon-button" (click)="abandonGame()">Abandonner</button>
             </div>
         </div>
-        <div id="chat-separator"></div>
-        <app-chat id="chat-container"></app-chat>
     </div>
 </div>

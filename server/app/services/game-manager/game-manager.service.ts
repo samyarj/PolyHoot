@@ -1,6 +1,7 @@
 import { Game } from '@app/classes/game/game';
 import { Player } from '@app/classes/player/player';
 import { SEED_1, SEED_2 } from '@app/constants';
+import { User } from '@app/interface/user';
 import { Quiz } from '@app/model/schema/quiz/quiz';
 import { Injectable } from '@nestjs/common';
 import { ConnectedSocket } from '@nestjs/websockets';
@@ -15,9 +16,9 @@ export class GameManagerService {
         this.socketRoomsMap = new Map<Socket, string>();
     }
 
-    createGame(quiz: Quiz, @ConnectedSocket() client: Socket): string {
+    createGame(quiz: Quiz, @ConnectedSocket() client: Socket, user: User): string {
         const roomId = this.generateNewRoomId();
-        this.currentGames.push(new Game(roomId, quiz, client));
+        this.currentGames.push(new Game(roomId, quiz, client, user));
         return roomId;
     }
 
@@ -37,7 +38,7 @@ export class GameManagerService {
         return roomId.toString();
     }
 
-    joinGame(roomId: string, playerName: string, @ConnectedSocket() client: Socket): boolean {
+    joinGame(roomId: string, playerName: string, @ConnectedSocket() client: Socket, user: User): boolean {
         if (!this.canEnterGame(roomId)) {
             return false;
         }
@@ -47,7 +48,7 @@ export class GameManagerService {
             return false;
         }
         const roomToJoin = this.getGameByRoomId(roomId);
-        const player = new Player(trimmedPlayerName, false, client);
+        const player = new Player(trimmedPlayerName, false, client, user);
         roomToJoin.addPlayer(player, client);
         return true;
     }

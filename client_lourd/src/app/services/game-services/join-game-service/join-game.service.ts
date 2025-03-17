@@ -6,6 +6,7 @@ import { Lobby } from '@app/interfaces/lobby';
 import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
 import { SocketClientService } from '@app/services/websocket-services/general/socket-client-manager.service';
+import { ToastrService } from 'ngx-toastr';
 import { Observable, Subject } from 'rxjs';
 
 @Injectable({
@@ -26,6 +27,7 @@ export class JoinGameService {
     constructor(
         private router: Router,
         private authService: AuthService,
+        private toastr: ToastrService,
     ) {
         this.socketService = this.authService.getSocketService();
         this.lobbysSource = new Subject<Lobby[]>();
@@ -156,7 +158,14 @@ export class JoinGameService {
     }
 
     private handleUpdateLobby() {
-        this.socketService.on<{ playerNames: string[]; roomId: string }>(JoinEvents.JoinSuccess, ({ roomId }) => {
+        this.socketService.on<{
+            playersInfo: {
+                name: string;
+                avatar: string;
+                banner: string;
+            }[];
+            roomId: string;
+        }>(JoinEvents.JoinSuccess, ({ roomId }) => {
             this.lobbys = this.lobbys.map((lobby) => (lobby.roomId === roomId ? { ...lobby, nbPlayers: lobby.nbPlayers + 1 } : lobby));
             this.lobbysSource.next(this.lobbys);
         });
@@ -167,7 +176,7 @@ export class JoinGameService {
     }
 
     private showPopUp() {
-        console.log('Dans popUp');
+        this.toastr.error(this.popUpMessage);
         this.wrongGameId = true;
         setTimeout(() => {
             this.wrongGameId = false;

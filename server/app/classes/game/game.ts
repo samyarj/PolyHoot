@@ -4,6 +4,7 @@ import { Timer } from '@app/classes/game-timer/game-timer';
 import { Player } from '@app/classes/player/player';
 import { TIME_FOR_QRL } from '@app/constants';
 import { GameEvents, GameState, QuestionType, TimerEvents } from '@app/constants/enum-classes';
+import { User } from '@app/interface/user';
 import { Quiz } from '@app/model/schema/quiz/quiz';
 import { PartialPlayer, PlayerResult } from '@common/partial-player';
 import { Injectable } from '@nestjs/common';
@@ -27,8 +28,8 @@ export class Game {
     private lastFinalizeCall: number | null;
     private lastFinalizePlayer: Player;
 
-    constructor(roomId: string, quiz: Quiz, @ConnectedSocket() client: Socket) {
-        this.initializeGame(roomId, quiz, client);
+    constructor(roomId: string, quiz: Quiz, @ConnectedSocket() client: Socket, organizer: User) {
+        this.initializeGame(roomId, quiz, client, organizer);
     }
 
     addPlayer(player: Player, @ConnectedSocket() client: Socket) {
@@ -221,9 +222,9 @@ export class Game {
 
     // Jusqu'à 5 paramètres sont permis d'après les chargés de lab
     // eslint-disable-next-line max-params
-    private initializeGame(roomId: string, quiz: Quiz, @ConnectedSocket() client: Socket) {
+    private initializeGame(roomId: string, quiz: Quiz, @ConnectedSocket() client: Socket, organizer: User) {
         this.players = [];
-        this.organizer = new Player('Organisateur', true, client);
+        this.organizer = new Player('Organisateur', true, client, organizer);
         this.playersRemoved = [];
         this.bannedNames = [];
         this.quiz = quiz;

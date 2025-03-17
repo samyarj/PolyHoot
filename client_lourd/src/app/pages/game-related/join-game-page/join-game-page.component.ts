@@ -53,8 +53,12 @@ export class JoinGamePageComponent implements OnDestroy, OnInit {
     }
 
     validGameId(roomId?: string) {
-        this.gameId = roomId || this.gameId;
-        this.joinGameService.validGameId(this.gameId);
+        if (roomId) {
+            this.joinGameService.validGameId(roomId);
+        } else {
+            this.gameId = roomId || this.gameId;
+            this.joinGameService.validGameId(this.gameId);
+        }
     }
 
     redirectToPage(page: string) {

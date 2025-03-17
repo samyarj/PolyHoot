@@ -4,24 +4,9 @@
         <div class="content-title">SALONS</div>
         <div *ngIf="canAccessGame" class="content-div"></div>
         <div *ngIf="!canAccessGame" class="content-div">
-            <!-- <div *ngIf="!canAccessGame" class="right-container">
-                <div *ngFor="let lobby of lobbys; let i = index">
-                    <span> {{ lobby.title }} </span>
-                    <span> {{ ' Nombre de joueurs : ' + lobby.nbPlayers }} </span><br />
-                    <button
-                        id="submit"
-                        type="button"
-                        class="btn custom-width custom-button"
-                        [disabled]="lobby.isLocked"
-                        (click)="validGameId(lobby.roomId)"
-                    >
-                        Joindre
-                    </button>
-                </div>
-            </div> -->
             <div *ngFor="let lobby of lobbys; let i = index" class="game-container">
                 <div class="game-info">
-                    <span class="game-title"> {{ lobby.title }} </span>
+                    <span class="game-title"> Mode classique: {{ lobby.title }} </span>
                     <div class="specific-game-info">
                         <div class="players">{{ lobby.nbPlayers }} <i class="fa-solid fa-users"></i></div>
                         <div class="vertical-separator"></div>
@@ -58,12 +43,17 @@
                     placeholder="0000"
                     autofocus
                 />
-                <button id="submit" type="submit" class="custom-button" [ngClass]="{ 'custom-button-disabled': accessForm.invalid }">Joindre</button>
+                <button
+                    id="submit"
+                    [disabled]="accessForm.invalid"
+                    type="submit"
+                    class="custom-button"
+                    [ngClass]="{ 'custom-button-disabled': accessForm.invalid }"
+                >
+                    Joindre
+                </button>
             </div>
             <div *ngIf="accessForm.invalid" class="warning-text">*Le code d'accès doit comporter 4 chiffres.</div>
-            <div *ngIf="wrongGameId" class="warning-text">
-                <p>{{ popUpMessage }}</p>
-            </div>
         </form>
     </div>
     <!-- <img id="owl-image" src="assets/pictures/button-owl.png" />

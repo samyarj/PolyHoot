@@ -36,7 +36,7 @@ export class ResultsPageComponent implements OnInit, OnDestroy {
             this.onUnload();
             return;
         }
-        this.resultsService.sortPlayers();
+        // this.resultsService.sortPlayers();
     }
 
     returnHome() {
