@@ -166,7 +166,7 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              'Réinitialiser le mot de passe',
+              'Réinitialisation du mot de passe',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -229,10 +229,11 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               child: Text(
-                'Retour à la connexion',
+                'Retour à la page de connexion',
                 style: TextStyle(
                   color: textColor,
                   fontSize: 12,
+                  decoration: TextDecoration.underline,
                 ),
                 textAlign: TextAlign.center,
               ),

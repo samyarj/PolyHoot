@@ -13,7 +13,7 @@ export class GameGateway {
     constructor(
         private gameManager: GameManagerService,
         private historyManager: HistoryManagerService,
-    ) { }
+    ) {}
 
     @SubscribeMessage(TimerEvents.Pause)
     handlePauseGame(@ConnectedSocket() client: Socket) {
@@ -177,6 +177,7 @@ export class GameGateway {
             const player = game.players.find((player) => player.name === playerName);
             player.socket.emit(GameEvents.PlayerBanned);
             game.removePlayer(playerName);
+            this.gameManager.socketRoomsMap.delete(player.socket);
         }
         const playerNames = this.gameManager.getGameByRoomId(roomId).players.map((player) => player.name);
         this.server.emit(GameEvents.PlayerLeft, { playerNames, roomId });

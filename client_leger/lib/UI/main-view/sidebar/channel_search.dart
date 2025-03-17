@@ -2,8 +2,8 @@ import 'package:client_leger/UI/confirmation/confirmation_dialog.dart';
 import 'package:client_leger/UI/confirmation/confirmation_messages.dart';
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
-import 'package:client_leger/models/chat_channels.dart';
 import 'package:client_leger/business/channel_manager.dart';
+import 'package:client_leger/models/chat_channels.dart';
 import 'package:flutter/material.dart';
 
 class ChannelSearch extends StatefulWidget {
@@ -55,6 +55,8 @@ class _ChannelSearchState extends State<ChannelSearch> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return widget.joinableChannels.isEmpty
         ? Column(
             children: [
@@ -63,7 +65,8 @@ class _ChannelSearchState extends State<ChannelSearch> {
                 child: Center(
                   child: Text(
                     'Aucun canal trouvé',
-                    style: TextStyle(color: Colors.white, fontSize: 18),
+                    style:
+                        TextStyle(color: colorScheme.onPrimary, fontSize: 18),
                   ),
                 ),
               ),
@@ -88,7 +91,7 @@ class _ChannelSearchState extends State<ChannelSearch> {
                       focusNode: _focusNode,
                       decoration: InputDecoration(
                         suffixIcon: IconButton(
-                          icon: Icon(Icons.clear, color: Colors.white),
+                          icon: Icon(Icons.clear, color: colorScheme.onPrimary),
                           onPressed: () {
                             setState(() {
                               _searchChannelTextController.clear();
@@ -97,11 +100,25 @@ class _ChannelSearchState extends State<ChannelSearch> {
                           },
                         ),
                         labelText: 'Chercher un canal',
-                        labelStyle: TextStyle(color: Colors.white),
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(),
+                        labelStyle: TextStyle(color: colorScheme.onPrimary),
+                        fillColor: colorScheme.surface.withValues(alpha: 0.3),
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(color: colorScheme.secondary),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color:
+                                  colorScheme.onPrimary.withValues(alpha: 0.5)),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: colorScheme.secondary),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: colorScheme.onPrimary),
                       onChanged: _filterChannels,
                     ),
                   ),
@@ -116,7 +133,8 @@ class _ChannelSearchState extends State<ChannelSearch> {
                       return ListTile(
                         title: Text(
                           channel.name,
-                          style: TextStyle(color: Colors.white, fontSize: 18),
+                          style: TextStyle(
+                              color: colorScheme.onPrimary, fontSize: 18),
                         ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -124,7 +142,7 @@ class _ChannelSearchState extends State<ChannelSearch> {
                             IconButton(
                               icon: Icon(
                                 Icons.add_circle,
-                                color: Colors.white,
+                                color: colorScheme.onPrimary,
                                 size: 30,
                               ),
                               onPressed: () async {
@@ -136,7 +154,7 @@ class _ChannelSearchState extends State<ChannelSearch> {
                               icon: Icon(
                                 Icons.delete,
                                 size: 30,
-                                color: Colors.white,
+                                color: colorScheme.onPrimary,
                               ),
                               onPressed: () async {
                                 await showConfirmationDialog(
@@ -159,6 +177,8 @@ class _ChannelSearchState extends State<ChannelSearch> {
   }
 
   Widget addChannel() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -167,15 +187,28 @@ class _ChannelSearchState extends State<ChannelSearch> {
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: colorScheme.onPrimary),
               controller: _textChannelController,
               decoration: InputDecoration(
                 labelText: "Nom du nouveau canal",
-                labelStyle: TextStyle(color: Colors.white),
-                fillColor: Colors.white,
-                border: OutlineInputBorder(),
+                labelStyle: TextStyle(color: colorScheme.onPrimary),
+                fillColor: colorScheme.surface.withValues(alpha: 0.3),
+                filled: true,
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: colorScheme.secondary),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                      color: colorScheme.onPrimary.withValues(alpha: 0.5)),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: colorScheme.secondary),
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 suffixIcon: IconButton(
-                  icon: Icon(Icons.clear, color: Colors.white),
+                  icon: Icon(Icons.clear, color: colorScheme.onPrimary),
                   onPressed: () {
                     _textChannelController.clear();
                   },
@@ -197,18 +230,21 @@ class _ChannelSearchState extends State<ChannelSearch> {
               showErrorDialog(context, getCustomError(e));
             }
           },
-          style: TextButton.styleFrom(
+          style: ElevatedButton.styleFrom(
             padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16.0),
             ),
-            backgroundColor: const Color.fromARGB(87, 21, 3, 87),
-            foregroundColor: Colors.white,
+            backgroundColor: colorScheme.secondary.withValues(alpha: 0.7),
+            foregroundColor: colorScheme.onSecondary,
             elevation: 2.0,
           ),
           child: Text(
             "Créer le canal",
-            style: TextStyle(color: Colors.white, fontSize: 16),
+            style: TextStyle(
+                color: colorScheme.onSecondary,
+                fontSize: 16,
+                fontWeight: FontWeight.bold),
           ),
         ),
       ],

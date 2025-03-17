@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:client_leger/UI/forgot-password/password_reset_form.dart';
-import 'package:client_leger/UI/global/auth-title.dart';
+import 'package:client_leger/UI/global/header_title.dart';
 import 'package:flutter/material.dart';
 
 class PasswordResetPage extends StatefulWidget {
@@ -36,7 +36,7 @@ class _PasswordResetPageState extends State<PasswordResetPage>
           ),
           Center(
             child: Opacity(
-              opacity: 0.3,
+              opacity: 0.8,
               child: ImageFiltered(
                 imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Image.asset(
@@ -54,7 +54,7 @@ class _PasswordResetPageState extends State<PasswordResetPage>
                 const AnimatedTitleWidget(title: 'POLYHOOT', fontSize: 38),
                 const SizedBox(height: 15),
                 Container(
-                  width: 400,
+                  width: 450,
                   height: screenHeight * 0.5,
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(

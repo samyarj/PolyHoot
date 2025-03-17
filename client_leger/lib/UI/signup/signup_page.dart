@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:client_leger/UI/global/auth-title.dart';
+import 'package:client_leger/UI/global/header_title.dart';
 import 'package:client_leger/UI/signup/signup_form.dart';
 import 'package:flutter/material.dart';
 
@@ -36,7 +36,7 @@ class _SignUpPageState extends State<SignUpPage>
           ),
           Center(
             child: Opacity(
-              opacity: 0.3,
+              opacity: 0.8,
               child: ImageFiltered(
                 imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Image.asset(

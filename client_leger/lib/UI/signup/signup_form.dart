@@ -260,7 +260,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              "S'inscrire",
+              "Créer un compte",
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -345,25 +345,42 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                       ),
               ),
             ),
+            const SizedBox(height: 5),
 
-            TextButton(
-              onPressed: () => context.go(Paths.logIn),
-              style: TextButton.styleFrom(
-                minimumSize: Size.zero,
-                padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(
-                "Vous avez un compte ? Connexion",
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 12,
-                ),
-                textAlign: TextAlign.center,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    "Vous avez déjà un compte ? ",
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 12,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => context.go(Paths.logIn),
+                    style: TextButton.styleFrom(
+                      minimumSize: Size.zero,
+                      padding: EdgeInsets.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      "Se connecter",
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 12,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-
-            const SizedBox(height: 3),
+            const SizedBox(height: 5),
 
             // Divider
             Row(

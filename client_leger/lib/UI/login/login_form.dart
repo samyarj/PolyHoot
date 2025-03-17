@@ -174,50 +174,80 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                       ),
               ),
             ),
+            const SizedBox(height: 5),
 
             Padding(
               padding: const EdgeInsets.only(top: 10, bottom: 3),
-              child: TextButton(
-                onPressed: () => context.go(Paths.signUp),
-                style: TextButton.styleFrom(
-                  minimumSize: Size.zero,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  "Vous n'avez pas de compte ? Inscrivez-vous",
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 12,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline:
+                    TextBaseline.alphabetic, // Ensures text aligns properly
+                children: [
+                  Text(
+                    "Vous n'avez pas de compte ? ",
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 12,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
+                  TextButton(
+                    onPressed: () => context.go(Paths.signUp),
+                    style: TextButton.styleFrom(
+                      minimumSize: Size.zero,
+                      padding: EdgeInsets.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      "Inscrivez-vous",
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 12,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
+            const SizedBox(height: 2),
 
             Padding(
               padding: const EdgeInsets.only(top: 3, bottom: 10),
-              child: TextButton(
-                onPressed: () => context.go(Paths.passwordReset),
-                style: TextButton.styleFrom(
-                  minimumSize: Size.zero,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  "Mot de passe oublié ?",
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 12,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline:
+                    TextBaseline.alphabetic, // Ensures text aligns properly
+                children: [
+                  Text(
+                    "Mot de passe oublié ? ",
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 12,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
+                  TextButton(
+                    onPressed: () => context.go(Paths.passwordReset),
+                    style: TextButton.styleFrom(
+                      minimumSize: Size.zero,
+                      padding: EdgeInsets.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      "Réinitialiser mon mot de passe",
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 12,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
 
-            const SizedBox(height: 3),
+            const SizedBox(height: 5),
 
             Row(
               children: [

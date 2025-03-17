@@ -41,6 +41,11 @@ class _AnimatedTitleWidgetState extends State<AnimatedTitleWidget>
 
   @override
   Widget build(BuildContext context) {
+    // Get theme colors from the current theme
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Color textColor = colorScheme.onPrimary;
+    final Color glowColor = colorScheme.secondary;
+
     return AnimatedBuilder(
       animation: _glowAnimation,
       builder: (context, child) {
@@ -56,7 +61,7 @@ class _AnimatedTitleWidgetState extends State<AnimatedTitleWidget>
                 letterSpacing: 5,
                 shadows: [
                   Shadow(
-                    color: Colors.white.withAlpha(50),
+                    color: glowColor.withValues(alpha: 0.7),
                     blurRadius: _glowAnimation.value,
                     offset: const Offset(0, 0),
                   ),
@@ -69,7 +74,7 @@ class _AnimatedTitleWidgetState extends State<AnimatedTitleWidget>
               style: GoogleFonts.orbitron(
                 fontSize: widget.fontSize,
                 fontWeight: FontWeight.w700,
-                color: Colors.white,
+                color: textColor,
                 letterSpacing: 5,
               ),
             ),
