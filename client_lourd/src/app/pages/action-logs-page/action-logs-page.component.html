@@ -5,16 +5,34 @@
             <tr>
                 <th>Horodatage</th>
                 <th>Action</th>
-                <th>Détails</th>
-                <th>Utilisateur</th>
             </tr>
         </thead>
         <tbody>
             <tr *ngFor="let log of logs">
                 <td>{{ log.timestamp | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
                 <td>{{ log.action }}</td>
-                <td>{{ log.details }}</td>
-                <td>{{ log.user }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Historique des parties</h2>
+    <table class="logs-table">
+        <thead>
+            <tr>
+                <th>Début</th>
+                <th>Fin</th>
+                <th>Joueur</th>
+                <th>Statut</th>
+                <th>Résultat</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let game of gameLogs">
+                <td>{{ game.startTime | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+                <td>{{ game.endTime | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+                <td>{{ game.player }}</td>
+                <td>{{ game.status }}</td>
+                <td>{{ game.won ? 'Victoire' : 'Défaite' }}</td>
             </tr>
         </tbody>
     </table>
