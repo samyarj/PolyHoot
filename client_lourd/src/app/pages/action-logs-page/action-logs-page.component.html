@@ -1,0 +1,21 @@
+<div class="logs-container">
+    <h2>Logs d'activité</h2>
+    <table class="logs-table">
+        <thead>
+            <tr>
+                <th>Horodatage</th>
+                <th>Action</th>
+                <th>Détails</th>
+                <th>Utilisateur</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let log of logs">
+                <td>{{ log.timestamp | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+                <td>{{ log.action }}</td>
+                <td>{{ log.details }}</td>
+                <td>{{ log.user }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { authGuard } from '@app/guards/auth.guard';
+import { ActionLogsPageComponent } from '@app/pages/action-logs-page/action-logs-page.component';
 import { ForgotPasswordComponent } from '@app/pages/auth/forgot-password/forgot-password.component';
 import { LoginPageComponent } from '@app/pages/auth/login-page/login-page.component';
 import { SignUpComponent } from '@app/pages/auth/sign-up/sign-up.component';
@@ -93,6 +94,7 @@ const routes: Routes = [
 
     { path: 'global-chat', component: GlobalChatComponent, canActivate: [authGuard] },
     { path: 'profile', component: ProfilePageComponent, canActivate: [authGuard] },
+    { path: 'profile/logs', component: ActionLogsPageComponent, canActivate: [authGuard] },
     { path: '**', redirectTo: '/home' },
 ];
 

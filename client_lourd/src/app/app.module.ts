@@ -77,6 +77,7 @@ import { InventoryService } from './services/general-services/inventory.service'
 import { GlobalErrorHandlerService } from './services/global-error-handler.service';
 import { ThemeService } from './services/ui-services/theme/theme.service';
 import { SocketClientService } from './services/websocket-services/general/socket-client-manager.service';
+import { ActionLogsPageComponent } from './pages/action-logs-page/action-logs-page.component';
 
 /**
  * Main module that is used in main.ts.
@@ -135,6 +136,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         LootBoxComponent,
         ProfilePageComponent,
         AvatarBannerComponent,
+        ActionLogsPageComponent,
     ],
     providers: [
         AuthService,
