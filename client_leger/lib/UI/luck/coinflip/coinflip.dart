@@ -17,9 +17,16 @@ class _CoinFlipPageState extends ConsumerState<CoinFlipPage> {
   int previousBetAmount = 0;
 
   @override
+  void dispose() {
+    _betAmountController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final coinflipState = ref.watch(coinflipProvider);
     final coinflipNotifier = ref.read(coinflipProvider.notifier);
+    final colorScheme = Theme.of(context).colorScheme;
 
     ref.listen(coinflipProvider, (previous, next) {
       if (next.betAmount != previousBetAmount) {
@@ -28,31 +35,79 @@ class _CoinFlipPageState extends ConsumerState<CoinFlipPage> {
       }
     });
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 0),
+      margin: const EdgeInsets.all(32.0),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            colorScheme.primary,
+            colorScheme.primary,
+            colorScheme.secondary,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(
+          color: colorScheme.tertiary.withValues(alpha: 0.3), // Border color
+          width: 2, // Border width
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.tertiary.withValues(alpha: 0.3),
+            spreadRadius: 2,
+            blurRadius: 10,
+          ),
+        ],
+      ),
       child: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             //coin history
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: coinflipState.history.reversed.map((flip) {
-                return Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: flip == 'heads' ? Colors.yellow : Colors.grey,
-                      ),
-                    ),
+            Container(
+              decoration: BoxDecoration(
+                color: colorScheme.primary,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(
+                  color: colorScheme.tertiary
+                      .withValues(alpha: 0.3), // Border color
+                  width: 2, // Border width
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: colorScheme.tertiary.withValues(alpha: 0.3),
+                    spreadRadius: 0,
+                    blurRadius: 10,
                   ),
-                );
-              }).toList(),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: coinflipState.history.reversed.map((flip) {
+                    return Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color:
+                                flip == 'heads' ? Colors.yellow : Colors.grey,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
             ),
             SizedBox(height: 8),
             // coin animation area
@@ -78,10 +133,16 @@ class _CoinFlipPageState extends ConsumerState<CoinFlipPage> {
             SizedBox(height: 8),
             //leader board area
             Container(
-              padding: EdgeInsets.all(10),
+              padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.white),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .tertiary
+                      .withValues(alpha: 0.3), // Border color
+                  width: 2, // Border width
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,

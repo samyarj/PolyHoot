@@ -18,27 +18,58 @@ class LeaderboardSideArea extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 200,
-      width: 400,
+      width: 350,
       padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.white),
-        borderRadius: BorderRadius.circular(10),
-        color:
-            winningSide == sideId && gameState == CoinFlipGameState.ResultsPhase
-                ? Colors.green.withOpacity(0.2) // Winner styling
-                : winningSide != sideId &&
-                        gameState == CoinFlipGameState.ResultsPhase
-                    ? Colors.red.withOpacity(0.2) // Loser styling
-                    : Colors.transparent,
+        color: Theme.of(context).colorScheme.primary,
+        gradient: gameState == CoinFlipGameState.ResultsPhase
+            ? winningSide == sideId
+                ? RadialGradient(
+                    colors: [
+                      Theme.of(context).colorScheme.primary,
+                      Theme.of(context).colorScheme.primary, // Transparent edge
+                      Theme.of(context).colorScheme.primary, // Transparent edge
+                      Color.fromRGBO(0, 255, 0, 0.82), // Winner gradient start
+                    ],
+                    center: Alignment.center, // Center of the gradient
+                    radius: 1.1, // Radius of the gradient
+                  )
+                : RadialGradient(
+                    colors: [
+                      Theme.of(context).colorScheme.primary,
+                      Theme.of(context).colorScheme.primary,
+                      Theme.of(context).colorScheme.primary,
+                      Color.fromRGBO(255, 0, 0, 0.82),
+                    ],
+                    center: Alignment.center, // Center of the gradient
+                    radius: 1.1, // Radius of the gradient
+                  )
+            : null,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(
+          color: Theme.of(context)
+              .colorScheme
+              .tertiary
+              .withValues(alpha: 0.3), // Border color
+          width: 2, // Border width
+        ),
+        boxShadow: [
+          BoxShadow(
+            color:
+                Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.3),
+            spreadRadius: 0,
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: Column(
         children: [
           Text(
             sideId == 'heads' ? "Face" : "Pile",
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onPrimary,
             ),
           ),
           const SizedBox(height: 10),
@@ -52,7 +83,6 @@ class LeaderboardSideArea extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: Colors.white.withOpacity(0.1),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -66,18 +96,18 @@ class LeaderboardSideArea extends StatelessWidget {
                           const SizedBox(width: 8),
                           Text(
                             player['name'],
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.onPrimary,
                             ),
                           ),
                         ],
                       ),
                       Text(
                         player['bet'].toString(),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                         ),
                       ),
                     ],

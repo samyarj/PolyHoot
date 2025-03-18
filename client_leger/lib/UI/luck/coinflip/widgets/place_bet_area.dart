@@ -49,8 +49,23 @@ class PlaceBetArea extends StatelessWidget {
       width: 300,
       padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.white),
-        borderRadius: BorderRadius.circular(10),
+        color: Theme.of(context).colorScheme.primary,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(
+          color: Theme.of(context)
+              .colorScheme
+              .tertiary
+              .withValues(alpha: 0.3), // Border color
+          width: 2, // Border width
+        ),
+        boxShadow: [
+          BoxShadow(
+            color:
+                Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.3),
+            spreadRadius: 0,
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: gameState == CoinFlipGameState.BettingPhase &&
               selectedSide.isNotEmpty &&

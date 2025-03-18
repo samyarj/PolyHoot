@@ -10,34 +10,54 @@ class LuckPage extends StatelessWidget {
       length: 3,
       child: Column(
         children: [
-          TabBar(
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white,
-            labelStyle: TextStyle(fontSize: 18),
-            indicator: BoxDecoration(
-              color: const Color.fromARGB(
-                  164, 68, 137, 255), // Highlight color for the selected tab
+          Container(
+            color: Theme.of(context)
+                .colorScheme
+                .primary, // Transparent background for the TabBar
+            child: TabBar(
+              dividerColor: Colors.transparent,
+              labelColor: Theme.of(context).colorScheme.onPrimary,
+              unselectedLabelColor: Theme.of(context).colorScheme.onPrimary,
+              indicatorColor: Theme.of(context).colorScheme.onPrimary,
+              labelStyle: TextStyle(fontSize: 18),
+              indicatorSize: TabBarIndicatorSize.label,
+              tabs: [
+                Tab(
+                  text: 'LootBox',
+                ),
+                Tab(text: 'CoinFlip'),
+                Tab(text: 'Prix Quotidien'),
+              ],
             ),
-            indicatorSize: TabBarIndicatorSize.tab, // Make the indicator cove
-            tabs: [
-              Tab(
-                text: 'LootBox',
-              ),
-              Tab(text: 'CoinFlip'),
-              Tab(text: 'Prix Quotidien'),
-            ],
           ),
           Expanded(
             child: TabBarView(
               children: [
-                Text("LootBox"),
-                CoinFlipPage(),
-                Text("Prix Quotidien"),
+                getBackroundContainer(Text("LootBox"), context),
+                getBackroundContainer(CoinFlipPage(), context),
+                getBackroundContainer(Text("Prix Quotidien"), context),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget getBackroundContainer(Widget child, BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.secondary,
+          ],
+        ),
+      ),
+      child: child,
     );
   }
 }
