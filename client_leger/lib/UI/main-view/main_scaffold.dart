@@ -148,10 +148,10 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                           onPressed: () => {},
                         ),
                         IconButton(
-                          icon: Icon(Icons.build),
+                          icon: Icon(FontAwesomeIcons.clover),
                           iconSize: 28,
                           color: colorScheme.tertiary,
-                          onPressed: () => context.go(Paths.quiz),
+                          onPressed: () => context.go(Paths.luck),
                         ),
                         IconButton(
                           icon: Icon(Icons.backpack),

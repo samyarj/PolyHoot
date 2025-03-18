@@ -1,3 +1,4 @@
+import 'package:client_leger/UI/luck/coinflip/coinflip.dart';
 import 'package:flutter/material.dart';
 
 class LuckPage extends StatelessWidget {
@@ -30,7 +31,7 @@ class LuckPage extends StatelessWidget {
             child: TabBarView(
               children: [
                 Text("LootBox"),
-                Text("CoinFlip"),
+                CoinFlipPage(),
                 Text("Prix Quotidien"),
               ],
             ),
