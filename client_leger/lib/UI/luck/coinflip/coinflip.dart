@@ -117,6 +117,7 @@ class _CoinFlipPageState extends ConsumerState<CoinFlipPage> {
               selectedSide: coinflipState.selectedSide,
               onSelectSide: (side) => coinflipNotifier.selectSide(side),
               time: coinflipState.time,
+              winningSide: coinflipState.winningSide,
             ),
             SizedBox(height: 8),
             // current text or place bet area

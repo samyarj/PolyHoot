@@ -3,19 +3,23 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 
 class CoinAnimationArea extends StatefulWidget {
-  const CoinAnimationArea(
-      {super.key,
-      required this.gameState,
-      required this.submitted,
-      required this.selectedSide,
-      required this.onSelectSide,
-      required this.time});
+  const CoinAnimationArea({
+    super.key,
+    required this.gameState,
+    required this.submitted,
+    required this.selectedSide,
+    required this.onSelectSide,
+    required this.time,
+    required this.winningSide,
+  });
 
   final CoinFlipGameState gameState;
   final bool submitted;
   final String selectedSide;
   final void Function(String side) onSelectSide;
   final double time;
+  final String winningSide;
+
   @override
   State<CoinAnimationArea> createState() => _CoinAnimationAreaState();
 }
@@ -159,16 +163,38 @@ class _CoinAnimationAreaState extends State<CoinAnimationArea>
                       ),
                     ],
                   )
-                : Center(
-                    child: Text(
-                      widget.time.toStringAsFixed(1),
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onPrimary,
+                : widget.gameState == CoinFlipGameState.ResultsPhase
+                    ? Center(
+                        child: Container(
+                          height: 50,
+                          width: 50,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: widget.winningSide == 'heads'
+                                ? Colors.yellow
+                                : Colors.grey,
+                          ),
+                          child: Text(
+                            widget.time.toStringAsFixed(1),
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      )
+                    : Center(
+                        child: Text(
+                          widget.time.toStringAsFixed(1),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
           ),
           if (widget.gameState == CoinFlipGameState.BettingPhase &&
               widget.submitted == false)
