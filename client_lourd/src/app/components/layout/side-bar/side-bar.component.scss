@@ -48,6 +48,7 @@
 
 /* User Menu */
 .user-menu {
+    background: linear-gradient(to bottom, var(--nav-bg) 30%, color-mix(in srgb, var(--nav-bg), transparent 90%) 100%);
     position: relative;
     display: flex;
     align-items: center;
