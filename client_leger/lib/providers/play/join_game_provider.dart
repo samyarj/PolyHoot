@@ -192,17 +192,17 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
   void dispose() {
     if (!mounted) return;
     AppLogger.i("Disposing JoinGameService");
-    _socketManager.socket.off(JoinEvents.LobbyCreated.value);
-    _socketManager.socket.off(GameEvents.End.value);
-    _socketManager.socket.off(GameEvents.GetCurrentGames.value);
-    _socketManager.socket.off(GameEvents.AlertLockToggled.value);
-    _socketManager.socket.off(JoinEvents.JoinSuccess.value);
-    _socketManager.socket.off(GameEvents.PlayerLeft.value);
-    _socketManager.socket.off(JoinErrors.InvalidId.value);
-    _socketManager.socket.off(JoinErrors.RoomLocked.value);
-    _socketManager.socket.off(JoinErrors.BannedName.value);
-    _socketManager.socket.off(JoinEvents.ValidId.value);
-    _socketManager.socket.off(JoinEvents.CanJoin.value);
+    _socketManager.socket?.off(JoinEvents.LobbyCreated.value);
+    _socketManager.socket?.off(GameEvents.End.value);
+    _socketManager.socket?.off(GameEvents.GetCurrentGames.value);
+    _socketManager.socket?.off(GameEvents.AlertLockToggled.value);
+    _socketManager.socket?.off(JoinEvents.JoinSuccess.value);
+    _socketManager.socket?.off(GameEvents.PlayerLeft.value);
+    _socketManager.socket?.off(JoinErrors.InvalidId.value);
+    _socketManager.socket?.off(JoinErrors.RoomLocked.value);
+    _socketManager.socket?.off(JoinErrors.BannedName.value);
+    _socketManager.socket?.off(JoinEvents.ValidId.value);
+    _socketManager.socket?.off(JoinEvents.CanJoin.value);
 
     resetAttributes();
     super.dispose();

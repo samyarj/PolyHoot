@@ -22,12 +22,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
   bool _isLoggingOut = false;
   final double sidebarWidth = 400;
 
-  @override
-  void initState() {
-    WebSocketManager.instance.initializeSocketConnection();
-    super.initState();
-  }
-
   _logout() async {
     if (_isLoggingOut) return;
 
@@ -63,9 +57,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     final userState = ref.watch(userProvider);
     final colorScheme = Theme.of(context).colorScheme;
     return userState.when(data: (user) {
-      WebSocketManager.instance
-          .webSocketSender("identifyMobileClient", user?.uid);
-
       return Scaffold(
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(kToolbarHeight),

@@ -107,7 +107,7 @@ class CoinflipNotifier extends StateNotifier<CoinflipState> {
           },
           history: List<String>.from(answer['history']),
           gameState: CoinFlipGameState.values.firstWhere(
-            (e) => e.toString() == 'CoinFlipGameState.${answer['state']}',
+            (e) => e.value == answer['state'],
           ),
         ),
       },
@@ -166,7 +166,7 @@ class CoinflipNotifier extends StateNotifier<CoinflipState> {
     _socketManager.webSocketReceiver(
         CoinFlipEvents.BetTimeCountdown.value,
         (newTime) =>
-            {state = state.copyWith(time: (newTime as num).toDouble()/10)});
+            {state = state.copyWith(time: (newTime as num).toDouble() / 10)});
   }
 
   submitBet(BuildContext context) {
@@ -233,12 +233,12 @@ class CoinflipNotifier extends StateNotifier<CoinflipState> {
   @override
   void dispose() {
     AppLogger.i("RemoveListeners");
-    _socketManager.socket.off(CoinFlipEvents.StartGame.value);
-    _socketManager.socket.off(CoinFlipEvents.PreFlippingPhase.value);
-    _socketManager.socket.off(CoinFlipEvents.FlippingPhase.value);
-    _socketManager.socket.off(CoinFlipEvents.Results.value);
-    _socketManager.socket.off(CoinFlipEvents.SendPlayerList.value);
-    _socketManager.socket.off(CoinFlipEvents.BetTimeCountdown.value);
+    _socketManager.socket?.off(CoinFlipEvents.StartGame.value);
+    _socketManager.socket?.off(CoinFlipEvents.PreFlippingPhase.value);
+    _socketManager.socket?.off(CoinFlipEvents.FlippingPhase.value);
+    _socketManager.socket?.off(CoinFlipEvents.Results.value);
+    _socketManager.socket?.off(CoinFlipEvents.SendPlayerList.value);
+    _socketManager.socket?.off(CoinFlipEvents.BetTimeCountdown.value);
     super.dispose();
   }
 }

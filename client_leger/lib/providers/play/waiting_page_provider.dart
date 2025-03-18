@@ -185,14 +185,14 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
   void dispose() {
     if (!mounted) return;
     AppLogger.i("Disposing WaitingPageNotifier");
-    _socketManager.socket.off(GameEvents.PlayerLeft.value);
-    _socketManager.socket.off(JoinEvents.JoinSuccess.value);
-    _socketManager.socket.off(GameEvents.PlayerBanned.value);
-    _socketManager.socket.off(DisconnectEvents.OrganizerHasLeft.value);
-    _socketManager.socket.off(GameEvents.AlertLockToggled.value);
-    _socketManager.socket.off(TimerEvents.GameCountdownValue.value);
-    _socketManager.socket.off(TimerEvents.GameCountdownEnd.value);
-    _socketManager.socket.off(GameEvents.Title.value);
+    _socketManager.socket?.off(GameEvents.PlayerLeft.value);
+    _socketManager.socket?.off(JoinEvents.JoinSuccess.value);
+    _socketManager.socket?.off(GameEvents.PlayerBanned.value);
+    _socketManager.socket?.off(DisconnectEvents.OrganizerHasLeft.value);
+    _socketManager.socket?.off(GameEvents.AlertLockToggled.value);
+    _socketManager.socket?.off(TimerEvents.GameCountdownValue.value);
+    _socketManager.socket?.off(TimerEvents.GameCountdownEnd.value);
+    _socketManager.socket?.off(GameEvents.Title.value);
     _resetAttributes();
     super.dispose();
   }

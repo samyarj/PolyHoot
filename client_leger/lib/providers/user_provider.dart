@@ -50,6 +50,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       final idToken = await firebaseUser.getIdToken();
       final headers = {'Authorization': 'Bearer $idToken'};
 
+      WebSocketManager.instance.initializeSocketConnection(idToken);
+
       WebSocketManager.instance
           .webSocketSender("identifyMobileClient", firebaseUser.uid);
 
@@ -113,6 +115,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
         isLoggedIn.value = true;
         WebSocketManager.instance.playerName = user.username;
         if (userCredential.user != null) {
+          WebSocketManager.instance.initializeSocketConnection(idToken);
+
           WebSocketManager.instance.webSocketSender(
               "identifyMobileClient", userCredential.user!.uid);
 
