@@ -1,6 +1,6 @@
 <!-- User Menu -->
 <aside class="main-aside">
-    <div class="user-menu dropdown" *ngIf="user$ | async as user">
+    <div class="user-menu dropdown" [ngClass]="{ game: isOnGamePage }" *ngIf="user$ | async as user">
         <!-- User Avatar (Trigger) -->
         <div class="avatar-container dropdown">
             <!-- <img [src]="user.avatarEquipped" alt="User Avatar" class="avatar dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" /> -->
@@ -66,7 +66,7 @@
     </div>
 
     <!-- chat menu -->
-    <div class="chat-menu">
+    <!-- <div class="chat-menu">
         <span class="chat-menu-title">CLAVARDAGE</span>
         <ul class="nav nav-tabs">
             <li class="nav-item">
@@ -188,5 +188,5 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 </aside>

@@ -4,7 +4,11 @@ import { Timer } from '@app/classes/game-timer/game-timer';
 import { Player } from '@app/classes/player/player';
 import { TIME_FOR_QRL } from '@app/constants';
 import { GameEvents, GameState, QuestionType, TimerEvents } from '@app/constants/enum-classes';
+import { BANNER_WINNER_CARTOON_VICE, BANNER_WINNER_STROKE, BANNER_WINNER_VICE } from '@app/constants/inventory.constants';
+import { Reward, RewardRarity, RewardType } from '@app/interface/lootbox-related';
+import { User } from '@app/interface/user';
 import { Quiz } from '@app/model/schema/quiz/quiz';
+import { UserService } from '@app/services/auth/user.service';
 import { PartialPlayer, PlayerResult } from '@common/partial-player';
 import { Injectable } from '@nestjs/common';
 import { ConnectedSocket } from '@nestjs/websockets';
@@ -27,8 +31,14 @@ export class Game {
     private lastFinalizeCall: number | null;
     private lastFinalizePlayer: Player;
 
-    constructor(roomId: string, quiz: Quiz, @ConnectedSocket() client: Socket) {
-        this.initializeGame(roomId, quiz, client);
+    constructor(
+        roomId: string,
+        quiz: Quiz,
+        @ConnectedSocket() client: Socket,
+        organizer: User,
+        private userService: UserService,
+    ) {
+        this.initializeGame(roomId, quiz, client, organizer);
     }
 
     addPlayer(player: Player, @ConnectedSocket() client: Socket) {
@@ -85,7 +95,8 @@ export class Game {
         const typeOfQuestion: string = this.quiz.questions[this.currentQuestionIndex].type;
         if (
             (typeOfQuestion === QuestionType.QCM && this.timer.timerValue > ALERT_MODE_TIME_LIMITS.QCM) ||
-            (typeOfQuestion === QuestionType.QRL && this.timer.timerValue > ALERT_MODE_TIME_LIMITS.QRL)
+            (typeOfQuestion === QuestionType.QRL && this.timer.timerValue > ALERT_MODE_TIME_LIMITS.QRL) ||
+            (typeOfQuestion === QuestionType.QRE && this.timer.timerValue > ALERT_MODE_TIME_LIMITS.QRE)
         )
             this.timer.startAlertMode();
     }
@@ -109,18 +120,109 @@ export class Game {
         }
     }
 
-    getResults() {
+    async getResults(): Promise<PlayerResult[]> {
         if (this.currentQuestionIndex + 1 >= this.quiz.questions.length) {
-            const playerList: PlayerResult[] = [];
-            this.players.forEach((player: Player) => {
-                playerList.push({ name: player.name, points: player.points, isInGame: player.isInGame, noBonusesObtained: player.noBonusesObtained });
-            });
-            this.playersRemoved.forEach((player: Player) => {
-                player.isInGame = false;
-                playerList.push({ name: player.name, points: player.points, isInGame: player.isInGame, noBonusesObtained: player.noBonusesObtained });
-            });
-            const resultsData = playerList;
+            const basicReward: Reward = this.getReward(false);
+            const winningReward: Reward = this.getReward(true);
+            const highestPoints = Math.max(...this.players.map((player) => player.points), 0);
+
+            const sortPlayers = (a: Player, b: Player) => {
+                if (b.points !== a.points) {
+                    return b.points - a.points; // Higher points first
+                }
+                return a.name.localeCompare(b.name); // Alphabetical order if points are the same
+            };
+
+            // Sort active players
+            const sortedPlayers = await Promise.all(
+                [...this.players].sort(sortPlayers).map(async (player) => {
+                    const reward = player.points === highestPoints ? winningReward : basicReward;
+                    const updatedReward = await this.rewardPlayer(player, reward); // Call reward function before returning
+                    return {
+                        name: player.name,
+                        points: player.points,
+                        isInGame: player.isInGame,
+                        equippedAvatar: player.equippedAvatar,
+                        equippedBanner: player.equippedBorder,
+                        noBonusesObtained: player.noBonusesObtained,
+                        reward: updatedReward,
+                    };
+                }),
+            );
+
+            // Sort players who abandoned
+            const sortedRemovedPlayers = [...this.playersRemoved].sort(sortPlayers).map((player) => ({
+                name: player.name,
+                points: player.points,
+                isInGame: false,
+                equippedAvatar: player.equippedAvatar,
+                equippedBanner: player.equippedBorder,
+                noBonusesObtained: player.noBonusesObtained,
+                reward: null,
+            }));
+
+            const resultsData = [...sortedPlayers, ...sortedRemovedPlayers];
+
             return resultsData;
+        }
+    }
+    async rewardPlayer(player: Player, reward: Reward) {
+        if (reward.type === RewardType.Coins) {
+            await this.userService.updateUserCoins(player.uid, reward.value as number);
+        } else if (reward.type === RewardType.Border) {
+            const addedToInventory: boolean = await this.userService.addToInventory(player.uid, 'banner', reward.value);
+            if (!addedToInventory) {
+                await this.userService.updateUserCoins(player.uid, 50);
+                return {
+                    type: RewardType.Coins,
+                    rarity: RewardRarity.Rare,
+                    odds: 50,
+                    value: 50,
+                };
+            }
+        }
+        return reward;
+    }
+    getReward(isWinner: boolean): Reward {
+        if (isWinner) {
+            const result = Math.random(); // 50% chance to get coins, 50% to get border
+            console.log(result);
+            if (result < 0.15) {
+                return {
+                    type: RewardType.Border,
+                    rarity: RewardRarity.VeryRare,
+                    odds: 15,
+                    value: BANNER_WINNER_CARTOON_VICE,
+                };
+            } else if (result < 0.3) {
+                return {
+                    type: RewardType.Border,
+                    rarity: RewardRarity.VeryRare,
+                    odds: 15,
+                    value: BANNER_WINNER_VICE,
+                };
+            } else if (result < 0.5) {
+                return {
+                    type: RewardType.Border,
+                    rarity: RewardRarity.Rare,
+                    odds: 20,
+                    value: BANNER_WINNER_STROKE,
+                };
+            } else {
+                return {
+                    type: RewardType.Coins,
+                    rarity: RewardRarity.Rare,
+                    odds: 50,
+                    value: 50,
+                };
+            }
+        } else {
+            return {
+                type: RewardType.Coins,
+                rarity: RewardRarity.Common,
+                odds: 100, // it has maximum odds, but this doesnt count essentially
+                value: 10,
+            };
         }
     }
 
@@ -213,6 +315,8 @@ export class Game {
                 points: player.points,
                 isInGame: player.isInGame,
                 submitted: player.submitted,
+                equippedAvatar: player.equippedAvatar,
+                equippedBanner: player.equippedBorder,
             });
         });
         this.organizer.socket.emit(GameEvents.SendPlayerList, players);
@@ -220,9 +324,9 @@ export class Game {
 
     // Jusqu'à 5 paramètres sont permis d'après les chargés de lab
     // eslint-disable-next-line max-params
-    private initializeGame(roomId: string, quiz: Quiz, @ConnectedSocket() client: Socket) {
+    private initializeGame(roomId: string, quiz: Quiz, @ConnectedSocket() client: Socket, organizer: User) {
         this.players = [];
-        this.organizer = new Player('Organisateur', true, client);
+        this.organizer = new Player('Organisateur', true, client, organizer);
         this.playersRemoved = [];
         this.bannedNames = [];
         this.quiz = quiz;

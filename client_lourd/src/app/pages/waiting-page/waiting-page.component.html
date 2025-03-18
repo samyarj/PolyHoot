@@ -1,63 +1,50 @@
 <div class="page-wrapper" *ngIf="!time; else gameCountDown">
-    <app-header-game *ngIf="isOrganizer" [onLogoClick]="abandonAsOrganizer.bind(this)" [title]="'Vue d\'attente'"></app-header-game>
-    <app-header-game *ngIf="!isOrganizer" [title]="'Vue d\'attente'"></app-header-game>
-    <div id="header-separator"></div>
     <div class="main-wrapper">
         <div class="body-section">
-            <img class="background-img" src="assets/pictures/waiting-page/background/background.gif" />
-            <img class="background-img far" src="assets/pictures/waiting-page/background/far-clouds.png" />
-            <img class="background-img mid" src="assets/pictures/waiting-page/background/mid-clouds.png" />
-            <img class="background-img" src="assets/pictures/waiting-page/background/close-clouds.png" />
             <div *ngIf="isOrganizer" class="room-board-container">
-                <img class="room-board" src="assets/pictures/waiting-page/background/wooden-board.png" />
                 <p>{{ roomId }}</p>
             </div>
-            <img *ngIf="players.length >= 1" [@moveUp] [@moveDown] class="hibou" src="assets/pictures/waiting-page/owls/hibou-1.png" />
-            <img *ngIf="players.length >= 2" [@moveUp] [@moveDown] class="hibou" src="assets/pictures/waiting-page/owls/hibou-2.png" />
-            <img *ngIf="players.length >= 3" [@moveUp] [@moveDown] class="hibou" src="assets/pictures/waiting-page/owls/hibou-3.png" />
-            <img *ngIf="players.length >= 4" [@moveUp] [@moveDown] class="hibou" src="assets/pictures/waiting-page/owls/hibou-4.png" />
-            <img *ngIf="players.length >= 5" [@moveUp] [@moveDown] class="hibou" src="assets/pictures/waiting-page/owls/hibou-5.png" />
-            <img *ngIf="players.length >= 6" [@moveUp] [@moveDown] class="hibou" src="assets/pictures/waiting-page/owls/hibou-6.png" />
-            <img *ngIf="players.length >= 7" [@moveUp] [@moveDown] class="hibou" src="assets/pictures/waiting-page/owls/hibou-7.png" />
-            <img *ngIf="players.length >= 8" [@moveUp] [@moveDown] class="hibou" src="assets/pictures/waiting-page/owls/hibou-8.png" />
-            <img class="background-img" src="assets/pictures/waiting-page/background/grass bed.png" />
             <div [ngClass]="{ 'game-view': !isOrganizer }" class="players-section">
-                <div><p>Joueurs</p></div>
-                <p *ngIf="players.length === 0 && isOrganizer">Invitez vos amis à rejoindre la partie !</p>
-                <ul class="players-list">
+                <div class="content-title">Joueurs</div>
+                <div class="players-list">
+                    <p *ngIf="isPlayersListEmpty && players.length === 0 && isOrganizer">Invitez vos amis à rejoindre la partie !</p>
                     <li
                         class="player-container"
-                        *ngFor="let player of players.reverse()"
+                        *ngFor="let player of players; trackBy: trackByPlayer"
                         [@popIn]
                         [@popOut]
-                        [ngStyle]="{
-                            background:
-                                player === name
-                                    ? 'linear-gradient(to right, rgba(97, 249, 132, 0.87), rgba(97, 249, 132, 0.5), rgba(97, 249, 132, 0.87))'
-                                    : 'linear-gradient(to right, rgba(167, 232, 255, 0.87), rgba(167, 232, 255, 0.5), rgba(167, 232, 255, 0.87))'
+                        (@popOut.done)="onPopOutDone()"
+                        [ngClass]="{
+                            me: player.name === name,
+                            them: player.name !== name
                         }"
                     >
-                        {{ player }}
-                        <button
-                            *ngIf="isOrganizer && player !== 'Organisateur'"
-                            (click)="banPlayer(player)"
-                            class="btn btn-danger btn-sm"
-                        >
+                        <div class="user-info">
+                            <app-avatar-banner [avatarUrl]="player.avatar" [bannerUrl]="player.banner" class="avatar"></app-avatar-banner>
+                        </div>
+                        <ng-container *ngIf="isOrganizer && player.name !== 'Organisateur'">
+                            <div class="player-name">{{ player.name }}</div>
+                        </ng-container>
+
+                        <ng-container *ngIf="!(isOrganizer && player.name !== 'Organisateur')">
+                            <div class="player-name">{{ player.name }}</div>
+                        </ng-container>
+
+                        <button *ngIf="isOrganizer && player.name !== 'Organisateur'" (click)="banPlayer(player.name)" class="custom-button">
                             Exclure
                         </button>
                     </li>
-                </ul>
+                </div>
             </div>
             <div class="intro-section">
                 <div class="lock-section">
-                    <i class="fa-solid" [ngClass]="{ 'fa-lock': gameLocked, 'fa-unlock': !gameLocked }"></i>
                     <button
                         *ngIf="isOrganizer"
                         (click)="toggleGameLock()"
-                        class="btn btn-dark lock-btn"
+                        class="custom-button-medium"
                         title="Aucun joueur ne peut rejoindre la partie si elle est verrouillée"
                     >
-                        {{ gameLocked ? 'Déverrouiller' : 'Verrouiller' }}
+                        <i class="fa-solid" [ngClass]="{ 'fa-lock': gameLocked, 'fa-unlock': !gameLocked }"></i>
                     </button>
                 </div>
                 <p *ngIf="isOrganizer">
@@ -69,36 +56,28 @@
                             : 'Il faut verrouiller la partie pour commencer!'
                     }}
                 </p>
-                <p *ngIf="!isOrganizer">Veuillez attendre que l'organisateur démarre la partie.</p>
+                <p *ngIf="!isOrganizer && !gameLocked">Veuillez attendre que l'organisateur démarre la partie.</p>
                 <p *ngIf="!isOrganizer && gameLocked">L'organisateur est prêt à démarrer la partie!</p>
                 <button
                     *ngIf="isOrganizer"
                     [disabled]="players.length === 0 || !gameLocked"
                     (click)="startGame()"
-                    class="btn btn-primary start-game-btn"
+                    class="custom-button-big"
+                    [ngClass]="{ 'custom-button-big-disabled': players.length === 0 || !gameLocked }"
                 >
                     Commencer la partie
                 </button>
             </div>
-            <button *ngIf="!isOrganizer" (click)="leaveWaitingPageAsPlayer()" class="btn btn-danger leave-btn">Quitter</button>
-            <button *ngIf="isOrganizer" (click)="abandonAsOrganizer()" class="btn btn-danger leave-btn">Quitter</button>
+            <button *ngIf="!isOrganizer" (click)="leaveWaitingPageAsPlayer()" class="custom-button-medium abd">Quitter</button>
+            <button *ngIf="isOrganizer" (click)="abandonAsOrganizer()" class="custom-button-medium abd">Quitter</button>
         </div>
-        <div id="chat-separator"></div>
-        <app-chat class="chat-section"></app-chat>
     </div>
 </div>
 <ng-template #gameCountDown>
-    <div class="page-wrapper-2">
-        <app-header-game *ngIf="isOrganizer" [onLogoClick]="abandonAsOrganizer" [title]="'Vue d\'attente'"></app-header-game>
-        <app-header-game *ngIf="!isOrganizer" [title]="'Vue d\'attente'"></app-header-game>
-        <div id="header-separator"></div>
+    <div class="animation-big-container">
         <div class="animation-container">
-            <img class="background-img-2 far" src="assets/pictures/waiting-page/background/background-2.png" />
-            <img class="background-img-2 far" src="assets/pictures/waiting-page/background/far-clouds.png" />
-            <img class="background-img-2 mid" src="assets/pictures/waiting-page/background/mid-clouds.png" />
-            <img class="background-img-2" src="assets/pictures/waiting-page/background/close-clouds.png" />
             <div class="info-content">
-                <h1>{{ gameTitle }}</h1>
+                <h1 class="content-title">{{ gameTitle }}</h1>
                 <h2>{{ time }}</h2>
             </div>
             <div [@moveUp] class="loading-owl">

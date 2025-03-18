@@ -1,5 +1,6 @@
 import { BONUS_MULTIPLIER } from '@app/constants';
 import { QuestionType } from '@app/constants/enum-classes';
+import { User } from '@app/interface/user';
 import { Question } from '@app/model/schema/question/question';
 import { Injectable } from '@nestjs/common';
 import { ConnectedSocket } from '@nestjs/websockets';
@@ -18,8 +19,11 @@ export class Player {
     currentChoices: boolean[];
     qreAnswer: number;
     exactAnswer: boolean;
+    uid: string;
+    equippedAvatar: string;
+    equippedBorder: string;
 
-    constructor(name: string, isOrganizer: boolean, @ConnectedSocket() client: Socket) {
+    constructor(name: string, isOrganizer: boolean, @ConnectedSocket() client: Socket, user: User) {
         this.name = name;
         this.isOrganizer = isOrganizer;
         this.isInGame = false;
@@ -29,6 +33,9 @@ export class Player {
         this.submitted = false;
         this.currentChoices = [false, false, false, false];
         this.qreAnswer = null;
+        this.uid = user.uid;
+        this.equippedAvatar = user.avatarEquipped;
+        this.equippedBorder = user.borderEquipped;
     }
 
     prepareForNextQuestion() {

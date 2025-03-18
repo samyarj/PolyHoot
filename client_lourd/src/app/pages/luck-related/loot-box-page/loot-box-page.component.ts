@@ -39,11 +39,13 @@ export class LootBoxPageComponent {
                 if (reward === null) {
                     this.matdialog.open(ErrorDialogComponent, {
                         width: '400px',
+                        panelClass: 'custom-container',
                         data: { message: "Vous n'avez pas assez d'argent pour vous procurer cette Loot Box.", reloadOnClose: false },
                     });
                 } else if (reward === false) {
                     this.matdialog.open(ErrorDialogComponent, {
                         width: '400px',
+                        panelClass: 'custom-container',
                         data: {
                             message: "Vous possèdez déjà l'item obtenu. Vous recevrez le prix de la lootBox en retour dans votre compte.",
                             reloadOnClose: false,

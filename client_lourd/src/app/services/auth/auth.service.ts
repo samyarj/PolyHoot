@@ -281,6 +281,7 @@ export class AuthService {
                             (docSnapshot) => {
                                 if (docSnapshot.exists()) {
                                     const userData = docSnapshot.data() as User;
+                                    console.log(userData);
                                     this.userBS.next(userData);
                                 } else {
                                     this.userBS.next(null);
