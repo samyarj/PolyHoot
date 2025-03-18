@@ -113,7 +113,6 @@ export class JoinGameService {
 
     private handleBannedName() {
         this.socketService.on(JoinErrors.BannedName, () => {
-            console.log('BannedName reçu du serveur');
             this.popUpMessage = 'Vous avez été banni de cette partie, vous ne pouvez pas la rejoindre.';
             this.showPopUp();
         });
@@ -166,7 +165,6 @@ export class JoinGameService {
     }
 
     private showPopUp() {
-        console.log('Dans popUp');
         this.wrongGameId = true;
         setTimeout(() => {
             this.wrongGameId = false;

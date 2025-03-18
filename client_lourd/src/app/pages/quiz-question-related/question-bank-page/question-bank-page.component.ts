@@ -30,6 +30,7 @@ export class QuestionBankPageComponent {
         next: (questions: Question[]) => {
             this.bankQuestions = this.sortingService.sortQuestionsByLastModified(questions);
             this.updateSelectedQuestions(this.selectedType, false);
+            console.log(this.selectedQuestions.filter((question) => question.type === 'QRL'));
         },
         error: (httpErrorResponse: HttpErrorResponse) => {
             this.messageHandler.popUpErrorDialog(httpErrorResponse.error.message);

@@ -8,5 +8,6 @@ export interface Question {
     points: number;
     choices?: QuestionChoice[];
     qreAttributes?: QreAttributes;
+    image?: string;
     lastModified?: string;
 }

@@ -46,7 +46,6 @@ export class GameClientService {
         private resultService: ResultsService,
         private messageHandlerService: MessageHandlerService,
     ) {
-        console.log(this.socketHandler.playerName);
         this.handleSockets();
         this.resetAttributes();
     }
@@ -84,7 +83,6 @@ export class GameClientService {
     }
     sendAnswerForCorrection(answer: string) {
         this.socketHandler.send(GameEvents.QRLAnswerSubmitted, answer);
-        console.log('Data envoyée au serveur ', answer);
     }
 
     resetAttributes() {
@@ -146,7 +144,6 @@ export class GameClientService {
     }
     private handleTimerValue() {
         this.socketHandler.on(TimerEvents.Paused, (pauseState: boolean) => {
-            console.log('1');
             this.gamePaused = pauseState;
         });
         this.socketHandler.on(TimerEvents.AlertModeStarted, () => {

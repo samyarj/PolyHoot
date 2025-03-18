@@ -150,7 +150,7 @@ export class ProfilePageComponent implements OnInit {
             return;
         }
 
-        this.uploadImgService.uploadImage(this.selectedFile).subscribe({
+        this.uploadImgService.uploadImage(this.selectedFile, 'avatar').subscribe({
             next: () => {
                 this.toastr.success('Image téléversée avec succès');
                 this.selectedFile = null;
