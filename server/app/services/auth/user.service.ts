@@ -97,7 +97,36 @@ export class UserService {
     }
 
     async logout(uid: string): Promise<void> {
-        await this.firestore.collection('users').doc(uid).update({ isOnline: false });
+        const userRef = this.firestore.collection('users').doc(uid);
+
+        // Create a log entry for the disconnect action
+        const logEntry = {
+            timestamp: this.formatTimestamp(new Date()),
+            action: 'disconnect',
+        };
+
+        // Use a transaction to ensure atomicity
+        await this.firestore.runTransaction(async (transaction) => {
+            const userDoc = await transaction.get(userRef);
+
+            if (!userDoc.exists) {
+                throw new Error("L'utilisateur n'existe pas.");
+            }
+
+            const updateData: any = {
+                isOnline: false,
+            };
+
+            // Check if cxnLogs exists, if not initialize it
+            if (!userDoc.data().cxnLogs) {
+                updateData.cxnLogs = [logEntry]; // Initialize cxnLogs with the new log entry
+            } else {
+                updateData.cxnLogs = admin.firestore.FieldValue.arrayUnion(logEntry); // Add the log entry to cxnLogs
+            }
+
+            // Update the user's online status and log the disconnect
+            transaction.update(userRef, updateData);
+        });
     }
 
     async getUserByUid(uid: string): Promise<User> {
@@ -436,5 +465,39 @@ export class UserService {
         updatedStats['rightAnswerPercentage'] = updatedStats.nQuestions > 0 ? (updatedStats.nGoodAnswers / updatedStats.nQuestions) * 100 : 0;
 
         await userRef.update({ stats: updatedStats });
+    }
+
+    async addConnectionLog(uid: string, logEntry: { timestamp: number; action: 'connect' | 'disconnect'; deviceInfo?: string; ipAddress?: string }) {
+        const userRef = await this.firestore.collection('users').doc(uid);
+        await userRef.update({
+            cxnLogs: admin.firestore.FieldValue.arrayUnion(logEntry),
+        });
+    }
+
+    async getConnectionLogs(uid: string): Promise<{ timestamp: string; action: 'connect' | 'disconnect' }[]> {
+        const userRef = this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+
+        const cxnLogs = userDoc.data().cxnLogs || [];
+        return cxnLogs.map((log) => ({
+            timestamp: log.timestamp, // Assuming timestamp is already formatted
+            action: log.action,
+        }));
+    }
+
+    private formatTimestamp(date: Date): string {
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        const day = pad(date.getDate());
+        const month = pad(date.getMonth() + 1); // Months are zero-based
+        const year = date.getFullYear();
+        const hours = pad(date.getHours());
+        const minutes = pad(date.getMinutes());
+        const seconds = pad(date.getSeconds());
+
+        return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
     }
 }

@@ -24,7 +24,10 @@ export interface User {
     };
     joinedChannels?: string[]; // IDs of channels the user has joined
     coins?: number; // User's coin balance
-    cxnLogs?: string[]; // Connection logs
+    cxnLogs?: {
+        timestamp: string;
+        action: 'connect' | 'disconnect';
+    }[];
     playedGameLogs?: string[]; // Logs of played games
     stats?: {
         nQuestions?: number; // Total number of questions answered

@@ -9,8 +9,8 @@
         </thead>
         <tbody>
             <tr *ngFor="let log of logs">
-                <td>{{ log.timestamp | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
-                <td>{{ log.action }}</td>
+                <td>{{ log.timestamp }}</td>
+                <td>{{ getActionDisplay(log.action) }}</td>
             </tr>
         </tbody>
     </table>
