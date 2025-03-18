@@ -19,7 +19,7 @@ enum AppTheme {
 class ThemeNotifier extends Notifier<ThemeData> {
   @override
   ThemeData build() {
-    return AppThemes.darkTheme; // Default theme
+    return AppThemes.sunsetTheme; // Default theme
   }
 
   void setTheme(AppTheme theme) {
