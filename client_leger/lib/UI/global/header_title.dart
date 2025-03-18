@@ -25,10 +25,10 @@ class _AnimatedTitleWidgetState extends State<AnimatedTitleWidget>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
 
-    _glowAnimation = Tween<double>(begin: 2.0, end: 20.0).animate(
+    _glowAnimation = Tween<double>(begin: 5.0, end: 30.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
   }
@@ -41,7 +41,6 @@ class _AnimatedTitleWidgetState extends State<AnimatedTitleWidget>
 
   @override
   Widget build(BuildContext context) {
-    // Get theme colors from the current theme
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Color textColor = colorScheme.onPrimary;
     final Color glowColor = colorScheme.secondary;
@@ -51,6 +50,7 @@ class _AnimatedTitleWidgetState extends State<AnimatedTitleWidget>
       builder: (context, child) {
         return Stack(
           children: [
+            // Glowing Shadow Effect
             Text(
               widget.title,
               textAlign: TextAlign.center,
@@ -61,13 +61,24 @@ class _AnimatedTitleWidgetState extends State<AnimatedTitleWidget>
                 letterSpacing: 5,
                 shadows: [
                   Shadow(
-                    color: glowColor.withValues(alpha: 0.7),
-                    blurRadius: _glowAnimation.value,
+                    color: glowColor.withValues(alpha: 0.9), // Stronger color
+                    blurRadius: _glowAnimation.value, // Dynamic glow
+                    offset: const Offset(0, 0),
+                  ),
+                  Shadow(
+                    color: glowColor.withValues(alpha: 0.6),
+                    blurRadius: _glowAnimation.value * 1.5, // Outer glow
+                    offset: const Offset(0, 0),
+                  ),
+                  Shadow(
+                    color: glowColor.withValues(alpha: 0.4),
+                    blurRadius: _glowAnimation.value * 2, // Faint distant glow
                     offset: const Offset(0, 0),
                   ),
                 ],
               ),
             ),
+            // Main Text
             Text(
               widget.title,
               textAlign: TextAlign.center,

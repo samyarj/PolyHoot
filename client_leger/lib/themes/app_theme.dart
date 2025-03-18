@@ -10,7 +10,7 @@ class AppThemes {
       surface: const Color(0xFF1E1E2E),
       onPrimary: Colors.white,
       onSecondary: Colors.white,
-      onSurface: const Color(0xFFF0F8FF), // aliceblue
+      onSurface: const Color(0xFFF0F8FF),
     ),
     useMaterial3: true,
   );
@@ -21,7 +21,7 @@ class AppThemes {
       primary: Colors.white,
       secondary: const Color(0xFF71CDFF),
       tertiary: const Color(0xFF000729),
-      surface: Colors.white,
+      surface: const Color(0xFFE5E5E5),
       onPrimary: const Color(0xFF101010),
       onSecondary: const Color(0xFF101010),
       onSurface: const Color(0xFF101010),
