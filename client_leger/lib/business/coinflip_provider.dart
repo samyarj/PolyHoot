@@ -175,6 +175,7 @@ class CoinflipNotifier extends StateNotifier<CoinflipState> {
     showConfirmationDialog(
         context,
         "Voulez vous miser la somme de : ${state.betAmount} coins?",
+        null,
         () => onSubmitBetConfirm(context));
   }
 
@@ -201,27 +202,32 @@ class CoinflipNotifier extends StateNotifier<CoinflipState> {
                   },
               });
     } else if (state.betAmount == 0 || state.betAmount % 1 != 0) {
-      showErrorDialog(context, 'Vous ne pouvez pas parier 0 coins.');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showErrorDialog(context, 'Vous ne pouvez pas parier 0 coins.');
+      });
     } else if (state.gameState != CoinFlipGameState.BettingPhase) {
       errorOutsideBettingPhase(context);
     }
   }
 
   errorOutsideBettingPhase(BuildContext context) {
-    showErrorDialog(
-        context, 'Vous ne pouvez pas parier en dehors de la phase de mise.');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showErrorDialog(
+          context, 'Vous ne pouvez pas parier en dehors de la phase de mise.');
+    });
   }
 
   updateBetAmount(int value) {
-    AppLogger.i("updateBetAmount");
+    AppLogger.i("updateBetAmount to $value");
 
     if (value < 0) {
-      return 0;
+      state.betAmount = 0;
     }
     if (value % 1 != 0) {
-      return value.ceil();
+      state.betAmount = value.ceil();
+    } else {
+      state.betAmount = value;
     }
-    return value;
   }
 
   increaseBet(int amount) {

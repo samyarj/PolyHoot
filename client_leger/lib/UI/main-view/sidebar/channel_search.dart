@@ -158,10 +158,10 @@ class _ChannelSearchState extends State<ChannelSearch> {
                               ),
                               onPressed: () async {
                                 await showConfirmationDialog(
-                                  context,
-                                  "$deleteChannel ${channel.name} ?",
-                                  () => widget.onDeleteChannel(channel.name),
-                                );
+                                    context,
+                                    "$deleteChannel ${channel.name} ?",
+                                    () => widget.onDeleteChannel(channel.name),
+                                    null);
                               },
                             ),
                           ],

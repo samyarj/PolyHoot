@@ -43,7 +43,7 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
         context, "Êtes-vous sûr de vouloir abandonner la partie?", () async {
       playerGameNotifier.stopAlertSound();
       GoRouter.of(context).go(Paths.play);
-    });
+    }, null);
   }
 
   @override
@@ -239,6 +239,4 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
       ),
     );
   }
-
-  // ...
 }

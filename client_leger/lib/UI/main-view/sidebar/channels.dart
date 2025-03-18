@@ -136,11 +136,11 @@ class Channels extends ConsumerWidget {
                       size: 30, color: colorScheme.onPrimary),
                   onPressed: () async {
                     await showConfirmationDialog(
-                      context,
-                      "$quitChannel ${channel.name} ?",
-                      () => channelManager.quitChannel(
-                          currentUserUid, channel.name),
-                    );
+                        context,
+                        "$quitChannel ${channel.name} ?",
+                        () => channelManager.quitChannel(
+                            currentUserUid, channel.name),
+                        null);
                   },
                 ),
                 IconButton(
@@ -148,10 +148,10 @@ class Channels extends ConsumerWidget {
                       size: 30, color: colorScheme.onPrimary),
                   onPressed: () async {
                     await showConfirmationDialog(
-                      context,
-                      "$deleteChannel ${channel.name} ?",
-                      () => onDeleteChannel(channel.name),
-                    );
+                        context,
+                        "$deleteChannel ${channel.name} ?",
+                        () => onDeleteChannel(channel.name),
+                        null);
                   },
                 ),
               ],
