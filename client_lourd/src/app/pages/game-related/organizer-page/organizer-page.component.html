@@ -29,8 +29,7 @@
                         </div>
                     </div>
                 </div> -->
-                <div *ngIf="question.type === 'QRL' && gameStatus === 'waitingForAnswers'" class="histogram-section">
-                </div>
+                <div *ngIf="question.type === 'QRL' && gameStatus === 'waitingForAnswers'" class="histogram-section"></div>
                 <div *ngIf="question.type === 'QRL' && gameStatus === 'organizerCorrecting'" class="histogram-section">
                     <div class="option-counter-container">
                         <div>Correction des réponses</div>
@@ -102,6 +101,5 @@
             </div>
         </div>
         <div id="chat-separator"></div>
-        <app-chat class="chat-container"></app-chat>
     </div>
 </div>

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ChatData } from '@app/interfaces/chat-data';
+import { AuthService } from '@app/services/auth/auth.service';
 import { SocketClientService } from '@app/services/websocket-services/general/socket-client-manager.service';
 import { ChatMessage } from '@common/chat-message';
 import { Observable, Subject } from 'rxjs';
@@ -9,13 +10,19 @@ import { ChatEvents } from './chat-events';
     providedIn: 'root',
 })
 export class ChatService {
+    private chatEventsSubject = new Subject<{ event: ChatEvents; data?: any }>();
+    chatEvents$ = this.chatEventsSubject.asObservable();
+
     allChatMessages: ChatMessage[];
     allChatMessagesSource: Subject<ChatMessage[]>;
     allChatMessagesObservable: Observable<ChatMessage[]>;
     isInitialized: boolean;
     roomId: string;
 
-    constructor(private socketClientService: SocketClientService) {
+    constructor(
+        private socketClientService: SocketClientService,
+        private authService: AuthService,
+    ) {
         this.allChatMessages = [];
         this.allChatMessagesSource = new Subject<ChatMessage[]>();
         this.allChatMessagesObservable = this.allChatMessagesSource.asObservable();
@@ -38,11 +45,15 @@ export class ChatService {
 
     sendMessageToRoom(messageInput: string): boolean {
         if (this.socketClientService.roomId) {
-            const message: ChatMessage = {
-                message: messageInput,
-                author: this.getUserName(),
-            };
-            this.socketClientService.send(ChatEvents.RoomMessage, message);
+            this.authService.user$.subscribe((user) => {
+                if (user) {
+                    const message: ChatMessage = {
+                        message: messageInput,
+                        author: user.username,
+                    };
+                    this.socketClientService.send(ChatEvents.RoomMessage, message);
+                }
+            });
             return true;
         }
         return false;
@@ -69,6 +80,9 @@ export class ChatService {
                 this.socketClientService.roomId = '';
                 this.socketClientService.playerName = '';
                 this.socketClientService.isOrganizer = false;
+                this.clearMessages(); // Clear messages when the user leaves the room
+                this.chatEventsSubject.next({ event: ChatEvents.RoomLeft }); // Emit custom event
+                this.socketClientService.send(ChatEvents.RoomLeft, chatData); // Broadcast the event to all clients
             } else {
                 this.allChatMessages.push(chatData.message);
                 this.allChatMessagesSource.next(this.allChatMessages);
@@ -76,5 +90,10 @@ export class ChatService {
         });
 
         this.isInitialized = true;
+    }
+
+    private clearMessages(): void {
+        this.allChatMessages = [];
+        this.allChatMessagesSource.next(this.allChatMessages);
     }
 }

@@ -1,5 +1,7 @@
 import { AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MAX_CHAR } from '@app/constants/constants';
+import { AuthService } from '@app/services/auth/auth.service';
+import { ChatEvents } from '@app/services/chat-services/chat-events';
 import { ChatService } from '@app/services/chat-services/chat.service';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
 import { ChatMessage } from '@common/chat-message';
@@ -22,11 +24,17 @@ export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
         },
     };
     private messagesSubscription: Subscription;
+    private chatEventsSubscription: Subscription;
 
     constructor(
         private chatService: ChatService,
         private messageHandlerService: MessageHandlerService,
+        private authService: AuthService,
     ) {}
+
+    get user() {
+        return this.authService.user$;
+    }
 
     get name() {
         return this.chatService.getUserName();
@@ -34,6 +42,12 @@ export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
 
     ngOnInit(): void {
         this.messagesSubscription = this.chatService.allChatMessagesObservable.subscribe(this.messagesObserver);
+        this.chatEventsSubscription = this.chatService.chatEvents$.subscribe((event) => {
+            if (event.event === ChatEvents.RoomLeft) {
+                this.clearMessages();
+            }
+        });
+
         if (!this.chatService.isInitialized) {
             this.chatService.configureChatSocketFeatures();
             this.chatService.getHistory();
@@ -68,6 +82,7 @@ export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
 
     ngOnDestroy(): void {
         if (this.messagesSubscription) this.messagesSubscription.unsubscribe();
+        if (this.chatEventsSubscription) this.chatEventsSubscription.unsubscribe();
     }
 
     isLengthInRange() {
@@ -80,5 +95,9 @@ export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
 
     private isNotEmpty() {
         return this.inputMessage.trim();
+    }
+
+    private clearMessages(): void {
+        this.chatMessages = [];
     }
 }

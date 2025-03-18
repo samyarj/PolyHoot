@@ -38,11 +38,7 @@
                         }"
                     >
                         {{ player }}
-                        <button
-                            *ngIf="isOrganizer && player !== 'Organisateur'"
-                            (click)="banPlayer(player)"
-                            class="btn btn-danger btn-sm"
-                        >
+                        <button *ngIf="isOrganizer && player !== 'Organisateur'" (click)="banPlayer(player)" class="btn btn-danger btn-sm">
                             Exclure
                         </button>
                     </li>
@@ -84,7 +80,6 @@
             <button *ngIf="isOrganizer" (click)="abandonAsOrganizer()" class="btn btn-danger leave-btn">Quitter</button>
         </div>
         <div id="chat-separator"></div>
-        <app-chat class="chat-section"></app-chat>
     </div>
 </div>
 <ng-template #gameCountDown>

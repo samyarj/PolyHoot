@@ -6,9 +6,9 @@
     <div
         *ngFor="let chatmessage of chatMessages"
         [ngClass]="{
-            user: name === chatmessage.author,
+            user: (user | async)?.username === chatmessage.author,
             systemMessage: chatmessage.author === 'System',
-            otherUser: name !== chatmessage.author
+            otherUser: (user | async)?.username !== chatmessage.author
         }"
     >
         <div class="message">{{ chatmessage.author + ' : ' + chatmessage.message }}</div>
