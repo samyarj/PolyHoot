@@ -40,6 +40,8 @@ export class BankPanelComponent {
         this.question.text = this.originalQuestion.text;
         this.question.points = this.originalQuestion.points;
         this.question.choices = this.originalQuestion.choices;
+        this.question.qreAttributes = this.originalQuestion.qreAttributes;
+        this.question.image = this.originalQuestion.image;
         this.question.lastModified = this.originalQuestion.lastModified;
         this.isEditMode = false;
     }

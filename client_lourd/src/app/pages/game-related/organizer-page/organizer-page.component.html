@@ -11,7 +11,8 @@
                 <div class="question-text-content">
                     {{ question.text }}
                 </div>
-                <div class="question-img">Image</div>
+
+                <img *ngIf="this.question.image" [src]="this.question.image" alt="Question Image" />
             </div>
             <div class="timer">
                 <div class="timer-content">

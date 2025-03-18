@@ -109,15 +109,17 @@
                         flex-direction: column;
                     }
 
-                    .question-img {
-                        align-self: center;
+                    img {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
                         position: relative;
-                        height: 100%;
-                        aspect-ratio: 1 / 1;
+                        max-height: 100%;
+                        max-width: 50%;
+                        position: relative;
+                        width: auto;
+                        height: auto;
                         border-radius: 30px;
-                        background: var(--tertiary-color);
-                        text-align: center;
-                        color: var(--primary-color);
                     }
                 }
 

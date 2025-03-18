@@ -55,6 +55,10 @@ export class Question {
     @Prop({ type: QreAttributes, required: false })
     qreAttributes?: QreAttributes;
 
+    @ApiProperty({ description: 'The URL of the image associated with the question' })
+    @Prop({ required: false })
+    image?: string;
+
     @ApiProperty({ description: 'The last modification date of the question' })
     @Prop({ required: false, default: new Date().toString() })
     lastModified: string;

@@ -59,6 +59,7 @@ export const EMPTY_QRE_QUESTION: Question = {
         maxBound: 0,
         tolerance: 0,
     },
+
 };
 
 export const EMPTY_QUESTION_WITHOUT_CHOICES: Question = {
