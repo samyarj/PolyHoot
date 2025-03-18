@@ -2,6 +2,7 @@ import { Location } from '@angular/common';
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoute } from '@app/constants/enum-class';
+import { RewardType } from '@app/interfaces/lootbox-related';
 import { ResultsService } from '@app/services/game-services/results-service/results-service.service';
 
 @Component({
@@ -10,6 +11,7 @@ import { ResultsService } from '@app/services/game-services/results-service/resu
     styleUrls: ['./results-page.component.scss'],
 })
 export class ResultsPageComponent implements OnInit, OnDestroy {
+    rewardType = RewardType;
     constructor(
         private resultsService: ResultsService,
         private router: Router,
@@ -17,9 +19,6 @@ export class ResultsPageComponent implements OnInit, OnDestroy {
     ) {}
     get nbPlayers() {
         return this.resultsService.nbPlayers;
-    }
-    get sortedPlayersList() {
-        return this.resultsService.sortedPlayersList;
     }
 
     get playerList() {
@@ -36,7 +35,6 @@ export class ResultsPageComponent implements OnInit, OnDestroy {
             this.onUnload();
             return;
         }
-        // this.resultsService.sortPlayers();
     }
 
     returnHome() {

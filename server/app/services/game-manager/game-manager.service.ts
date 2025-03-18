@@ -6,19 +6,20 @@ import { Quiz } from '@app/model/schema/quiz/quiz';
 import { Injectable } from '@nestjs/common';
 import { ConnectedSocket } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
+import { UserService } from '../auth/user.service';
 
 @Injectable()
 export class GameManagerService {
     currentGames: Game[] = [];
     socketRoomsMap: Map<Socket, string>;
 
-    constructor() {
+    constructor(private userService: UserService) {
         this.socketRoomsMap = new Map<Socket, string>();
     }
 
     createGame(quiz: Quiz, @ConnectedSocket() client: Socket, user: User): string {
         const roomId = this.generateNewRoomId();
-        this.currentGames.push(new Game(roomId, quiz, client, user));
+        this.currentGames.push(new Game(roomId, quiz, client, user, this.userService));
         return roomId;
     }
 

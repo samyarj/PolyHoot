@@ -16,6 +16,8 @@ import { Subscription } from 'rxjs';
     animations: [playerJoinAnimation, playerLeftAnimation, moveUpAnimation, moveDownAnimation],
 })
 export class WaitingPageComponent implements OnDestroy {
+    name: string = '';
+
     private hasTimerEnded: boolean = false;
     private isorganizerDisconnected: boolean = false;
     private isplayerBanned: boolean = false;
@@ -24,7 +26,6 @@ export class WaitingPageComponent implements OnDestroy {
     private organizorDisconnectedSub: Subscription;
     private timerEndSubscription: Subscription;
 
-    name: string = '';
     // constructeur a 4 parametres permis selon les charges et le prof, etant donne la nature des attributs
     // eslint-disable-next-line max-params
     constructor(
@@ -35,7 +36,6 @@ export class WaitingPageComponent implements OnDestroy {
     ) {
         this.onUnload();
         this.handleSocketSubscriptions();
-        console.log(this.name);
         this.waitingPageService.playerName.subscribe((value: User | null) => {
             if (value) {
                 this.name = value.username;

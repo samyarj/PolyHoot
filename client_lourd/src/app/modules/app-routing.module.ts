@@ -86,7 +86,7 @@ const routes: Routes = [
         ],
     },
 
-    { path: 'game', component: GamePageComponent }, // , canActivate: [authGuard] },
+    { path: 'game', component: GamePageComponent, canActivate: [authGuard] },
     { path: 'results', component: ResultsPageComponent, canActivate: [authGuard] },
     { path: 'waiting', component: WaitingPageComponent, canActivate: [authGuard] },
     { path: 'organizer', component: OrganizerPageComponent, canActivate: [authGuard] },

@@ -100,8 +100,6 @@ export class WaitingPageService {
             }[];
             roomId: string;
         }>(GameEvents.PlayerLeft, ({ playersInfo }) => {
-            console.log('left');
-            console.log(playersInfo);
             this.players = playersInfo;
         });
     }

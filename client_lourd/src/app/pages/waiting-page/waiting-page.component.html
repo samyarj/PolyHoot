@@ -21,8 +21,15 @@
                     >
                         <div class="user-info">
                             <app-avatar-banner [avatarUrl]="player.avatar" [bannerUrl]="player.banner" class="avatar"></app-avatar-banner>
-                            {{ player.name }}
                         </div>
+                        <ng-container *ngIf="isOrganizer && player.name !== 'Organisateur'">
+                            <div class="player-name">{{ player.name }}</div>
+                        </ng-container>
+
+                        <ng-container *ngIf="!(isOrganizer && player.name !== 'Organisateur')">
+                            <div class="player-name">{{ player.name }}</div>
+                        </ng-container>
+
                         <button *ngIf="isOrganizer && player.name !== 'Organisateur'" (click)="banPlayer(player.name)" class="custom-button">
                             Exclure
                         </button>

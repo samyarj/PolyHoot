@@ -45,7 +45,7 @@ p {
             text-transform: uppercase;
             font-weight: 400;
             color: var(--text-color);
-
+            -webkit-text-stroke: 2px var(--primary-color);
             animation: glow 1.5s infinite alternate;
         }
 

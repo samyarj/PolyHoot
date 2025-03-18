@@ -6,6 +6,7 @@ import { Quiz } from '@app/model/schema/quiz/quiz';
 import { UserService } from '@app/services/auth/user.service';
 import { GameManagerService } from '@app/services/game-manager/game-manager.service';
 import { HistoryManagerService } from '@app/services/history-manager/history-manager.service';
+import { PlayerResult } from '@common/partial-player';
 import { UseGuards } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
@@ -215,11 +216,11 @@ export class GameGateway {
     }
 
     @SubscribeMessage(GameEvents.ShowResults)
-    handleShowResults(@ConnectedSocket() client: AuthenticatedSocket) {
+    async handleShowResults(@ConnectedSocket() client: AuthenticatedSocket) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {
-            const results = game.getResults();
+            const results: PlayerResult[] = await game.getResults();
             if (results) this.server.to(roomId).emit(GameEvents.SendResults, results);
             game.gameState = GameState.RESULTS;
             this.historyManager.saveGameRecordToDB(roomId, results);
