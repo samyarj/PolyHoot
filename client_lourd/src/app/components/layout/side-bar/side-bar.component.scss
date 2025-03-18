@@ -9,6 +9,14 @@
     z-index: 2;
 }
 
+.game {
+    background: linear-gradient(
+        to bottom,
+        var(--secondary-color) 20%,
+        color-mix(in srgb, var(--secondary-color), transparent 90%) 70%,
+        transparent 95%
+    );
+}
 .menu-bar {
     position: fixed;
     top: 0;
@@ -44,10 +52,18 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 101px;
+    height: 100px;
     width: 100%;
-    border-bottom: 1px solid var(--tertiary-color);
     cursor: pointer;
+
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        width: 100%;
+        height: 1px;
+        background: var(--tertiary-color);
+    }
 }
 
 /* Avatar */

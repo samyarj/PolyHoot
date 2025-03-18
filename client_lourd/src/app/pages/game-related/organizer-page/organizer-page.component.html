@@ -74,7 +74,7 @@
                 <div
                     class="evaluation-section"
                     [ngClass]="{
-                        green: gameStatus === 'correctionFinished' || gameStatus === 'waitingForNextQuestion',
+                        green: gameStatus === 'correctionFinished' || gameStatus === 'waitingForNextQuestion' || gameStatus === 'gameFinished',
                         active: gameStatus === 'organizerCorrecting'
                     }"
                 >

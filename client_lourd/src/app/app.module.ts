@@ -75,6 +75,7 @@ import { FirebaseChatService } from './services/chat-services/firebase/firebase-
 import { FrenchPaginatorIntlService } from './services/general-services/french-paginator/french-paginator-intl.service';
 import { InventoryService } from './services/general-services/inventory.service';
 import { GlobalErrorHandlerService } from './services/global-error-handler.service';
+import { HeaderNavigationService } from './services/ui-services/header-navigation.service';
 import { ThemeService } from './services/ui-services/theme/theme.service';
 import { SocketClientService } from './services/websocket-services/general/socket-client-manager.service';
 
@@ -144,6 +145,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         FirebaseChatService,
         ThemeService,
         InventoryService,
+        HeaderNavigationService,
         { provide: WINDOW, useValue: window },
         { provide: MatPaginatorIntl, useClass: FrenchPaginatorIntlService },
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },

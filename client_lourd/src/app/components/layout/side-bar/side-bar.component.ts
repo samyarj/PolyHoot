@@ -6,6 +6,7 @@ import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
 import { ChatChannel, chatChannelFromJson } from '@app/services/chat-services/chat-channels';
 import { FirebaseChatService } from '@app/services/chat-services/firebase/firebase-chat.service';
+import { HeaderNavigationService } from '@app/services/ui-services/header-navigation.service';
 import { Observable, Subscription } from 'rxjs';
 
 @Component({
@@ -37,8 +38,13 @@ export class SideBarComponent implements OnInit, OnDestroy {
         private authService: AuthService,
         private router: Router,
         private firebaseChatService: FirebaseChatService,
+        private headerService: HeaderNavigationService,
     ) {
         this.user$ = this.authService.user$;
+    }
+
+    get isOnGamePage() {
+        return this.headerService.isGameRelatedRoute;
     }
 
     ngOnInit(): void {
