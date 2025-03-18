@@ -18,67 +18,19 @@
         </div>
     </div>
     <div class="player-list">
-        <div class="player-container crossed">
-            <div class="user-info">
-                <app-avatar-banner class="avatar"></app-avatar-banner>
-            </div>
-            <div class="player-name">Nom</div>
-
-            <p>10 points</p>
-        </div>
-        <div class="player-container">
-            <div class="user-info">
-                <app-avatar-banner class="avatar"></app-avatar-banner>
-            </div>
-            <div class="player-name">Nom</div>
-
-            <p>10 points</p>
-        </div>
-        <div class="player-container">
-            <div class="user-info">
-                <app-avatar-banner class="avatar"></app-avatar-banner>
-            </div>
-            <div class="player-name">Nom</div>
-
-            <p>10 points</p>
-        </div>
-        <div class="player-container">
-            <div class="user-info">
-                <app-avatar-banner class="avatar"></app-avatar-banner>
-            </div>
-            <div class="player-name">Nom</div>
-
-            <p>10 points</p>
-        </div>
-        <div class="player-container">
-            <div class="user-info">
-                <app-avatar-banner class="avatar"></app-avatar-banner>
-            </div>
-            <div class="player-name">Nom</div>
-
-            <p>10 points</p>
-        </div>
-        <div class="player-container">
-            <div class="user-info">
-                <app-avatar-banner class="avatar"></app-avatar-banner>
-            </div>
-            <div class="player-name">Nom</div>
-
-            <p>10 points</p>
-        </div>
         <div
             *ngFor="let player of playerList"
-            class="player-info-section"
+            class="player-container"
             [ngClass]="{
                 crossed: !player.isInGame
             }"
         >
             <div class="user-info">
-                <app-avatar-banner [avatarUrl]="" [bannerUrl]="" class="avatar"></app-avatar-banner>
+                <app-avatar-banner [avatarUrl]="player.equippedAvatar" [bannerUrl]="player.equippedBanner" class="avatar"></app-avatar-banner>
             </div>
-            <div class="player-name">Nom</div>
+            <div class="player-name">{{ player.name }}</div>
 
-            <p>10 points</p>
+            <p>{{ player.points }} points</p>
         </div>
     </div>
 </div>

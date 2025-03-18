@@ -23,6 +23,8 @@ export interface PartialPlayer {
     points: number;
     isInGame: boolean;
     submitted: boolean;
+    equippedAvatar: string;
+    equippedBanner: string;
 }
 
 export interface PlayerResult {

@@ -10,7 +10,7 @@
                     <p *ngIf="isPlayersListEmpty && players.length === 0 && isOrganizer">Invitez vos amis à rejoindre la partie !</p>
                     <li
                         class="player-container"
-                        *ngFor="let player of players.reverse()"
+                        *ngFor="let player of players; trackBy: trackByPlayer"
                         [@popIn]
                         [@popOut]
                         (@popOut.done)="onPopOutDone()"

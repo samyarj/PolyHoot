@@ -95,7 +95,8 @@ export class Game {
         const typeOfQuestion: string = this.quiz.questions[this.currentQuestionIndex].type;
         if (
             (typeOfQuestion === QuestionType.QCM && this.timer.timerValue > ALERT_MODE_TIME_LIMITS.QCM) ||
-            (typeOfQuestion === QuestionType.QRL && this.timer.timerValue > ALERT_MODE_TIME_LIMITS.QRL)
+            (typeOfQuestion === QuestionType.QRL && this.timer.timerValue > ALERT_MODE_TIME_LIMITS.QRL) ||
+            (typeOfQuestion === QuestionType.QRE && this.timer.timerValue > ALERT_MODE_TIME_LIMITS.QRE)
         )
             this.timer.startAlertMode();
     }
@@ -315,6 +316,8 @@ export class Game {
                 points: player.points,
                 isInGame: player.isInGame,
                 submitted: player.submitted,
+                equippedAvatar: player.equippedAvatar,
+                equippedBanner: player.equippedBorder,
             });
         });
         this.organizer.socket.emit(GameEvents.SendPlayerList, players);

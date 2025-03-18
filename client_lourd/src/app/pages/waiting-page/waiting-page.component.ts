@@ -83,6 +83,16 @@ export class WaitingPageComponent implements OnDestroy {
         this.timerEndSubscription.unsubscribe();
     }
 
+    trackByPlayer(
+        index: number,
+        player: {
+            name: string;
+            avatar: string;
+            banner: string;
+        },
+    ) {
+        return player.name;
+    }
     onPopOutDone() {
         this.waitingPageService.onPopOutDone();
     }

@@ -4,22 +4,19 @@
             <div class="question-points">
                 <div class="question-points-content">
                     <div>Points</div>
-                    <div class="value">50</div>
+                    <div class="value">{{ question.points }}</div>
                 </div>
             </div>
             <div class="question-text">
                 <div class="question-text-content">
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit. Minima vitae voluptatum nulla maiores quis molestiae facere doloremque,
-                    eaque, est delectus accusantium explicabo rem unde. At quam veritatis id in delectus! Lorem ipsum, dolor sit amet consectetur
-                    adipisicing elit. Officiis autem harum quo? Deleniti maxime commodi laudantium vel rem aut eaque aperiam amet omnis sunt! Harum
-                    beatae corrupti excepturi esse perspiciatis?
+                    {{ question.text }}
                 </div>
                 <div class="question-img">Image</div>
             </div>
             <div class="timer">
                 <div class="timer-content">
                     <div>Temps restant</div>
-                    <div class="value">5</div>
+                    <div class="value">{{ timeLeft }}</div>
                 </div>
             </div>
         </div>
@@ -39,7 +36,12 @@
                     </div>
                     <div class="control-timer-button-section">
                         <div class="button-container">
-                            <button class="custom-button" [disabled]="gameStatus !== 'waitingForAnswers'" (click)="pauseGame()">
+                            <button
+                                class="custom-button"
+                                [disabled]="gameStatus !== 'waitingForAnswers'"
+                                [ngClass]="{ 'custom-button-disabled': gameStatus !== 'waitingForAnswers' }"
+                                (click)="pauseGame()"
+                            >
                                 {{ gamePaused ? 'Reprendre' : 'Pause' }}
                             </button>
                         </div>
@@ -50,8 +52,17 @@
                                     gameStatus !== 'waitingForAnswers' ||
                                     alertMode ||
                                     (questionType === 'QCM' && timeLeft <= 10) ||
+                                    (questionType === 'QRE' && timeLeft <= 10) ||
                                     (questionType === 'QRL' && timeLeft <= 20)
                                 "
+                                [ngClass]="{
+                                    'custom-button-disabled':
+                                        gameStatus !== 'waitingForAnswers' ||
+                                        alertMode ||
+                                        (questionType === 'QCM' && timeLeft <= 10) ||
+                                        (questionType === 'QRE' && timeLeft <= 10) ||
+                                        (questionType === 'QRL' && timeLeft <= 20)
+                                }"
                                 (click)="startAlertMode()"
                             >
                                 {{ alertMode && gameStatus !== 'waitingForNextQuestion' ? 'EN ALERTE' : 'Alerte' }}
@@ -60,82 +71,50 @@
                     </div>
                 </div>
 
-                <div class="evaluation-section">
-                    <img class="logo" src="assets/pictures/logo.png" />
+                <div
+                    class="evaluation-section"
+                    [ngClass]="{
+                        green: gameStatus === 'correctionFinished' || gameStatus === 'waitingForNextQuestion',
+                        active: gameStatus === 'organizerCorrecting'
+                    }"
+                >
+                    <div *ngIf="gameStatus !== 'organizerCorrecting'" class="qcm-qre-content">
+                        <img class="logo" src="assets/pictures/logo.png" />
+                        <p class="question-type">{{ question.type }}</p>
+                    </div>
+                    <div *ngIf="question.type === 'QRL'" class="qrl-content">
+                        <div *ngIf="question.type === 'QRL' && gameStatus === 'organizerCorrecting'" class="answer-details">
+                            <div id="player">{{ playerBeingCorrected }}</div>
+                            <div class="">Réponse:</div>
+                            <div id="answer">
+                                {{ answerBeingCorrected }}
+                            </div>
+                        </div>
+                    </div>
+                    <div *ngIf="question.type === 'QRL'" class="qrl-choices">
+                        <ng-container *ngIf="gameStatus === 'organizerCorrecting'">
+                            <div class="button-container first">
+                                <button (click)="gradeAnswer(0)" class="custom-button">0 %</button>
+                            </div>
+                            <div class="button-container">
+                                <button (click)="gradeAnswer(50)" class="custom-button">50 %</button>
+                            </div>
+                            <div class="button-container last">
+                                <button (click)="gradeAnswer(100)" class="custom-button">100 %</button>
+                            </div>
+                        </ng-container>
+                        <ng-container
+                            *ngIf="
+                                question.type === 'QRL' &&
+                                (gameStatus === 'correctionFinished' || gameStatus === 'waitingForNextQuestion' || gameStatus === 'gameFinished')
+                            "
+                        >
+                            <div class="button-container mid"></div>
+                        </ng-container>
+                    </div>
                 </div>
             </div>
         </div>
-        <!-- 
-        <div class="general-info-section">
-            <div *ngIf="question.type === 'QRL' && gameStatus === 'waitingForAnswers'" class="histogram-section"></div>
-            <div *ngIf="question.type === 'QRL' && gameStatus === 'organizerCorrecting'" class="histogram-section">
-                <div class="option-counter-container">
-                    <div>Correction des réponses</div>
-                </div>
-                <div class="answer-details">
-                    <p id="player">{{ playerBeingCorrected }}</p>
-                    <p style="font-size: 15px">Réponse:</p>
-                    <p id="answer">{{ answerBeingCorrected }}</p>
-                </div>
-                <div class="options-container">
-                    <button (click)="gradeAnswer(0)" class="custom-button custom-width btn">0 %</button>
-                    <button (click)="gradeAnswer(50)" class="custom-button custom-width btn">50 %</button>
-                    <button (click)="gradeAnswer(100)" class="custom-button custom-width btn">100 %</button>
-                </div>
-            </div>
-            <div
-                *ngIf="
-                    question.type === 'QRL' &&
-                    (gameStatus === 'correctionFinished' || gameStatus === 'waitingForNextQuestion' || gameStatus === 'gameFinished')
-                "
-                class="histogram-section"
-            >
-                <div class="option-counter-container">
-                    <div>Correction des réponses</div>
-                </div>
-                <div class="answer-details" *ngIf="gameStatus === 'correctionFinished' || gameStatus === 'waitingForNextQuestion'">
-                    <p>La correction est finie!</p>
-                    <p>Les notes ont été envoyées aux joueurs.</p>
-                    <p>Vous pouvez passer à la prochaine question!</p>
-                </div>
-                <div class="answer-details" *ngIf="gameStatus === 'gameFinished'">
-                    <p>La partie est finie!</p>
-                    <p>Vous pouvez maintenant passer à la vue des résultats</p>
-                </div>
-                <div class="options-container"></div>
-            </div>
-            <div class="control-section">
-                <div class="timer-button-section">
-                    <button class="btn custom-width custom-button" *ngIf="gameStatus === 'correctionFinished'" (click)="nextQuestion()">
-                        Prochaine question
-                    </button>
-                    <p *ngIf="gameStatus === 'organizerCorrecting'">Veuillez finir la correction avant de passer à la prochaine question</p>
-                    <p *ngIf="gameStatus === 'waitingForAnswers'">En attente des réponses des joueurs</p>
-                    <p *ngIf="gameStatus === 'waitingForNextQuestion'">La prochaine question s'affichera dans {{ timeLeft }} secondes.</p>
-                    <button class="btn custom-width custom-button" *ngIf="gameStatus === 'gameFinished'" (click)="showResults()">
-                        Afficher les réponses
-                    </button>
-                </div>
-                <div class="control-timer-button-section">
-                    <button class="btn custom-width custom-button" [disabled]="gameStatus !== 'waitingForAnswers'" (click)="pauseGame()">
-                        {{ gamePaused ? 'Reprendre' : 'Pause' }}
-                    </button>
-                    <button
-                        class="btn custom-width custom-button"
-                        [disabled]="
-                            gameStatus !== 'waitingForAnswers' ||
-                            alertMode ||
-                            (questionType === 'QCM' && timeLeft <= 10) ||
-                            (questionType === 'QRL' && timeLeft <= 20)
-                        "
-                        (click)="startAlertMode()"
-                    >
-                        {{ alertMode && gameStatus !== 'waitingForNextQuestion' ? 'EN ALERTE' : 'Alerte' }}
-                    </button>
-                </div>
-                <app-player-list class="player-list"></app-player-list>
-            </div>
-        </div> -->
         <button class="abandon-button custom-button-medium" (click)="abandonGame()">Abandonner</button>
     </div>
 </div>
