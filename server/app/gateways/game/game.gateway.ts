@@ -181,6 +181,12 @@ export class GameGateway {
             // Only increment games for non-organizer players
             if (client.user?.uid && game.organizer.socket.id !== client.id) {
                 await this.userService.incrementGames(client.user.uid);
+                await this.userService.addGameLog(client.user.uid, {
+                    gameName: game.quiz.title,
+                    startTime: this.userService.formatTimestamp(new Date()),
+                    status: 'abandoned', // Default to abandoned, change to complete later
+                    result: 'lose',
+                });
             }
             // Only create the game record if this is the organizer
             if (game.organizer.socket.id === client.id) {
@@ -243,6 +249,12 @@ export class GameGateway {
                     if (playerSocket?.user?.uid) {
                         await this.userService.updateStats(playerSocket.user.uid, {
                             timeSpent: game.timer.timerValue,
+                        });
+                        await this.userService.updateGameLog(playerSocket.user.uid, {
+                            gameName: game.quiz.title,
+                            endTime: this.userService.formatTimestamp(new Date()),
+                            status: 'complete',
+                            result: player.name === winner.name ? 'win' : 'lose',
                         });
                     }
                 }

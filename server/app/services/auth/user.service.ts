@@ -489,7 +489,112 @@ export class UserService {
         }));
     }
 
-    private formatTimestamp(date: Date): string {
+    async addGameLog(
+        uid: string,
+        gameLog: {
+            gameName?: string;
+            startTime?: string;
+            endTime?: string;
+            status?: 'complete' | 'abandoned';
+            result?: 'win' | 'lose';
+        },
+    ): Promise<boolean> {
+        try {
+            const userRef = this.firestore.collection('users').doc(uid);
+            const userDoc = await userRef.get();
+
+            if (!userDoc.exists) {
+                throw new Error("L'utilisateur n'existe pas.");
+            }
+
+            // Add the new game log to the user's gameLogs array
+            await userRef.update({
+                gameLogs: admin.firestore.FieldValue.arrayUnion(gameLog),
+            });
+
+            return true;
+        } catch (error) {
+            console.error('Failed to add game log:', error);
+            return false;
+        }
+    }
+
+    async getGameLogs(uid: string): Promise<any[]> {
+        try {
+            const userRef = this.firestore.collection('users').doc(uid);
+            const userDoc = await userRef.get();
+
+            if (!userDoc.exists) {
+                throw new Error("L'utilisateur n'existe pas.");
+            }
+
+            return userDoc.data().gameLogs || [];
+        } catch (error) {
+            console.error('Failed to get game logs:', error);
+            return [];
+        }
+    }
+
+    async updateGameLog(
+        uid: string,
+        updatedGameLog: {
+            gameName?: string;
+            startTime?: string;
+            endTime?: string;
+            status?: 'complete' | 'abandoned';
+            result?: 'win' | 'lose';
+        },
+    ): Promise<boolean> {
+        try {
+            const userRef = this.firestore.collection('users').doc(uid);
+            const userDoc = await userRef.get();
+
+            if (!userDoc.exists) {
+                throw new Error("L'utilisateur n'existe pas.");
+            }
+
+            const gameLogs = userDoc.data().gameLogs || [];
+
+            if (gameLogs.length === 0) {
+                throw new Error('No game logs found.');
+            }
+
+            // Always update the last game log
+            const lastIndex = gameLogs.length - 1;
+            gameLogs[lastIndex] = {
+                ...gameLogs[lastIndex],
+                ...updatedGameLog,
+            };
+
+            await userRef.update({ gameLogs });
+
+            return true;
+        } catch (error) {
+            console.error('Failed to update game log:', error);
+            return false;
+        }
+    }
+
+    async clearGameLogs(uid: string): Promise<boolean> {
+        try {
+            const userRef = this.firestore.collection('users').doc(uid);
+            const userDoc = await userRef.get();
+
+            if (!userDoc.exists) {
+                throw new Error("L'utilisateur n'existe pas.");
+            }
+
+            // Clear the game logs array
+            await userRef.update({ gameLogs: [] });
+
+            return true;
+        } catch (error) {
+            console.error('Failed to clear game logs:', error);
+            return false;
+        }
+    }
+
+    formatTimestamp(date: Date): string {
         const pad = (n: number) => n.toString().padStart(2, '0');
         const day = pad(date.getDate());
         const month = pad(date.getMonth() + 1); // Months are zero-based
