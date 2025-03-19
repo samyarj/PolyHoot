@@ -24,16 +24,10 @@ class LootboxService {
 
   String baseUrl;
   String lootboxUrl;
-  String? _token;
   // acces a l'objet user dans le widget en ecoutant
 
-  get token async {
-    _token ??= await FirebaseAuth.instance.currentUser?.getIdToken();
-    return _token;
-  }
-
   Future<Reward> openBox(double id) async {
-    final tokenValue = await token;
+    final tokenValue = await FirebaseAuth.instance.currentUser?.getIdToken();
     final headers = {
       'Authorization': 'Bearer $tokenValue',
     };
@@ -55,7 +49,7 @@ class LootboxService {
   }
 
   Future<List<LootBoxContainer>> getBoxes() async {
-    final tokenValue = await token;
+    final tokenValue = await FirebaseAuth.instance.currentUser?.getIdToken();
     final headers = {
       'Authorization': 'Bearer $tokenValue',
     };
@@ -78,7 +72,7 @@ class LootboxService {
   }
 
   Future<Reward> openDailyFree() async {
-    final tokenValue = await token;
+    final tokenValue = await FirebaseAuth.instance.currentUser?.getIdToken();
     final headers = {
       'Authorization': 'Bearer $tokenValue',
     };
@@ -99,7 +93,7 @@ class LootboxService {
   }
 
   Future<DailyFree> getDailyFree() async {
-    final tokenValue = await token;
+    final tokenValue = await FirebaseAuth.instance.currentUser?.getIdToken();
     final headers = {
       'Authorization': 'Bearer $tokenValue',
     };
