@@ -12,6 +12,7 @@ final class WebSocketManager {
 
   bool isOrganizer = false;
   String? playerName;
+  IO.Socket? socket;
 
   String _fetchBaseUrl() {
     return Environment.serverUrlSocket;
@@ -33,29 +34,37 @@ final class WebSocketManager {
     });
   }
 
-  IO.Socket get socket => IO.io(
-      _fetchBaseUrl(), IO.OptionBuilder().setTransports(['websocket']).build());
+  bool isSocketAlive() {
+    return socket != null && socket!.connected;
+  }
 
-  initializeSocketConnection() {
-    try {
-      socket.connect();
-      socket.onConnect((_) {
-        AppLogger.i("WebSocket connected");
-      });
-    } catch (e) {
-      AppLogger.e('$e');
+  initializeSocketConnection(String? token) {
+    if (!isSocketAlive() && token != null) {
+      try {
+        socket = IO.io(
+          _fetchBaseUrl(),
+          IO.OptionBuilder()
+              .setTransports(['websocket']).setQuery({'token': token}).build(),
+        );
+        socket?.connect();
+        socket?.onConnect((_) {
+          AppLogger.i("WebSocket connected");
+        });
+      } catch (e) {
+        AppLogger.e('$e');
+      }
     }
   }
 
   disconnectFromSocket() {
-    socket.disconnect();
+    socket?.disconnect();
     roomId = null;
     isOrganizer = false;
-    socket.onDisconnect((_) => AppLogger.i("WebSocket disconnected"));
+    socket?.onDisconnect((_) => AppLogger.i("WebSocket disconnected"));
   }
 
   void webSocketReceiver(String eventName, Function(dynamic) onEvent) {
-    socket.on(eventName, (data) {
+    socket?.on(eventName, (data) {
       onEvent(data);
     });
   }
@@ -63,11 +72,11 @@ final class WebSocketManager {
   void webSocketSender(String eventName,
       [dynamic body, Function(dynamic)? callback]) {
     if (callback != null) {
-      socket.emitWithAck(eventName, body ?? {}, ack: (data) {
+      socket?.emitWithAck(eventName, body ?? {}, ack: (data) {
         callback(data);
       });
     } else {
-      socket.emit(eventName, body ?? {});
+      socket?.emit(eventName, body ?? {});
     }
   }
 }

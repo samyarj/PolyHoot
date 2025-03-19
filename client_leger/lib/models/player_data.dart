@@ -29,3 +29,31 @@ class PlayerData {
     };
   }
 }
+
+class PlayerDetails {
+  String name;
+  String avatar;
+  String? banner;
+
+  PlayerDetails({
+    required this.name,
+    required this.avatar,
+    this.banner,
+  });
+
+  factory PlayerDetails.fromJson(Map<String, dynamic> json) {
+    return PlayerDetails(
+      name: json['name'],
+      avatar: json['avatar'],
+      banner: json['banner'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'avatar': avatar,
+      if (banner != null) 'banner': banner,
+    };
+  }
+}

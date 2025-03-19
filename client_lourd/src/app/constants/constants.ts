@@ -43,7 +43,7 @@ export const USERNAME_MIN_LENGTH = 3;
 export const USERNAME_MAX_LENGTH = 20;
 export const USERNAME_REGEX = /^[a-zA-Z0-9._]{3,20}$/;
 export const PASSWORD_MIN_LENGTH = 6;
-export const MESSAGES_LIMIT = 30;
+export const MESSAGES_LIMIT = 5;
 export const MIN_LOADING_TIME = 600;
 
 export const DEFAULT_HOVER_INDEX = -1;
