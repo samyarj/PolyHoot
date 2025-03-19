@@ -174,9 +174,13 @@ class WaitingPage extends ConsumerWidget {
                                 itemBuilder: (context, index) {
                                   final player =
                                       waitingState.playersInfo[index];
-                                  final isPlayer =
-                                      WebSocketManager.instance.playerName ==
-                                          player.name;
+                                  final isOrganizer =
+                                      WebSocketManager.instance.isOrganizer;
+                                  final isNotPlayer =
+                                      WebSocketManager.instance.playerName !=
+                                              player.name ||
+                                          isOrganizer;
+
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 6, horizontal: 20),
@@ -187,23 +191,25 @@ class WaitingPage extends ConsumerWidget {
                                         gradient: LinearGradient(
                                           colors: [
                                             colorScheme.secondary
-                                                .withValues(alpha: 0.6),
-                                            colorScheme.secondary
-                                                .withValues(alpha: 0.5),
-                                            if (isPlayer)
+                                                .withValues(alpha: 0.4),
+                                            if (isNotPlayer)
+                                              colorScheme.secondary
+                                                  .withValues(alpha: 0.3),
+                                            if (isNotPlayer)
                                               colorScheme.primary
-                                                  .withValues(alpha: 0.7),
-                                            colorScheme.primary.withValues(
-                                                alpha: isPlayer ? 0.2 : 0.8),
-                                            colorScheme.primary.withValues(
-                                                alpha: isPlayer ? 0.2 : 0.8),
-                                            if (isPlayer)
+                                                  .withValues(alpha: 0.6),
+                                            if (isNotPlayer)
+                                              colorScheme.primary,
+                                            if (isNotPlayer)
+                                              colorScheme.primary,
+                                            if (isNotPlayer)
                                               colorScheme.primary
-                                                  .withValues(alpha: 0.7),
+                                                  .withValues(alpha: 0.6),
+                                            if (isNotPlayer)
+                                              colorScheme.secondary
+                                                  .withValues(alpha: 0.3),
                                             colorScheme.secondary
-                                                .withValues(alpha: 0.5),
-                                            colorScheme.secondary
-                                                .withValues(alpha: 0.6),
+                                                .withValues(alpha: 0.4),
                                           ],
                                           begin: Alignment.centerLeft,
                                           end: Alignment.centerRight,
