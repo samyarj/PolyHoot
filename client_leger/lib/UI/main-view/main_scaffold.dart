@@ -55,6 +55,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
   @override
   Widget build(BuildContext context) {
     final userState = ref.watch(userProvider);
+
     final colorScheme = Theme.of(context).colorScheme;
     return userState.when(data: (user) {
       return Scaffold(

@@ -1,4 +1,5 @@
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
+import 'package:client_leger/models/player_data.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:client_leger/utilities/socket_events.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,7 +11,7 @@ final waitingPageProvider =
 });
 
 class WaitingPageState {
-  final List<String> players;
+  final List<PlayerDetails> playersInfo;
   final bool gameLocked;
   final String gameTitle;
   final int? time;
@@ -19,7 +20,7 @@ class WaitingPageState {
   final bool timerEnded;
 
   WaitingPageState({
-    required this.players,
+    required this.playersInfo,
     required this.gameLocked,
     required this.gameTitle,
     required this.time,
@@ -29,7 +30,7 @@ class WaitingPageState {
   });
 
   WaitingPageState copyWith({
-    List<String>? players,
+    List<PlayerDetails>? playersInfo,
     bool? gameLocked,
     String? gameTitle,
     int? time,
@@ -38,7 +39,7 @@ class WaitingPageState {
     bool? timerEnded,
   }) {
     return WaitingPageState(
-      players: players ?? this.players,
+      playersInfo: playersInfo ?? this.playersInfo,
       gameLocked: gameLocked ?? this.gameLocked,
       gameTitle: gameTitle ?? this.gameTitle,
       time: time ?? this.time,
@@ -55,7 +56,7 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
 
   WaitingPageNotifier(this._socketManager)
       : super(WaitingPageState(
-          players: [],
+          playersInfo: [],
           gameLocked: false,
           gameTitle: "",
           time: null,
@@ -71,22 +72,29 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
   void _initializeListeners() {
     _socketManager.webSocketReceiver(GameEvents.PlayerLeft.value, (data) {
       if (state.banned) return;
-      if (data is Map<String, dynamic> && data.containsKey('playerNames')) {
-        final List<String> updatedPlayers =
-            List<String>.from(data['playerNames'] as List);
-        state = state.copyWith(players: updatedPlayers);
-        AppLogger.i("Players updated: ${state.players}");
+      if (data is Map<String, dynamic> && data.containsKey('playersInfo')) {
+        final List<PlayerDetails> updatedPlayers = (data['playersInfo'] as List)
+            .map((player) =>
+                PlayerDetails.fromJson(player as Map<String, dynamic>))
+            .toList();
+
+        state = state.copyWith(playersInfo: updatedPlayers);
+        AppLogger.i("Players updated: ${state.playersInfo}");
       } else {
         AppLogger.w("Invalid or missing data for PlayerLeft event.");
       }
     });
 
     _socketManager.webSocketReceiver(JoinEvents.JoinSuccess.value, (data) {
-      if (data is Map<String, dynamic> && data.containsKey('playerNames')) {
-        final List<String> updatedPlayers =
-            List<String>.from(data['playerNames'] as List);
-        state = state.copyWith(players: updatedPlayers);
-        AppLogger.i("Players updated: ${state.players}");
+      if (data is Map<String, dynamic> && data.containsKey('playersInfo')) {
+        AppLogger.i("JoinSuccess event received with data: $data");
+        final List<PlayerDetails> updatedPlayers = (data['playersInfo'] as List)
+            .map((player) =>
+                PlayerDetails.fromJson(player as Map<String, dynamic>))
+            .toList();
+
+        state = state.copyWith(playersInfo: updatedPlayers);
+        AppLogger.i("Players updated: ${state.playersInfo}");
       } else {
         AppLogger.w("Invalid or missing data for JoinSuccess event.");
       }
@@ -118,7 +126,7 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
 
     _socketManager.webSocketReceiver(TimerEvents.GameCountdownEnd.value, (_) {
       state = state.copyWith(timerEnded: true);
-      if (state.players.isNotEmpty) {
+      if (state.playersInfo.isNotEmpty) {
         startGame();
       }
       AppLogger.i("Game countdown ended");
@@ -159,19 +167,23 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
   void _getPlayerList() {
     _socketManager.webSocketSender(GameEvents.GetCurrentPlayers.value,
         {"roomId": WebSocketManager.instance.roomId}, (data) {
-      if (data is List) {
-        final List<String> updatedPlayers = List<String>.from(data);
-        state = state.copyWith(players: updatedPlayers);
-        AppLogger.i("Players updated: ${state.players}");
+      if (data is Map<String, dynamic> && data.containsKey('playersInfo')) {
+        final List<PlayerDetails> updatedPlayers = (data['playersInfo'] as List)
+            .map((player) =>
+                PlayerDetails.fromJson(player as Map<String, dynamic>))
+            .toList();
+
+        state = state.copyWith(playersInfo: updatedPlayers);
+        AppLogger.i("Players updated: ${state.playersInfo}");
       } else {
-        AppLogger.w("Invalid data for GetCurrentPlayers event.");
+        AppLogger.w("Invalid or missing data for JoinSuccess event.");
       }
     });
   }
 
   void _resetAttributes() {
     state = WaitingPageState(
-      players: [],
+      playersInfo: [],
       gameLocked: false,
       gameTitle: '',
       time: null,

@@ -233,6 +233,10 @@ class _JoinGameState extends ConsumerState<JoinGame> {
                                                                 lobby.roomId);
                                                       },
                                                 style: ElevatedButton.styleFrom(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 10,
+                                                      horizontal: 60),
                                                   backgroundColor:
                                                       colorScheme.primary,
                                                   disabledBackgroundColor:
@@ -254,7 +258,9 @@ class _JoinGameState extends ConsumerState<JoinGame> {
                                                         ? BorderSide.none
                                                         : BorderSide(
                                                             color: colorScheme
-                                                                .tertiary,
+                                                                .tertiary
+                                                                .withValues(
+                                                                    alpha: 0.8),
                                                             width: 2.5,
                                                           ),
                                                   ),
@@ -264,7 +270,9 @@ class _JoinGameState extends ConsumerState<JoinGame> {
                                                       MainAxisSize.min,
                                                   children: [
                                                     Text(
-                                                      'Rejoindre',
+                                                      lobby.isLocked
+                                                          ? 'Verrouillé'
+                                                          : 'Joindre',
                                                       style: TextStyle(
                                                         color: lobby.isLocked
                                                             ? colorScheme
@@ -278,7 +286,7 @@ class _JoinGameState extends ConsumerState<JoinGame> {
                                                             FontWeight.bold,
                                                       ),
                                                     ),
-                                                    const SizedBox(width: 8),
+                                                    const SizedBox(width: 16),
                                                     Icon(
                                                       lobby.isLocked
                                                           ? Icons.lock

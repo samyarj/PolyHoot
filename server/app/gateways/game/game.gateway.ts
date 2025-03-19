@@ -21,7 +21,7 @@ export class GameGateway {
         private gameManager: GameManagerService,
         private historyManager: HistoryManagerService,
         private userService: UserService,
-    ) { }
+    ) {}
 
     @SubscribeMessage(TimerEvents.Pause)
     handlePauseGame(@ConnectedSocket() client: AuthenticatedSocket) {
@@ -67,8 +67,12 @@ export class GameGateway {
     handleCurrentPlayers(@ConnectedSocket() client: AuthenticatedSocket, @MessageBody() data: { roomId: string }) {
         const roomId = data.roomId;
         const game = this.gameManager.getGameByRoomId(roomId);
-        const playerNames = game.players.map((player) => player.name);
-        return playerNames;
+        const playersInfo = game.players.map((player) => ({
+            name: player.name,
+            avatar: player.equippedAvatar,
+            banner: player.equippedBorder,
+        }));
+        return { playersInfo };
     }
 
     @SubscribeMessage(GameEvents.GetCurrentGames)
