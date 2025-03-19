@@ -1,7 +1,7 @@
 import { MAX_POINTS, MIN_POINTS } from '@app/constants';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsInt, IsNotEmpty, IsOptional, IsString, Max, Min, ValidateNested } from 'class-validator';
+import { IsArray, IsInt, IsNotEmpty, IsOptional, IsString, isURL, Max, Min, ValidateNested } from 'class-validator';
 import { ChoiceDto } from './choice-dto';
 import { QreAttributes } from './qre-attributes-dto';
 
@@ -34,6 +34,12 @@ export class CreateQuestionDto {
     @ValidateNested()
     @Type(() => QreAttributes)
     qreAttributes?: QreAttributes;
+
+    @ApiProperty()
+    @IsString()
+    @IsNotEmpty()
+    @IsOptional()
+    image?: string;
 
     @ApiProperty()
     @IsOptional()

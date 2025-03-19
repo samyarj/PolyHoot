@@ -1,27 +1,70 @@
-<div id="global-page-wrapper">
-    <app-header-game title="Vue des Résultats"></app-header-game>
-    <div id="header-separator"></div>
-    <div id="page-container">
-        <div id="main-content-container">
-            <div id="general-info-section">
-                <div id="player-list-section">
-                    <h1 id="player-list">Joueurs de la partie</h1>
-                    <div class="player-list-div">
-                        <div
-                            *ngFor="let player of sortedPlayersList"
-                            class="player-info-section"
-                            [ngClass]="player.isInGame ? 'not-crossed' : 'crossed'"
-                        >
-                            <p class="player-name">{{ player.name }}</p>
-                            <p class="player-points">{{ player.points }} points</p>
-                            <p class="player-bonuses">{{ player.noBonusesObtained }} bonus</p>
+<div class="results-page-wrapper">
+    <div class="page-container-wrapper">
+        <div class="general-info-section">
+            <h1 class="player-list">Podium</h1>
+            <div class="player-list-div">
+                <div
+                    *ngFor="let player of playerList"
+                    class="player-info-section"
+                    [ngClass]="{
+                        'not-crossed': player.isInGame,
+                        crossed: !player.isInGame,
+                        first: player.points === playerList[0].points
+                    }"
+                >
+                    <div class="user-info">
+                        <app-avatar-banner [avatarUrl]="player.equippedAvatar" [bannerUrl]="player.equippedBanner" class="avatar"></app-avatar-banner>
+                        <div class="player-name">
+                            {{ player.name }}
                         </div>
+                    </div>
+                    <div
+                        *ngIf="player.isInGame && player.reward && player.reward.type === rewardType.Border"
+                        class="reward"
+                        [ngClass]="player.reward.rarity || 'common'"
+                    >
+                        <app-avatar-banner [bannerUrl]="player.reward.value" class="item-img"></app-avatar-banner>
+                    </div>
+
+                    <div
+                        *ngIf="player.isInGame && player.reward && player.reward.type === rewardType.Coins"
+                        class="reward"
+                        [ngClass]="player.reward.rarity || 'common'"
+                    >
+                        <div *ngIf="player.reward.value === 10" class="item-img-coins">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 24 24">
+                                <g fill="var(--text-color)">
+                                    <path
+                                        fill="currentColor"
+                                        d="M12 5c2.592 0 4.986.465 6.77 1.258c.89.396 1.674.893 2.247 1.496c.53.557.914 1.243.975 2.029L22 10v4c0 .878-.404 1.639-.983 2.246c-.573.603-1.356 1.1-2.247 1.496C16.986 18.535 14.592 19 12 19s-4.986-.465-6.77-1.258c-.89-.396-1.674-.893-2.247-1.496c-.53-.557-.914-1.243-.975-2.029L2 14v-4c0-.878.404-1.639.983-2.246c.573-.603 1.356-1.1 2.247-1.496C7.014 5.465 9.408 5 12 5m8 8.08c-.375.246-.79.466-1.23.662C16.986 14.535 14.592 15 12 15s-4.986-.465-6.77-1.258A9 9 0 0 1 4 13.08V14c0 .227.1.518.432.868c.337.354.872.719 1.61 1.047C7.516 16.57 9.622 17 12 17s4.484-.43 5.958-1.085c.738-.328 1.273-.693 1.61-1.047c.333-.35.432-.641.432-.868z"
+                                    />
+                                </g>
+                            </svg>
+                            <p>10</p>
+                        </div>
+                        <div *ngIf="player.reward.value === 50" class="item-img-coins">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 24 24">
+                                <g fill="var(--text-color)">
+                                    <path
+                                        fill="currentColor"
+                                        d="M21 16.143V17.5c0 .814-.381 1.51-.91 2.057c-.523.542-1.233.984-2.032 1.334C16.456 21.591 14.314 22 12 22s-4.456-.408-6.058-1.109c-.799-.35-1.509-.792-2.032-1.334c-.485-.5-.845-1.128-.902-1.856L3 17.5v-1.357q.697.398 1.494.695c2.03.751 4.685 1.17 7.506 1.17s5.476-.419 7.506-1.17q.598-.222 1.139-.503zm-18-5.5q.697.398 1.494.695c2.03.751 4.685 1.17 7.506 1.17s5.476-.419 7.506-1.17A10 10 0 0 0 21 10.643v3.105a8.3 8.3 0 0 1-2.188 1.214c-1.755.65-4.164 1.047-6.812 1.047c-2.647 0-5.056-.397-6.812-1.047A8.3 8.3 0 0 1 3 13.748zM12 3c2.314 0 4.456.408 6.058 1.109c.799.35 1.509.792 2.032 1.334c.485.5.845 1.128.902 1.856L21 7.5v.748a8.3 8.3 0 0 1-2.188 1.214c-1.755.65-4.164 1.047-6.812 1.047c-2.647 0-5.056-.397-6.812-1.047a8.3 8.3 0 0 1-1.905-1.006L3 8.248V7.5c0-.814.381-1.51.91-2.057c.523-.542 1.233-.984 2.032-1.334C7.544 3.409 9.686 3 12 3"
+                                    />
+                                </g>
+                            </svg>
+                            <p>50</p>
+                        </div>
+                    </div>
+
+                    <div *ngIf="!player.isInGame" class="reward common">
+                        <i class="fa-solid fa-x"></i>
+                    </div>
+                    <div class="player-quiz-info">
+                        <p class="player-points">{{ player.points }} points</p>
+                        <p class="player-bonuses">{{ player.noBonusesObtained }} bonus</p>
                     </div>
                 </div>
             </div>
-            <button id="abandon-button" routerLink="/home">Quitter</button>
         </div>
-        <div id="chat-separator"></div>
-        <app-chat id="chat-container"></app-chat>
+        <button id="abandon-button" class="custom-button-medium" routerLink="/home">Quitter</button>
     </div>
 </div>

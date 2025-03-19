@@ -109,7 +109,7 @@ export class QuestionService {
         let correct = true;
         for (const choice of choices) {
             if (choice.isCorrect) {
-                if (!choice.isSelected) correct = false;
+                if (!choice) correct = false;
             } else {
                 if (choice.isSelected) correct = false;
             }
