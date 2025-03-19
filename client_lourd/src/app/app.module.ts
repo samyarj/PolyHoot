@@ -83,6 +83,10 @@ import { GlobalErrorHandlerService } from './services/global-error-handler.servi
 import { HeaderNavigationService } from './services/ui-services/header-navigation.service';
 import { ThemeService } from './services/ui-services/theme/theme.service';
 import { SocketClientService } from './services/websocket-services/general/socket-client-manager.service';
+import { CreatePollComponent } from './pages/poll-related/create-poll/create-poll.component';
+import { PollManagementComponent } from './pages/poll-related/poll-management/poll-management.component';
+import { PollHistoryComponent } from './pages/poll-related/poll-history/poll-history.component';
+import { AnswerPollComponent } from './pages/poll-related/answer-poll/answer-poll.component';
 
 /**
  * Main module that is used in main.ts.
@@ -146,6 +150,10 @@ import { SocketClientService } from './services/websocket-services/general/socke
         ConsultPollPageComponent,
         CreatePollPageComponent,
         PollMainPageComponent,
+        CreatePollComponent,
+        PollManagementComponent,
+        PollHistoryComponent,
+        AnswerPollComponent,
     ],
     providers: [
         AuthService,
