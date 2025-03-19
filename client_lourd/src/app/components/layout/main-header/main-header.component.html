@@ -1,6 +1,6 @@
-<header class="main-header" [ngClass]="{ game: isOnGamePage }">
-    <img *ngIf="isOnGamePage" class="logo" src="assets/pictures/logo.png" />
-    <nav *ngIf="!isOnGamePage">
+<header *ngIf="user" class="main-header" [ngClass]="{ game: isOnGamePage }">
+    <img *ngIf="isOnGamePage && user.role === 'player'" class="logo" src="assets/pictures/logo.png" />
+    <nav *ngIf="!isOnGamePage && user.role === 'player'">
         <ul class="left-list">
             <img class="logo" src="assets/pictures/logo.png" />
             <li class="item-background-hover end-category" routerLink="game-home" routerLinkActive="item-background-active">Jouer</li>
@@ -27,7 +27,23 @@
             <li class="item-background-hover end-category" routerLink="luck" routerLinkActive="item-background-active">
                 <i class="fa-solid fa-clover"></i>
             </li>
-            <li *ngIf="user$ | async as user">Coins: {{ user.coins }}</li>
+            <li>Coins: {{ user.coins }}</li>
+        </ul>
+    </nav>
+
+    <nav *ngIf="user.role === 'admin'">
+        <ul class="left-list">
+            <img class="logo" src="assets/pictures/logo.png" />
+            <li class="item-background-hover" routerLink="home" routerLinkActive="item-background-active">Accueil</li>
+        </ul>
+
+        <ul class="right-list">
+            <li class="item-background-hover" routerLink="playerInfo" routerLinkActive="item-background-active">
+                <i class="fa-regular fa-address-book"></i>
+            </li>
+            <li class="item-background-hover end-category" routerLink="polls" routerLinkActive="item-background-active">
+                <i class="fa-solid fa-square-poll-vertical"></i>
+            </li>
         </ul>
     </nav>
 </header>

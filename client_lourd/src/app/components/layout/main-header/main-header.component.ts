@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
 import { HeaderNavigationService } from '@app/services/ui-services/header-navigation.service';
-import { Observable } from 'rxjs';
 
 @Component({
     selector: 'app-main-header',
@@ -10,13 +9,18 @@ import { Observable } from 'rxjs';
     styleUrls: ['./main-header.component.scss'],
 })
 export class MainHeaderComponent {
-    user$: Observable<User | null>;
+    user: User | null;
 
     constructor(
         private authService: AuthService,
         private headerService: HeaderNavigationService,
     ) {
-        this.user$ = this.authService.user$;
+        this.authService.user$.subscribe({
+            next: (user: User | null) => {
+                this.user = user;
+                console.log(user);
+            },
+        });
     }
 
     get isOnGamePage() {
