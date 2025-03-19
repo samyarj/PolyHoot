@@ -1,12 +1,12 @@
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/main-view/sidebar/sidebar.dart';
-import 'package:client_leger/UI/play/widgets/playbutton.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/providers/user_provider.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 class MainScaffold extends ConsumerStatefulWidget {
@@ -20,12 +20,7 @@ class MainScaffold extends ConsumerStatefulWidget {
 
 class _MainScaffoldState extends ConsumerState<MainScaffold> {
   bool _isLoggingOut = false;
-
-  @override
-  void initState() {
-    WebSocketManager.instance.initializeSocketConnection();
-    super.initState();
-  }
+  final double sidebarWidth = 400;
 
   _logout() async {
     if (_isLoggingOut) return;
@@ -33,8 +28,19 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     setState(() {
       _isLoggingOut = true;
     });
+
     try {
-      await ref.read(userProvider.notifier).logout();
+      WebSocketManager.instance.disconnectFromSocket();
+
+      if (mounted) {
+        isLoggedIn.value = false;
+
+        context.go(Paths.logIn);
+
+        Future.delayed(Duration(milliseconds: 100), () {
+          ref.read(userProvider.notifier).logout();
+        });
+      }
     } catch (e) {
       if (!mounted) return;
       showErrorDialog(context, e.toString());
@@ -49,114 +55,202 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
   @override
   Widget build(BuildContext context) {
     final userState = ref.watch(userProvider);
+
     final colorScheme = Theme.of(context).colorScheme;
     return userState.when(data: (user) {
-      WebSocketManager.instance
-          .webSocketSender("identifyMobileClient", user?.uid);
-
       return Scaffold(
-        appBar: AppBar(
-          flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF00115A), Color(0xFF004080)],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-            ),
-          ),
-          title: Row(children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Image.asset(
-                'assets/logo.png',
-                width: 50,
-                height: 50,
-              ),
-            ),
-            PlayButton(
-              onPressed: () => widget.statefulNavigationShell.goBranch(
-                  0), // Go to the Play branch (without clearing nav stack; saves the state!)
-            ),
-            IconButton(
-              icon: const Icon(Icons.edit),
-              iconSize: 34,
-              onPressed: () => context.go(Paths.quiz),
-            ),
-            IconButton(
-              icon: const Icon(Icons.backpack),
-              iconSize: 34,
-              onPressed: () => context.go(Paths.equipped),
-            ),
-            IconButton(
-              icon: const Icon(Icons.attach_money),
-              iconSize: 34,
-              onPressed: () => context.go(Paths.coins),
-            ),
-            Spacer(),
-            IconButton(
-              icon: const Icon(Icons.notifications),
-              iconSize: 34,
-              onPressed: () => {},
-            ),
-            const SizedBox(width: 200),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: PopupMenuButton<int>(
-                onSelected: (value) {
-                  if (value == 1) {
-                    _logout();
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem<int>(
-                    value: 1,
-                    child: Text(
-                      'Déconnexion',
-                      style: TextStyle(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface), // Dynamic text color
-                    ),
-                  ),
-                ],
-                color: Theme.of(context)
-                    .colorScheme
-                    .surface, // Dynamic background color
-                shadowColor: Theme.of(context)
-                    .colorScheme
-                    .shadow, // Dynamic shadow color
-                offset: Offset(0, 48),
-                child: CircleAvatar(
-                  radius: 23,
-                  backgroundImage: user?.avatarEquipped != null
-                      ? NetworkImage(user!.avatarEquipped!)
-                      : AssetImage('assets/default_avatar.png'),
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(kToolbarHeight),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: colorScheme.secondary,
+                  width: 1.5,
                 ),
               ),
             ),
-            const SizedBox(width: 8),
-            Text(
-              user?.username ?? 'Guest',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+            child: AppBar(
+              automaticallyImplyLeading: false,
+              flexibleSpace: Container(
+                color: colorScheme.primary,
               ),
+              title: Row(
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        // Logo
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Image.asset(
+                            'assets/logo.png',
+                            width: 40,
+                            height: 40,
+                          ),
+                        ),
+
+                        TextButton(
+                          onPressed: () => GoRouter.of(context)
+                              .go('${Paths.play}/${Paths.joinGame}'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: colorScheme.tertiary,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                          ),
+                          child: Text(
+                            'Jouer',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(
+                          height: 24,
+                          child: VerticalDivider(
+                            color: colorScheme.onPrimary.withValues(alpha: 0.5),
+                            thickness: 3,
+                            width: 1,
+                          ),
+                        ),
+
+                        TextButton(
+                          onPressed: () => GoRouter.of(context).go(Paths.play),
+                          style: TextButton.styleFrom(
+                            foregroundColor: colorScheme.tertiary,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                          ),
+                          child: Text(
+                            'Accueil',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+
+                        Spacer(),
+                        IconButton(
+                          icon: Icon(Icons.person),
+                          iconSize: 28,
+                          color: colorScheme.tertiary,
+                          onPressed: () => {},
+                        ),
+                        IconButton(
+                          icon: Icon(FontAwesomeIcons.clover),
+                          iconSize: 28,
+                          color: colorScheme.tertiary,
+                          onPressed: () => context.go(Paths.luck),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.backpack),
+                          iconSize: 28,
+                          color: colorScheme.tertiary,
+                          onPressed: () => context.go(Paths.equipped),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.attach_money),
+                          iconSize: 28,
+                          color: colorScheme.tertiary,
+                          onPressed: () => context.go(Paths.coins),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    width: sidebarWidth - 20,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            PopupMenuButton<int>(
+                              onSelected: (value) {
+                                if (value == 1) {
+                                  _logout();
+                                }
+                              },
+                              itemBuilder: (context) => [
+                                PopupMenuItem<int>(
+                                  value: 1,
+                                  child: Text(
+                                    'Déconnexion',
+                                    style:
+                                        TextStyle(color: colorScheme.onSurface),
+                                  ),
+                                ),
+                              ],
+                              color: colorScheme.surface,
+                              shadowColor: colorScheme.shadow,
+                              offset: Offset(0, 48),
+                              child: CircleAvatar(
+                                radius: 22,
+                                backgroundImage: user?.avatarEquipped != null
+                                    ? NetworkImage(user!.avatarEquipped!)
+                                    : AssetImage('assets/default-avatar.png')
+                                        as ImageProvider,
+                                backgroundColor: Colors.transparent,
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user?.username ?? 'Guest',
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.onPrimary,
+                                  ),
+                                ),
+                                Text(
+                                  'Coins: ${user?.coins ?? 0}',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: colorScheme.onPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(width: 8),
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16.0),
+                          child: IconButton(
+                            icon: Icon(Icons.notifications),
+                            iconSize: 28,
+                            color: colorScheme.tertiary,
+                            onPressed: () {},
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              iconTheme: IconThemeData(color: colorScheme.onPrimary),
             ),
-          ]),
-          iconTheme: const IconThemeData(color: Colors.white),
+          ),
         ),
+        //),
+        //),
         body: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(child: widget.statefulNavigationShell),
-            SizedBox(width: 400, child: SideBar(user: user)),
+            SizedBox(width: sidebarWidth, child: SideBar(user: user)),
           ],
         ),
       );
     }, loading: () {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
           child: ThemedProgressIndicator(),
         ),

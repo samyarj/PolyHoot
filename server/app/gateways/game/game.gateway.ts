@@ -67,8 +67,12 @@ export class GameGateway {
     handleCurrentPlayers(@ConnectedSocket() client: AuthenticatedSocket, @MessageBody() data: { roomId: string }) {
         const roomId = data.roomId;
         const game = this.gameManager.getGameByRoomId(roomId);
-        const playerNames = game.players.map((player) => player.name);
-        return playerNames;
+        const playersInfo = game.players.map((player) => ({
+            name: player.name,
+            avatar: player.equippedAvatar,
+            banner: player.equippedBorder,
+        }));
+        return { playersInfo };
     }
 
     @SubscribeMessage(GameEvents.GetCurrentGames)
@@ -195,6 +199,7 @@ export class GameGateway {
             const player = game.players.find((player) => player.name === playerName);
             player.socket.emit(GameEvents.PlayerBanned);
             game.removePlayer(playerName);
+            this.gameManager.socketRoomsMap.delete(player.socket);
         }
         const playersInfo = this.gameManager.getGameByRoomId(roomId).players.map((player) => ({
             name: player.name,
