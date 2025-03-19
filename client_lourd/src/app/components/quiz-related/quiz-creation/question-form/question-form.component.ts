@@ -2,7 +2,7 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { EMPTY_STRING, MAX_CHOICES, MIN_CHOICES } from '@app/constants/constants';
 import { ButtonType } from '@app/constants/enum-class';
-import { EMPTY_QCM_QUESTION, EMPTY_QRE_QUESTION,  } from '@app/constants/mock-constants';
+import { EMPTY_QCM_QUESTION, EMPTY_QRE_QUESTION } from '@app/constants/mock-constants';
 import { Question } from '@app/interfaces/question';
 import { QuestionChoice } from '@app/interfaces/question-choice';
 import { QuestionType } from '@app/interfaces/question-type';
