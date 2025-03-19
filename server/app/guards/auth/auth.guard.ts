@@ -64,7 +64,6 @@ export class WsAuthGuard implements CanActivate {
                 email: decodedToken.email,
                 displayName: userRecord.displayName,
             };
-
             return true;
         } catch (error) {
             throw new WsException('Invalid or expired token.');

@@ -1,5 +1,6 @@
 import { BONUS_MULTIPLIER } from '@app/constants';
 import { QuestionType } from '@app/constants/enum-classes';
+import { User } from '@app/interface/user';
 import { Question } from '@app/model/schema/question/question';
 import { Injectable } from '@nestjs/common';
 import { ConnectedSocket } from '@nestjs/websockets';
@@ -24,8 +25,11 @@ export class Player {
         rightAnswerPercentage: number;
         timeSpent: number;
     };
+    uid: string;
+    equippedAvatar: string;
+    equippedBorder: string;
 
-    constructor(name: string, isOrganizer: boolean, @ConnectedSocket() client: Socket) {
+    constructor(name: string, isOrganizer: boolean, @ConnectedSocket() client: Socket, user: User) {
         this.name = name;
         this.isOrganizer = isOrganizer;
         this.isInGame = false;
@@ -41,6 +45,9 @@ export class Player {
             rightAnswerPercentage: 0,
             timeSpent: 0,
         };
+        this.uid = user.uid;
+        this.equippedAvatar = user.avatarEquipped;
+        this.equippedBorder = user.borderEquipped;
     }
 
     prepareForNextQuestion() {

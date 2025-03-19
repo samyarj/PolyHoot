@@ -43,8 +43,10 @@ export class CreatePageComponent {
 
     openDialog(quiz: Quiz): void {
         this.dialog.open(PopUpCreationComponent, {
-            width: this.quizPopUpWidth,
-            data: quiz,
+            width: '50%',
+            backdropClass: 'quiz-info-popup',
+            panelClass: 'custom-container',
+            data: { quiz, isCreate: true },
         });
     }
 

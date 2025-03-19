@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { HeaderNavigationService } from '@app/services/ui-services/header-navigation.service';
 
 @Component({
     selector: 'app-secondary-header',
@@ -13,7 +14,12 @@ export class SecondaryHeaderComponent {
     constructor(
         private router: Router,
         public dialog: MatDialog,
+        private headerService: HeaderNavigationService,
     ) {}
+
+    get isOnGame() {
+        return this.headerService.isGameRelatedRoute;
+    }
 
     navigate(route: string): void {
         this.router.navigate([route]);

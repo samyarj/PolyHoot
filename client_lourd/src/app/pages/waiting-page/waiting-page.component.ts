@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { moveDownAnimation, moveUpAnimation, playerJoinAnimation, playerLeftAnimation } from '@app/animations/animation';
 import { START_GAME_COUNTDOWN } from '@app/constants/constants';
 import { AppRoute, ConfirmationMessage } from '@app/constants/enum-class';
+import { User } from '@app/interfaces/user';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
 import { WaitingPageService } from '@app/services/waiting-room-services/waiting-page.service';
 import { Subscription } from 'rxjs';
@@ -15,6 +16,8 @@ import { Subscription } from 'rxjs';
     animations: [playerJoinAnimation, playerLeftAnimation, moveUpAnimation, moveDownAnimation],
 })
 export class WaitingPageComponent implements OnDestroy {
+    name: string = '';
+
     private hasTimerEnded: boolean = false;
     private isorganizerDisconnected: boolean = false;
     private isplayerBanned: boolean = false;
@@ -22,6 +25,7 @@ export class WaitingPageComponent implements OnDestroy {
     private bannedSubscription: Subscription;
     private organizorDisconnectedSub: Subscription;
     private timerEndSubscription: Subscription;
+
     // constructeur a 4 parametres permis selon les charges et le prof, etant donne la nature des attributs
     // eslint-disable-next-line max-params
     constructor(
@@ -32,11 +36,13 @@ export class WaitingPageComponent implements OnDestroy {
     ) {
         this.onUnload();
         this.handleSocketSubscriptions();
+        this.waitingPageService.playerName.subscribe((value: User | null) => {
+            if (value) {
+                this.name = value.username;
+            }
+        });
     }
 
-    get name(): string {
-        return this.waitingPageService.playerName;
-    }
     get roomId() {
         return this.waitingPageService.roomId;
     }
@@ -61,6 +67,10 @@ export class WaitingPageComponent implements OnDestroy {
         return this.waitingPageService.time;
     }
 
+    get isPlayersListEmpty(): boolean {
+        return this.waitingPageService.isPlayersListEmpty;
+    }
+
     @HostListener('window:beforeunload')
     handleBeforeUnload() {
         localStorage.setItem('navigatedFromUnload', 'true');
@@ -71,6 +81,20 @@ export class WaitingPageComponent implements OnDestroy {
         this.organizorDisconnectedSub.unsubscribe();
         this.bannedSubscription.unsubscribe();
         this.timerEndSubscription.unsubscribe();
+    }
+
+    trackByPlayer(
+        index: number,
+        player: {
+            name: string;
+            avatar: string;
+            banner: string;
+        },
+    ) {
+        return player.name;
+    }
+    onPopOutDone() {
+        this.waitingPageService.onPopOutDone();
     }
 
     toggleGameLock() {

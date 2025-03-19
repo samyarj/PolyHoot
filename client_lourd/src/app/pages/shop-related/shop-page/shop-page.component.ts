@@ -42,6 +42,7 @@ export class ShopPageComponent {
 
         const dialogRef = this.matdialog.open(ConfirmationDialogComponent, {
             width: WIDTH_SIZE,
+            panelClass: 'custom-container',
             data: `Voulez vous acheter ${messageTarget}?`,
         });
 
@@ -59,6 +60,7 @@ export class ShopPageComponent {
                     case false: {
                         this.matdialog.open(ErrorDialogComponent, {
                             width: '400px',
+                            panelClass: 'custom-container',
                             data: {
                                 message: "Vous possèdez déjà l'item obtenu. Vous serez ramboursé sur l'item.",
                                 reloadOnClose: false,
@@ -74,6 +76,7 @@ export class ShopPageComponent {
                     case null: {
                         this.matdialog.open(ErrorDialogComponent, {
                             width: '400px',
+                            panelClass: 'custom-container',
                             data: {
                                 message: "Vous n'avez pas assez d'argent pour vous procurer l'item :(.",
                                 reloadOnClose: false,

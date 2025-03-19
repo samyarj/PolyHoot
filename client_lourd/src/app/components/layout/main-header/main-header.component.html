@@ -1,5 +1,6 @@
-<header class="main-header">
-    <nav>
+<header class="main-header" [ngClass]="{ game: isOnGamePage }">
+    <img *ngIf="isOnGamePage" class="logo" src="assets/pictures/logo.png" />
+    <nav *ngIf="!isOnGamePage">
         <ul class="left-list">
             <img class="logo" src="assets/pictures/logo.png" />
             <li class="item-background-hover end-category" routerLink="game-home" routerLinkActive="item-background-active">Jouer</li>
