@@ -335,17 +335,17 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
   void dispose() {
     if (!mounted) return;
     AppLogger.i("Disposing GamePlayerProvider");
-    _socketManager.socket.off(GameEvents.WaitingForCorrection.value);
-    _socketManager.socket.off(TimerEvents.Paused.value);
-    _socketManager.socket.off(TimerEvents.AlertModeStarted.value);
-    _socketManager.socket.off(TimerEvents.QuestionCountdownValue.value);
-    _socketManager.socket.off(TimerEvents.QuestionCountdownEnd.value);
-    _socketManager.socket.off(TimerEvents.Value.value);
-    _socketManager.socket.off(TimerEvents.End.value);
-    _socketManager.socket.off(GameEvents.NextQuestion.value);
-    _socketManager.socket.off(GameEvents.PlayerPointsUpdate.value);
-    _socketManager.socket.off(DisconnectEvents.OrganizerHasLeft.value);
-    _socketManager.socket.off(GameEvents.SendResults.value);
+    _socketManager.socket?.off(GameEvents.WaitingForCorrection.value);
+    _socketManager.socket?.off(TimerEvents.Paused.value);
+    _socketManager.socket?.off(TimerEvents.AlertModeStarted.value);
+    _socketManager.socket?.off(TimerEvents.QuestionCountdownValue.value);
+    _socketManager.socket?.off(TimerEvents.QuestionCountdownEnd.value);
+    _socketManager.socket?.off(TimerEvents.Value.value);
+    _socketManager.socket?.off(TimerEvents.End.value);
+    _socketManager.socket?.off(GameEvents.NextQuestion.value);
+    _socketManager.socket?.off(GameEvents.PlayerPointsUpdate.value);
+    _socketManager.socket?.off(DisconnectEvents.OrganizerHasLeft.value);
+    _socketManager.socket?.off(GameEvents.SendResults.value);
     resetAttributes();
     super.dispose();
   }

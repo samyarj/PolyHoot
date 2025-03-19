@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { SocketClientService } from './../websocket-services/general/socket-client-manager.service';
 /* eslint-disable @typescript-eslint/naming-convention */
 import { HttpClient } from '@angular/common/http';
