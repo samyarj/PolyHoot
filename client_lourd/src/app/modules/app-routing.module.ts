@@ -1,6 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { authGuard } from '@app/guards/auth.guard';
+import { authGuard, authGuardAdmin } from '@app/guards/auth.guard';
+import { PlayerInfoPageComponent } from '@app/pages/admin-pages/player-info-page/player-info-page.component';
+import { ConsultPollPageComponent } from '@app/pages/admin-pages/poll-related/consult-poll-page/consult-poll-page.component';
+import { CreatePollPageComponent } from '@app/pages/admin-pages/poll-related/create-poll-page/create-poll-page.component';
+import { HistoryPollPageComponent } from '@app/pages/admin-pages/poll-related/history-poll-page/history-poll-page.component';
+import { PollMainPageComponent } from '@app/pages/admin-pages/poll-related/poll-main-page/poll-main-page.component';
 import { ForgotPasswordComponent } from '@app/pages/auth/forgot-password/forgot-password.component';
 import { LoginPageComponent } from '@app/pages/auth/login-page/login-page.component';
 import { SignUpComponent } from '@app/pages/auth/sign-up/sign-up.component';
@@ -93,6 +98,20 @@ const routes: Routes = [
 
     { path: 'global-chat', component: GlobalChatComponent, canActivate: [authGuard] },
     { path: 'profile', component: ProfilePageComponent, canActivate: [authGuard] },
+
+    { path: 'playerInfo', component: PlayerInfoPageComponent, canActivate: [authGuardAdmin] },
+    {
+        path: 'polls',
+        component: PollMainPageComponent,
+        canActivate: [authGuardAdmin],
+        children: [
+            { path: '', redirectTo: 'consult', pathMatch: 'full' },
+            { path: 'consult', component: ConsultPollPageComponent, canActivate: [authGuard] },
+            { path: 'create', component: CreatePollPageComponent, canActivate: [authGuard] },
+            { path: 'history', component: HistoryPollPageComponent, canActivate: [authGuard] },
+        ],
+    },
+
     { path: '**', redirectTo: '/home' },
 ];
 

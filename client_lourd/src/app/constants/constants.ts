@@ -158,8 +158,8 @@ export const NAV_ADMIN_INFO: NavItem[] = [
         description: 'Observez les joueurs et leurs informations!',
         screenshots: [
             {
-                image: 'playerList.png',
-                route: '/admin/playerList',
+                image: 'playerInfo.png',
+                route: 'playerInfo',
                 buttonDescription: 'Consultez les joueurs',
             },
         ],
@@ -170,11 +170,11 @@ export const NAV_ADMIN_INFO: NavItem[] = [
         screenshots: [
             {
                 image: 'pollList.png',
-                route: '/admin/pollList',
+                route: '/polls/consult',
                 buttonDescription: 'Voir les sondages',
             },
-            { image: 'createPoll.png', route: '/admin/createPoll', buttonDescription: 'Créer un sondage' },
-            { image: 'createPoll.png', route: '/admin/createPoll', buttonDescription: 'Historique des sondages' },
+            { image: 'createPoll.png', route: '/polls/create', buttonDescription: 'Créer un sondage' },
+            { image: 'createPoll.png', route: '/polls/history', buttonDescription: 'Historique des sondages' },
         ],
     },
 ];

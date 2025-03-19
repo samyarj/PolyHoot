@@ -44,6 +44,11 @@ import { CreateQuizComponent } from './components/quiz-related/quiz-creation/cre
 import { QuestionFormComponent } from './components/quiz-related/quiz-creation/question-form/question-form.component';
 import { ErrorInterceptor } from './interceptors/error.interceptor';
 import { AppRoutingModule } from './modules/app-routing.module';
+import { PlayerInfoPageComponent } from './pages/admin-pages/player-info-page/player-info-page.component';
+import { ConsultPollPageComponent } from './pages/admin-pages/poll-related/consult-poll-page/consult-poll-page.component';
+import { CreatePollPageComponent } from './pages/admin-pages/poll-related/create-poll-page/create-poll-page.component';
+import { HistoryPollPageComponent } from './pages/admin-pages/poll-related/history-poll-page/history-poll-page.component';
+import { PollMainPageComponent } from './pages/admin-pages/poll-related/poll-main-page/poll-main-page.component';
 import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-password.component';
 import { LoginPageComponent } from './pages/auth/login-page/login-page.component';
 import { SignUpComponent } from './pages/auth/sign-up/sign-up.component';
@@ -136,6 +141,11 @@ import { SocketClientService } from './services/websocket-services/general/socke
         LootBoxComponent,
         ProfilePageComponent,
         AvatarBannerComponent,
+        PlayerInfoPageComponent,
+        HistoryPollPageComponent,
+        ConsultPollPageComponent,
+        CreatePollPageComponent,
+        PollMainPageComponent,
     ],
     providers: [
         AuthService,
