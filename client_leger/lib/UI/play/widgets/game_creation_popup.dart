@@ -1,6 +1,7 @@
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/quiz.dart';
+import 'package:client_leger/utilities/logger.dart';
 import 'package:client_leger/utilities/socket_events.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -24,7 +25,7 @@ class GameCreationPopup {
       context: context,
       builder: (context) {
         return Dialog(
-          insetPadding: EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+          //insetPadding: EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
           child: Container(
             width: 700,
             height: 550,
@@ -192,8 +193,10 @@ class GameCreationPopup {
 
   static void _createGame(BuildContext context, Quiz quiz) {
     final socket = WebSocketManager.instance;
+    AppLogger.i('Creating game with quiz: ${quiz.toJson()}');
 
     socket.webSocketSender(JoinEvents.Create.value, quiz.toJson(), (roomId) {
+      AppLogger.i('Creating game with quiz: $roomId');
       socket.setRoomId(roomId);
       socket.isOrganizer = true;
       Navigator.pop(context);

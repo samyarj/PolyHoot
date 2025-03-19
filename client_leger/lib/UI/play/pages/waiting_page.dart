@@ -27,7 +27,7 @@ class WaitingPage extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final canStartGame = socketManager.isOrganizer &&
         waitingState.gameLocked &&
-        waitingState.players.isNotEmpty;
+        waitingState.playersInfo.isNotEmpty;
 
     ref.listen(waitingPageProvider, (previous, next) {
       if (next.banned) {
@@ -156,7 +156,7 @@ class WaitingPage extends ConsumerWidget {
                               ),
                             ],
                           )
-                        : waitingState.players.isEmpty
+                        : waitingState.playersInfo.isEmpty
                             ? Center(
                                 child: Text(
                                   "Invitez vos amis à rejoindre la partie !",
@@ -170,9 +170,13 @@ class WaitingPage extends ConsumerWidget {
                             : ListView.builder(
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 18, horizontal: 50),
-                                itemCount: waitingState.players.length,
+                                itemCount: waitingState.playersInfo.length,
                                 itemBuilder: (context, index) {
-                                  final player = waitingState.players[index];
+                                  final player =
+                                      waitingState.playersInfo[index];
+                                  final isPlayer =
+                                      WebSocketManager.instance.playerName ==
+                                          player.name;
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 6, horizontal: 20),
@@ -185,15 +189,19 @@ class WaitingPage extends ConsumerWidget {
                                             colorScheme.secondary
                                                 .withValues(alpha: 0.6),
                                             colorScheme.secondary
-                                                .withValues(alpha: 0.3),
-                                            colorScheme.primary
-                                                .withValues(alpha: 0.6),
-                                            colorScheme.primary,
-                                            colorScheme.primary,
-                                            colorScheme.primary
-                                                .withValues(alpha: 0.6),
+                                                .withValues(alpha: 0.5),
+                                            if (isPlayer)
+                                              colorScheme.primary
+                                                  .withValues(alpha: 0.7),
+                                            colorScheme.primary.withValues(
+                                                alpha: isPlayer ? 0.2 : 0.8),
+                                            colorScheme.primary.withValues(
+                                                alpha: isPlayer ? 0.2 : 0.8),
+                                            if (isPlayer)
+                                              colorScheme.primary
+                                                  .withValues(alpha: 0.7),
                                             colorScheme.secondary
-                                                .withValues(alpha: 0.3),
+                                                .withValues(alpha: 0.5),
                                             colorScheme.secondary
                                                 .withValues(alpha: 0.6),
                                           ],
@@ -212,16 +220,15 @@ class WaitingPage extends ConsumerWidget {
                                         children: [
                                           // Avatar
                                           CircleAvatar(
-                                            backgroundImage: const AssetImage(
-                                                'assets/default-avatar.png'),
+                                            backgroundImage:
+                                                NetworkImage(player.avatar),
                                             backgroundColor:
                                                 colorScheme.secondary,
-                                            radius: 18,
+                                            radius: 22,
                                           ),
-
                                           // Username text
                                           Text(
-                                            player,
+                                            player.name,
                                             style: TextStyle(
                                               fontSize: 20,
                                               fontWeight: FontWeight.bold,
@@ -238,7 +245,7 @@ class WaitingPage extends ConsumerWidget {
                                                         .read(
                                                             waitingPageProvider
                                                                 .notifier)
-                                                        .banPlayer(player);
+                                                        .banPlayer(player.name);
                                                   },
                                                   style:
                                                       ElevatedButton.styleFrom(
@@ -306,16 +313,28 @@ class WaitingPage extends ConsumerWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             // Lock status text first
-                            Text(
-                              waitingState.gameLocked
-                                  ? "La partie est verrouillée"
-                                  : "Il faut verrouiller la partie et avoir au moins 1 joueur pour commencer",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: colorScheme.onPrimary,
+                            if (socketManager.isOrganizer)
+                              Text(
+                                waitingState.gameLocked
+                                    ? "La partie est verrouillée"
+                                    : "Il faut verrouiller la partie et avoir au moins 1 joueur pour commencer",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: colorScheme.onPrimary,
+                                ),
+                                textAlign: TextAlign.center,
+                              )
+                            else
+                              Text(
+                                waitingState.gameLocked
+                                    ? "La partie est verrouillée"
+                                    : "En attente de l'organisateur pour démarrer la partie",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: colorScheme.onPrimary,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                              textAlign: TextAlign.center,
-                            ),
 
                             const SizedBox(height: 16),
 
@@ -394,26 +413,6 @@ class WaitingPage extends ConsumerWidget {
                                       ),
                                     ),
                                   )
-                                else
-                                  Container(
-                                    padding: const EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.primary
-                                          .withValues(alpha: 0.9),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: colorScheme.tertiary,
-                                        width: 2,
-                                      ),
-                                    ),
-                                    child: Icon(
-                                      waitingState.gameLocked
-                                          ? Icons.lock
-                                          : Icons.lock_open,
-                                      size: 22,
-                                      color: colorScheme.onPrimary,
-                                    ),
-                                  ),
                               ],
                             ),
                           ],

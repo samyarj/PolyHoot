@@ -24,3 +24,10 @@ export const BANNER_SIDALI = 'https://res.cloudinary.com/dtu6fkkm9/image/upload/
 export const BANNER_FIRE = 'https://res.cloudinary.com/dtu6fkkm9/image/upload/t_banner-tranf/v1741417933/border-9_y3zydi.png';
 export const BANNER_GOLD = 'https://res.cloudinary.com/dtu6fkkm9/image/upload/t_banner-tranf/v1741395993/border-3_tqj7qk.png';
 export const BANNER_WATER = 'https://res.cloudinary.com/dtu6fkkm9/image/upload/t_banner-tranf/v1741396855/border-4_mwxkz5.png';
+
+export const BANNER_WINNER_CARTOON_VICE =
+    'https://res.cloudinary.com/dtu6fkkm9/image/upload/t_banner-tranf/v1742242345/Lovepik_com-380314375-twibbon-cute-gradient-colorful-avatar-border-social-media-dazzling_fiqtiw.png';
+export const BANNER_WINNER_VICE =
+    'https://res.cloudinary.com/dtu6fkkm9/image/upload/t_banner-tranf/v1742239403/Pngtree_pink_blue_neon_border_light_9157194_he2nzd.png';
+export const BANNER_WINNER_STROKE =
+    'https://res.cloudinary.com/dtu6fkkm9/image/upload/t_banner-tranf/v1742239292/Pngtree_brush_circle_creative_brush_effect_6020152_lem16c.png';

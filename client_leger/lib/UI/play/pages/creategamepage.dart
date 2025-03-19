@@ -83,29 +83,35 @@ class GameCreationPage extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
-                                        softSecondary.withValues(alpha: 0.5),
+                                        softSecondary.withValues(alpha: 0.2),
+                                        colorScheme.primary
+                                            .withValues(alpha: 0.2),
                                         colorScheme.primary
                                             .withValues(alpha: 0.6),
                                         colorScheme.primary
-                                            .withValues(alpha: 0.8),
+                                            .withValues(alpha: 0.7),
                                         colorScheme.primary
-                                            .withValues(alpha: 0.9),
+                                            .withValues(alpha: 0.75),
                                         colorScheme.primary
-                                            .withValues(alpha: 0.9),
+                                            .withValues(alpha: 0.75),
                                         colorScheme.primary
-                                            .withValues(alpha: 0.8),
+                                            .withValues(alpha: 0.7),
                                         colorScheme.primary
                                             .withValues(alpha: 0.6),
-                                        softSecondary.withValues(alpha: 0.5),
+                                        colorScheme.primary
+                                            .withValues(alpha: 0.2),
+                                        softSecondary.withValues(alpha: 0.2),
                                       ],
                                       stops: const [
                                         0.0,
+                                        0.10,
                                         0.20,
                                         0.25,
                                         0.30,
                                         0.70,
                                         0.75,
                                         0.80,
+                                        0.90,
                                         1.0
                                       ],
                                       begin: Alignment.centerLeft,
@@ -114,7 +120,7 @@ class GameCreationPage extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(40),
                                     border: Border.all(
                                       color: colorScheme.secondary
-                                          .withValues(alpha: 0.5),
+                                          .withValues(alpha: 0.25),
                                       width: 2,
                                     ),
                                     boxShadow: [
