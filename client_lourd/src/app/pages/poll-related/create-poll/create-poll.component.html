@@ -9,12 +9,31 @@
                         class="form-control"
                         id="title"
                         [(ngModel)]="poll.title"
-                        placeholder="Entrez le titre du questionnaire"
+                        placeholder="Entrez le titre du sondage"
                         name="title"
                         required
                         #title="ngModel"
                     />
                     <small class="text-danger" *ngIf="isPollTitleEmpty()"> Il faut un titre.</small>
+                </div>
+                <div class="form-group" id="description">
+                    <label for="description-input">Description du sondage:</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="description-input"
+                        [(ngModel)]="poll.description"
+                        name="description"
+                        maxlength="200"
+                        #descriptionModel="ngModel"
+                        required
+                    />
+                    <small class="text-danger">
+                        <ng-container *ngIf="isDescriptionEmpty()"> Il faut une description.</ng-container>
+                        <ng-container *ngIf="descriptionModel.errors?.maxlength">
+                            La description ne devrait pas avoir plus de 200 caractères.
+                        </ng-container>
+                    </small>
                 </div>
             </div>
         </form>
@@ -26,7 +45,7 @@
                         class="form-control"
                         id="question-text-id"
                         type="text"
-                        [(ngModel)]="currentQuestion.text"
+                        [(ngModel)]="question.text"
                         placeholder="Entrez votre question."
                         name="text"
                         #text="ngModel"
@@ -36,10 +55,10 @@
                 </div>
             </div>
         
-            <div class="form-group answers-section" *ngIf="questionType === 'QCM'">
+            <div class="form-group answers-section">
                 <label class="form-label">Réponses:</label>
                 <div cdkDropList class="answers-list" (cdkDropListDropped)="drop($event)">
-                    <div *ngFor="let choice of currentQuestion.choices; let i = index" class="mb-2 question-choice" cdkDrag>
+                    <div *ngFor="let choice of question.choices; let i = index" class="mb-2 question-choice" cdkDrag>
                         <div class="input-group">
                             <p>{{ i + 1 }}.</p>
                             <input
@@ -53,20 +72,9 @@
                             />
                             <div class="button-section">
                                 <button
-                                    class="btn btn-sm"
-                                    [class.btn-success]="choice.isCorrect"
-                                    [class.btn-danger]="!choice.isCorrect"
-                                    type="button"
-                                    (click)="toggleAnswer(choice)"
-                                    [matTooltip]="choice.isCorrect ? 'Marquer comme faux' : 'Marquer comme vrai'"
-                                    matTooltipClass="tooltip-custom-class"
-                                >
-                                    <i class="fas" [ngClass]="{ 'fa-check': choice.isCorrect, 'fa-circle-xmark': !choice.isCorrect }"></i>
-                                </button>
-                                <button
                                     class="btn btn-dark btn-sm"
                                     type="button"
-                                    *ngIf="currentQuestion.choices && currentQuestion.choices.length > 2"
+                                    *ngIf="question.choices && question.choices.length > 2"
                                     (click)="deleteAnswer(i)"
                                     matTooltip="Supprimer"
                                 >
@@ -76,34 +84,20 @@
                             </div>
                         </div>
                         <small class="form-text text-danger" *ngIf="answer.invalid && (answer.dirty || answer.touched)"> La réponse est requise </small>
-                        <div class="upload-section">
-                            <input type="file" (change)="onFileSelectedAndUpload($event, choice)" accept="image/*" #fileInput style="display: none" />
-                            <button (click)="fileInput.click(); $event.stopPropagation(); $event.preventDefault();" class="upload-btn">
-                                Téléverser une image pour cette réponse
-                            </button>
-                            <button (click)="deleteImage(choice); $event.stopPropagation(); $event.preventDefault();" class="upload-btn">
-                                Supprimer l'image de cette réponse
-                            </button>
-                            <div *ngIf="choice.image">
-                                <p>Image téléversée :</p>
-                                <img [src]="choice.image" alt="Image associée" style="max-width: 100%; height: auto" />
-                            </div>
-                        </div>
                     </div>
                 </div>
         
-                <button class="btn btn-secondary btn-sm" type="button" *ngIf="currentQuestion.choices && currentQuestion.choices.length < 4" (click)="addAnswer()">
+                <button class="btn btn-secondary btn-sm" type="button" *ngIf="question.choices && question.choices.length < 4" (click)="addAnswer()">
                     <i matTooltip="Ajouter un choix de réponse" class="fa-solid fa-plus"></i>
                 </button>
         
-                <div *ngIf="!hasAtLeastOneTrueAndFalseChoice()" class="text-danger">*Au moins un choix devrait être faux et un vrai.</div>
                 <div *ngIf="!validUniqueChoiceTexts()" class="text-danger">*Les choix de réponse doivent être uniques</div>
                 <div *ngIf="!questionForm.valid || !areQuestionChoicesTextValid()" class="text-danger">*Tous les champs sont requis.</div>
             </div>
             <div class="submit-section">
                 <button *ngIf="showButton" type="button" class="btn btn-dark custom-width" (click)="resetAnswers()">Tout effacer</button>
-                <button *ngIf="showButton" type="submit" class="btn custom-button custom-width" [disabled]="!questionForm.valid || !validQuestion()">
-                    {{ submitButton }}
+                <button *ngIf="showButton" type="submit" class="btn custom-button custom-width" [disabled]="!questionForm.valid">
+                    {{ submitQuestionButton }}
                 </button>
             </div>
         </form>
@@ -135,6 +129,6 @@
 <div class="submit-game-section">
     <button (click)="emptyPollAndRedirect()" class="btn btn-danger custom-width">Annuler</button>
     <button class="btn btn-primary custom-width" [disabled]="!gameForm.valid || !validatePoll()" (click)="submitPollEvent()">
-        {{ submitpollButton }}
+        {{ submitPollButton }}
     </button>
 </div>

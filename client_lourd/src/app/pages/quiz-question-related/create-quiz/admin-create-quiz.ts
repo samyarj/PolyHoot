@@ -38,7 +38,7 @@ export class AdminQuizCreateComponent implements OnDestroy {
 
     private errorObserver: Partial<Observer<Quiz[]>> = {
         next: () => {
-            this.router.navigate([AppRoute.ADMIN]);
+            this.router.navigate([AppRoute.QUIZMANAGEMENT]);
         },
         error: (httpErrorResponse: HttpErrorResponse) => {
             this.messageHandler.popUpErrorDialog(httpErrorResponse.error.message);

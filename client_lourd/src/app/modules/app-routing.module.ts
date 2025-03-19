@@ -97,17 +97,9 @@ const routes: Routes = [
     { path: 'global-chat', component: GlobalChatComponent, canActivate: [authGuard] },
     { path: 'profile', component: ProfilePageComponent, canActivate: [authGuard] },
     { path: '**', redirectTo: '/home' },
-    {
-        path: 'polls-management',
-        component: QuizManagementMainPageComponent,
-        canActivate: [authGuard],
-        children: [
-            { path: '', redirectTo: 'polls', pathMatch: 'full' },
-            { path: 'polls', component: PollManagementComponent, canActivate: [authGuard] },
-            { path: 'polls-expired', component: PollHistoryComponent, canActivate: [authGuard] },
-            { path: 'polls/create', component: CreatePollComponent, canActivate: [authGuard] },
-        ],
-    },
+    { path: 'polls', component: PollManagementComponent, canActivate: [authGuard] },
+    { path: 'polls-expired', component: PollHistoryComponent, canActivate: [authGuard] },
+    { path: 'polls/create', component: CreatePollComponent, canActivate: [authGuard] },
 ];
 
 @NgModule({

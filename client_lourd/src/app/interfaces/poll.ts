@@ -1,9 +1,17 @@
 import { Question } from './question';
-import { QuestionChoice } from './question-choice';
 export interface Poll {
+    id?: string;
     title: string;
+    description: string;
     questions: Question[];
-    choices: QuestionChoice[];
     expired: boolean;
     expireDate: Date;
+    isPublished?: boolean;
+}
+
+export interface PublishedPoll extends Poll {
+    isPublished: true;
+    publicationDate: string;
+    endDate: string;
+    totalVotes: number[][];
 }
