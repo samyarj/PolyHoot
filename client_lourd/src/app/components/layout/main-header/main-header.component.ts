@@ -18,12 +18,15 @@ export class MainHeaderComponent {
         this.authService.user$.subscribe({
             next: (user: User | null) => {
                 this.user = user;
-                console.log(user);
             },
         });
     }
 
     get isOnGamePage() {
         return this.headerService.isGameRelatedRoute;
+    }
+
+    openPollAnswer() {
+        console.log('REAL');
     }
 }
