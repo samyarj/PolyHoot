@@ -6,6 +6,7 @@ import 'package:client_leger/providers/user_provider.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 class MainScaffold extends ConsumerStatefulWidget {
@@ -57,8 +58,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
 
     final colorScheme = Theme.of(context).colorScheme;
     return userState.when(data: (user) {
-      WebSocketManager.instance
-          .webSocketSender("identifyMobileClient", user?.uid);
       return Scaffold(
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(kToolbarHeight),
@@ -141,10 +140,10 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                           onPressed: () => {},
                         ),
                         IconButton(
-                          icon: Icon(Icons.build),
+                          icon: Icon(FontAwesomeIcons.clover),
                           iconSize: 28,
                           color: colorScheme.tertiary,
-                          onPressed: () => context.go(Paths.quiz),
+                          onPressed: () => context.go(Paths.luck),
                         ),
                         IconButton(
                           icon: Icon(Icons.backpack),
