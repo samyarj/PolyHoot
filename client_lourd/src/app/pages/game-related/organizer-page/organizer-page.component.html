@@ -71,15 +71,44 @@
                         </div>
                     </div>
                 </div>
-
+                <div *ngIf="question.type !== 'QRL'" class="info-section-qcm-qre">
+                    <div
+                        class="qcm-qre-content-logo"
+                        [ngClass]="{
+                            green: gameStatus === 'correctionFinished' || gameStatus === 'waitingForNextQuestion' || gameStatus === 'gameFinished'
+                        }"
+                    >
+                        <div *ngIf="question.type !== 'QRL'" class="img-container">
+                            <p class="question-type">{{ question.type }}</p>
+                            <img class="logo" src="assets/pictures/logo.png" />
+                            <p class="question-type">{{ question.type }}</p>
+                        </div>
+                    </div>
+                    <div *ngIf="question.type === 'QCM'" class="qcm-content">
+                        <div
+                            *ngFor="let questionChoice of question.choices"
+                            [ngClass]="questionChoice.isCorrect ? 'correct-choice' : 'incorrect-choice'"
+                            class="multiple-choice"
+                        >
+                            {{ questionChoice.text }}
+                        </div>
+                    </div>
+                    <div *ngIf="question.type === 'QRE' && question.qreAttributes" class="qre-content">
+                        <div class="exact-value">Reponse exacte : {{ question.qreAttributes.goodAnswer }}</div>
+                        <div class="lower-bound">{{ question.qreAttributes.minBound }}</div>
+                        <div class="margin">&plusmn;{{ question.qreAttributes.tolerance }}</div>
+                        <div class="upper-bound">{{ question.qreAttributes.maxBound }}</div>
+                    </div>
+                </div>
                 <div
+                    *ngIf="question.type === 'QRL'"
                     class="evaluation-section"
                     [ngClass]="{
                         green: gameStatus === 'correctionFinished' || gameStatus === 'waitingForNextQuestion' || gameStatus === 'gameFinished',
                         active: gameStatus === 'organizerCorrecting'
                     }"
                 >
-                    <div *ngIf="gameStatus !== 'organizerCorrecting'" class="qcm-qre-content">
+                    <div *ngIf="gameStatus !== 'organizerCorrecting' && question.type === 'QRL'" class="qcm-qre-content">
                         <img class="logo" src="assets/pictures/logo.png" />
                         <p class="question-type">{{ question.type }}</p>
                     </div>
