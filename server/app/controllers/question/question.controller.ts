@@ -67,6 +67,7 @@ export class QuestionController {
         try {
             await this.questionService.createQuestion(createQuestionDto);
             const updatedQuestions = await this.questionService.getAllQuestions();
+            console.log(updatedQuestions.filter((question) => question.text === createQuestionDto.text));
             response.status(HttpStatus.CREATED).json(updatedQuestions);
         } catch (error) {
             if (error.status === HttpStatus.CONFLICT) {

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DisconnectEvents, GameEvents } from '@app/constants/enum-class';
+import { Reward } from '@app/interfaces/lootbox-related';
 import { SocketClientService } from '@app/services/websocket-services/general/socket-client-manager.service';
 
 interface PlayerData {
@@ -7,6 +8,9 @@ interface PlayerData {
     points: number;
     noBonusesObtained: number;
     isInGame: boolean;
+    reward: Reward | null;
+    equippedAvatar: string;
+    equippedBanner: string;
 }
 
 @Injectable({
@@ -15,7 +19,6 @@ interface PlayerData {
 export class ResultsService {
     playerList: PlayerData[];
     nbPlayers: number;
-    sortedPlayersList: PlayerData[] = [];
     resultsReady: boolean = false;
 
     constructor(private socketHandlerService: SocketClientService) {
@@ -28,21 +31,6 @@ export class ResultsService {
 
     setAttributes() {
         this.nbPlayers = this.playerList.length;
-    }
-
-    sortPlayers() {
-        const comparePlayers = (a: PlayerData, b: PlayerData) => {
-            if (a.points === b.points) {
-                return a.name.localeCompare(b.name);
-            } else {
-                return b.points - a.points;
-            }
-        };
-        const playersInGame = this.playerList.filter((player) => player.isInGame);
-        const playersNotInGame = this.playerList.filter((player) => !player.isInGame);
-        const sortedPlayersInGame = playersInGame.sort(comparePlayers);
-        const sortedPlayersNotInGame = playersNotInGame.sort(comparePlayers);
-        this.sortedPlayersList = sortedPlayersInGame.concat(sortedPlayersNotInGame);
     }
 
     handleResultsSockets() {
@@ -59,7 +47,6 @@ export class ResultsService {
 
     resetAttributes() {
         this.nbPlayers = 0;
-        this.sortedPlayersList = [];
         this.resultsReady = false;
     }
 }

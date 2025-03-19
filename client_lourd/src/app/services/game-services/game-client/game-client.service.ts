@@ -14,6 +14,7 @@ import {
 } from '@app/constants/enum-class';
 import { PlayerInfo } from '@app/interfaces/player-info';
 import { Question } from '@app/interfaces/question';
+import { QuestionType } from '@app/interfaces/question-type';
 import { ResultsService } from '@app/services/game-services/results-service/results-service.service';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
 import { SocketClientService } from '@app/services/websocket-services/general/socket-client-manager.service';
@@ -46,7 +47,6 @@ export class GameClientService {
         private resultService: ResultsService,
         private messageHandlerService: MessageHandlerService,
     ) {
-        console.log(this.socketHandler.playerName);
         this.handleSockets();
         this.resetAttributes();
     }
@@ -84,7 +84,6 @@ export class GameClientService {
     }
     sendAnswerForCorrection(answer: string) {
         this.socketHandler.send(GameEvents.QRLAnswerSubmitted, answer);
-        console.log('Data envoyée au serveur ', answer);
     }
 
     resetAttributes() {
@@ -146,7 +145,6 @@ export class GameClientService {
     }
     private handleTimerValue() {
         this.socketHandler.on(TimerEvents.Paused, (pauseState: boolean) => {
-            console.log('1');
             this.gamePaused = pauseState;
         });
         this.socketHandler.on(TimerEvents.AlertModeStarted, () => {
@@ -166,6 +164,9 @@ export class GameClientService {
             this.time = time;
         });
         this.socketHandler.on(TimerEvents.End, (time: number) => {
+            if (!this.playerInfo.submitted && this.currentQuestion.type === QuestionType.QRL) {
+                this.sendAnswerForCorrection(this.answer);
+            }
             this.playerInfo.submitted = true;
             this.time = time;
         });

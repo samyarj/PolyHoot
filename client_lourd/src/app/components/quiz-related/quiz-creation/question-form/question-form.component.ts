@@ -2,12 +2,14 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { EMPTY_STRING, MAX_CHOICES, MIN_CHOICES } from '@app/constants/constants';
 import { ButtonType } from '@app/constants/enum-class';
-import { EMPTY_QRE_QUESTION } from '@app/constants/mock-constants';
+import { EMPTY_QCM_QUESTION, EMPTY_QRE_QUESTION,  } from '@app/constants/mock-constants';
 import { Question } from '@app/interfaces/question';
 import { QuestionChoice } from '@app/interfaces/question-choice';
 import { QuestionType } from '@app/interfaces/question-type';
 import { ValidationService } from '@app/services/admin-services/validation-services/common-validation-service/validation.service';
 import { QuestionValidationService } from '@app/services/admin-services/validation-services/question-validation-service/question-validation.service';
+import { UploadImgService } from '@app/services/upload-img.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
     selector: 'app-question-form',
@@ -30,6 +32,8 @@ export class QuestionFormComponent implements OnChanges {
     constructor(
         private questionValidationService: QuestionValidationService,
         private commonValidationService: ValidationService,
+        private toastr: ToastrService,
+        private uploadImgService: UploadImgService,
     ) {}
 
     submitQuestion() {
@@ -93,6 +97,7 @@ export class QuestionFormComponent implements OnChanges {
             }
             case QuestionType.QCM: {
                 this.question.type = QuestionType.QCM;
+                this.question = JSON.parse(JSON.stringify(EMPTY_QCM_QUESTION));
                 break;
             }
             case QuestionType.QRE: {
@@ -125,5 +130,40 @@ export class QuestionFormComponent implements OnChanges {
     }
     goodAnswerValid() {
         return this.questionValidationService.goodAnswerValid(this.question.qreAttributes);
+    }
+
+    onFileSelectedAndUpload(event: Event): void {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (!file) {
+            this.toastr.warning('Aucun fichier sélectionné.');
+            return;
+        }
+
+        // Téléversement immédiat après la sélection
+        this.uploadImgService.uploadImage(file, 'question').subscribe({
+            next: (response) => {
+                this.toastr.success('Image téléversée avec succès');
+
+                // Stockez l'URL de l'image pour l'afficher dans le formulaire
+                this.question.image = response.imageUrl;
+                const fileInput = event.target as HTMLInputElement;
+                if (fileInput) fileInput.value = ''; // Réinitialise l'input file
+            },
+            error: (error) => {
+                this.toastr.error(`Erreur lors du téléversement : ${error.message}`);
+            },
+        });
+    }
+    deleteImage(): void {
+        if (!this.question.image) {
+            this.toastr.warning('Aucune image à supprimer.');
+            return;
+        }
+        this.uploadImgService.deleteImage(this.question.image).subscribe({
+            next: () => {
+                this.toastr.success('Image supprimée avec succès');
+                this.question.image = '';
+            },
+        });
     }
 }

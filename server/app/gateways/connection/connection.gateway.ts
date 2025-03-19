@@ -149,8 +149,14 @@ export class ConnectionGateway implements OnGatewayDisconnect {
         }
     }
     private disconnectPlayerFromWaitingPage(roomId: string, disconnectedPlayer: Player, game: Game) {
-        const playerNames = game.players.filter((player) => player.name !== disconnectedPlayer.name).map((player) => player.name);
-        this.server.emit(GameEvents.PlayerLeft, { playerNames, roomId });
+        const playersInfo = game.players
+            .filter((player) => player.name !== disconnectedPlayer.name)
+            .map((player) => ({
+                name: player.name,
+                avatar: player.equippedAvatar,
+                banner: player.equippedBorder,
+            }));
+        this.server.emit(GameEvents.PlayerLeft, { playersInfo, roomId });
     }
 
     private disconnectPlayerFromGamePage(game: Game, player: Player) {

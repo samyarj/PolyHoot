@@ -15,6 +15,7 @@ export class MessageHandlerService {
     popUpErrorDialog(messageToShow: string) {
         this.matdialog.open(ErrorDialogComponent, {
             width: WIDTH_SIZE,
+            panelClass: 'custom-container',
             data: { message: messageToShow, reloadOnClose: false },
         });
     }
@@ -31,6 +32,7 @@ export class MessageHandlerService {
     confirmationDialog(messageToShow: string, callback: () => void) {
         const dialogRef = this.matdialog.open(ConfirmationDialogComponent, {
             width: WIDTH_SIZE,
+            panelClass: 'custom-container',
             data: messageToShow,
         });
 
