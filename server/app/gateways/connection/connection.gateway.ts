@@ -113,7 +113,14 @@ export class ConnectionGateway implements OnGatewayDisconnect {
                 this.sendDisconnectMessage('Organisateur', roomId);
             } else {
                 const player = this.gameManager.getGameByRoomId(roomId).findTargetedPlayer(client);
-                if (player) this.sendDisconnectMessage(player.name, roomId);
+                if (player) {
+                    this.sendDisconnectMessage(player.name, roomId);
+
+                    this.userService.updateGameLog(player.uid, {
+                        endTime: this.userService.formatTimestamp(new Date()),
+                        status: 'complete',
+                    });
+                }
             }
             client.leave(roomId);
             this.gameManager.socketRoomsMap.delete(client);
@@ -162,6 +169,8 @@ export class ConnectionGateway implements OnGatewayDisconnect {
     private disconnectPlayerFromGamePage(game: Game, player: Player) {
         game.organizer.socket.emit(GameEvents.PlayerStatusUpdate, { name: player.name, isInGame: false });
         game.removePlayer(player.name);
+        const date = this.userService.formatTimestamp(new Date());
+        this.userService.updateGameLog(player.uid, { endTime: date });
         if (game.players.length === 0) {
             this.server.to(game.roomId).emit(ConnectEvents.AllPlayersLeft);
             this.disconnectOrganizer(game.roomId, game.organizer.socket);

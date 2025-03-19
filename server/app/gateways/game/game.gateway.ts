@@ -254,6 +254,9 @@ export class GameGateway {
                 if (winnerSocket?.user?.uid) {
                     console.log('Incrementing wins for user:', winnerSocket.user.uid);
                     await this.userService.incrementWins(winnerSocket.user.uid);
+                    await this.userService.updateGameLog(winnerSocket.user.uid, {
+                        result: 'win',
+                    });
                 }
 
                 // Update time spent for all authenticated players

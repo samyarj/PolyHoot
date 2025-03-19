@@ -31,6 +31,13 @@ export interface User {
         action: 'connect' | 'disconnect';
     }[];
     playedGameLogs?: string[]; // Logs of played games
+    gameLogs?: {
+        gameName?: string; // Name of the game
+        startTime?: string; // Start time of the game
+        endTime?: string; // End time of the game
+        status?: 'complete' | 'abandoned'; // Game status
+        result?: 'win' | 'lose'; // Game result
+    }[];
     stats?: {
         nQuestions?: number; // Total number of questions answered
         nGoodAnswers?: number; // Number of correct answers

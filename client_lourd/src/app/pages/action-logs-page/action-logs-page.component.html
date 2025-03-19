@@ -21,18 +21,18 @@
             <tr>
                 <th>Début</th>
                 <th>Fin</th>
-                <th>Joueur</th>
+                <th>Nom du jeu</th>
                 <th>Statut</th>
                 <th>Résultat</th>
             </tr>
         </thead>
         <tbody>
             <tr *ngFor="let game of gameLogs">
-                <td>{{ game.startTime | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
-                <td>{{ game.endTime | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
-                <td>{{ game.player }}</td>
-                <td>{{ game.status }}</td>
-                <td>{{ game.won ? 'Victoire' : 'Défaite' }}</td>
+                <td>{{ game.startTime ?? '--' }}</td>
+                <td>{{ game.endTime ?? '--' }}</td>
+                <td>{{ game.gameName ?? '--' }}</td>
+                <td>{{ this.getStatusDisplay(game.status || 'abandoned') }}</td>
+                <td>{{ this.getResultDisplay(game.result || 'lose') }}</td>
             </tr>
         </tbody>
     </table>

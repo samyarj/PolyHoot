@@ -519,22 +519,6 @@ export class UserService {
         }
     }
 
-    async getGameLogs(uid: string): Promise<any[]> {
-        try {
-            const userRef = this.firestore.collection('users').doc(uid);
-            const userDoc = await userRef.get();
-
-            if (!userDoc.exists) {
-                throw new Error("L'utilisateur n'existe pas.");
-            }
-
-            return userDoc.data().gameLogs || [];
-        } catch (error) {
-            console.error('Failed to get game logs:', error);
-            return [];
-        }
-    }
-
     async updateGameLog(
         uid: string,
         updatedGameLog: {
@@ -571,25 +555,6 @@ export class UserService {
             return true;
         } catch (error) {
             console.error('Failed to update game log:', error);
-            return false;
-        }
-    }
-
-    async clearGameLogs(uid: string): Promise<boolean> {
-        try {
-            const userRef = this.firestore.collection('users').doc(uid);
-            const userDoc = await userRef.get();
-
-            if (!userDoc.exists) {
-                throw new Error("L'utilisateur n'existe pas.");
-            }
-
-            // Clear the game logs array
-            await userRef.update({ gameLogs: [] });
-
-            return true;
-        } catch (error) {
-            console.error('Failed to clear game logs:', error);
             return false;
         }
     }

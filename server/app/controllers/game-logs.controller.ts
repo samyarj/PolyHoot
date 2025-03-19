@@ -1,6 +1,6 @@
 import { AuthGuard } from '@app/guards/auth/auth.guard';
 import { UserService } from '@app/services/auth/user.service';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 
 @Controller('game-logs')
 export class GameLogsController {
@@ -23,13 +23,6 @@ export class GameLogsController {
         return { success };
     }
 
-    @Get(':uid')
-    @UseGuards(AuthGuard)
-    async getGameLogs(@Param('uid') uid: string) {
-        const logs = await this.userService.getGameLogs(uid);
-        return { logs };
-    }
-
     @Put(':uid')
     @UseGuards(AuthGuard)
     async updateGameLog(
@@ -45,13 +38,6 @@ export class GameLogsController {
         },
     ) {
         const success = await this.userService.updateGameLog(uid, gameLog);
-        return { success };
-    }
-
-    @Delete(':uid')
-    @UseGuards(AuthGuard)
-    async clearGameLogs(@Param('uid') uid: string) {
-        const success = await this.userService.clearGameLogs(uid);
         return { success };
     }
 }
