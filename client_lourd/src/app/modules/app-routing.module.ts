@@ -109,9 +109,9 @@ const routes: Routes = [
         canActivate: [authGuardAdmin],
         children: [
             { path: '', redirectTo: 'consult', pathMatch: 'full' },
-            { path: 'consult', component: ConsultPollPageComponent, canActivate: [authGuard] },
-            { path: 'create', component: CreatePollPageComponent, canActivate: [authGuard] },
-            { path: 'history', component: HistoryPollPageComponent, canActivate: [authGuard] },
+            { path: 'consult', component: ConsultPollPageComponent, canActivate: [authGuardAdmin] },
+            { path: 'create', component: CreatePollPageComponent, canActivate: [authGuardAdmin] },
+            { path: 'history', component: HistoryPollPageComponent, canActivate: [authGuardAdmin] },
         ],
     },
 

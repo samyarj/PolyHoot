@@ -1,7 +1,51 @@
 <div class="popin-container">
     <div class="popin-header">
-        <div class="poll-title">Poll Title</div>
+        <div class="poll-title">{{ poll.title }}</div>
         <button class="close-button" (click)="onClose()">X</button>
     </div>
-    <div class="popin-content"></div>
+    <div class="popin-content">
+        <div *ngIf="state === 'not_started'" class="poll-description">
+            <strong>Description:&nbsp;</strong>
+            {{ poll.description }}
+        </div>
+        <div *ngIf="state === 'not_started'" class="poll-questions">
+            <strong>Questions:</strong>
+            <ol class="questions-list">
+                <li class="question-list-element" *ngFor="let question of poll.questions">
+                    <span>{{ question.text + ' : ' + question.type }}</span>
+                </li>
+            </ol>
+        </div>
+        <div *ngIf="state === 'finished'" class="poll-content-final">Merci pour vos réponses!</div>
+        <div *ngIf="state === 'started'" class="poll-content">
+            <div class="question-text">
+                <div>
+                    {{ this.currentQuestion.text }}
+                </div>
+            </div>
+            <div *ngIf="this.currentQuestion.type === 'QCM'" class="qcm-content">
+                <div
+                    *ngFor="let questionChoice of this.currentQuestion.choices; let index = index"
+                    [ngClass]="{ selected: selectedChoice === index }"
+                    class="multiple-choice"
+                    (click)="selectChoice(index)"
+                >
+                    <div>
+                        {{ questionChoice.text }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button *ngIf="state === 'not_started'" class="custom-button-big" (click)="startPoll()">Débuter</button>
+    <button
+        [disabled]="this.selectedChoice === -1"
+        *ngIf="state === 'started'"
+        class="custom-button-big"
+        [ngClass]="{ 'custom-button-big-disabled': this.selectedChoice === -1 }"
+        (click)="nextQuestion()"
+    >
+        Prochaine question
+    </button>
+    <button *ngIf="state === 'finished'" class="custom-button-big" (click)="onSubmit()">Soumettre vos réponses</button>
 </div>
