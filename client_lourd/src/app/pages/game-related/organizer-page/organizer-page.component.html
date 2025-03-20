@@ -33,7 +33,15 @@
                         <div *ngIf="gameStatus === 'organizerCorrecting'">Veuillez finir la correction avant de passer à la prochaine question.</div>
                         <div *ngIf="gameStatus === 'waitingForAnswers'">En attente des réponses des joueurs.</div>
                         <div *ngIf="gameStatus === 'waitingForNextQuestion'">La prochaine question s'affichera dans {{ timeLeft }} secondes.</div>
-                        <button class="custom-button" *ngIf="gameStatus === 'gameFinished'" (click)="showResults()">Afficher les réponses</button>
+                        <button
+                            class="custom-button"
+                            (disabled)="(sentResults)"
+                            *ngIf="gameStatus === 'gameFinished'"
+                            (click)="showResults()"
+                            [ngClass]="{ 'custom-button-disabled': sentResults }"
+                        >
+                            Afficher les réponses
+                        </button>
                     </div>
                     <div class="control-timer-button-section">
                         <div class="button-container">

@@ -74,6 +74,10 @@ export class OrganizerPageComponent implements OnDestroy {
         return this.organizerService.gameInfo.playersInGame;
     }
 
+    get sentResults(): boolean {
+        return this.organizerService.sentResults;
+    }
+
     // J'ai mis window:beforeunload pour que le localStorage soit modifie avant que la page soit dechargee
     @HostListener('window:beforeunload')
     handleBeforeUnload() {
@@ -91,7 +95,9 @@ export class OrganizerPageComponent implements OnDestroy {
     }
 
     showResults() {
-        this.organizerService.showResults();
+        if (!this.sentResults) {
+            this.organizerService.showResults();
+        }
     }
 
     nextQuestion() {

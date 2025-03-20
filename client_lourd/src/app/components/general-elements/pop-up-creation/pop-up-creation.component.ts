@@ -17,7 +17,7 @@ export class PopUpCreationComponent {
     errorMessage: string | null = null;
     component: { title: string; description: string; duration: number; questions: { text: string }[] };
     isQuizValid: boolean = false;
-
+    isCreated: boolean = false;
     // constructeur a 6 parametres permis selon les charges et le prof, etant donne la nature des attributs
     // eslint-disable-next-line max-params
     constructor(
@@ -37,12 +37,15 @@ export class PopUpCreationComponent {
 
     openNewGame(): void {
         const quiz = this.data.quiz;
-        this.socketService.send(JoinEvents.Create, quiz, (roomId: string) => {
-            this.socketService.roomId = roomId;
-            this.socketService.isOrganizer = true;
-            this.verifyLocalStorage();
-            this.navigate('/waiting');
-        });
+        if (!this.isCreated) {
+            this.isCreated = true;
+            this.socketService.send(JoinEvents.Create, quiz, (roomId: string) => {
+                this.socketService.roomId = roomId;
+                this.socketService.isOrganizer = true;
+                this.verifyLocalStorage();
+                this.navigate('/waiting');
+            });
+        }
     }
 
     navigate(route: string): void {

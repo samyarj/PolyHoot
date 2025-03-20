@@ -2,13 +2,15 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { Auth, updateProfile } from '@angular/fire/auth';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { RELOAD_DELAY_MS, USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH, USERNAME_REGEX } from '@app/constants/constants';
+import { USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH, USERNAME_REGEX } from '@app/constants/constants';
 import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
 import { UploadImgService } from '@app/services/upload-img.service';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+
+const SECONDS_IN_MINUTE = 60;
 
 @Component({
     selector: 'app-profile-page',
@@ -65,6 +67,18 @@ export class ProfilePageComponent implements OnInit {
             this.profileForm.patchValue({
                 username: user.username,
             });
+            // Set statistics
+            this.totalGamesPlayed = user.nGames || 0;
+            this.gamesWon = user.nWins || 0;
+            this.averageCorrectAnswers = user.stats?.rightAnswerPercentage || 0;
+
+            // Calculate average time per game if we have both total time and games played
+            if (user.stats?.timeSpent && user.nGames) {
+                const averageSeconds = Math.floor(user.stats.timeSpent / user.nGames);
+                const minutes = Math.floor(averageSeconds / SECONDS_IN_MINUTE);
+                const seconds = averageSeconds % SECONDS_IN_MINUTE;
+                this.averageTimePerGame = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
         }
     }
 
@@ -109,9 +123,6 @@ export class ProfilePageComponent implements OnInit {
                             this.currentUsername = updatedUser.username;
                             this.authService.setUser(updatedUser);
                             this.toastr.success('Pseudonyme mis à jour avec succès !');
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, RELOAD_DELAY_MS);
                         },
                         error: (error: Error) => {
                             this.toastr.error('Erreur lors de la mise à jour du pseudonyme : ' + error.message);
