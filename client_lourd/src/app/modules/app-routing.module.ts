@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { authGuard, authGuardAdmin, authGuardPlayer } from '@app/guards/auth.guard';
+import { ActionLogsPageComponent } from '@app/pages/action-logs-page/action-logs-page.component';
 import { PlayerInfoPageComponent } from '@app/pages/admin-pages/player-info-page/player-info-page.component';
 import { ConsultPollPageComponent } from '@app/pages/admin-pages/poll-related/consult-poll-page/consult-poll-page.component';
 import { CreatePollPageComponent } from '@app/pages/admin-pages/poll-related/create-poll-page/create-poll-page.component';
@@ -98,6 +99,7 @@ const routes: Routes = [
 
     { path: 'global-chat', component: GlobalChatComponent, canActivate: [authGuard] },
     { path: 'profile', component: ProfilePageComponent, canActivate: [authGuardPlayer] },
+    { path: 'profile/logs', component: ActionLogsPageComponent, canActivate: [authGuardPlayer] },
 
     { path: 'playerInfo', component: PlayerInfoPageComponent, canActivate: [authGuardAdmin] },
     {

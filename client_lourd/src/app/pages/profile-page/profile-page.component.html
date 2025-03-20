@@ -100,8 +100,10 @@
             <p>Parties gagnées: {{ gamesWon }}</p>
             <p>Moyenne de bonnes réponses: {{ averageCorrectAnswers }}%</p>
             <p>Temps moyen par partie: {{ averageTimePerGame }}</p>
-            <p>Actions totales: {{ totalActions }}</p>
-            <p>Dernière connexion: {{ lastLogin }}</p>
+            <button class="btn custom-button" routerLink="/profile/logs">Voir les logs</button>
         </div>
+        <!-- <button class="btn custom-button" (click)="goToHistory()">View History</button> -->
     </div>
 </div>
+
+<router-outlet></router-outlet>
