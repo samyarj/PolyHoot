@@ -7,7 +7,7 @@ export interface User {
 
     // Optional fields
     password?: string; // Hashed password
-    role?: 'admin' | 'joueur'; // User role: admin or joueur
+    role?: 'admin' | 'player'; // User role: admin or joueur
     friends?: string[]; // List of UIDs of friends
     friendRequests?: string[]; // List of UIDs of pending friend requests
     avatarEquipped?: string; // Link to the equipped avatar

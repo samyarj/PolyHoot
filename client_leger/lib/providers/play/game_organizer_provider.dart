@@ -535,22 +535,22 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
     if (!mounted) return;
     AppLogger.i("Disposing OrganizerNotifier");
 
-    _socketManager.socket.off(GameEvents.QRLAnswerSubmitted.value);
-    _socketManager.socket.off(GameEvents.EveryoneSubmitted.value);
-    _socketManager.socket.off(GameEvents.PlayerStatusUpdate.value);
-    _socketManager.socket.off(GameEvents.OrganizerPointsUpdate.value);
-    _socketManager.socket.off(GameEvents.SendPlayerList.value);
-    _socketManager.socket.off(TimerEvents.Value.value);
-    _socketManager.socket.off(TimerEvents.QuestionCountdownValue.value);
-    _socketManager.socket.off(TimerEvents.Paused.value);
-    _socketManager.socket.off(TimerEvents.AlertModeStarted.value);
-    _socketManager.socket.off(TimerEvents.QuestionCountdownEnd.value);
-    _socketManager.socket.off(TimerEvents.End.value);
-    _socketManager.socket.off(GameEvents.QuestionsLength.value);
-    _socketManager.socket.off(GameEvents.ProceedToNextQuestion.value);
-    _socketManager.socket.off(GameEvents.NextQuestion.value);
-    _socketManager.socket.off(GameEvents.SendResults.value);
-    _socketManager.socket.off(ConnectEvents.AllPlayersLeft.value);
+    _socketManager.socket?.off(GameEvents.QRLAnswerSubmitted.value);
+    _socketManager.socket?.off(GameEvents.EveryoneSubmitted.value);
+    _socketManager.socket?.off(GameEvents.PlayerStatusUpdate.value);
+    _socketManager.socket?.off(GameEvents.OrganizerPointsUpdate.value);
+    _socketManager.socket?.off(GameEvents.SendPlayerList.value);
+    _socketManager.socket?.off(TimerEvents.Value.value);
+    _socketManager.socket?.off(TimerEvents.QuestionCountdownValue.value);
+    _socketManager.socket?.off(TimerEvents.Paused.value);
+    _socketManager.socket?.off(TimerEvents.AlertModeStarted.value);
+    _socketManager.socket?.off(TimerEvents.QuestionCountdownEnd.value);
+    _socketManager.socket?.off(TimerEvents.End.value);
+    _socketManager.socket?.off(GameEvents.QuestionsLength.value);
+    _socketManager.socket?.off(GameEvents.ProceedToNextQuestion.value);
+    _socketManager.socket?.off(GameEvents.NextQuestion.value);
+    _socketManager.socket?.off(GameEvents.SendResults.value);
+    _socketManager.socket?.off(ConnectEvents.AllPlayersLeft.value);
 
     _resetAttributes();
     alertSoundPlayer.stop();

@@ -27,8 +27,8 @@ class InGameChatService {
       currentRoomId = null;
       AppLogger.i(
           "Resetting InGameChatService because we're not in a game anymore");
-      _socketManager.socket.off(ChatEvents.RoomLeft.value);
-      _socketManager.socket.off(ChatEvents.MessageAdded.value);
+      _socketManager.socket?.off(ChatEvents.RoomLeft.value);
+      _socketManager.socket?.off(ChatEvents.MessageAdded.value);
     }
   }
 

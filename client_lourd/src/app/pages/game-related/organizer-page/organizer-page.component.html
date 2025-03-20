@@ -95,9 +95,9 @@
                     </div>
                     <div *ngIf="question.type === 'QRE' && question.qreAttributes" class="qre-content">
                         <div class="exact-value">Reponse exacte : {{ question.qreAttributes.goodAnswer }}</div>
-                        <div class="lower-bound">{{ question.qreAttributes.minBound }}</div>
-                        <div class="margin">&plusmn;{{ question.qreAttributes.tolerance }}</div>
-                        <div class="upper-bound">{{ question.qreAttributes.maxBound }}</div>
+                        <div class="lower-bound">Minimum<br />{{ question.qreAttributes.minBound }}</div>
+                        <div class="margin">Marge<br />&plusmn;{{ question.qreAttributes.tolerance }}</div>
+                        <div class="upper-bound">Maximum<br />{{ question.qreAttributes.maxBound }}</div>
                     </div>
                 </div>
                 <div
