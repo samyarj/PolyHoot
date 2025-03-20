@@ -1,27 +1,27 @@
 import { ERROR } from '@app/constants/error-messages';
-import { CreateQuizDto } from '@app/model/dto/quiz/create-quiz.dto';
-import { UpdateQuizDto } from '@app/model/dto/quiz/update-quiz.dto';
-import { Quiz } from '@app/model/schema/quiz/quiz';
-import { QuizService } from '@app/services/quiz/quiz.service';
+import { CreatePollDto } from '@app/model/dto/poll/create-poll.dto';
+import { UpdatePollDto } from '@app/model/dto/poll/update-poll.dto';
+import { Poll } from '@app/model/schema/poll/poll';
+import { PollService } from '@app/services/poll/poll.service';
 import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Res } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 
-@ApiTags('Quizzes')
-@Controller('quizzes')
-export class QuizController {
-    constructor(private readonly quizService: QuizService) {}
+@ApiTags('Polls')
+@Controller('polls')
+export class PollController {
+    constructor(private readonly pollService: PollService) {}
 
     @ApiOkResponse({
-        description: 'Returns all quizzes',
-        type: Quiz,
+        description: 'Returns all polls',
+        type: Poll,
         isArray: true,
     })
     @Get()
-    async getAllQuizzes(@Res() response: Response) {
+    async getAllPolls(@Res() response: Response) {
         try {
-            const quizzes = await this.quizService.getAllQuizzes();
-            response.status(HttpStatus.OK).json(quizzes);
+            const polls = await this.pollService.getAllPolls();
+            response.status(HttpStatus.OK).json(polls);
         } catch (error) {
             if (error.status === HttpStatus.NOT_FOUND) {
                 response.status(HttpStatus.NOT_FOUND).send({ message: error.message });
@@ -32,14 +32,14 @@ export class QuizController {
     }
 
     @ApiOkResponse({
-        description: 'Get quiz by ID',
-        type: Quiz,
+        description: 'Get poll by ID',
+        type: Poll,
     })
     @Get('/:id')
-    async getQuizById(@Param('id') id: string, @Res() response: Response) {
+    async getPollById(@Param('id') id: string, @Res() response: Response) {
         try {
-            const quiz = await this.quizService.getQuizById(id);
-            response.status(HttpStatus.OK).json(quiz);
+            const poll = await this.pollService.getPollById(id);
+            response.status(HttpStatus.OK).json(poll);
         } catch (error) {
             if (error.status === HttpStatus.NOT_FOUND) {
                 response.status(HttpStatus.NOT_FOUND).send({ message: error.message });
@@ -50,15 +50,15 @@ export class QuizController {
     }
 
     @ApiCreatedResponse({
-        description: 'Create a new quiz',
-        type: Quiz,
+        description: 'Create a new poll',
+        type: Poll,
     })
     @Post('/create')
-    async createQuiz(@Body() createQuizDto: CreateQuizDto, @Res() response: Response) {
+    async createPoll(@Body() createPollDto: CreatePollDto, @Res() response: Response) {
         try {
-            await this.quizService.createQuiz(createQuizDto);
-            const updatedQuizzes = await this.quizService.getAllQuizzes();
-            response.status(HttpStatus.CREATED).json(updatedQuizzes);
+            await this.pollService.createPoll(createPollDto);
+            const updatedPolls = await this.pollService.getAllPolls();
+            response.status(HttpStatus.CREATED).json(updatedPolls);
         } catch (error) {
             if (error.status === HttpStatus.CONFLICT) {
                 response.status(HttpStatus.CONFLICT).send({ message: error.message });
@@ -68,15 +68,15 @@ export class QuizController {
         }
     }
 
-    @ApiOkResponse({ description: 'Quiz successfully updated' })
-    @ApiNotFoundResponse({ description: 'Quiz not found' })
+    @ApiOkResponse({ description: 'Poll successfully updated' })
+    @ApiNotFoundResponse({ description: 'Poll not found' })
     @ApiBadRequestResponse({ description: 'Bad request' })
     @Patch('/update/:id')
-    async updateQuiz(@Param('id') id: string, @Body() updateQuizDto: UpdateQuizDto, @Res() response: Response) {
+    async updatePoll(@Param('id') id: string, @Body() updatePollDto: UpdatePollDto, @Res() response: Response) {
         try {
-            await this.quizService.verifyAndUpdateQuiz(id, updateQuizDto);
-            const updatedQuizzes = await this.quizService.getAllQuizzes();
-            response.status(HttpStatus.OK).json(updatedQuizzes);
+            await this.pollService.verifyAndUpdatePoll(id, updatePollDto);
+            const updatedPolls = await this.pollService.getAllPolls();
+            response.status(HttpStatus.OK).json(updatedPolls);
         } catch (error) {
             if (error.status === HttpStatus.CONFLICT) {
                 response.status(HttpStatus.CONFLICT).send({ message: error.message });
@@ -89,17 +89,17 @@ export class QuizController {
     }
 
     @ApiOkResponse({
-        description: 'Quiz successfully deleted',
+        description: 'Poll successfully deleted',
     })
     @ApiNotFoundResponse({
-        description: 'Quiz not found',
+        description: 'Poll not found',
     })
     @Delete('/delete/:id')
-    async deleteQuiz(@Param('id') id: string, @Res() response: Response) {
+    async deletePoll(@Param('id') id: string, @Res() response: Response) {
         try {
-            await this.quizService.deleteQuizById(id);
-            const updatedQuizzes = await this.quizService.getAllQuizzes();
-            response.status(HttpStatus.OK).json(updatedQuizzes);
+            await this.pollService.deletePollById(id);
+            const updatedPolls = await this.pollService.getAllPolls();
+            response.status(HttpStatus.OK).json(updatedPolls);
         } catch (error) {
             if (error.status === HttpStatus.NOT_FOUND) {
                 response.status(HttpStatus.NOT_FOUND).send({ message: error.message });
@@ -109,14 +109,13 @@ export class QuizController {
         }
     }
 
-    @ApiOkResponse({ description: 'Quiz visibility toggled' })
-    @ApiNotFoundResponse({ description: 'Quiz not found' })
+    @ApiOkResponse({ description: 'Poll visibility toggled' })
+    @ApiNotFoundResponse({ description: 'Poll not found' })
     @Patch('/toggle-visibility/:id')
-    async toggleQuizVisibility(@Param('id') id: string, @Res() response: Response) {
+    async togglePollVisibility(@Param('id') id: string, @Res() response: Response) {
         try {
-            await this.quizService.toggleQuizVisibility(id);
-            const updatedQuizzes = await this.quizService.getAllQuizzes();
-            response.status(HttpStatus.OK).json(updatedQuizzes);
+            const updatedPolls = await this.pollService.getAllPolls();
+            response.status(HttpStatus.OK).json(updatedPolls);
         } catch (error) {
             if (error.status === HttpStatus.NOT_FOUND) {
                 response.status(HttpStatus.NOT_FOUND).send({ message: error.message });

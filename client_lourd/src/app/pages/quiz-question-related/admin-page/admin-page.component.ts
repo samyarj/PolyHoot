@@ -47,7 +47,7 @@ export class AdminPageComponent {
 
     private quizzesObserver: Partial<Observer<Quiz[]>> = {
         next: (quizzes: Quiz[]) => {
-            this.quizzes = quizzes.filter((quiz) => quiz.title !== 'Mode aléatoire');
+            this.quizzes = quizzes.filter((quiz) => quiz.title);
             this.quizzes = this.adminPageService.sortQuizByLastModified(this.quizzes);
         },
         error: (httpErrorResponse: HttpErrorResponse) => {
