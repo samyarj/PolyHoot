@@ -99,6 +99,11 @@ export class ConnectionGateway implements OnGatewayDisconnect {
         this.server.emit(GameEvents.End, roomId);
         clientIds?.forEach((clientId) => {
             const clientSocket = this.server.sockets.sockets.get(clientId);
+            // get the player object from the game
+            const player = this.gameManager.getGameByRoomId(roomId).findTargetedPlayer(clientSocket);
+            this.userService.updateGameLog(player.uid, {
+                endTime: this.userService.formatTimestamp(new Date()),
+            });
             this.gameManager.socketRoomsMap.delete(clientSocket);
             clientSocket.leave(roomId);
             clientSocket.emit(ChatEvents.RoomLeft);
