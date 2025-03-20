@@ -2,7 +2,9 @@ import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/luck/lootbox/lootbox_coin_svg.dart';
 import 'package:client_leger/UI/luck/lootbox/lootbox_rarity_design.dart';
 import 'package:client_leger/UI/luck/lootbox/lootbox_theme_design.dart';
+import 'package:client_leger/UI/luck/lootbox/lootbox_win_dialog.dart';
 import 'package:client_leger/backend-communication-services/chance/lootbox_service.dart';
+import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/models/chance/lootbox_container.dart';
 import 'package:client_leger/models/enums.dart';
 import 'package:client_leger/providers/user_provider.dart';
@@ -21,6 +23,8 @@ class LootBox extends ConsumerStatefulWidget {
 class _LootBoxState extends ConsumerState<LootBox> {
   final lootBoxService = LootboxService();
   late List<LootBoxContainer> lootBoxes = [];
+  bool _isLoadingOpenBox = false;
+  int? _indexOfLoadingBox;
 
   Future<void> loadLootBoxes() async {
     try {
@@ -39,6 +43,35 @@ class _LootBoxState extends ConsumerState<LootBox> {
   void initState() {
     loadLootBoxes();
     super.initState();
+  }
+
+  void openBox(int index) async {
+    try {
+      setState(
+        () {
+          _isLoadingOpenBox = true;
+          _indexOfLoadingBox = index;
+        },
+      );
+      final result = await lootBoxService.openBox(index);
+      setState(
+        () {
+          _isLoadingOpenBox = false;
+          _indexOfLoadingBox = null;
+        },
+      );
+      if (result == null && mounted) {
+        showErrorDialog(context,
+            "Vous n'avez pas assez d'argent pour vous procurer cette Loot Box.");
+      } else if (result == false && mounted) {
+        showErrorDialog(context,
+            "Vous possèdez déjà l'item obtenu. Vous recevrez le prix de la lootBox en retour dans votre compte.");
+      } else if (mounted) {
+        openLootBoxWinDialog(result, context);
+      }
+    } catch (e) {
+      if (mounted) showErrorDialog(context, getCustomError(e));
+    }
   }
 
   @override
@@ -81,7 +114,9 @@ class _LootBoxState extends ConsumerState<LootBox> {
                         ),
                       ),
                     ),
-                    ...lootBoxes.map((container) {
+                    ...lootBoxes.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final container = entry.value;
                       return Column(
                         children: [
                           Text(
@@ -118,7 +153,7 @@ class _LootBoxState extends ConsumerState<LootBox> {
                                 children: [
                                   SizedBox(
                                     width: 800,
-                                    height: 112,
+                                    height: 132,
                                     child: ListView.separated(
                                       padding: const EdgeInsets.all(8),
                                       scrollDirection: Axis.horizontal,
@@ -146,9 +181,9 @@ class _LootBoxState extends ConsumerState<LootBox> {
                                                         reward.value,
                                                         fit: BoxFit.scaleDown,
                                                         width:
-                                                            60, // Specify width
+                                                            80, // Specify width
                                                         height:
-                                                            60, // Specify height
+                                                            80, // Specify height
                                                       ),
                                                     )
                                                   : reward.type ==
@@ -156,8 +191,8 @@ class _LootBoxState extends ConsumerState<LootBox> {
                                                       ? getContainer(
                                                           reward.value)
                                                       : Container(
-                                                          width: 60,
-                                                          height: 60,
+                                                          width: 80,
+                                                          height: 80,
                                                           decoration: BoxDecoration(
                                                               shape: BoxShape
                                                                   .circle,
@@ -195,13 +230,16 @@ class _LootBoxState extends ConsumerState<LootBox> {
                                     ),
                                   ),
                                   // ouvrir pour button
-                                  Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 64),
-                                      child: Divider()),
+                                  Divider(
+                                      indent: 64, endIndent: 64, thickness: 2),
                                   GestureDetector(
-                                    onTap: () {},
+                                    onTap: _isLoadingOpenBox
+                                        ? null
+                                        : () {
+                                            openBox(index);
+                                          },
                                     child: Container(
+                                      margin: const EdgeInsets.only(top: 8),
                                       width: 200,
                                       height:
                                           50, // Fixed height for medium button
@@ -221,16 +259,19 @@ class _LootBoxState extends ConsumerState<LootBox> {
                                             50), // Rounded corners
                                       ),
                                       alignment: Alignment.center,
-                                      child: Text(
-                                        "Ouvrir pour ${container.price} coins", // Button text
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onPrimary, // Text color
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                      child: _isLoadingOpenBox &&
+                                              _indexOfLoadingBox == index
+                                          ? ThemedProgressIndicator()
+                                          : Text(
+                                              "Ouvrir pour ${container.price} coins", // Button text
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onPrimary, // Text color
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
                                     ),
                                   ),
                                 ],

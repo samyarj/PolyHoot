@@ -26,20 +26,26 @@ class LootboxService {
   String lootboxUrl;
   // acces a l'objet user dans le widget en ecoutant
 
-  Future<Reward> openBox(double id) async {
+  Future<dynamic> openBox(int id) async {
     final tokenValue = await FirebaseAuth.instance.currentUser?.getIdToken();
     final headers = {
+      'Content-Type': 'application/json',
       'Authorization': 'Bearer $tokenValue',
     };
+
+    AppLogger.i("Opening lootbox with id: $id");
 
     final response = await http.post(
       Uri.parse('$lootboxUrl/lootBox'),
       headers: headers,
-      body: '{"id": "$id"}',
+      body: jsonEncode({"id": id}),
     );
 
     if (response.statusCode == 200) {
       final rewardJson = jsonDecode(response.body);
+      if (rewardJson == null || rewardJson == false) {
+        return rewardJson;
+      }
       return Reward.fromJson(rewardJson);
     } else {
       AppLogger.e('Failed to open lootbox: ${response.statusCode}');

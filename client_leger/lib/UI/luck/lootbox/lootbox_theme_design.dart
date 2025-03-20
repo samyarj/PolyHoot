@@ -20,8 +20,8 @@ Container getContainer(String themeName) {
 
 Container getThemeContainer(ThemeData theme, String text) {
   return Container(
-    width: 60,
-    height: 60,
+    width: 80,
+    height: 80,
     decoration: BoxDecoration(
       gradient: LinearGradient(
         colors: [
@@ -44,7 +44,7 @@ Container getThemeContainer(ThemeData theme, String text) {
       style: TextStyle(
         color: AppThemes.sunsetTheme.colorScheme.onPrimary, // Text color
         fontWeight: FontWeight.bold,
-        fontSize: 10,
+        fontSize: 14,
       ),
     ),
   );
