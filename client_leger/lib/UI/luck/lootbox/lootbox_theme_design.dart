@@ -42,7 +42,7 @@ Container getThemeContainer(ThemeData theme, String text) {
     child: Text(
       text,
       style: TextStyle(
-        color: AppThemes.sunsetTheme.colorScheme.onPrimary, // Text color
+        color: theme.colorScheme.onPrimary, // Text color
         fontWeight: FontWeight.bold,
         fontSize: 14,
       ),
