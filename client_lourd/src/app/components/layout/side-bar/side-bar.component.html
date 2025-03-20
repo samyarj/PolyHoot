@@ -49,7 +49,12 @@
                 <div *ngIf="showSearchInput" class="search-friend-overlay">
                     <div class="search-friend-content">
                         <div class="search-header">
-                            <input type="text" [(ngModel)]="searchQuery" placeholder="Search for users" />
+                            <input
+                                type="text"
+                                [(ngModel)]="searchQuery"
+                                (input)="onSearchInputChange($event)"
+                                placeholder="Rechercher des utilisateurs"
+                            />
                             <button class="close-search" (click)="toggleSearchInput()">
                                 <i class="fa-solid fa-times"></i>
                             </button>
@@ -57,7 +62,15 @@
                         <div *ngIf="searchError" class="search-error">
                             {{ searchError }}
                         </div>
-                        <button class="send-request-btn" (click)="sendFriendRequest()">Envoyé la demande d'ami</button>
+                        <div class="search-results" *ngIf="searchResults.length > 0">
+                            <div *ngFor="let user of searchResults" class="search-result-item">
+                                <span class="username">{{ user.username }}</span>
+                                <button class="send-request-btn" (click)="sendFriendRequest(user.id, user.username)">
+                                    <i class="fa-solid fa-user-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div *ngIf="searchQuery && searchResults.length === 0" class="no-results">Aucun utilisateur trouvé</div>
                     </div>
                 </div>
                 <div *ngIf="showFriendRequests" class="friend-requests-overlay">

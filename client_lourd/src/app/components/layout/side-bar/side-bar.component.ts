@@ -44,6 +44,8 @@ export class SideBarComponent implements OnInit, OnDestroy {
     showFriendList: boolean = false;
     searchError: string = '';
     friends: { id: string; username: string }[] = [];
+    searchResults: { id: string; username: string }[] = [];
+    private searchSubscription: Subscription;
 
     constructor(
         private authService: AuthService,
@@ -150,6 +152,9 @@ export class SideBarComponent implements OnInit, OnDestroy {
         }
         if (this.userDocSubscription) {
             this.userDocSubscription();
+        }
+        if (this.searchSubscription) {
+            this.searchSubscription.unsubscribe();
         }
     }
 
@@ -299,8 +304,9 @@ export class SideBarComponent implements OnInit, OnDestroy {
     toggleSearchInput(): void {
         this.showSearchInput = !this.showSearchInput;
         if (!this.showSearchInput) {
-            this.searchError = ''; // Clear error when closing
-            this.searchQuery = ''; // Clear search query when closing
+            this.searchError = '';
+            this.searchQuery = '';
+            this.searchResults = [];
         }
     }
 
@@ -312,29 +318,62 @@ export class SideBarComponent implements OnInit, OnDestroy {
         this.showFriendList = !this.showFriendList;
     }
 
-    async sendFriendRequest(): Promise<void> {
+    async onSearchInputChange(event: any): Promise<void> {
+        const searchTerm = event.target.value.trim();
+        if (!this.userUID) return;
+
+        // Unsubscribe from previous search if it exists
+        if (this.searchSubscription) {
+            this.searchSubscription.unsubscribe();
+        }
+
+        try {
+            // Subscribe to real-time search results
+            this.searchSubscription = this.friendSystemService.searchUsers(searchTerm, this.userUID).subscribe({
+                next: (results) => {
+                    this.searchResults = results;
+                    this.searchError = '';
+                },
+                error: (error) => {
+                    console.error('Error searching users:', error);
+                    this.searchError = 'Une erreur est survenue lors de la recherche';
+                },
+            });
+        } catch (error) {
+            console.error('Error setting up search:', error);
+            this.searchError = 'Une erreur est survenue lors de la recherche';
+        }
+    }
+
+    async sendFriendRequest(userId?: string, username?: string): Promise<void> {
         const currentUser = this.authService.getUser();
         if (!currentUser) {
             this.searchError = "Vous devez être connecté pour envoyer une demande d'ami";
             return;
         }
 
-        if (!this.searchQuery.trim()) {
-            this.searchError = "Veuillez entrer un nom d'utilisateur";
-            return;
-        }
-
-        // Check if user is trying to send request to themselves
-        if (this.searchQuery.trim().toLowerCase() === currentUser.username.toLowerCase()) {
-            this.searchError = "Vous ne pouvez pas vous envoyer une demande d'ami à vous-même";
-            return;
-        }
-
         try {
-            await this.friendSystemService.sendFriendRequest(currentUser.uid, this.searchQuery.trim());
-            this.searchQuery = '';
+            if (username) {
+                // When clicking the add button in search results
+                await this.friendSystemService.sendFriendRequest(currentUser.uid, username);
+                // Remove the user from search results after sending request
+                this.searchResults = this.searchResults.filter((user) => user.id !== userId);
+            } else {
+                // When manually entering a username
+                if (!this.searchQuery.trim()) {
+                    this.searchError = "Veuillez entrer un nom d'utilisateur";
+                    return;
+                }
+
+                if (this.searchQuery.trim().toLowerCase() === currentUser.username.toLowerCase()) {
+                    this.searchError = "Vous ne pouvez pas vous envoyer une demande d'ami à vous-même";
+                    return;
+                }
+
+                await this.friendSystemService.sendFriendRequest(currentUser.uid, this.searchQuery.trim());
+                this.searchQuery = '';
+            }
             this.searchError = '';
-            this.toggleSearchInput(); // Close the search overlay after successful send
         } catch (error: any) {
             console.error("Erreur lors de l'envoi de la demande d'ami:", error);
             if (error?.status === 401) {
