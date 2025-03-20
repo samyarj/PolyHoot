@@ -97,19 +97,24 @@ export class ConnectionGateway implements OnGatewayDisconnect {
     private disconnectOrganizerFromOtherPages(roomId: string, clientIds: Set<string>) {
         this.server.to(roomId).emit(DisconnectEvents.OrganizerHasLeft);
         this.server.emit(GameEvents.End, roomId);
-        clientIds?.forEach((clientId) => {
-            const clientSocket = this.server.sockets.sockets.get(clientId);
-            // get the player object from the game
-            const player = this.gameManager.getGameByRoomId(roomId).findTargetedPlayer(clientSocket);
-            this.userService.updateGameLog(player.uid, {
-                endTime: this.userService.formatTimestamp(new Date()),
+        const game = this.gameManager.getGameByRoomId(roomId);
+        if (game) {
+            clientIds?.forEach((clientId) => {
+                const clientSocket = this.server.sockets.sockets.get(clientId);
+                // get the player object from the game
+                const player = game.findTargetedPlayer(clientSocket);
+                if (player && game.gameState !== GameState.RESULTS && game.gameState !== GameState.WAITING) {
+                    this.userService.updateGameLog(player.uid, {
+                        endTime: this.userService.formatTimestamp(new Date()),
+                    });
+                }
+                this.gameManager.socketRoomsMap.delete(clientSocket);
+                clientSocket.leave(roomId);
+                clientSocket.emit(ChatEvents.RoomLeft);
             });
-            this.gameManager.socketRoomsMap.delete(clientSocket);
-            clientSocket.leave(roomId);
-            clientSocket.emit(ChatEvents.RoomLeft);
-        });
-        this.gameManager.endGame(roomId);
-        this.chatService.deleteHistory(roomId);
+            this.gameManager.endGame(roomId);
+            this.chatService.deleteHistory(roomId);
+        }
     }
     private disconnectUserFromResultsPage(roomId: string, client: Socket) {
         if (client) {
