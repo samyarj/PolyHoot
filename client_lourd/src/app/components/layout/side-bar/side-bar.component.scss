@@ -450,8 +450,8 @@ img.global-channels-icon {
 
         .send-request-btn {
             padding: 0.5rem 1rem;
-            background-color: var(--tertiary-color);
-            color: var(--primary-color);
+            background: none;
+            color: var(--text-color);
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -598,13 +598,13 @@ img.global-channels-icon {
 
         h3 {
             margin: 0;
-            color: var(--text-color);
+            color: var(--tertiary-color);
         }
 
         .close-button {
             background: none;
             border: none;
-            color: var(--text-color);
+            color: var(--tertiary-color);
             cursor: pointer;
             padding: 0.5rem;
             font-size: 1.2rem;
@@ -622,7 +622,7 @@ img.global-channels-icon {
 
         .no-friends {
             text-align: center;
-            color: var(--text-color);
+            color: var(--tertiary-color);
             padding: 1rem;
         }
 
@@ -640,25 +640,102 @@ img.global-channels-icon {
                 margin-bottom: 0.5rem;
                 background-color: var(--item-bg);
 
-                &:hover {
-                    background-color: var(--item-hover-bg);
-                }
-
                 .friend-name {
-                    color: var(--text-color);
+                    color: var(--tertiary-color);
                 }
 
                 .remove-friend-button {
                     background: none;
                     border: none;
-                    color: var(--text-color);
+                    color: var(--tertiary-color);
                     cursor: pointer;
                     padding: 0.5rem;
 
                     &:hover {
-                        color: var(--danger-color);
+                        color: var(--secondary-color);
                     }
                 }
+            }
+        }
+    }
+}
+
+.search-results {
+    margin-top: 10px;
+    max-height: 700px;
+    overflow-y: auto;
+    border-radius: 4px;
+    background: var(--primary-color);
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 2px solid var(--tertiary-color);
+    &:hover {
+        background-color: var(--secondary-color);
+    }
+    &:last-child {
+        border-bottom: none;
+    }
+
+    .username {
+        color: var(--tertiary-color);
+        flex-grow: 1;
+        margin-right: 10px;
+    }
+
+    .send-request-btn {
+        background: none;
+        border: none;
+        color: var(--tertiary-color);
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        i {
+            color: var(--tertiary-color);
+            font-size: 1.1em;
+        }
+    }
+}
+
+.no-results {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+    font-style: italic;
+}
+
+// Update existing search input styles
+.search-friend-content {
+    .search-header {
+        input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--tertiary-color);
+            padding: 8px 12px;
+            border-radius: 4px;
+            width: 100%;
+            margin-bottom: 10px;
+            i{
+                color: var(--tertiary-color);
+            }
+
+            &::placeholder {
+                color: rgba(255, 255, 255, 0.5);
+            }
+
+            &:focus {
+                outline: none;
+                border-color: rgba(255, 255, 255, 0.4);
             }
         }
     }
