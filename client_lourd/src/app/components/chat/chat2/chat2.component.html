@@ -11,8 +11,8 @@
         *ngFor="let chatmessage of chatMessages"
         [ngClass]="{
             systemMessage: chatmessage.username === 'System',
-            user: (user | async)?.username === chatmessage.username,
-            otherUser: (user | async)?.username !== chatmessage.username
+            user: (user | async)?.uid === chatmessage.uid,
+            otherUser: (user | async)?.uid !== chatmessage.uid
         }"
         class="chat-message user otherUser"
     >

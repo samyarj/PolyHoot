@@ -45,6 +45,7 @@ import { CreateQuizComponent } from './components/quiz-related/quiz-creation/cre
 import { QuestionFormComponent } from './components/quiz-related/quiz-creation/question-form/question-form.component';
 import { ErrorInterceptor } from './interceptors/error.interceptor';
 import { AppRoutingModule } from './modules/app-routing.module';
+import { ActionLogsPageComponent } from './pages/action-logs-page/action-logs-page.component';
 import { PlayerInfoPageComponent } from './pages/admin-pages/player-info-page/player-info-page.component';
 import { ConsultPollPageComponent } from './pages/admin-pages/poll-related/consult-poll-page/consult-poll-page.component';
 import { CreatePollPageComponent } from './pages/admin-pages/poll-related/create-poll-page/create-poll-page.component';
@@ -146,6 +147,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         LootBoxComponent,
         ProfilePageComponent,
         AvatarBannerComponent,
+        ActionLogsPageComponent,
         PlayerInfoPageComponent,
         HistoryPollPageComponent,
         ConsultPollPageComponent,
