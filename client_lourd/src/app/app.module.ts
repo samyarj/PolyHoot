@@ -29,6 +29,7 @@ import { AvatarBannerComponent } from './components/general-elements/avatar-bann
 import { ConfirmationDialogComponent } from './components/general-elements/confirmation-dialog/confirmation-dialog.component';
 import { ErrorDialogComponent } from './components/general-elements/error-dialog/error-dialog.component';
 import { LootBoxWinDialogComponent } from './components/general-elements/lootbox-win-dialog/lootbox-win-dialog.component';
+import { PollPlayerPopInComponent } from './components/general-elements/poll-player-pop-in/poll-player-pop-in.component';
 import { PopUpCreationComponent } from './components/general-elements/pop-up-creation/pop-up-creation.component';
 import { HeaderGameComponent } from './components/layout/filler/header-game/header-game.component';
 import { SecondaryHeaderGameComponent } from './components/layout/filler/secondary-header-game/secondary-header-game.component';
@@ -44,6 +45,7 @@ import { CreateQuizComponent } from './components/quiz-related/quiz-creation/cre
 import { QuestionFormComponent } from './components/quiz-related/quiz-creation/question-form/question-form.component';
 import { ErrorInterceptor } from './interceptors/error.interceptor';
 import { AppRoutingModule } from './modules/app-routing.module';
+import { ActionLogsPageComponent } from './pages/action-logs-page/action-logs-page.component';
 import { PlayerInfoPageComponent } from './pages/admin-pages/player-info-page/player-info-page.component';
 import { ConsultPollPageComponent } from './pages/admin-pages/poll-related/consult-poll-page/consult-poll-page.component';
 import { CreatePollPageComponent } from './pages/admin-pages/poll-related/create-poll-page/create-poll-page.component';
@@ -77,6 +79,7 @@ import { AuthService } from './services/auth/auth.service';
 import { QuestionService } from './services/back-end-communication-services/question-service/question.service';
 import { QuizService } from './services/back-end-communication-services/quiz-service/quiz.service';
 import { FirebaseChatService } from './services/chat-services/firebase/firebase-chat.service';
+import { FriendSystemService } from './services/friend-system.service'; // Import the service
 import { FrenchPaginatorIntlService } from './services/general-services/french-paginator/french-paginator-intl.service';
 import { InventoryService } from './services/general-services/inventory.service';
 import { GlobalErrorHandlerService } from './services/global-error-handler.service';
@@ -141,11 +144,13 @@ import { SocketClientService } from './services/websocket-services/general/socke
         LootBoxComponent,
         ProfilePageComponent,
         AvatarBannerComponent,
+        ActionLogsPageComponent,
         PlayerInfoPageComponent,
         HistoryPollPageComponent,
         ConsultPollPageComponent,
         CreatePollPageComponent,
         PollMainPageComponent,
+        PollPlayerPopInComponent,
     ],
     providers: [
         AuthService,
@@ -156,6 +161,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         ThemeService,
         InventoryService,
         HeaderNavigationService,
+        FriendSystemService,
         { provide: WINDOW, useValue: window },
         { provide: MatPaginatorIntl, useClass: FrenchPaginatorIntlService },
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },

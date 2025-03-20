@@ -42,23 +42,94 @@
         <div class="social-menu-content">
             <ul class="friend-menu">
                 <li class="add-friend">
-                    <button class="add-friend-button">
+                    <button class="add-friend-button" (click)="toggleSearchInput()">
                         <i class="fa-solid fa-user-plus"></i>
                     </button>
                 </li>
+                <div *ngIf="showSearchInput" class="search-friend-overlay">
+                    <div class="search-friend-content">
+                        <div class="search-header">
+                            <input
+                                type="text"
+                                [(ngModel)]="searchQuery"
+                                (input)="onSearchInputChange($event)"
+                                placeholder="Rechercher des utilisateurs"
+                            />
+                            <button class="close-search" (click)="toggleSearchInput()">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
+                        </div>
+                        <div *ngIf="searchError" class="search-error">
+                            {{ searchError }}
+                        </div>
+                        <div class="search-results" *ngIf="searchResults.length > 0">
+                            <div *ngFor="let user of searchResults" class="search-result-item">
+                                <span class="username">{{ user.username }}</span>
+                                <button class="send-request-btn" (click)="sendFriendRequest(user.id, user.username)">
+                                    <i class="fa-solid fa-user-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div *ngIf="searchQuery && searchResults.length === 0" class="no-results">Aucun utilisateur trouvé</div>
+                    </div>
+                </div>
+                <div *ngIf="showFriendRequests" class="friend-requests-overlay">
+                    <div class="friend-requests-content">
+                        <div class="friend-requests-header">
+                            <h3>Demande d'ami</h3>
+                            <button class="close-requests" (click)="toggleFriendRequests()">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="friend-requests-list">
+                            <div *ngIf="friendRequests.length === 0" class="no-requests">Aucune demande d'ami</div>
+                            <div *ngFor="let friend of friendRequests" class="friend-request-item">
+                                <span>{{ friend.username }}</span>
+                                <div class="friend-request-actions">
+                                    <button class="accept-btn" (click)="acceptFriendRequest(friend.id)">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                    <button class="decline-btn" (click)="declineFriendRequest(friend.id)">
+                                        <i class="fa-solid fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <li class="friend-list">
-                    <button class="friend-list-button">
+                    <button class="friend-list-button" (click)="toggleFriendList()">
                         <i class="fa-solid fa-users"></i>
                     </button>
                 </li>
+                <!-- Friend List Overlay -->
+                <div *ngIf="showFriendList" class="friend-list-overlay">
+                    <div class="friend-list-header">
+                        <h3>Liste d'amis</h3>
+                        <button class="close-button" (click)="toggleFriendList()">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="friend-list-content">
+                        <div *ngIf="friends.length === 0" class="no-friends">Vous n'avez pas encore d'amis</div>
+                        <ul *ngIf="friends.length > 0" class="friends-list">
+                            <li *ngFor="let friend of friends" class="friend-item">
+                                <span class="friend-name">{{ friend.username }}</span>
+                                <button class="remove-friend-button" [disabled]="!userUID" (click)="userUID && removeFriend(userUID, friend.id)">
+                                    <i class="fa-solid fa-user-minus"></i>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </ul>
             <div class="friend-request">
-                <button class="friend-request-button">
+                <button class="friend-request-button" (click)="toggleFriendRequests()">
                     <li class="friend-request-icon">
                         <span>Demande d'ami</span>
                     </li>
                     <li class="friend-request-number">
-                        <span>5</span>
+                        <span>{{ friendRequests.length || 0 }}</span>
                     </li>
                 </button>
             </div>

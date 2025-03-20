@@ -1,11 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { doc, FieldPath, onSnapshot, Unsubscribe } from '@angular/fire/firestore';
+import { doc, FieldPath, Firestore, getDoc, onSnapshot, Unsubscribe } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { FirebaseChatMessage } from '@app/interfaces/chat-message';
 import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
 import { ChatChannel, chatChannelFromJson } from '@app/services/chat-services/chat-channels';
 import { FirebaseChatService } from '@app/services/chat-services/firebase/firebase-chat.service';
+import { FriendSystemService } from '@app/services/friend-system.service';
 import { HeaderNavigationService } from '@app/services/ui-services/header-navigation.service';
 import { Observable, Subscription } from 'rxjs';
 
@@ -21,12 +22,15 @@ export class SideBarComponent implements OnInit, OnDestroy {
     selectedChannelMessagesLoading: boolean = true;
     user$: Observable<User | null>;
     userUID: string | null = null;
+    friendRequests: { id: string; username: string }[] = [];
     private globalMessagesSubscription: Subscription;
     private selectedChannelMessagesSubscription: Unsubscribe;
     private channelsSubscription: Subscription;
     private userSubscription: Subscription;
-    private lastMessageDate: FieldPath; // Track last message date for pagination
-    isFetchingOlderMessages: boolean = false; // Prevent multiple fetches at once
+    private friendRequestsSubscription: Subscription;
+    private userDocSubscription: Unsubscribe;
+    private lastMessageDate: FieldPath;
+    isFetchingOlderMessages: boolean = false;
     channels: ChatChannel[] = [];
     joinedChannels: string[] = [];
     newChannelName: string = '';
@@ -34,11 +38,22 @@ export class SideBarComponent implements OnInit, OnDestroy {
     searchTerm: string = '';
     errorMessage: string = '';
 
+    showSearchInput: boolean = false;
+    searchQuery: string = '';
+    showFriendRequests: boolean = false;
+    showFriendList: boolean = false;
+    searchError: string = '';
+    friends: { id: string; username: string }[] = [];
+    searchResults: { id: string; username: string }[] = [];
+    private searchSubscription: Subscription;
+
     constructor(
         private authService: AuthService,
         private router: Router,
         private firebaseChatService: FirebaseChatService,
         private headerService: HeaderNavigationService,
+        private friendSystemService: FriendSystemService,
+        private firestore: Firestore,
     ) {
         this.user$ = this.authService.user$;
     }
@@ -62,10 +77,58 @@ export class SideBarComponent implements OnInit, OnDestroy {
             },
         });
 
-        // Subscribe to user data to get joined channels
+        // Subscribe to user data to get joined channels and set up real-time updates
         this.userSubscription = this.authService.user$.subscribe((user) => {
             if (user) {
+                this.userUID = user.uid;
                 this.joinedChannels = user.joinedChannels || [];
+                this.setupRealtimeUserUpdates(user.uid);
+            }
+        });
+    }
+
+    private setupRealtimeUserUpdates(uid: string) {
+        // Clean up previous subscription if it exists
+        if (this.userDocSubscription) {
+            this.userDocSubscription();
+        }
+
+        const userRef = doc(this.firestore, 'users', uid);
+        this.userDocSubscription = onSnapshot(userRef, async (docSnapshot) => {
+            if (docSnapshot.exists()) {
+                const userData = docSnapshot.data();
+
+                // Update friend requests in real-time
+                if (userData.friendRequests) {
+                    const friendRequestsData = await Promise.all(
+                        userData.friendRequests.map(async (id: string) => {
+                            const friendDoc = await getDoc(doc(this.firestore, 'users', id));
+                            return {
+                                id,
+                                username: friendDoc.data()?.username || 'Unknown User',
+                            };
+                        }),
+                    );
+                    this.friendRequests = friendRequestsData;
+                } else {
+                    this.friendRequests = [];
+                }
+
+                // Update friends list in real-time
+                if (userData.friends) {
+                    const friendsData = await Promise.all(
+                        userData.friends.map(async (id: string) => {
+                            const friendDoc = await getDoc(doc(this.firestore, 'users', id));
+                            return {
+                                id,
+                                username: friendDoc.data()?.username || 'Unknown User',
+                            };
+                        }),
+                    );
+                    this.friends = friendsData;
+                } else {
+                    this.friends = [];
+                }
             }
         });
     }
@@ -78,18 +141,25 @@ export class SideBarComponent implements OnInit, OnDestroy {
         if (this.selectedChannelMessagesSubscription) {
             this.selectedChannelMessagesSubscription();
         }
-        // Unsubscribe from channels observable to avoid memory leaks
         if (this.channelsSubscription) {
             this.channelsSubscription.unsubscribe();
         }
-        // Unsubscribe from user observable to avoid memory leaks
         if (this.userSubscription) {
             this.userSubscription.unsubscribe();
+        }
+        if (this.friendRequestsSubscription) {
+            this.friendRequestsSubscription.unsubscribe();
+        }
+        if (this.userDocSubscription) {
+            this.userDocSubscription();
+        }
+        if (this.searchSubscription) {
+            this.searchSubscription.unsubscribe();
         }
     }
 
     logout(): void {
-        this.authService.logout(); // Call the logout method from AuthService
+        this.authService.logout();
         this.router.navigateByUrl('/login');
     }
 
@@ -126,6 +196,7 @@ export class SideBarComponent implements OnInit, OnDestroy {
             console.error('Failed to send message:', error);
         }
     }
+
     async createChannel(): Promise<void> {
         if (this.newChannelName.trim()) {
             try {
@@ -161,6 +232,7 @@ export class SideBarComponent implements OnInit, OnDestroy {
             }
         }
     }
+
     async selectChannel(channel: string): Promise<void> {
         try {
             await this.firebaseChatService.joinChannel(channel);
@@ -217,6 +289,101 @@ export class SideBarComponent implements OnInit, OnDestroy {
                 await this.firebaseChatService.sendMessage(this.selectedChannel, message);
             } catch (error) {
                 console.error('Failed to send message to channel:', error);
+            }
+        }
+    }
+
+    filteredJoinedChannels(): string[] {
+        return this.joinedChannels.filter((channel) => channel.toLowerCase().includes(this.searchTerm.toLowerCase()));
+    }
+
+    filteredChannels(): ChatChannel[] {
+        return this.channels.filter((channel) => channel.name.toLowerCase().includes(this.searchTerm.toLowerCase()));
+    }
+
+    toggleSearchInput(): void {
+        this.showSearchInput = !this.showSearchInput;
+        if (!this.showSearchInput) {
+            this.searchError = '';
+            this.searchQuery = '';
+            this.searchResults = [];
+        }
+    }
+
+    toggleFriendRequests(): void {
+        this.showFriendRequests = !this.showFriendRequests;
+    }
+
+    toggleFriendList(): void {
+        this.showFriendList = !this.showFriendList;
+    }
+
+    async onSearchInputChange(event: any): Promise<void> {
+        const searchTerm = event.target.value.trim();
+        if (!this.userUID) return;
+
+        // Unsubscribe from previous search if it exists
+        if (this.searchSubscription) {
+            this.searchSubscription.unsubscribe();
+        }
+
+        try {
+            // Subscribe to real-time search results
+            this.searchSubscription = this.friendSystemService.searchUsers(searchTerm, this.userUID).subscribe({
+                next: (results) => {
+                    this.searchResults = results;
+                    this.searchError = '';
+                },
+                error: (error) => {
+                    console.error('Error searching users:', error);
+                    this.searchError = 'Une erreur est survenue lors de la recherche';
+                },
+            });
+        } catch (error) {
+            console.error('Error setting up search:', error);
+            this.searchError = 'Une erreur est survenue lors de la recherche';
+        }
+    }
+
+    async sendFriendRequest(userId?: string, username?: string): Promise<void> {
+        const currentUser = this.authService.getUser();
+        if (!currentUser) {
+            this.searchError = "Vous devez être connecté pour envoyer une demande d'ami";
+            return;
+        }
+
+        try {
+            if (username) {
+                // When clicking the add button in search results
+                await this.friendSystemService.sendFriendRequest(currentUser.uid, username);
+                // Remove the user from search results after sending request
+                this.searchResults = this.searchResults.filter((user) => user.id !== userId);
+            } else {
+                // When manually entering a username
+                if (!this.searchQuery.trim()) {
+                    this.searchError = "Veuillez entrer un nom d'utilisateur";
+                    return;
+                }
+
+                if (this.searchQuery.trim().toLowerCase() === currentUser.username.toLowerCase()) {
+                    this.searchError = "Vous ne pouvez pas vous envoyer une demande d'ami à vous-même";
+                    return;
+                }
+
+                await this.friendSystemService.sendFriendRequest(currentUser.uid, this.searchQuery.trim());
+                this.searchQuery = '';
+            }
+            this.searchError = '';
+        } catch (error: any) {
+            console.error("Erreur lors de l'envoi de la demande d'ami:", error);
+            if (error?.status === 401) {
+                this.searchError = 'Votre session a expiré. Veuillez vous reconnecter.';
+                this.authService.logout();
+                this.router.navigateByUrl('/login');
+            } else if (error?.error?.message) {
+                this.searchError = error.error.message;
+            } else {
+                this.searchError = "Erreur lors de l'envoi de la demande d'ami. Veuillez réessayer.";
             }
         }
     }
@@ -279,11 +446,33 @@ export class SideBarComponent implements OnInit, OnDestroy {
         });
     }
 
-    filteredJoinedChannels(): string[] {
-        return this.joinedChannels.filter((channel) => channel.toLowerCase().includes(this.searchTerm.toLowerCase()));
+    async removeFriend(userId: string, friendId: string): Promise<void> {
+        if (!userId) return;
+
+        try {
+            await this.friendSystemService.removeFriend(userId, friendId);
+        } catch (error) {
+            console.error("Erreur lors de la suppression de l'ami:", error);
+        }
     }
 
-    filteredChannels(): ChatChannel[] {
-        return this.channels.filter((channel) => channel.name.toLowerCase().includes(this.searchTerm.toLowerCase()));
+    async acceptFriendRequest(friendId: string): Promise<void> {
+        if (!this.userUID) return;
+
+        try {
+            await this.friendSystemService.acceptFriendRequest(this.userUID, friendId);
+        } catch (error) {
+            console.error("Erreur lors de l'acceptation de la demande d'ami:", error);
+        }
+    }
+
+    async declineFriendRequest(friendId: string): Promise<void> {
+        if (!this.userUID) return;
+
+        try {
+            await this.friendSystemService.cancelFriendRequest(friendId, this.userUID);
+        } catch (error) {
+            console.error("Erreur lors du refu de la demande d'ami:", error);
+        }
     }
 }

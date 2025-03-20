@@ -3,24 +3,25 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthController } from './controllers/auth/auth.controller';
 import { ChatChannelsController } from './controllers/chat-channels/chat-channels.controller';
+import { FriendSystemController } from './controllers/friend-system.controller';
 import { HistoryController } from './controllers/history/history.controller';
 import { InventoryController } from './controllers/inventory.controller';
 import { LootBoxController } from './controllers/luck-related/lootbox-controller';
 import { PasswordValidationController } from './controllers/password-validation/password-validation.controller';
+import { PollController } from './controllers/poll-related/poll.controller';
+import { PublishedPollController } from './controllers/poll-related/published-poll.controller';
 import { QuestionController } from './controllers/question/question.controller';
 import { QuizController } from './controllers/quiz/quiz.controller';
 import { ShopController } from './controllers/shop.controller';
-import { PollController } from './controllers/poll-related/poll.controller';
-import { PublishedPollController } from './controllers/poll-related/published-poll.controller';
 import { ChatGateway } from './gateways/chat/chat.gateway';
 import { CoinflipGateway } from './gateways/coinflip/coinflip.gateway';
 import { ConnectionGateway } from './gateways/connection/connection.gateway';
 import { GameGateway } from './gateways/game/game.gateway';
 import { GameRecordSchema, gameRecordSchema } from './model/schema/game-record/game-record-schema';
+import { Poll, pollSchema } from './model/schema/poll/poll';
+import { PublishedPoll, publishedPollSchema } from './model/schema/poll/published-poll.schema';
 import { Question, questionSchema } from './model/schema/question/question';
 import { Quiz, quizSchema } from './model/schema/quiz/quiz';
-import {Poll,pollSchema} from './model/schema/poll/poll';
-import { PublishedPoll, publishedPollSchema} from './model/schema/poll/published-poll.schema';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { FirebaseModule } from './modules/firebase.module';
 import { UserService } from './services/auth/user.service';
@@ -32,11 +33,11 @@ import { GameRecordService } from './services/game-record/game-record.service';
 import { HistoryManagerService } from './services/history-manager/history-manager.service';
 import { InventoryService } from './services/inventory.service';
 import { LootBoxService } from './services/lootbox/lootbox.service';
+import { PollService } from './services/poll/poll.service';
+import { PublishedPollService } from './services/poll/published-poll.service';
 import { QuestionService } from './services/question/question.service';
 import { QuizService } from './services/quiz/quiz.service';
 import { ShopService } from './services/shop.service';
-import { PollService } from './services/poll/poll.service';
-import { PublishedPollService } from './services/poll/published-poll.service';
 
 @Module({
     imports: [
@@ -90,6 +91,7 @@ import { PublishedPollService } from './services/poll/published-poll.service';
         LootBoxController,
         InventoryController,
         ShopController,
+        FriendSystemController,
         PollController,
         PublishedPollController,
     ],

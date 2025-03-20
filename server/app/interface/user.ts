@@ -24,9 +24,26 @@ export interface User {
     };
     joinedChannels?: string[]; // IDs of channels the user has joined
     coins?: number; // User's coin balance
-    cxnLogs?: string[]; // Connection logs
+    cxnLogs?: {
+        timestamp: string;
+        action: 'connect' | 'disconnect';
+    }[];
     playedGameLogs?: string[]; // Logs of played games
+    gameLogs?: {
+        gameName?: string; // Name of the game
+        startTime?: string; // Start time of the game
+        endTime?: string; // End time of the game
+        status?: 'complete' | 'abandoned'; // Game status
+        result?: 'win' | 'lose'; // Game result
+    }[];
+    stats?: {
+        nQuestions?: number; // Total number of questions answered
+        nGoodAnswers?: number; // Number of correct answers
+        rightAnswerPercentage?: number; // Percentage of correct answers
+        timeSpent?: number; // Total time spent playing (in seconds)
+    };
     nWins?: number; // Number of wins
+    nGames?: number; // Number of games played
     isOnline?: boolean; // Online status
     pity?: number; // Pity counter
     nextDailyFree?: Date; // Next date where user can get daily free

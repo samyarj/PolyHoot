@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { authGuard, authGuardAdmin, authGuardPlayer } from '@app/guards/auth.guard';
+import { ActionLogsPageComponent } from '@app/pages/action-logs-page/action-logs-page.component';
 import { PlayerInfoPageComponent } from '@app/pages/admin-pages/player-info-page/player-info-page.component';
 import { ConsultPollPageComponent } from '@app/pages/admin-pages/poll-related/consult-poll-page/consult-poll-page.component';
 import { CreatePollPageComponent } from '@app/pages/admin-pages/poll-related/create-poll-page/create-poll-page.component';
@@ -24,7 +25,6 @@ import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { ProfilePageComponent } from '@app/pages/profile-page/profile-page.component';
 import { AdminPageComponent } from '@app/pages/quiz-question-related/admin-page/admin-page.component';
 import { AdminQuizCreateComponent } from '@app/pages/quiz-question-related/create-quiz/admin-create-quiz';
-import { HistoryPageComponent } from '@app/pages/quiz-question-related/history/history.component';
 import { QuestionBankPageComponent } from '@app/pages/quiz-question-related/question-bank-page/question-bank-page.component';
 import { QuizManagementMainPageComponent } from '@app/pages/quiz-question-related/quiz-management-main-page/quiz-management-main-page.component';
 import { ShopMainPageComponent } from '@app/pages/shop-related/shop-main-page/shop-main-page.component';
@@ -55,7 +55,6 @@ const routes: Routes = [
             { path: 'createQuiz', component: AdminQuizCreateComponent, canActivate: [authGuardPlayer] },
             { path: 'modifierQuiz/:id', component: AdminQuizCreateComponent, canActivate: [authGuardPlayer] },
             { path: 'questionBank', component: QuestionBankPageComponent, canActivate: [authGuardPlayer] },
-            { path: 'history', component: HistoryPageComponent, canActivate: [authGuardPlayer] },
         ],
     },
     { path: 'inventory', component: InventoryPageComponent, canActivate: [authGuardPlayer] },
@@ -98,17 +97,18 @@ const routes: Routes = [
 
     { path: 'global-chat', component: GlobalChatComponent, canActivate: [authGuard] },
     { path: 'profile', component: ProfilePageComponent, canActivate: [authGuardPlayer] },
+    { path: 'profile/logs', component: ActionLogsPageComponent, canActivate: [authGuardPlayer] },
 
     { path: 'playerInfo', component: PlayerInfoPageComponent, canActivate: [authGuardAdmin] },
     {
         path: 'polls',
         component: PollMainPageComponent,
-        /* canActivate: [authGuardAdmin], */
+        canActivate: [authGuardAdmin],
         children: [
             { path: '', redirectTo: 'consult', pathMatch: 'full' },
-            { path: 'consult', component: ConsultPollPageComponent, canActivate: [authGuard] },
-            { path: 'create', component: CreatePollPageComponent /* , canActivate: [authGuard] */ },
-            { path: 'history', component: HistoryPollPageComponent, canActivate: [authGuard] },
+            { path: 'consult', component: ConsultPollPageComponent, canActivate: [authGuardAdmin] },
+            { path: 'create', component: CreatePollPageComponent, canActivate: [authGuardAdmin] },
+            { path: 'history', component: HistoryPollPageComponent, canActivate: [authGuardAdmin] },
         ],
     },
 ];

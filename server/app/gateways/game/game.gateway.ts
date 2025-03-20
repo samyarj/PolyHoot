@@ -105,14 +105,24 @@ export class GameGateway {
     }
 
     @SubscribeMessage(GameEvents.FinalizePlayerAnswer)
-    handleFinalizePlayerAnswer(
+    async handleFinalizePlayerAnswer(
         @ConnectedSocket() client: AuthenticatedSocket,
         @MessageBody() answerData: { choiceSelected: boolean[]; qreAnswer: number },
     ) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {
-            game.finalizePlayerAnswer(client, answerData);
+            const player = game.findTargetedPlayer(client);
+            const wasCorrect = game.finalizePlayerAnswer(client, answerData);
+
+            // Update user stats if they are authenticated
+            if (client.user?.uid) {
+                const newStats = {
+                    nQuestions: 1,
+                    nGoodAnswers: wasCorrect ? 1 : 0,
+                };
+                await this.userService.updateStats(client.user.uid, newStats);
+            }
         }
     }
 
@@ -177,10 +187,25 @@ export class GameGateway {
     }
 
     @SubscribeMessage(GameEvents.StartGame)
-    handleStartGame(@ConnectedSocket() client: AuthenticatedSocket) {
+    async handleStartGame(@ConnectedSocket() client: AuthenticatedSocket) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
-        if (game) this.historyManager.addGameRecord(game.quiz.title, roomId);
+        if (game) {
+            // Only increment games for non-organizer players
+            if (client.user?.uid && game.organizer.socket.id !== client.id) {
+                await this.userService.incrementGames(client.user.uid);
+                await this.userService.addGameLog(client.user.uid, {
+                    gameName: game.quiz.title,
+                    startTime: this.userService.formatTimestamp(new Date()),
+                    status: 'abandoned', // Default to abandoned, change to complete later
+                    result: 'lose',
+                });
+            }
+            // Only create the game record if this is the organizer
+            if (game.organizer.socket.id === client.id) {
+                this.historyManager.addGameRecord(game.quiz.title, roomId);
+            }
+        }
     }
 
     @SubscribeMessage(GameEvents.ToggleLock)
@@ -225,9 +250,40 @@ export class GameGateway {
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {
             const results: PlayerResult[] = await game.getResults();
-            if (results) this.server.to(roomId).emit(GameEvents.SendResults, results);
-            game.gameState = GameState.RESULTS;
-            this.historyManager.saveGameRecordToDB(roomId, results);
+            if (results) {
+                // Find the player with the highest points who is still in the game
+                const winner = results.filter((player) => player.isInGame).reduce((prev, current) => (prev.points > current.points ? prev : current));
+
+                // Find the winner's socket to get their user ID
+                const winnerSocket = game.players.find((p) => p.name === winner.name)?.socket as AuthenticatedSocket;
+                if (winnerSocket?.user?.uid) {
+                    console.log('Incrementing wins for user:', winnerSocket.user.uid);
+                    await this.userService.incrementWins(winnerSocket.user.uid);
+                    await this.userService.updateGameLog(winnerSocket.user.uid, {
+                        result: 'win',
+                    });
+                }
+
+                // Update time spent for all authenticated players
+                for (const player of game.players) {
+                    const playerSocket = player.socket as AuthenticatedSocket;
+                    if (playerSocket?.user?.uid) {
+                        await this.userService.updateStats(playerSocket.user.uid, {
+                            timeSpent: game.timer.timerValue,
+                        });
+                        await this.userService.updateGameLog(playerSocket.user.uid, {
+                            gameName: game.quiz.title,
+                            endTime: this.userService.formatTimestamp(new Date()),
+                            status: 'complete',
+                            result: player.name === winner.name ? 'win' : 'lose',
+                        });
+                    }
+                }
+
+                this.server.to(roomId).emit(GameEvents.SendResults, results);
+                game.gameState = GameState.RESULTS;
+                this.historyManager.saveGameRecordToDB(roomId, results);
+            }
         }
     }
 }

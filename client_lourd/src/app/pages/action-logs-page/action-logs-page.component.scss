@@ -1,0 +1,42 @@
+.logs-container {
+    padding: 20px;
+    color: white;
+    max-width: 1200px;
+    margin: 0 auto;
+    margin-top: 7rem;
+
+    h2 {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+}
+
+.logs-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+
+    th,
+    td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    th {
+        background-color: rgba(255, 255, 255, 0.15);
+        font-weight: bold;
+    }
+
+    tbody tr {
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        &:last-child td {
+            border-bottom: none;
+        }
+    }
+}

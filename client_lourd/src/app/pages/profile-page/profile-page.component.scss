@@ -4,15 +4,14 @@ div {
 }
 
 .gen {
-    margin-top: 10rem;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    height: 100vh;
+    min-height: fit-content;
     padding: 20px;
     max-width: 800px;
-    margin: 0 auto;
+    margin: 7rem auto 0;
 }
 
 .avatar-selection {

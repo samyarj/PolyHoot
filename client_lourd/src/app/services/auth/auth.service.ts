@@ -12,12 +12,12 @@ import {
     updateProfile,
     UserCredential,
 } from '@angular/fire/auth';
-import { Firestore } from '@angular/fire/firestore';
+import { doc, Firestore, runTransaction, updateDoc } from '@angular/fire/firestore';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { User } from '@app/interfaces/user';
 import { handleErrorsGlobally } from '@app/utils/rxjs-operators';
-import { collection, doc, getDocs, onSnapshot, query, updateDoc, where } from '@firebase/firestore';
+import { collection, getDocs, onSnapshot, query, where } from '@firebase/firestore';
 import { User as FirebaseUser, onIdTokenChanged, sendPasswordResetEmail } from 'firebase/auth';
 import { BehaviorSubject, catchError, finalize, from, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -211,9 +211,27 @@ export class AuthService {
         if (!uid) return;
 
         const userDocRef = doc(this.firestore, `users/${uid}`);
-        from(updateDoc(userDocRef, { isOnline: status }))
-            .pipe(handleErrorsGlobally(this.injector))
-            .subscribe();
+        const logEntry = {
+            timestamp: this.formatTimestamp(new Date()),
+            action: status ? 'connect' : 'disconnect',
+        };
+
+        runTransaction(this.firestore, async (transaction) => {
+            const userDoc = await transaction.get(userDocRef);
+            if (!userDoc.exists()) {
+                throw new Error('User document does not exist');
+            }
+
+            const currentLogs = userDoc.data()?.cxnLogs || [];
+            const updatedLogs = [...currentLogs, logEntry];
+
+            transaction.update(userDocRef, {
+                isOnline: status,
+                cxnLogs: updatedLogs,
+            });
+        }).catch((error) => {
+            console.error('Transaction failed: ', error);
+        });
     }
 
     private handleAuthAndFetchUser(userCredential: UserCredential, endpoint: string, method: 'GET' | 'POST' = 'GET'): Observable<User> {
@@ -266,7 +284,7 @@ export class AuthService {
                     this.socketClientService.connect(idToken);
 
                     this.isUserOnline(firebaseUser.uid).subscribe((isOnline) => {
-                        if (isOnline && signIn) {
+                        if (isOnline && signIn && !this.userBS.value) {
                             this.loadingTokenBS.next(false);
                             this.signOutAndClearSession();
                             throw new Error("L'utilisateur est déjà connecté sur un autre appareil.");
@@ -274,7 +292,7 @@ export class AuthService {
 
                         const userDocRef = doc(this.firestore, `users/${firebaseUser.uid}`);
 
-                        this.setIsOnline(true, firebaseUser.uid);
+                        if (!this.userBS.value) this.setIsOnline(true, firebaseUser.uid);
                         this.socketClientService.send('identifyMobileClient', firebaseUser.uid);
 
                         this.userSnapshotUnsubscribe = onSnapshot(
@@ -340,7 +358,6 @@ export class AuthService {
                 if (querySnapshot.empty) {
                     return false;
                 }
-
                 const userDoc = querySnapshot.docs[0];
                 return userDoc.data()?.isOnline === true;
             }),
@@ -377,5 +394,17 @@ export class AuthService {
 
     private updateUserProfile(user: FirebaseUser, profileData: Partial<Pick<FirebaseUser, 'displayName' | 'photoURL'>>): Observable<void> {
         return from(updateProfile(user, profileData));
+    }
+
+    private formatTimestamp(date: Date): string {
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        const day = pad(date.getDate());
+        const month = pad(date.getMonth() + 1); // Months are zero-based
+        const year = date.getFullYear();
+        const hours = pad(date.getHours());
+        const minutes = pad(date.getMinutes());
+        const seconds = pad(date.getSeconds());
+
+        return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
     }
 }

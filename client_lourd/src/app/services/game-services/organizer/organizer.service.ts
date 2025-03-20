@@ -38,6 +38,7 @@ export class OrganizerService {
     gameModifiers: Modifiers = { paused: false, alertMode: false };
     gameStatus: GameStatus = GameStatus.WaitingForAnswers;
     shouldDisconnect: boolean = true;
+    sentResults: boolean = false;
     private questionsLength: number;
     private pointsAfterCorrection: PointsUpdateQRL[] = [];
     // private totalNumberOfAnswers = [0, 0, 0];
@@ -64,6 +65,7 @@ export class OrganizerService {
     }
 
     showResults() {
+        this.sentResults = true;
         this.socketHandlerService.send(GameEvents.ShowResults);
     }
 
@@ -269,6 +271,7 @@ export class OrganizerService {
         this.socketHandlerService.on(GameEvents.SendResults, () => {
             this.shouldDisconnect = false;
             this.router.navigate([AppRoute.RESULTS]);
+            this.sentResults = false;
             this.alertSoundPlayer.stop();
         });
     }
