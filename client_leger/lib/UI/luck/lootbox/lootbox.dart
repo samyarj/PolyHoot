@@ -25,6 +25,7 @@ class _LootBoxState extends ConsumerState<LootBox> {
   late List<LootBoxContainer> lootBoxes = [];
   bool _isLoadingOpenBox = false;
   int? _indexOfLoadingBox;
+  int? previousPityValue;
 
   Future<void> loadLootBoxes() async {
     try {
@@ -78,6 +79,15 @@ class _LootBoxState extends ConsumerState<LootBox> {
   Widget build(BuildContext context) {
     final userState = ref.watch(userProvider);
     final colorScheme = Theme.of(context).colorScheme;
+
+    ref.listen(userProvider, (previous, next) {
+      if (next.value?.pity != previousPityValue) {
+        previousPityValue = next.value?.pity;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          loadLootBoxes(); // to update the odds of each reward according to current - live - pity value
+        });
+      }
+    });
 
     return userState.when(data: (user) {
       return lootBoxes.isEmpty
