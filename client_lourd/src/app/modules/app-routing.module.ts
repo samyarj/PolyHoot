@@ -28,7 +28,6 @@ import { PollManagementComponent } from '@app/pages/poll-related/poll-management
 import { ProfilePageComponent } from '@app/pages/profile-page/profile-page.component';
 import { AdminPageComponent } from '@app/pages/quiz-question-related/admin-page/admin-page.component';
 import { AdminQuizCreateComponent } from '@app/pages/quiz-question-related/create-quiz/admin-create-quiz';
-import { HistoryPageComponent } from '@app/pages/quiz-question-related/history/history.component';
 import { QuestionBankPageComponent } from '@app/pages/quiz-question-related/question-bank-page/question-bank-page.component';
 import { QuizManagementMainPageComponent } from '@app/pages/quiz-question-related/quiz-management-main-page/quiz-management-main-page.component';
 import { ShopMainPageComponent } from '@app/pages/shop-related/shop-main-page/shop-main-page.component';
@@ -59,7 +58,6 @@ const routes: Routes = [
             { path: 'createQuiz', component: AdminQuizCreateComponent, canActivate: [authGuardPlayer] },
             { path: 'modifierQuiz/:id', component: AdminQuizCreateComponent, canActivate: [authGuardPlayer] },
             { path: 'questionBank', component: QuestionBankPageComponent, canActivate: [authGuardPlayer] },
-            { path: 'history', component: HistoryPageComponent, canActivate: [authGuardPlayer] },
         ],
     },
     { path: 'inventory', component: InventoryPageComponent, canActivate: [authGuardPlayer] },
