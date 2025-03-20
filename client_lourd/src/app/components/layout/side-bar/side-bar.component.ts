@@ -6,8 +6,8 @@ import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
 import { ChatChannel, chatChannelFromJson } from '@app/services/chat-services/chat-channels';
 import { FirebaseChatService } from '@app/services/chat-services/firebase/firebase-chat.service';
-import { HeaderNavigationService } from '@app/services/ui-services/header-navigation.service';
 import { FriendSystemService } from '@app/services/friend-system.service';
+import { HeaderNavigationService } from '@app/services/ui-services/header-navigation.service';
 import { Observable, Subscription } from 'rxjs';
 
 @Component({
@@ -28,8 +28,9 @@ export class SideBarComponent implements OnInit, OnDestroy {
     private channelsSubscription: Subscription;
     private userSubscription: Subscription;
     private friendRequestsSubscription: Subscription;
-    private lastMessageDate: FieldPath; // Track last message date for pagination
-    isFetchingOlderMessages: boolean = false; // Prevent multiple fetches at once
+    private userDocSubscription: Unsubscribe;
+    private lastMessageDate: FieldPath;
+    isFetchingOlderMessages: boolean = false;
     channels: ChatChannel[] = [];
     joinedChannels: string[] = [];
     newChannelName: string = '';
@@ -74,14 +75,58 @@ export class SideBarComponent implements OnInit, OnDestroy {
             },
         });
 
-        // Subscribe to user data to get joined channels
+        // Subscribe to user data to get joined channels and set up real-time updates
         this.userSubscription = this.authService.user$.subscribe((user) => {
             if (user) {
                 this.userUID = user.uid;
                 this.joinedChannels = user.joinedChannels || [];
-                console.log('Joined Channels:', this.joinedChannels); // Debug statement
-                // Fetch friend requests when user is available
-                this.updateFriendRequests();
+                this.setupRealtimeUserUpdates(user.uid);
+            }
+        });
+    }
+
+    private setupRealtimeUserUpdates(uid: string) {
+        // Clean up previous subscription if it exists
+        if (this.userDocSubscription) {
+            this.userDocSubscription();
+        }
+
+        const userRef = doc(this.firestore, 'users', uid);
+        this.userDocSubscription = onSnapshot(userRef, async (docSnapshot) => {
+            if (docSnapshot.exists()) {
+                const userData = docSnapshot.data();
+
+                // Update friend requests in real-time
+                if (userData.friendRequests) {
+                    const friendRequestsData = await Promise.all(
+                        userData.friendRequests.map(async (id: string) => {
+                            const friendDoc = await getDoc(doc(this.firestore, 'users', id));
+                            return {
+                                id,
+                                username: friendDoc.data()?.username || 'Unknown User',
+                            };
+                        }),
+                    );
+                    this.friendRequests = friendRequestsData;
+                } else {
+                    this.friendRequests = [];
+                }
+
+                // Update friends list in real-time
+                if (userData.friends) {
+                    const friendsData = await Promise.all(
+                        userData.friends.map(async (id: string) => {
+                            const friendDoc = await getDoc(doc(this.firestore, 'users', id));
+                            return {
+                                id,
+                                username: friendDoc.data()?.username || 'Unknown User',
+                            };
+                        }),
+                    );
+                    this.friends = friendsData;
+                } else {
+                    this.friends = [];
+                }
             }
         });
     }
@@ -94,16 +139,17 @@ export class SideBarComponent implements OnInit, OnDestroy {
         if (this.selectedChannelMessagesSubscription) {
             this.selectedChannelMessagesSubscription();
         }
-        // Unsubscribe from channels observable to avoid memory leaks
         if (this.channelsSubscription) {
             this.channelsSubscription.unsubscribe();
         }
-        // Unsubscribe from user observable to avoid memory leaks
         if (this.userSubscription) {
             this.userSubscription.unsubscribe();
         }
         if (this.friendRequestsSubscription) {
             this.friendRequestsSubscription.unsubscribe();
+        }
+        if (this.userDocSubscription) {
+            this.userDocSubscription();
         }
     }
 
@@ -260,16 +306,10 @@ export class SideBarComponent implements OnInit, OnDestroy {
 
     toggleFriendRequests(): void {
         this.showFriendRequests = !this.showFriendRequests;
-        if (this.showFriendRequests) {
-            this.updateFriendRequests(); // Refresh the list when opening
-        }
     }
 
     toggleFriendList(): void {
         this.showFriendList = !this.showFriendList;
-        if (this.showFriendList) {
-            this.updateFriendList(); // Refresh the list when opening
-        }
     }
 
     async sendFriendRequest(): Promise<void> {
@@ -367,56 +407,11 @@ export class SideBarComponent implements OnInit, OnDestroy {
         });
     }
 
-    private async updateFriendRequests(): Promise<void> {
-        if (this.userUID) {
-            try {
-                const friendRequestIds = await this.friendSystemService.getFriendRequests(this.userUID);
-                const userDocs = await Promise.all(
-                    friendRequestIds.map(async (id) => {
-                        const userRef = doc(this.firestore, 'users', id);
-                        return { id, doc: await getDoc(userRef) };
-                    }),
-                );
-                this.friendRequests = userDocs
-                    .filter((item) => item.doc.exists())
-                    .map((item) => ({
-                        id: item.id,
-                        username: item.doc.data()?.username || 'Unknown User',
-                    }));
-            } catch (error) {
-                console.error("Erreur lors de la mise à jour des demandes d'ami :", error);
-            }
-        }
-    }
-
-    private async updateFriendList(): Promise<void> {
-        if (this.userUID) {
-            try {
-                const friendIds = await this.friendSystemService.getFriends(this.userUID);
-                const userDocs = await Promise.all(
-                    friendIds.map(async (id) => {
-                        const userRef = doc(this.firestore, 'users', id);
-                        return { id, doc: await getDoc(userRef) };
-                    }),
-                );
-                this.friends = userDocs
-                    .filter((item) => item.doc.exists())
-                    .map((item) => ({
-                        id: item.id,
-                        username: item.doc.data()?.username || 'Unknown User',
-                    }));
-            } catch (error) {
-                console.error('Erreur lors de la mise à jour de la liste des amis:', error);
-            }
-        }
-    }
-
     async removeFriend(userId: string, friendId: string): Promise<void> {
         if (!userId) return;
 
         try {
             await this.friendSystemService.removeFriend(userId, friendId);
-            await this.updateFriendList();
         } catch (error) {
             console.error("Erreur lors de la suppression de l'ami:", error);
         }
@@ -427,8 +422,6 @@ export class SideBarComponent implements OnInit, OnDestroy {
 
         try {
             await this.friendSystemService.acceptFriendRequest(this.userUID, friendId);
-            await this.updateFriendRequests();
-            await this.updateFriendList(); // Also update friend list after accepting
         } catch (error) {
             console.error("Erreur lors de l'acceptation de la demande d'ami:", error);
         }
@@ -439,7 +432,6 @@ export class SideBarComponent implements OnInit, OnDestroy {
 
         try {
             await this.friendSystemService.cancelFriendRequest(friendId, this.userUID);
-            await this.updateFriendRequests();
         } catch (error) {
             console.error("Erreur lors du refu de la demande d'ami:", error);
         }
