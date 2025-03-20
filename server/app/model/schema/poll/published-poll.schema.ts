@@ -22,10 +22,6 @@ export class PublishedPoll extends Poll {
     @Prop({ required: true })
     publicationDate: string;
 
-    @ApiProperty({ description: 'The end date of the poll' })
-    @Prop({ required: true })
-    endDate: string;
-
     @ApiProperty({ description: 'Total votes for each question' })
     @Prop({ type: [[Number]], default: [] })
     totalVotes: number[][];

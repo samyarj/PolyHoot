@@ -9,11 +9,6 @@ export class CreatePublishedPollDto extends CreatePollDto {
     @IsDateString()
     publicationDate: string;
 
-    @ApiProperty({ description: 'The end date of the poll' })
-    @IsNotEmpty()
-    @IsDateString()
-    endDate: string;
-
     @ApiProperty({ description: 'Total votes for each question' })
     @IsArray()
     @ValidateNested({ each: true })

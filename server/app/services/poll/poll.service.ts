@@ -89,7 +89,7 @@ export class PollService {
                 title: updateData.title,
                 description: updateData.description,
                 expired: updateData.expired,
-                expireDate: updateData.expireDate,
+                endDate: updateData.endDate,
                 questions: updateData.questions,
             };
             try {
