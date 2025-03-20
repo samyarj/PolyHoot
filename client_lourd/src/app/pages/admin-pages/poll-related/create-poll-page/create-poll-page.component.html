@@ -1,3 +1,143 @@
 <div class="poll-page-container">
-    <div class="poll-page-content">Page de creation de sondages.<br />Mettre ton contenu ici.</div>
+    <div class="poll-page-content">
+        <div class="container">
+            <div class="forms-container">
+                <form class="row mt-2 game-info" #gameForm="ngForm" @gameFormAnimation>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="title">Titre du sondage:</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="title"
+                                [(ngModel)]="poll.title"
+                                placeholder="Entrez le titre du sondage"
+                                name="title"
+                                required
+                                #title="ngModel"
+                            />
+                            <small class="text-danger" *ngIf="isPollTitleEmpty()"> Il faut un titre.</small>
+                        </div>
+                        <div class="form-group" id="description">
+                            <label for="description-input">Description du sondage:</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="description-input"
+                                [(ngModel)]="poll.description"
+                                name="description"
+                                maxlength="200"
+                                #descriptionModel="ngModel"
+                                required
+                            />
+                            <small class="text-danger">
+                                <ng-container *ngIf="isDescriptionEmpty()"> Il faut une description.</ng-container>
+                                <ng-container *ngIf="descriptionModel.errors?.maxlength">
+                                    La description ne devrait pas avoir plus de 200 caractères.
+                                </ng-container>
+                            </small>
+                        </div>
+                    </div>
+                </form>
+                <form class="form-question-container" #questionForm="ngForm" (ngSubmit)="addQuestion()">
+                    <div class="question-info-section">
+                        <div class="form-group question-text">
+                            <label class="form-label" for="question-text-id">Question</label>
+                            <input
+                                class="form-control"
+                                id="question-text-id"
+                                type="text"
+                                [(ngModel)]="question.text"
+                                placeholder="Entrez votre question."
+                                name="text"
+                                #text="ngModel"
+                                required
+                            />
+                            <small class="text-danger" *ngIf="isQuestionTextValid()">Entrez votre question</small>
+                        </div>
+                    </div>
+
+                    <div class="form-group answers-section">
+                        <label class="form-label">Réponses:</label>
+                        <div cdkDropList class="answers-list" (cdkDropListDropped)="drop($event)">
+                            <div *ngFor="let choice of question.choices; let i = index" class="mb-2 question-choice" cdkDrag>
+                                <div class="input-group">
+                                    <p>{{ i + 1 }}.</p>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        [(ngModel)]="choice.text"
+                                        placeholder="Entrez le contenu de la réponse"
+                                        name="answer{{ choice.text }}"
+                                        required
+                                        #answer="ngModel"
+                                    />
+                                    <div class="button-section">
+                                        <button
+                                            class="btn btn-dark btn-sm"
+                                            type="button"
+                                            *ngIf="question.choices && question.choices.length > 2"
+                                            (click)="deleteAnswer(i)"
+                                            matTooltip="Supprimer"
+                                        >
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        <i class="fas fa-grip-vertical"></i>
+                                    </div>
+                                </div>
+                                <small class="form-text text-danger" *ngIf="answer.invalid && (answer.dirty || answer.touched)">
+                                    La réponse est requise
+                                </small>
+                            </div>
+                        </div>
+                        <div *ngIf="question.choices"> {{question.choices.length}}</div>
+                        <button
+                            class="btn btn-secondary btn-sm"
+                            type="button"
+                            *ngIf="question.choices && question.choices.length < 4"
+                            (click)="addAnswer()"
+                        >
+                            <i matTooltip="Ajouter un choix de réponse" class="fa-solid fa-plus"></i>
+                        </button>
+                        <div *ngIf="!validUniqueChoiceTexts()" class="text-danger">*Les choix de réponse doivent être uniques</div>
+                        <div *ngIf="!questionForm.valid || !areQuestionChoicesTextValid()" class="text-danger">*Tous les champs sont requis.</div>
+                    </div>
+                    <div class="submit-section">
+                        <button *ngIf="showButton" type="button" class="btn btn-dark custom-width" (click)="resetAnswers()">Tout effacer</button>
+                        <button *ngIf="showButton" type="submit" class="btn custom-button custom-width" [disabled]="!questionForm.valid">
+                            {{ submitQuestionButton }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="created-question-container" @gameFormAnimation>
+                <h2>Questions</h2>
+                <ul class="question-list-container" cdkDropList (cdkDropListDropped)="onDrop($event)">
+                    <li
+                        *ngFor="let question of poll.questions; trackBy: trackByFn; let i = index"
+                        @zoomIn
+                        @bounceOut
+                        class="question-item"
+                        cdkDrag
+                        cdkDragPreviewClass="drag-preview"
+                    >
+                        <div class="question-title truncate-text">{{ i + 1 }}. {{ question.text }}</div>
+                        <span class="action-icons">
+                            <i class="fas fa-pencil-alt" (click)="editQuestion(i)" matTooltip="Modifier"></i>
+                            <i class="fas fa-trash-alt" (click)="deleteQuestion(i)" matTooltip="Supprimer"></i>
+                        </span>
+                    </li>
+                </ul>
+                <div *ngIf="poll.questions.length > 0" class="btn btn-dark add-question-icon">
+                    <i class="fas fa-plus-circle" (click)="addQuestion()"></i>
+                </div>
+            </div>
+        </div>
+        <div class="submit-game-section">
+            <button (click)="emptyPollAndRedirect()" class="btn btn-danger custom-width">Annuler</button>
+            <button class="btn btn-primary custom-width" [disabled]="!gameForm.valid || !validatePoll()" (click)="submitPollEvent()">
+                {{ submitPollButton }}
+            </button>
+        </div>
+    </div>
 </div>

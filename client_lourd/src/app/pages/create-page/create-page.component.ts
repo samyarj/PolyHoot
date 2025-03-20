@@ -19,7 +19,7 @@ export class CreatePageComponent {
 
     quizzesObserver: Partial<Observer<Quiz[]>> = {
         next: (quizzes: Quiz[]) => {
-            const visibleQuizzes = quizzes.filter((quiz) => quiz.visibility && quiz.title !== 'Mode aléatoire');
+            const visibleQuizzes = quizzes.filter((quiz) => quiz.visibility && quiz.title);
             if (!visibleQuizzes.length) {
                 this.openErrorPopUp();
             } else {

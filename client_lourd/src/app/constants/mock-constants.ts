@@ -69,6 +69,12 @@ export const EMPTY_POLL: Poll = {
     expireDate: new Date(9999, 1, 1),
     isPublished: false,
 };
+export const EMPTY_POLL_QUESTION: Question = {
+    type: QuestionType.QCM,
+    text: '',
+    points: 10,
+    choices: [{ text: '' }, { text: '' }],
+};
 
 export const POLL_1: Poll = {
     title: 'Premier sondage',
