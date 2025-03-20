@@ -99,7 +99,6 @@ class CoinflipNotifier extends StateNotifier<CoinflipState> {
       CoinFlipEvents.JoinGame.value,
       null,
       (answer) => {
-        AppLogger.i("$answer"),
         if (mounted)
           {
             state = state.copyWith(
@@ -148,7 +147,6 @@ class CoinflipNotifier extends StateNotifier<CoinflipState> {
     _socketManager.webSocketReceiver(
         CoinFlipEvents.Results.value,
         (answer) => {
-              AppLogger.i("$answer"),
               if (mounted)
                 {
                   state = state.copyWith(
@@ -168,7 +166,6 @@ class CoinflipNotifier extends StateNotifier<CoinflipState> {
     _socketManager.webSocketReceiver(
         CoinFlipEvents.SendPlayerList.value,
         (playerList) => {
-              AppLogger.i("$playerList"),
               if (mounted)
                 {
                   state = state.copyWith(
@@ -259,7 +256,7 @@ class CoinflipNotifier extends StateNotifier<CoinflipState> {
 
   @override
   void dispose() {
-    AppLogger.e("RemoveListeners DISPOSE OF COINFLIP PROVIDER");
+    AppLogger.i("RemoveListeners DISPOSE OF COINFLIP PROVIDER");
     _socketManager.socket?.off(CoinFlipEvents.StartGame.value);
     _socketManager.socket?.off(CoinFlipEvents.PreFlippingPhase.value);
     _socketManager.socket?.off(CoinFlipEvents.FlippingPhase.value);

@@ -1,4 +1,3 @@
-import 'package:client_leger/utilities/logger.dart';
 import 'reward.dart';
 
 class LootBoxContainer {
@@ -13,7 +12,6 @@ class LootBoxContainer {
   });
 
   factory LootBoxContainer.fromJson(Map<String, dynamic> json) {
-    AppLogger.i("LootBoxContainer.fromJson: $json");
     return LootBoxContainer(
       rewards: (json['rewards'] as List<dynamic>)
           .map((reward) => Reward.fromJson(reward as Map<String, dynamic>))

@@ -27,13 +27,12 @@ class LootboxService {
   // acces a l'objet user dans le widget en ecoutant
 
   Future<dynamic> openBox(int id) async {
+    AppLogger.i("Opening lootbox with id: $id");
     final tokenValue = await FirebaseAuth.instance.currentUser?.getIdToken();
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $tokenValue',
     };
-
-    AppLogger.i("Opening lootbox with id: $id");
 
     final response = await http.post(
       Uri.parse('$lootboxUrl/lootBox'),
@@ -55,6 +54,8 @@ class LootboxService {
   }
 
   Future<List<LootBoxContainer>> getBoxes() async {
+    AppLogger.i("Getting loot boxes");
+
     final tokenValue = await FirebaseAuth.instance.currentUser?.getIdToken();
     final headers = {
       'Authorization': 'Bearer $tokenValue',

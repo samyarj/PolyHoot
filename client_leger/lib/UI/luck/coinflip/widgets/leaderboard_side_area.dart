@@ -34,16 +34,18 @@ class LeaderboardSideArea extends StatelessWidget {
                     center: Alignment.center, // Center of the gradient
                     radius: 1.1, // Radius of the gradient
                   )
-                : RadialGradient(
-                    colors: [
-                      Theme.of(context).colorScheme.primary,
-                      Theme.of(context).colorScheme.primary,
-                      Theme.of(context).colorScheme.primary,
-                      Color.fromRGBO(255, 0, 0, 0.82),
-                    ],
-                    center: Alignment.center, // Center of the gradient
-                    radius: 1.1, // Radius of the gradient
-                  )
+                : winningSide.isNotEmpty
+                    ? RadialGradient(
+                        colors: [
+                          Theme.of(context).colorScheme.primary,
+                          Theme.of(context).colorScheme.primary,
+                          Theme.of(context).colorScheme.primary,
+                          Color.fromRGBO(255, 0, 0, 0.82),
+                        ],
+                        center: Alignment.center, // Center of the gradient
+                        radius: 1.1, // Radius of the gradient
+                      )
+                    : null
             : null,
         borderRadius: BorderRadius.circular(30),
         border: Border.all(
