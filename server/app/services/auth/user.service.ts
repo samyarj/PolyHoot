@@ -501,6 +501,26 @@ export class UserService {
             throw new Error('Vous êtes déjà ami avec cet utilisateur');
         }
 
+        // Check if the user has a pending request from the friend
+        if (userData.friendRequests?.includes(friendId)) {
+            // If yes, make them friends directly
+            if (!userData.friends) userData.friends = [];
+            if (!friendData.friends) friendData.friends = [];
+
+            // Add each user to the other's friend list
+            userData.friends.push(friendId);
+            friendData.friends.push(userId);
+
+            // Remove the friend request
+            userData.friendRequests = userData.friendRequests.filter((id) => id !== friendId);
+
+            // Update both documents
+            await userRef.update({ friends: userData.friends, friendRequests: userData.friendRequests });
+            await friendRef.update({ friends: friendData.friends });
+
+            return true;
+        }
+
         // Check if there's already a pending request
         if (friendData.friendRequests?.includes(userId)) {
             throw new Error("Vous avez déjà envoyé une demande d'ami à cet utilisateur");
