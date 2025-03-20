@@ -22,6 +22,9 @@ import { DailyFreePageComponent } from '@app/pages/luck-related/daily-free-page/
 import { LootBoxPageComponent } from '@app/pages/luck-related/loot-box-page/loot-box-page.component';
 import { LuckMainPageComponent } from '@app/pages/luck-related/luck-main-page/luck-main-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
+import { CreatePollComponent } from '@app/pages/poll-related/create-poll/create-poll.component';
+import { PollHistoryComponent } from '@app/pages/poll-related/poll-history/poll-history.component';
+import { PollManagementComponent } from '@app/pages/poll-related/poll-management/poll-management.component';
 import { ProfilePageComponent } from '@app/pages/profile-page/profile-page.component';
 import { AdminPageComponent } from '@app/pages/quiz-question-related/admin-page/admin-page.component';
 import { AdminQuizCreateComponent } from '@app/pages/quiz-question-related/create-quiz/admin-create-quiz';
@@ -108,13 +111,16 @@ const routes: Routes = [
         canActivate: [authGuardAdmin],
         children: [
             { path: '', redirectTo: 'consult', pathMatch: 'full' },
-            { path: 'consult', component: ConsultPollPageComponent, canActivate: [authGuard] },
-            { path: 'create', component: CreatePollPageComponent, canActivate: [authGuard] },
-            { path: 'history', component: HistoryPollPageComponent, canActivate: [authGuard] },
+            { path: 'consult', component: ConsultPollPageComponent, canActivate: [authGuardAdmin] },
+            { path: 'create', component: CreatePollPageComponent, canActivate: [authGuardAdmin] },
+            { path: 'history', component: HistoryPollPageComponent, canActivate: [authGuardAdmin] },
         ],
     },
 
     { path: '**', redirectTo: '/home' },
+    { path: 'polls', component: PollManagementComponent, canActivate: [authGuard] },
+    { path: 'polls-expired', component: PollHistoryComponent, canActivate: [authGuard] },
+    { path: 'polls/create', component: CreatePollComponent, canActivate: [authGuard] },
 ];
 
 @NgModule({
