@@ -3,7 +3,7 @@ class User {
   final String? borderEquipped;
   final int? coins;
   final Map<String, dynamic>? config;
-  final List<String>? cxnLogs;
+  final List<Map<String, dynamic>>? cxnLogs;
   final String email;
   final List<String>? friendRequests;
   final List<String>? friends;
@@ -49,8 +49,9 @@ class User {
       borderEquipped: json['borderEquipped'] as String?,
       coins: json['coins'] as int?,
       config: json['config'] as Map<String, dynamic>?,
-      cxnLogs:
-          (json['cxnLogs'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      cxnLogs: (json['cxnLogs'] as List<dynamic>?)
+          ?.map((e) => e as Map<String, dynamic>)
+          .toList(),
       email: json['email'] as String,
       friendRequests: (json['friendRequests'] as List<dynamic>?)
           ?.map((e) => e as String)

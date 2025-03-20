@@ -8,5 +8,6 @@ export const CLIENT_ERROR = {
 export const ALERT_MODE_TIME_LIMITS = {
     QRL: 20,
     QCM: 10,
+    QRE: 10,
 };
 export const ANSWER_TIME_INTERVAL = 500;

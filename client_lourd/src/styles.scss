@@ -27,6 +27,10 @@
     transform: translate(-50%, -50%);
 }
 
+.quiz-info-popup {
+    background: color-mix(in srgb, var(--primary-color) 50%, transparent);
+}
+
 // Rare Backdrop
 .backdrop-dialog-rare {
     width: 50%;
@@ -233,6 +237,22 @@
     }
 }
 
+.custom-button-disabled {
+    @extend .custom-button;
+    cursor: not-allowed !important;
+    opacity: 0.6;
+
+    &:hover {
+        background: var(--primary-color);
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        border: 3px solid var(--tertiary-color);
+        box-shadow: none !important; /* Remove any hover shadows */
+        filter: none !important; /* Remove brightness or other effects */
+        transform: none !important; /* Disable animations */
+    }
+}
+
 .custom-button-cancel {
     display: flex;
     align-items: center; /* Vertical centering */
@@ -240,13 +260,13 @@
     text-align: center;
     background-color: var(--tertiary-color);
     color: var(--primary-color);
-    border: 3px solid var(--secondary-color);
+    border: 3px solid var(--text-color);
     border-radius: 50px;
     transition: transform 0.2s ease-in-out;
     &:hover {
-        background: linear-gradient(0deg, var(--primary-color) 0%, var(--tertiary-color) 47.5%);
+        background: linear-gradient(0deg, var(--secondary-color) 0%, var(--tertiary-color) 47.5%);
         cursor: pointer;
-        border: 3px solid var(--primary-color);
+        border: 3px solid var(--secondary-color);
     }
 }
 

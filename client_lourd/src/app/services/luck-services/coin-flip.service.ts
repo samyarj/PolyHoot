@@ -108,6 +108,7 @@ export class CoinFlipService {
     submitBet() {
         const dialogRef = this.matdialog.open(ConfirmationDialogComponent, {
             width: WIDTH_SIZE,
+            panelClass: 'custom-container',
             data: `Voulez vous miser la somme de : ${this.betAmount} coins?`,
         });
 
@@ -123,6 +124,7 @@ export class CoinFlipService {
                             } else {
                                 this.matdialog.open(ErrorDialogComponent, {
                                     width: WIDTH_SIZE,
+                                    panelClass: 'custom-container',
                                     data: {
                                         message:
                                             'Vous ne pouvez pas parier plus de coins que ceux détenus ou bien parier en dehors de la phase de mise!',
@@ -135,6 +137,7 @@ export class CoinFlipService {
                 } else if (this.betAmount === 0 || this.betAmount % 1 !== 0) {
                     this.matdialog.open(ErrorDialogComponent, {
                         width: WIDTH_SIZE,
+                        panelClass: 'custom-container',
                         data: { message: 'Vous ne pouvez pas parier 0 coins.', reloadOnClose: false },
                     });
                 } else if (this.gameState !== CoinFlipGameState.BettingPhase) {
@@ -147,6 +150,7 @@ export class CoinFlipService {
     errorOutsideBettingPhase() {
         this.matdialog.open(ErrorDialogComponent, {
             width: WIDTH_SIZE,
+            panelClass: 'custom-container',
             data: { message: 'Vous ne pouvez pas parier en dehors de la phase de mise.', reloadOnClose: false },
         });
     }

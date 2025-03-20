@@ -54,7 +54,10 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
   @override
   Widget build(BuildContext context) {
     final userState = ref.read(userProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
+        backgroundColor: colorScheme.primary,
         resizeToAvoidBottomInset: true,
         body: userState.when(
             data: (user) {
@@ -63,8 +66,13 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      Text("Partie", style: TextStyle(fontSize: 18)),
-                      Divider(),
+                      Text("Partie",
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: colorScheme.onPrimary,
+                              fontWeight: FontWeight.bold)),
+                      Divider(
+                          color: colorScheme.onPrimary.withValues(alpha: 0.5)),
                       Expanded(
                         child: SingleChildScrollView(
                           // sinon overflow on focus when keyboard appears
@@ -100,7 +108,8 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                                               0.7),
                                                   padding: EdgeInsets.all(12),
                                                   decoration: BoxDecoration(
-                                                    color: Color(0xFF4F5487),
+                                                    color: colorScheme
+                                                        .primaryContainer,
                                                     borderRadius:
                                                         BorderRadius.circular(
                                                             15),
@@ -113,7 +122,8 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                                       Text(
                                                         message.author,
                                                         style: TextStyle(
-                                                            color: Colors.white,
+                                                            color: colorScheme
+                                                                .onPrimaryContainer,
                                                             fontSize: 18,
                                                             fontWeight:
                                                                 FontWeight
@@ -123,7 +133,8 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                                         message.message,
                                                         softWrap: true,
                                                         style: TextStyle(
-                                                          color: Colors.white,
+                                                          color: colorScheme
+                                                              .onPrimaryContainer,
                                                           fontSize: 18,
                                                           fontStyle:
                                                               FontStyle.italic,
@@ -136,8 +147,11 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                                           formatDate(
                                                               message.date!),
                                                           style: TextStyle(
-                                                              color:
-                                                                  Colors.white,
+                                                              color: colorScheme
+                                                                  .onPrimaryContainer
+                                                                  .withValues(
+                                                                      alpha:
+                                                                          0.7),
                                                               fontSize: 16),
                                                         ),
                                                       ),
@@ -166,13 +180,23 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                                   gradient: LinearGradient(
                                                     colors: isUserMessage
                                                         ? [
-                                                            Color(0xFF47AE6C),
-                                                            Color(0xFF2ECC71)
+                                                            colorScheme
+                                                                .secondary
+                                                                .withValues(
+                                                                    alpha: 0.4),
+                                                            colorScheme
+                                                                .secondary
+                                                                .withValues(
+                                                                    alpha: 0.7),
                                                           ]
                                                         : [
-                                                            Color(0xFF4A69BB),
-                                                            Color(0xFF3B5998)
+                                                            colorScheme.surface
+                                                                .withValues(
+                                                                    alpha: 0.6),
+                                                            colorScheme.surface,
                                                           ],
+                                                    begin: Alignment.topLeft,
+                                                    end: Alignment.bottomRight,
                                                   ),
                                                   borderRadius:
                                                       BorderRadius.only(
@@ -190,7 +214,8 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                                   boxShadow: [
                                                     BoxShadow(
                                                         color: Colors.black
-                                                            .withOpacity(0.2),
+                                                            .withValues(
+                                                                alpha: 0.2),
                                                         spreadRadius: 2,
                                                         blurRadius: 6),
                                                   ],
@@ -202,7 +227,11 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                                     Text(
                                                       message.author,
                                                       style: TextStyle(
-                                                          color: Colors.white,
+                                                          color: isUserMessage
+                                                              ? colorScheme
+                                                                  .onSecondary
+                                                              : colorScheme
+                                                                  .onSurface,
                                                           fontSize: 18,
                                                           fontWeight:
                                                               FontWeight.bold),
@@ -211,7 +240,11 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                                       message.message,
                                                       softWrap: true,
                                                       style: TextStyle(
-                                                          color: Colors.white,
+                                                          color: isUserMessage
+                                                              ? colorScheme
+                                                                  .onSecondary
+                                                              : colorScheme
+                                                                  .onSurface,
                                                           fontSize: 18),
                                                     ),
                                                     Align(
@@ -221,7 +254,13 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                                         formatDate(
                                                             message.date!),
                                                         style: TextStyle(
-                                                            color: Colors.white,
+                                                            color: (isUserMessage
+                                                                    ? colorScheme
+                                                                        .onSecondary
+                                                                    : colorScheme
+                                                                        .onSurface)
+                                                                .withValues(
+                                                                    alpha: 0.7),
                                                             fontSize: 16),
                                                       ),
                                                     ),
@@ -244,15 +283,24 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                   focusNode: _focusNode,
                                   minLines: 1,
                                   maxLines: null,
+                                  style:
+                                      TextStyle(color: colorScheme.onSurface),
                                   decoration: InputDecoration(
                                     hintText: 'Écrivez un message...',
+                                    filled: true,
+                                    fillColor: colorScheme.surface,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                      borderSide: BorderSide.none,
+                                    ),
                                     suffixIcon: IconButton(
-                                      icon:
-                                          Icon(Icons.send, color: Colors.white),
+                                      icon: Icon(Icons.send,
+                                          color: colorScheme.secondary),
                                       onPressed: () => sendMessage(),
                                     ),
                                     hintStyle: TextStyle(
-                                      color: Colors.white,
+                                      color: colorScheme.onPrimary
+                                          .withValues(alpha: 0.7),
                                     ),
                                   ),
                                   textInputAction: TextInputAction.send,

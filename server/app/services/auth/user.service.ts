@@ -97,7 +97,36 @@ export class UserService {
     }
 
     async logout(uid: string): Promise<void> {
-        await this.firestore.collection('users').doc(uid).update({ isOnline: false });
+        const userRef = this.firestore.collection('users').doc(uid);
+
+        // Create a log entry for the disconnect action
+        const logEntry = {
+            timestamp: this.formatTimestamp(new Date()),
+            action: 'disconnect',
+        };
+
+        // Use a transaction to ensure atomicity
+        await this.firestore.runTransaction(async (transaction) => {
+            const userDoc = await transaction.get(userRef);
+
+            if (!userDoc.exists) {
+                throw new Error("L'utilisateur n'existe pas.");
+            }
+
+            const updateData: any = {
+                isOnline: false,
+            };
+
+            // Check if cxnLogs exists, if not initialize it
+            if (!userDoc.data().cxnLogs) {
+                updateData.cxnLogs = [logEntry]; // Initialize cxnLogs with the new log entry
+            } else {
+                updateData.cxnLogs = admin.firestore.FieldValue.arrayUnion(logEntry); // Add the log entry to cxnLogs
+            }
+
+            // Update the user's online status and log the disconnect
+            transaction.update(userRef, updateData);
+        });
     }
 
     async getUserByUid(uid: string): Promise<User> {
@@ -347,7 +376,14 @@ export class UserService {
             coins: userDoc.coins || 0,
             cxnLogs: userDoc.cxnLogs || [],
             playedGameLogs: userDoc.playedGameLogs || [],
+            stats: userDoc.stats || {
+                nQuestions: 0,
+                nGoodAnswers: 0,
+                rightAnswerPercentage: 0,
+                timeSpent: 0,
+            },
             nWins: userDoc.nWins || 0,
+            nGames: userDoc.nGames || 0,
             isOnline: true,
             pity: userDoc.pity || 0,
             nextDailyFree: userDoc.nextDailyFree || new Date(),
@@ -524,5 +560,156 @@ export class UserService {
         }
 
         return querySnapshot.docs[0].id;
+    }
+
+    async incrementGames(uid: string): Promise<void> {
+        const userRef = await this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+
+        const currentGames = userDoc.data().nGames || 0;
+        await userRef.update({ nGames: currentGames + 1 });
+    }
+
+    async incrementWins(uid: string): Promise<void> {
+        const userRef = this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+        const currentWins = userDoc.data().nWins || 0;
+        await userRef.update({ nWins: currentWins + 1 });
+    }
+
+    async updateStats(uid: string, newStats: { nQuestions?: number; nGoodAnswers?: number; timeSpent?: number }): Promise<void> {
+        const userRef = this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+
+        const currentStats = userDoc.data().stats || {
+            nQuestions: 0,
+            nGoodAnswers: 0,
+            rightAnswerPercentage: 0,
+            timeSpent: 0,
+        };
+
+        const updatedStats = {
+            nQuestions: (currentStats.nQuestions || 0) + (newStats.nQuestions || 0),
+            nGoodAnswers: (currentStats.nGoodAnswers || 0) + (newStats.nGoodAnswers || 0),
+            timeSpent: (currentStats.timeSpent || 0) + (newStats.timeSpent || 0),
+        };
+
+        // Calculate the new percentage
+        updatedStats['rightAnswerPercentage'] = updatedStats.nQuestions > 0 ? (updatedStats.nGoodAnswers / updatedStats.nQuestions) * 100 : 0;
+
+        await userRef.update({ stats: updatedStats });
+    }
+
+    async addConnectionLog(uid: string, logEntry: { timestamp: number; action: 'connect' | 'disconnect'; deviceInfo?: string; ipAddress?: string }) {
+        const userRef = await this.firestore.collection('users').doc(uid);
+        await userRef.update({
+            cxnLogs: admin.firestore.FieldValue.arrayUnion(logEntry),
+        });
+    }
+
+    async getConnectionLogs(uid: string): Promise<{ timestamp: string; action: 'connect' | 'disconnect' }[]> {
+        const userRef = this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+
+        const cxnLogs = userDoc.data().cxnLogs || [];
+        return cxnLogs.map((log) => ({
+            timestamp: log.timestamp, // Assuming timestamp is already formatted
+            action: log.action,
+        }));
+    }
+
+    async addGameLog(
+        uid: string,
+        gameLog: {
+            gameName?: string;
+            startTime?: string;
+            endTime?: string;
+            status?: 'complete' | 'abandoned';
+            result?: 'win' | 'lose';
+        },
+    ): Promise<boolean> {
+        try {
+            const userRef = this.firestore.collection('users').doc(uid);
+            const userDoc = await userRef.get();
+
+            if (!userDoc.exists) {
+                throw new Error("L'utilisateur n'existe pas.");
+            }
+
+            // Add the new game log to the user's gameLogs array
+            await userRef.update({
+                gameLogs: admin.firestore.FieldValue.arrayUnion(gameLog),
+            });
+
+            return true;
+        } catch (error) {
+            console.error('Failed to add game log:', error);
+            return false;
+        }
+    }
+
+    async updateGameLog(
+        uid: string,
+        updatedGameLog: {
+            gameName?: string;
+            startTime?: string;
+            endTime?: string;
+            status?: 'complete' | 'abandoned';
+            result?: 'win' | 'lose';
+        },
+    ): Promise<boolean> {
+        try {
+            const userRef = this.firestore.collection('users').doc(uid);
+            const userDoc = await userRef.get();
+
+            if (!userDoc.exists) {
+                throw new Error("L'utilisateur n'existe pas.");
+            }
+
+            const gameLogs = userDoc.data().gameLogs || [];
+
+            if (gameLogs.length === 0) {
+                throw new Error('No game logs found.');
+            }
+
+            // Always update the last game log
+            const lastIndex = gameLogs.length - 1;
+            gameLogs[lastIndex] = {
+                ...gameLogs[lastIndex],
+                ...updatedGameLog,
+            };
+
+            await userRef.update({ gameLogs });
+
+            return true;
+        } catch (error) {
+            console.error('Failed to update game log:', error);
+            return false;
+        }
+    }
+
+    formatTimestamp(date: Date): string {
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        const day = pad(date.getDate());
+        const month = pad(date.getMonth() + 1); // Months are zero-based
+        const year = date.getFullYear();
+        const hours = pad(date.getHours());
+        const minutes = pad(date.getMinutes());
+        const seconds = pad(date.getSeconds());
+
+        return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
     }
 }

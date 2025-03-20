@@ -12,6 +12,21 @@ h2 {
     overflow-y: auto;
     max-height: 600px;
     padding: 1rem;
+
+    &::-webkit-scrollbar {
+        width: 4px; // Adjust width of scrollbar
+    }
+
+    &::-webkit-scrollbar-track {
+        background: color-mix(in srgb, var(--primary-color) 70%, transparent);
+        border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--secondary-color);
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+    }
 }
 
 .right-section h2 {
@@ -28,6 +43,7 @@ h2 {
     gap: 0.5rem;
     transition: transform 0.22s ease-in-out;
     font-weight: 500;
+    border: 3px solid var(--tertiary-color);
     &:hover {
         transform: scale(1.05);
         .question-title {
@@ -67,6 +83,10 @@ h2 {
 
 .qrl {
     background: $question-qrl-color;
+}
+
+.qre {
+    background: rgba(141, 163, 255);
 }
 
 .question-type-icon {

@@ -6,13 +6,17 @@
         [expanded]="expanded"
         [disabled]="expansionPanelDisabled"
     >
-        <mat-expansion-panel-header [class.expanded-panel]="expanded" [ngClass]="{ qcm: question.type === 'QCM', qrl: question.type === 'QRL', qre: question.type === 'QRE' }">
+        <mat-expansion-panel-header
+            [class.expanded-panel]="expanded"
+            [ngClass]="{ qcm: question.type === 'QCM', qrl: question.type === 'QRL', qre: question.type === 'QRE' }"
+        >
             <mat-panel-title>
                 <i
                     class="fa-solid question-type-icon"
                     [ngClass]="{
                         'fa-list-check': question.type === 'QCM',
-                        'fa-keyboard': question.type === 'QRL'
+                        'fa-keyboard': question.type === 'QRL',
+                        'fa-circle-dot': question.type === 'QRE'
                     }"
                 ></i>
                 {{ question.lastModified | date: 'yyyy-MM-dd HH:mm:ss' }}

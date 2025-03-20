@@ -2,13 +2,14 @@ import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:flutter/material.dart';
 
 Future<void> showConfirmationDialog(BuildContext context, String message,
-    Future<void> Function() onConfirm) async {
+    Future<void> Function()? onAsyncConfirm, Function? onConfirm) async {
   return showDialog<void>(
     context: context,
     barrierDismissible: false, // user must tap button!
     builder: (BuildContext context) {
       return _ConfirmationDialog(
         message: message,
+        onAsyncConfirm: onAsyncConfirm,
         onConfirm: onConfirm,
       );
     },
@@ -17,12 +18,13 @@ Future<void> showConfirmationDialog(BuildContext context, String message,
 
 class _ConfirmationDialog extends StatefulWidget {
   final String message;
-  final Future<void> Function() onConfirm;
+  final Future<void> Function()? onAsyncConfirm;
+  final Function? onConfirm;
 
-  const _ConfirmationDialog({
-    required this.message,
-    required this.onConfirm,
-  });
+  const _ConfirmationDialog(
+      {required this.message,
+      required this.onAsyncConfirm,
+      required this.onConfirm});
 
   @override
   __ConfirmationDialogState createState() => __ConfirmationDialogState();
@@ -69,15 +71,22 @@ class __ConfirmationDialogState extends State<_ConfirmationDialog> {
         TextButton(
           onPressed: _isLoading
               ? null
-              : () async {
-                  setState(() {
-                    _isLoading = true;
-                  });
-                  await widget.onConfirm();
-                  if (mounted) {
-                    Navigator.of(context).pop();
-                  }
-                },
+              : widget.onConfirm == null
+                  ? () async {
+                      setState(() {
+                        _isLoading = true;
+                      });
+                      await widget.onAsyncConfirm!();
+                      if (mounted) {
+                        Navigator.of(context).pop();
+                      }
+                    }
+                  : () {
+                      widget.onConfirm!();
+                      if (mounted) {
+                        Navigator.of(context).pop();
+                      }
+                    },
           child: Text(
             'Continuer',
             style: TextStyle(fontSize: 18),

@@ -1,0 +1,39 @@
+<div class="logs-container">
+    <h2>Logs d'activité</h2>
+    <table class="logs-table">
+        <thead>
+            <tr>
+                <th>Horodatage</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let log of logs">
+                <td>{{ log.timestamp }}</td>
+                <td>{{ getActionDisplay(log.action) }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Historique des parties</h2>
+    <table class="logs-table">
+        <thead>
+            <tr>
+                <th>Début</th>
+                <th>Fin</th>
+                <th>Nom du jeu</th>
+                <th>Statut</th>
+                <th>Résultat</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let game of gameLogs">
+                <td>{{ game.startTime ?? '--' }}</td>
+                <td>{{ game.endTime ?? '--' }}</td>
+                <td>{{ game.gameName ?? '--' }}</td>
+                <td>{{ this.getStatusDisplay(game.status || 'abandoned') }}</td>
+                <td>{{ this.getResultDisplay(game.result || 'lose') }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

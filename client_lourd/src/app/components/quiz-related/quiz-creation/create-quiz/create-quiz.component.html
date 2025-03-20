@@ -92,14 +92,19 @@
                 </span>
             </li>
         </ul>
-        <div *ngIf="quiz.questions.length > 0" class="btn btn-dark add-question-icon">
+        <div *ngIf="quiz.questions.length > 0" class="custom-button-medium add-question-icon">
             <i class="fas fa-plus-circle" (click)="addEmptyQuestion()"></i>
         </div>
     </div>
 </div>
 <div class="submit-game-section">
-    <button (click)="emptyQuizAndRedirect()" class="btn btn-danger custom-width">Annuler</button>
-    <button class="btn btn-primary custom-width" [disabled]="!gameForm.valid || !validateQuiz()" (click)="submitQuizEvent()">
+    <button (click)="emptyQuizAndRedirect()" class="custom-button-cancel-medium">Annuler</button>
+    <button
+        class="custom-button-medium"
+        [ngClass]="{ 'custom-button-disabled-medium': !gameForm.valid || !validateQuiz() }"
+        [disabled]="!gameForm.valid || !validateQuiz()"
+        (click)="submitQuizEvent()"
+    >
         {{ submitQuizButton }}
     </button>
 </div>

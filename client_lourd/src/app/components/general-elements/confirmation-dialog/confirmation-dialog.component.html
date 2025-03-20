@@ -1,8 +1,10 @@
-<h1 mat-dialog-title>Confirmation</h1>
-<div mat-dialog-content>
-    <p>{{ data }}</p>
-</div>
-<div mat-dialog-actions align="end">
-    <button mat-button (click)="onDismiss()">Annuler</button>
-    <button mat-button color="primary" (click)="onConfirm()">Confirmer</button>
+<div class="wrapper-div">
+    <h1 mat-dialog-title>Confirmation</h1>
+    <div mat-dialog-content>
+        <p>{{ data }}</p>
+    </div>
+    <div class="button-actions" mat-dialog-actions align="end">
+        <button class="custom-button-cancel-medium" (click)="onDismiss()">Annuler</button>
+        <button class="custom-button-medium" color="primary" (click)="onConfirm()">Confirmer</button>
+    </div>
 </div>

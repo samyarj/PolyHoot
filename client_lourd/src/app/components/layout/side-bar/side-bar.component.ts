@@ -6,6 +6,7 @@ import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
 import { ChatChannel, chatChannelFromJson } from '@app/services/chat-services/chat-channels';
 import { FirebaseChatService } from '@app/services/chat-services/firebase/firebase-chat.service';
+import { HeaderNavigationService } from '@app/services/ui-services/header-navigation.service';
 import { FriendSystemService } from '@app/services/friend-system.service';
 import { Observable, Subscription } from 'rxjs';
 
@@ -47,10 +48,15 @@ export class SideBarComponent implements OnInit, OnDestroy {
         private authService: AuthService,
         private router: Router,
         private firebaseChatService: FirebaseChatService,
+        private headerService: HeaderNavigationService,
         private friendSystemService: FriendSystemService,
         private firestore: Firestore,
     ) {
         this.user$ = this.authService.user$;
+    }
+
+    get isOnGamePage() {
+        return this.headerService.isGameRelatedRoute;
     }
 
     ngOnInit(): void {
@@ -62,7 +68,6 @@ export class SideBarComponent implements OnInit, OnDestroy {
             next: (channels) => {
                 const currentUserId = this.authService.getUser()?.uid || '';
                 this.channels = channels.map((channel) => chatChannelFromJson(channel, currentUserId));
-                console.log('Channels:', this.channels); // Debug statement
             },
             error: (err) => {
                 console.error('Error while fetching channels:', err);

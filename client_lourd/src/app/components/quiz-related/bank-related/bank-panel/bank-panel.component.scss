@@ -4,6 +4,7 @@ $second-color: #5cb85c;
 $qrl-color: #f0c33b;
 // $question-qcm-color: #198038;
 $question-qcm-color: #2a9152;
+$question-qre-color: rgba(141, 163, 255);
 $question-qcm-color-hover: #125d29;
 $question-qrl-color: #194e80;
 $question-qrl-color-hover: #15395b;
@@ -24,12 +25,14 @@ $question-qrl-color-hover: #15395b;
 
         mat-expansion-panel-header {
             color: white;
+            border: 3px solid var(--tertiary-color);
             border-radius: 5px;
             margin-right: 0;
             align-items: center;
             padding: 30px 10px;
 
             mat-panel-title {
+                margin-left: 10px;
                 font-weight: bold;
                 font-size: medium;
                 color: white;
@@ -51,6 +54,10 @@ $question-qrl-color-hover: #15395b;
 
         mat-expansion-panel-header.qcm {
             background: $question-qcm-color;
+        }
+
+        mat-expansion-panel-header.qre {
+            background: $question-qre-color;
         }
 
         mat-expansion-panel-header.qrl {

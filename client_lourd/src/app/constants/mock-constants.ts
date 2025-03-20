@@ -1,6 +1,7 @@
 /* eslint-disable max-lines */
 // notre fichier des constantes, donc nous nous permettons de depasser les lignes
 import { Game } from '@app/interfaces/game';
+import { Poll } from '@app/interfaces/poll';
 import { Question } from '@app/interfaces/question';
 import { QuestionType } from '@app/interfaces/question-type';
 import { Quiz } from '@app/interfaces/quiz';
@@ -59,6 +60,42 @@ export const EMPTY_QRE_QUESTION: Question = {
         maxBound: 0,
         tolerance: 0,
     },
+};
+export const EMPTY_POLL: Poll = {
+    title: '',
+    description: '',
+    questions: [],
+    expired: false,
+    expireDate: new Date(9999, 1, 1),
+    isPublished: false,
+};
+
+export const POLL_1: Poll = {
+    title: 'Premier sondage',
+    description: 'Sondage portant sur les items par défaut de la boutique',
+    questions: [
+        {
+            type: QuestionType.QCM,
+            text: 'Quel est votre avatar préféré ?',
+            points: 0,
+            choices: [{ text: 'Wonder Woman' }, { text: 'Superman' }, { text: 'Spider-man' }],
+        },
+        {
+            type: QuestionType.QCM,
+            text: 'Quel est votre thème préféré ?',
+            points: 0,
+            choices: [{ text: 'vice' }, { text: 'celstial' }, { text: 'dark' }, { text: 'sunset' }],
+        },
+        {
+            type: QuestionType.QCM,
+            text: 'Quel est votre banner préférée ?',
+            points: 0,
+            choices: [{ text: 'league of legends' }, { text: 'le cercle jaune là' }],
+        },
+    ],
+    expired: false,
+    expireDate: new Date(9999, 1, 1),
+    isPublished: false,
 };
 
 export const EMPTY_QUESTION_WITHOUT_CHOICES: Question = {
