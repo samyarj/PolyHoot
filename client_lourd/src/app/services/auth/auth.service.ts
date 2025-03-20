@@ -284,7 +284,7 @@ export class AuthService {
                     this.socketClientService.connect(idToken);
 
                     this.isUserOnline(firebaseUser.uid).subscribe((isOnline) => {
-                        if (isOnline && signIn) {
+                        if (isOnline && signIn && !this.userBS.value) {
                             this.loadingTokenBS.next(false);
                             this.signOutAndClearSession();
                             throw new Error("L'utilisateur est déjà connecté sur un autre appareil.");
@@ -292,7 +292,7 @@ export class AuthService {
 
                         const userDocRef = doc(this.firestore, `users/${firebaseUser.uid}`);
 
-                        this.setIsOnline(true, firebaseUser.uid);
+                        if (!this.userBS.value) this.setIsOnline(true, firebaseUser.uid);
                         this.socketClientService.send('identifyMobileClient', firebaseUser.uid);
 
                         this.userSnapshotUnsubscribe = onSnapshot(
