@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */ // Mongo utilise des attributs avec un underscore
 import { ERROR } from '@app/constants/error-messages';
-//import { MOCK_QUIZZES } from '@app/constants/mock-Polls';
+//import { MOCK_POLLZES } from '@app/constants/mock-Polls';
 //import { SUCCESS } from '@app/constants/success-messages';
 import { CreatePollDto } from '@app/model/dto/poll/create-poll.dto';
 import { UpdatePollDto } from '@app/model/dto/poll/update-poll.dto';
@@ -38,20 +38,20 @@ export class PollService {
         try {
             return await this.pollModel.find().exec();
         } catch (error) {
-            throw new NotFoundException(ERROR.QUIZ.LIST_FAILED_TO_LOAD);
+            throw new NotFoundException(ERROR.POLL.LIST_FAILED_TO_LOAD);
         }
     }
     async getPollById(id: string): Promise<Poll> {
         const poll = await this.pollModel.findById(id).exec();
         if (!poll) {
-            throw new NotFoundException(ERROR.QUIZ.ID_NOT_FOUND);
+            throw new NotFoundException(ERROR.POLL.ID_NOT_FOUND);
         }
         return poll;
     }
 
     async createPoll(createPollDto: CreatePollDto): Promise<Poll> {
         const existingPoll = await this.findPollByTitle(createPollDto.title);
-        if (existingPoll && existingPoll.title) throw new ConflictException(ERROR.QUIZ.ALREADY_EXISTS);
+        if (existingPoll && existingPoll.title) throw new ConflictException(ERROR.POLL.ALREADY_EXISTS);
         const createdPoll = new this.pollModel(createPollDto);
         return createdPoll.save();
     }
@@ -60,7 +60,7 @@ export class PollService {
         if (updatePollDto.title) {
             const existingPoll = await this.findPollByTitle(updatePollDto.title);
             if (existingPoll && existingPoll._id.toString() !== id) {
-                throw new ConflictException(ERROR.QUIZ.ALREADY_EXISTS);
+                throw new ConflictException(ERROR.POLL.ALREADY_EXISTS);
             }
         }
         return await this.updatePoll(id, updatePollDto);
@@ -70,7 +70,7 @@ export class PollService {
         try {
             await this.pollModel.deleteOne({ _id: id }).exec();
         } catch (error) {
-            throw new NotFoundException(ERROR.QUIZ.ID_NOT_FOUND);
+            throw new NotFoundException(ERROR.POLL.ID_NOT_FOUND);
         }
     }
 
@@ -95,8 +95,8 @@ export class PollService {
             try {
                 return await this.createPoll(createPollDto);
             } catch (error) {
-                this.logger.error(ERROR.QUIZ.FAILED_TO_CREATE, error);
-                throw new BadRequestException(ERROR.QUIZ.FAILED_TO_CREATE);
+                this.logger.error(ERROR.POLL.FAILED_TO_CREATE, error);
+                throw new BadRequestException(ERROR.POLL.FAILED_TO_CREATE);
             }
         }
         try {
@@ -104,8 +104,8 @@ export class PollService {
             this.logger.log(`Poll avec ID ${id} mis à jour avec succès.`);
             return updatedPoll;
         } catch (error) {
-            this.logger.error(ERROR.QUIZ.FAILED_TO_UPDATE, error);
-            throw new NotFoundException(ERROR.QUIZ.FAILED_TO_UPDATE);
+            this.logger.error(ERROR.POLL.FAILED_TO_UPDATE, error);
+            throw new NotFoundException(ERROR.POLL.FAILED_TO_UPDATE);
         }
     }
 }
