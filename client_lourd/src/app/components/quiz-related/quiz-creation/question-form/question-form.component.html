@@ -57,10 +57,10 @@
     </div>
     <div class="upload-section">
         <input type="file" (change)="onFileSelectedAndUpload($event)" accept="image/*" #fileInput style="display: none" />
-        <button (click)="fileInput.click(); $event.stopPropagation(); $event.preventDefault();" class="upload-btn">
+        <button (click)="fileInput.click(); $event.stopPropagation(); $event.preventDefault()" class="custom-button">
             Téléverser une image pour votre question
         </button>
-        <button (click)="deleteImage(); $event.stopPropagation(); $event.preventDefault();" class="upload-btn">
+        <button (click)="deleteImage(); $event.stopPropagation(); $event.preventDefault()" class="custom-button">
             Supprimer l'image de votre question
         </button>
         <div *ngIf="this.question.image">
@@ -184,8 +184,14 @@
         <div *ngIf="!questionForm.valid || !areQuestionChoicesTextValid()" class="text-danger">*Tous les champs sont requis.</div>
     </div>
     <div class="submit-section">
-        <button *ngIf="showButton" type="button" class="btn btn-dark custom-width" (click)="resetAnswers()">Tout effacer</button>
-        <button *ngIf="showButton" type="submit" class="btn custom-button custom-width" [disabled]="!questionForm.valid || !validQuestion()">
+        <button *ngIf="showButton" type="button" class="custom-button-cancel-medium" (click)="resetAnswers()">Tout effacer</button>
+        <button
+            *ngIf="showButton"
+            type="submit"
+            class="custom-button-medium"
+            [ngClass]="{ 'custom-button-medium-disabled': !questionForm.valid || !validQuestion() }"
+            [disabled]="!questionForm.valid || !validQuestion()"
+        >
             {{ submitButton }}
         </button>
     </div>

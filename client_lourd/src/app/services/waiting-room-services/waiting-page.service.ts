@@ -147,7 +147,7 @@ export class WaitingPageService {
     private handleCountdownEnd() {
         this.socketService.on(TimerEvents.GameCountdownEnd, () => {
             this.timerEndSource.next(true);
-            if (this.isOrganizer) this.startGame();
+            this.startGame();
             this.resetAttributes();
         });
     }

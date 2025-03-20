@@ -10,7 +10,7 @@ import 'package:client_leger/UI/play/pages/player_game_page.dart';
 import 'package:client_leger/UI/play/pages/playpage.dart';
 import 'package:client_leger/UI/play/pages/result_page.dart';
 import 'package:client_leger/UI/play/pages/waiting_page.dart';
-import 'package:client_leger/UI/quiz/quiz_page.dart';
+import 'package:client_leger/UI/luck/luck_page.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/UI/signup/signup_page.dart';
 import 'package:client_leger/models/player_data.dart';
@@ -109,8 +109,8 @@ final GoRouter router = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: Paths.quiz,
-              builder: (context, state) => const QuizPage(),
+              path: Paths.luck,
+              builder: (context, state) => const LuckPage(),
             ),
           ],
         ),

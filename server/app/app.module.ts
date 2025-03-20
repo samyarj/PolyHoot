@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthController } from './controllers/auth/auth.controller';
 import { ChatChannelsController } from './controllers/chat-channels/chat-channels.controller';
+import { FriendSystemController } from './controllers/friend-system.controller';
 import { HistoryController } from './controllers/history/history.controller';
 import { InventoryController } from './controllers/inventory.controller';
 import { LootBoxController } from './controllers/luck-related/lootbox-controller';
@@ -80,6 +81,7 @@ import { ShopService } from './services/shop.service';
         LootBoxController,
         InventoryController,
         ShopController,
+        FriendSystemController,
     ],
 })
 export class AppModule {}
