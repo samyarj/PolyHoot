@@ -4,7 +4,7 @@ import 'reward.dart';
 class LootBoxContainer {
   final List<Reward> rewards;
   final String image; // Image of the lootbox
-  final double price;
+  final num price;
 
   LootBoxContainer({
     required this.rewards,
@@ -19,7 +19,7 @@ class LootBoxContainer {
           .map((reward) => Reward.fromJson(reward as Map<String, dynamic>))
           .toList(),
       image: json['image'] as String,
-      price: (json['price'] as num).toDouble(),
+      price: json['price'] as num,
     );
   }
 }

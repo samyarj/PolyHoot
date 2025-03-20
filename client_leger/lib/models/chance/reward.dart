@@ -4,8 +4,8 @@ import 'package:client_leger/utilities/logger.dart';
 class Reward {
   final RewardType type;
   final RewardRarity rarity;
-  final double odds;
-  final dynamic value; // String for avatar/border/theme or int for coin amount
+  final num odds;
+  final dynamic value; // Link for avatar/border, string theme or int for coin amount
 
   Reward({
     required this.type,
@@ -19,7 +19,7 @@ class Reward {
     return Reward(
       type: RewardType.values.firstWhere((e) => e.value == json['type']),
       rarity: RewardRarity.values.firstWhere((e) => e.value == json['rarity']),
-      odds: (json['odds'] as num).toDouble(),
+      odds: json['odds'] as num,
       value: json['value'],
     );
   }
