@@ -289,7 +289,7 @@ export class UserService {
         // default avatar so it doesn't change/show errors.
         avatars.push('https://res.cloudinary.com/dtu6fkkm9/image/upload/v1737478954/default-avatar_qcaycl.jpg');
 
-        const canEquipAvatar = avatars.includes(avatarURL);
+        const canEquipAvatar = avatars.includes(avatarURL) || DEFAULT_AVATARS.includes(avatarURL);
         if (canEquipAvatar) {
             await userRef.update({ avatarEquipped: avatarURL });
             await this.deleteOldUploadedAvatar(currentAvatarUrl, avatars);
