@@ -72,6 +72,7 @@ import { AuthService } from './services/auth/auth.service';
 import { QuestionService } from './services/back-end-communication-services/question-service/question.service';
 import { QuizService } from './services/back-end-communication-services/quiz-service/quiz.service';
 import { FirebaseChatService } from './services/chat-services/firebase/firebase-chat.service';
+import { FriendSystemService } from './services/friend-system.service'; // Import the service
 import { FrenchPaginatorIntlService } from './services/general-services/french-paginator/french-paginator-intl.service';
 import { InventoryService } from './services/general-services/inventory.service';
 import { GlobalErrorHandlerService } from './services/global-error-handler.service';
@@ -144,6 +145,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         FirebaseChatService,
         ThemeService,
         InventoryService,
+        FriendSystemService,
         { provide: WINDOW, useValue: window },
         { provide: MatPaginatorIntl, useClass: FrenchPaginatorIntlService },
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },

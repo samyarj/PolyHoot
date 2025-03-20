@@ -383,4 +383,146 @@ export class UserService {
 
         return await this.getUserByUid(uid);
     }
+
+    async addFriend(userId: string, friendId: string): Promise<boolean> {
+        const userRef = this.firestore.collection('users').doc(userId);
+        const friendRef = this.firestore.collection('users').doc(friendId);
+
+        const userDoc = await userRef.get();
+        const friendDoc = await friendRef.get();
+
+        if (userDoc.exists && friendDoc.exists) {
+            const userData = userDoc.data();
+            const friendData = friendDoc.data();
+
+            if (!userData.friends) userData.friends = [];
+            if (!friendData.friends) friendData.friends = [];
+            if (!userData.friendRequests) userData.friendRequests = [];
+
+            if (userData.friendRequests.includes(friendId)) {
+                // Add each user to the other's friend list
+                userData.friends.push(friendId);
+                friendData.friends.push(userId);
+
+                // Remove the friend request
+                userData.friendRequests = userData.friendRequests.filter((id) => id !== friendId);
+
+                // Update both documents
+                await userRef.update({ friends: userData.friends, friendRequests: userData.friendRequests });
+                await friendRef.update({ friends: friendData.friends });
+                return true;
+            }
+        }
+        return false;
+    }
+
+    async removeFriend(userId: string, friendId: string): Promise<boolean> {
+        const userRef = this.firestore.collection('users').doc(userId);
+        const friendRef = this.firestore.collection('users').doc(friendId);
+
+        const userDoc = await userRef.get();
+        const friendDoc = await friendRef.get();
+
+        if (userDoc.exists && friendDoc.exists) {
+            const userData = userDoc.data();
+            const friendData = friendDoc.data();
+
+            if (userData.friends) {
+                userData.friends = userData.friends.filter((id) => id !== friendId);
+                await userRef.update({ friends: userData.friends });
+            }
+
+            if (friendData.friends) {
+                friendData.friends = friendData.friends.filter((id) => id !== userId);
+                await friendRef.update({ friends: friendData.friends });
+            }
+
+            return true;
+        }
+        return false;
+    }
+
+    async sendFriendRequest(userId: string, friendId: string): Promise<boolean> {
+        // Check if user is trying to send request to themselves
+        if (userId === friendId) {
+            throw new Error("Vous ne pouvez pas vous envoyer une demande d'ami à vous-même");
+        }
+
+        const userRef = this.firestore.collection('users').doc(userId);
+        const friendRef = this.firestore.collection('users').doc(friendId);
+
+        const [userDoc, friendDoc] = await Promise.all([userRef.get(), friendRef.get()]);
+
+        if (!userDoc.exists || !friendDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas");
+        }
+
+        const userData = userDoc.data();
+        const friendData = friendDoc.data();
+
+        // Check if they are already friends
+        if (userData.friends?.includes(friendId) || friendData.friends?.includes(userId)) {
+            throw new Error('Vous êtes déjà ami avec cet utilisateur');
+        }
+
+        // Check if there's already a pending request
+        if (friendData.friendRequests?.includes(userId)) {
+            throw new Error("Vous avez déjà envoyé une demande d'ami à cet utilisateur");
+        }
+
+        // Initialize friend requests array if it doesn't exist
+        if (!friendData.friendRequests) friendData.friendRequests = [];
+
+        // Add the friend request
+        friendData.friendRequests.push(userId);
+        await friendRef.update({ friendRequests: friendData.friendRequests });
+
+        return true;
+    }
+
+    async cancelFriendRequest(userId: string, friendId: string): Promise<boolean> {
+        const friendRef = this.firestore.collection('users').doc(friendId);
+        const friendDoc = await friendRef.get();
+
+        if (friendDoc.exists) {
+            const friendData = friendDoc.data();
+            if (friendData.friendRequests) {
+                friendData.friendRequests = friendData.friendRequests.filter((id) => id !== userId);
+                await friendRef.update({ friendRequests: friendData.friendRequests });
+                return true;
+            }
+        }
+        return false;
+    }
+
+    async getFriends(userId: string): Promise<string[] | undefined> {
+        const userRef = this.firestore.collection('users').doc(userId);
+        const userDoc = await userRef.get();
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            return userData.friends;
+        }
+        return undefined;
+    }
+
+    async getFriendRequests(userId: string): Promise<string[] | undefined> {
+        const userRef = this.firestore.collection('users').doc(userId);
+        const userDoc = await userRef.get();
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            return userData.friendRequests;
+        }
+        return undefined;
+    }
+
+    async getUserIdByUsername(username: string): Promise<string> {
+        const usersRef = this.firestore.collection('users');
+        const querySnapshot = await usersRef.where('username', '==', username).limit(1).get();
+
+        if (querySnapshot.empty) {
+            throw new Error(`L'utilisateur avec le pseudonyme "${username}" n'existe pas`);
+        }
+
+        return querySnapshot.docs[0].id;
+    }
 }
