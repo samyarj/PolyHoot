@@ -72,7 +72,7 @@ export const EMPTY_POLL: Poll = {
 export const EMPTY_POLL_QUESTION: Question = {
     type: QuestionType.QCM,
     text: '',
-    points: 0,
+    points: 10,
     choices: [{ text: '' }, { text: '' }],
 };
 

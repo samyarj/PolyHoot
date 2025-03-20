@@ -131,6 +131,7 @@ export class CreatePollPageComponent {
             return;
         }
         this.pollService.createPoll(this.poll).subscribe(this.errorObserver);
+        this.emptyPollAndRedirectCallback();
     }
     private emptyPollAndRedirectCallback() {
         this.resetAnswers();

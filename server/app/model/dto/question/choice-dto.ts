@@ -8,6 +8,5 @@ export class ChoiceDto {
     text: string;
 
     @ApiProperty()
-    @IsNotEmpty()
     isCorrect: boolean;
 }

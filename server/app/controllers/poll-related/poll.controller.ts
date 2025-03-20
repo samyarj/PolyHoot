@@ -56,6 +56,7 @@ export class PollController {
     @Post('/create')
     async createPoll(@Body() createPollDto: CreatePollDto, @Res() response: Response) {
         try {
+            console.log("sondage créé ", createPollDto)
             await this.pollService.createPoll(createPollDto);
             const updatedPolls = await this.pollService.getAllPolls();
             response.status(HttpStatus.CREATED).json(updatedPolls);
@@ -98,22 +99,6 @@ export class PollController {
     async deletePoll(@Param('id') id: string, @Res() response: Response) {
         try {
             await this.pollService.deletePollById(id);
-            const updatedPolls = await this.pollService.getAllPolls();
-            response.status(HttpStatus.OK).json(updatedPolls);
-        } catch (error) {
-            if (error.status === HttpStatus.NOT_FOUND) {
-                response.status(HttpStatus.NOT_FOUND).send({ message: error.message });
-            } else {
-                response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: ERROR.INTERNAL_SERVER_ERROR });
-            }
-        }
-    }
-
-    @ApiOkResponse({ description: 'Poll visibility toggled' })
-    @ApiNotFoundResponse({ description: 'Poll not found' })
-    @Patch('/toggle-visibility/:id')
-    async togglePollVisibility(@Param('id') id: string, @Res() response: Response) {
-        try {
             const updatedPolls = await this.pollService.getAllPolls();
             response.status(HttpStatus.OK).json(updatedPolls);
         } catch (error) {
