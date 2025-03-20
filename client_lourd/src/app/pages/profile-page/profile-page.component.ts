@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { Auth, updateProfile } from '@angular/fire/auth';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { RELOAD_DELAY_MS, USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH, USERNAME_REGEX } from '@app/constants/constants';
+import { USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH, USERNAME_REGEX } from '@app/constants/constants';
 import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
 import { UploadImgService } from '@app/services/upload-img.service';
@@ -123,9 +123,6 @@ export class ProfilePageComponent implements OnInit {
                             this.currentUsername = updatedUser.username;
                             this.authService.setUser(updatedUser);
                             this.toastr.success('Pseudonyme mis à jour avec succès !');
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, RELOAD_DELAY_MS);
                         },
                         error: (error: Error) => {
                             this.toastr.error('Erreur lors de la mise à jour du pseudonyme : ' + error.message);
