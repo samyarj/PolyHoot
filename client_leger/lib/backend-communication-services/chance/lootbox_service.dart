@@ -106,7 +106,7 @@ class LootboxService {
     };
 
     final response = await http.get(
-      Uri.parse('$baseUrl/dailyFree'),
+      Uri.parse('$lootboxUrl/dailyFree'),
       headers: headers,
     );
 
