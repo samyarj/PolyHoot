@@ -1,4 +1,5 @@
 import 'package:client_leger/UI/global/header_title.dart';
+import 'package:client_leger/UI/user-statistics/utilities.dart';
 import 'package:client_leger/UI/user-statistics/widget/connection-logs-table.dart';
 import 'package:client_leger/UI/user-statistics/widget/user-statistics-panel.dart';
 import 'package:client_leger/models/connection-log-entry-model.dart';
@@ -7,13 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class UserStatsAndLogsPage extends ConsumerWidget {
-  const UserStatsAndLogsPage({Key? key}) : super(key: key);
+  const UserStatsAndLogsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userState = ref.watch(userProvider);
     final colorScheme = Theme.of(context).colorScheme;
-    final size = MediaQuery.of(context).size;
 
     // Fixed height for both containers
     final containerHeight = 450.0;
@@ -41,9 +41,6 @@ class UserStatsAndLogsPage extends ConsumerWidget {
         final winRate = totalGamesPlayed > 0
             ? (gamesWon / totalGamesPlayed * 100).toStringAsFixed(1)
             : '0.0';
-
-        // Get average time per game
-        final averageTimePerGame = '0:00'; // Default value
 
         return Scaffold(
           backgroundColor: colorScheme.primary,
@@ -78,7 +75,8 @@ class UserStatsAndLogsPage extends ConsumerWidget {
                               totalGamesPlayed: totalGamesPlayed,
                               gamesWon: gamesWon,
                               winRate: winRate,
-                              averageTimePerGame: averageTimePerGame,
+                              averageTimePerGame:
+                                  getAverageTimePerGame(user.gameLogs),
                             ),
                           ),
                         ),

@@ -1,6 +1,5 @@
 import 'package:client_leger/UI/global/header_title.dart';
 import 'package:client_leger/UI/user-statistics/widget/game-logs-table.dart';
-import 'package:client_leger/models/game-log-entry-model.dart';
 import 'package:client_leger/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,11 +26,6 @@ class GameLogsPage extends ConsumerWidget {
             ),
           );
         }
-
-        // Create game log entries
-        final gameLogs =
-            user.gameLogs?.map((log) => GameLogEntry.fromJson(log)).toList() ??
-                [];
 
         return Scaffold(
           backgroundColor: colorScheme.primary,
@@ -77,7 +71,7 @@ class GameLogsPage extends ConsumerWidget {
                           ),
                         ),
                         child: GameLogsTable(
-                          gameLogs: gameLogs,
+                          gameLogs: user.gameLogs,
                         ),
                       ),
                     ),

@@ -1,3 +1,5 @@
+import 'package:client_leger/models/game-log-entry-model.dart';
+
 class User {
   final String? avatarEquipped;
   final String? borderEquipped;
@@ -7,7 +9,7 @@ class User {
   final String email;
   final List<String>? friendRequests;
   final List<String>? friends;
-  final List<Map<String, dynamic>>? gameLogs; // Added
+  final List<GameLogEntry> gameLogs; // Added
   final Map<String, dynamic>? inventory;
   final bool? isOnline;
   final List<String>? joinedChannels;
@@ -67,8 +69,9 @@ class User {
       friends:
           (json['friends'] as List<dynamic>?)?.map((e) => e as String).toList(),
       gameLogs: (json['gameLogs'] as List<dynamic>?) // Added
-          ?.map((e) => e as Map<String, dynamic>)
-          .toList(),
+              ?.map((e) => GameLogEntry.fromJson(e))
+              .toList() ??
+          [],
       inventory: json['inventory'] as Map<String, dynamic>?,
       isOnline: json['isOnline'] as bool?,
       joinedChannels: (json['joinedChannels'] as List<dynamic>?)
