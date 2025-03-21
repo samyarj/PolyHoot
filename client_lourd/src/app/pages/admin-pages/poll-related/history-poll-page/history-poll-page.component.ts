@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { Component } from '@angular/core';
 import { PublishedPoll } from '@app/interfaces/poll';
+import { Question } from '@app/interfaces/question';
 import { QuestionType } from '@app/interfaces/question-type';
 import { ChartConfiguration, ChartData } from 'chart.js';
 export const PUBLISHED_POLL_1: PublishedPoll = {
@@ -26,9 +28,9 @@ export const PUBLISHED_POLL_1: PublishedPoll = {
         },
     ],
     expired: true,
-    endDate: new Date(2024, 4, 1).toISOString(),
+    endDate: new Date(2024, 4, 1),
     isPublished: true,
-    publicationDate: new Date().toISOString(),
+    publicationDate: new Date(),
     totalVotes: [
         [0, 0, 1],
         [1, 0, 0, 0],
@@ -134,14 +136,25 @@ export const PUBLISHED_POLL_4: PublishedPoll = {
         [20, 8, 5, 7], // Votes pour les moyens de transport
     ],
 };
+
 @Component({
     selector: 'app-history-poll-page',
     templateUrl: './history-poll-page.component.html',
     styleUrls: ['./history-poll-page.component.scss'],
 })
 export class HistoryPollPageComponent {
-    isShown: boolean = false;
-
+    currentQuestion: Question | null = null;
+    currentQuestionIndex: number;
+    labels: string[] = [];
+    data: number[] = [];
+    polls: PublishedPoll[] = [];
+    backgroundColors: string[] = [
+        '#4E5D6C', // muted steel blue-gray
+        '#3C3F41', // deep charcoal
+        '#505050', // dark slate
+        '#2E3A59', // dark indigo-blue
+    ];
+    currentPoll: PublishedPoll;
     pieChartOptions: ChartConfiguration<'pie'>['options'] = {
         responsive: true,
         plugins: {
@@ -152,7 +165,7 @@ export class HistoryPollPageComponent {
     };
 
     pieChartData: ChartData<'pie', number[], string | string[]> = {
-        labels: ['Option 1', 'Option 2', 'Option 3', 'Option 4'],
+        labels: this.labels,
         datasets: [
             {
                 // eslint-disable-next-line @typescript-eslint/no-magic-numbers
@@ -164,8 +177,53 @@ export class HistoryPollPageComponent {
 
     pieChartType: 'pie' = 'pie';
 
-    show() {
-        this.isShown = !this.isShown;
-        console.log(this.isShown);
+    constructor() {
+        this.polls = this.getPublishedPolls();
+    }
+
+    getPublishedPolls() {
+        return [PUBLISHED_POLL_1, PUBLISHED_POLL_2, PUBLISHED_POLL_3, PUBLISHED_POLL_4];
+    }
+
+    show(poll: PublishedPoll) {
+        this.currentQuestionIndex = 0;
+        this.currentPoll = poll;
+        this.showQuestion();
+    }
+
+    previousQuestion() {
+        if (this.currentQuestionIndex - 1 < 0) {
+            return;
+        } else {
+            this.currentQuestionIndex = this.currentQuestionIndex - 1;
+            this.showQuestion();
+        }
+    }
+
+    nextQuestion() {
+        if (this.currentQuestionIndex + 1 > this.currentPoll.questions.length - 1) {
+            return;
+        } else {
+            this.currentQuestionIndex = this.currentQuestionIndex + 1;
+            this.showQuestion();
+        }
+    }
+
+    showQuestion() {
+        this.currentQuestion = this.currentPoll.questions[this.currentQuestionIndex];
+        if (this.currentQuestion.choices) {
+            this.labels = this.currentQuestion.choices.map((choice) => choice.text);
+            this.data = this.currentPoll.totalVotes[this.currentQuestionIndex];
+            this.pieChartData = {
+                labels: this.labels,
+                datasets: [
+                    {
+                        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+                        data: this.data,
+                        backgroundColor: this.backgroundColors,
+                    },
+                ],
+            };
+        }
     }
 }

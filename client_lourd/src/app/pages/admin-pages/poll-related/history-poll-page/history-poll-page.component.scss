@@ -43,20 +43,24 @@
                 padding: 15px;
                 border-top-left-radius: 30px;
                 border-bottom-left-radius: 30px;
+                border-radius: 30px;
                 background-color: color-mix(in srgb, var(--secondary-color) 10%, transparent);
                 box-shadow: 0px 0px 3px color-mix(in srgb, var(--tertiary-color) 80%, transparent);
                 color: var(--text-color);
                 transition:
                     width 0.2s ease-in-out,
+                    border-radius 0.2s ease-in-out,
                     margin 0.2s ease-in-out,
                     background-color 0.2s ease-in-out,
                     box-shadow 0.2s ease-in-out,
                     transform 0.2s ease-in-out;
                 &.active {
                     padding-right: 25px;
-                    width: calc(100% - 10px);
+                    width: calc(100%);
                     margin-right: 0px;
-                    background-color: color-mix(in srgb, var(--primary-color) 100%, transparent);
+                    margin-left: 0px;
+                    border-radius: 0px;
+                    background-color: transparent;
                     box-shadow: 0 0 10px var(--tertiary-color);
                 }
 
