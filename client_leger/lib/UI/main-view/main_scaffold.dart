@@ -174,6 +174,10 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                                   _logout();
                                 } else if (value == 2) {
                                   GoRouter.of(context).go(Paths.profile);
+                                } else if (value == 3) {
+                                  GoRouter.of(context).go(Paths.userStats);
+                                } else if (value == 4) {
+                                  GoRouter.of(context).go(Paths.gamesLogs);
                                 }
                               },
                               itemBuilder: (context) => [
@@ -246,6 +250,24 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                                   ),
                                 ),
                                 PopupMenuItem<int>(
+                                  value: 3,
+                                  child: Text(
+                                    'Mes statistiques & Logs',
+                                    style: TextStyle(
+                                        color: colorScheme.onSurface,
+                                        fontSize: 16),
+                                  ),
+                                ),
+                                PopupMenuItem<int>(
+                                  value: 4,
+                                  child: Text(
+                                    'Historique des parties',
+                                    style: TextStyle(
+                                        color: colorScheme.onSurface,
+                                        fontSize: 16),
+                                  ),
+                                ),
+                                PopupMenuItem<int>(
                                   value: 1,
                                   child: Text(
                                     'Déconnexion',
@@ -255,7 +277,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                                   ),
                                 ),
                               ],
-                              color: colorScheme.surface.withValues(alpha: 0.9),
+                              color: colorScheme.surface,
                               shadowColor: colorScheme.shadow,
                               position: PopupMenuPosition.under,
                               offset: Offset(175, 6.5),

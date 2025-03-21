@@ -37,8 +37,8 @@ class CustomAvatarUploadWidget extends StatelessWidget {
                 width: 80,
                 margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
-                  border:
-                      Border.all(color: colorScheme.primary.withOpacity(0.5)),
+                  border: Border.all(
+                      color: colorScheme.primary.withValues(alpha: 0.5)),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: ClipRRect(
@@ -89,7 +89,7 @@ class CustomAvatarUploadWidget extends StatelessWidget {
                             backgroundColor: colorScheme.secondary,
                             foregroundColor: colorScheme.onSecondary,
                             disabledBackgroundColor:
-                                colorScheme.secondary.withOpacity(0.3),
+                                colorScheme.secondary.withValues(alpha: 0.3),
                             padding: const EdgeInsets.symmetric(vertical: 8),
                           ),
                         ),

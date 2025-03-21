@@ -3,6 +3,8 @@ class Paths {
   static const String signUp = '/signup';
   static const String passwordReset = '/password_reset';
   static const String profile = '/profile';
+  static const String userStats = '/user_stats';
+  static const String gamesLogs = '/games_logs';
   static const String play = '/play';
   static const String gameCreation = 'game_creation';
   static const String joinGame = 'join_game';

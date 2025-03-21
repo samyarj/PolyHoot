@@ -14,6 +14,8 @@ import 'package:client_leger/UI/play/pages/waiting_page.dart';
 import 'package:client_leger/UI/profile/profile_page.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/UI/signup/signup_page.dart';
+import 'package:client_leger/UI/user-statistics/game-logs-page.dart';
+import 'package:client_leger/UI/user-statistics/user-stats-logs-page.dart';
 import 'package:client_leger/models/player_data.dart';
 import 'package:client_leger/providers/play/game_player_provider.dart';
 import 'package:client_leger/providers/play/join_game_provider.dart';
@@ -59,6 +61,16 @@ final GoRouter router = GoRouter(
                 path: Paths.profile,
                 builder: (context, state) {
                   return ProfilePage();
+                }),
+            GoRoute(
+                path: Paths.userStats,
+                builder: (context, state) {
+                  return UserStatsAndLogsPage();
+                }),
+            GoRoute(
+                path: Paths.gamesLogs,
+                builder: (context, state) {
+                  return GameLogsPage();
                 }),
             GoRoute(
               path: Paths.play,
