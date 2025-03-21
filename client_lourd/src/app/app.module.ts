@@ -18,6 +18,7 @@ import { AppComponent } from '@app/pages/app/app.component';
 import { GamePageComponent } from '@app/pages/game-related/game-page/game-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { WINDOW } from '@app/services/general-services/window.token';
+import { NgChartsModule } from 'ng2-charts';
 import { ToastrModule } from 'ngx-toastr';
 import { environment } from 'src/environments/environment';
 import { ForgotPasswordFormComponent } from './components/auth/forgot-password-form/forgot-password-form.component';
@@ -64,10 +65,6 @@ import { CoinFlipPageComponent } from './pages/luck-related/coin-flip-page/coin-
 import { DailyFreePageComponent } from './pages/luck-related/daily-free-page/daily-free-page.component';
 import { LootBoxPageComponent } from './pages/luck-related/loot-box-page/loot-box-page.component';
 import { LuckMainPageComponent } from './pages/luck-related/luck-main-page/luck-main-page.component';
-import { AnswerPollComponent } from './pages/poll-related/answer-poll/answer-poll.component';
-import { CreatePollComponent } from './pages/poll-related/create-poll/create-poll.component';
-import { PollHistoryComponent } from './pages/poll-related/poll-history/poll-history.component';
-import { PollManagementComponent } from './pages/poll-related/poll-management/poll-management.component';
 import { ProfilePageComponent } from './pages/profile-page/profile-page.component';
 import { AdminPageComponent } from './pages/quiz-question-related/admin-page/admin-page.component';
 import { AdminQuizCreateComponent } from './pages/quiz-question-related/create-quiz/admin-create-quiz';
@@ -90,7 +87,6 @@ import { GlobalErrorHandlerService } from './services/global-error-handler.servi
 import { HeaderNavigationService } from './services/ui-services/header-navigation.service';
 import { ThemeService } from './services/ui-services/theme/theme.service';
 import { SocketClientService } from './services/websocket-services/general/socket-client-manager.service';
-
 /**
  * Main module that is used in main.ts.
  * All automatically generated components will appear in this module.
@@ -154,10 +150,6 @@ import { SocketClientService } from './services/websocket-services/general/socke
         ConsultPollPageComponent,
         CreatePollPageComponent,
         PollMainPageComponent,
-        CreatePollComponent,
-        PollManagementComponent,
-        PollHistoryComponent,
-        AnswerPollComponent,
         PollPlayerPopInComponent,
     ],
     providers: [
@@ -188,6 +180,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         MatCardModule,
         MatExpansionModule,
         MatIconModule,
+        NgChartsModule,
         provideFirebaseApp(() => initializeApp(environment.firebase)),
         provideAuth(() => getAuth()),
         provideFirestore(() => getFirestore()),
