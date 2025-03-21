@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';

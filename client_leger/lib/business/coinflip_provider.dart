@@ -80,14 +80,16 @@ class CoinflipNotifier extends StateNotifier<CoinflipState> {
 
   resetAttributes() {
     AppLogger.i("resetAttributes");
-    state = state.copyWith(
-      gameState: CoinFlipGameState.BettingPhase,
-      selectedSide: '',
-      winningSide: '',
-      betAmount: 0,
-      submitted: false,
-      time: 0,
-    );
+    if (mounted) {
+      state = state.copyWith(
+        gameState: CoinFlipGameState.BettingPhase,
+        selectedSide: '',
+        winningSide: '',
+        betAmount: 0,
+        submitted: false,
+        time: 0,
+      );
+    }
   }
 
   getState() {
@@ -97,19 +99,21 @@ class CoinflipNotifier extends StateNotifier<CoinflipState> {
       CoinFlipEvents.JoinGame.value,
       null,
       (answer) => {
-        AppLogger.i("$answer"),
-        state = state.copyWith(
-          playerList: {
-            'heads':
-                List<Map<String, dynamic>>.from(answer['playerList']['heads']),
-            'tails':
-                List<Map<String, dynamic>>.from(answer['playerList']['tails']),
-          },
-          history: List<String>.from(answer['history']),
-          gameState: CoinFlipGameState.values.firstWhere(
-            (e) => e.value == answer['state'],
-          ),
-        ),
+        if (mounted)
+          {
+            state = state.copyWith(
+              playerList: {
+                'heads': List<Map<String, dynamic>>.from(
+                    answer['playerList']['heads']),
+                'tails': List<Map<String, dynamic>>.from(
+                    answer['playerList']['tails']),
+              },
+              history: List<String>.from(answer['history']),
+              gameState: CoinFlipGameState.values.firstWhere(
+                (e) => e.value == answer['state'],
+              ),
+            ),
+          }
       },
     );
   }
@@ -123,50 +127,64 @@ class CoinflipNotifier extends StateNotifier<CoinflipState> {
     _socketManager.webSocketReceiver(
         CoinFlipEvents.PreFlippingPhase.value,
         (_) => {
-              state =
-                  state.copyWith(gameState: CoinFlipGameState.PreFlippingPhase),
+              if (mounted)
+                {
+                  state = state.copyWith(
+                      gameState: CoinFlipGameState.PreFlippingPhase),
+                }
             });
 
     _socketManager.webSocketReceiver(
         CoinFlipEvents.FlippingPhase.value,
         (_) => {
-              state =
-                  state.copyWith(gameState: CoinFlipGameState.FlippingPhase),
+              if (mounted)
+                {
+                  state = state.copyWith(
+                      gameState: CoinFlipGameState.FlippingPhase),
+                }
             });
 
     _socketManager.webSocketReceiver(
         CoinFlipEvents.Results.value,
         (answer) => {
-              AppLogger.i("$answer"),
-              state = state.copyWith(
-                playerList: {
-                  'heads': List<Map<String, dynamic>>.from(
-                      answer['playerList']['heads']),
-                  'tails': List<Map<String, dynamic>>.from(
-                      answer['playerList']['tails']),
-                },
-                history: List<String>.from(answer['history']),
-                gameState: CoinFlipGameState.ResultsPhase,
-                winningSide: answer['result'],
-              )
+              if (mounted)
+                {
+                  state = state.copyWith(
+                    playerList: {
+                      'heads': List<Map<String, dynamic>>.from(
+                          answer['playerList']['heads']),
+                      'tails': List<Map<String, dynamic>>.from(
+                          answer['playerList']['tails']),
+                    },
+                    history: List<String>.from(answer['history']),
+                    gameState: CoinFlipGameState.ResultsPhase,
+                    winningSide: answer['result'],
+                  )
+                }
             });
 
     _socketManager.webSocketReceiver(
         CoinFlipEvents.SendPlayerList.value,
         (playerList) => {
-              AppLogger.i("$playerList"),
-              state = state.copyWith(
-                playerList: {
-                  'heads': List<Map<String, dynamic>>.from(playerList['heads']),
-                  'tails': List<Map<String, dynamic>>.from(playerList['tails']),
-                },
-              )
+              if (mounted)
+                {
+                  state = state.copyWith(
+                    playerList: {
+                      'heads':
+                          List<Map<String, dynamic>>.from(playerList['heads']),
+                      'tails':
+                          List<Map<String, dynamic>>.from(playerList['tails']),
+                    },
+                  )
+                }
             });
 
     _socketManager.webSocketReceiver(
         CoinFlipEvents.BetTimeCountdown.value,
-        (newTime) =>
-            {state = state.copyWith(time: (newTime as num).toDouble() / 10)});
+        (newTime) => {
+              if (mounted)
+                {state = state.copyWith(time: (newTime as num).toDouble() / 10)}
+            });
   }
 
   submitBet(BuildContext context) {
@@ -238,7 +256,7 @@ class CoinflipNotifier extends StateNotifier<CoinflipState> {
 
   @override
   void dispose() {
-    AppLogger.i("RemoveListeners");
+    AppLogger.i("RemoveListeners DISPOSE OF COINFLIP PROVIDER");
     _socketManager.socket?.off(CoinFlipEvents.StartGame.value);
     _socketManager.socket?.off(CoinFlipEvents.PreFlippingPhase.value);
     _socketManager.socket?.off(CoinFlipEvents.FlippingPhase.value);
