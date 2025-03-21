@@ -1,109 +1,218 @@
-<div class="gen">
-    <div>
-        <h2>Sélectionner un Avatar</h2>
-        <div class="avatar-selection">
-            <div class="avatar-grid">
-                <div
-                    *ngFor="let avatar of defaultAvatars"
-                    class="avatar-option"
-                    [class.selected]="avatar === selectedAvatar"
-                    (click)="selectAvatar(avatar)"
-                >
-                    <img [src]="avatar" alt="Avatar par défaut" class="avatar-image" />
+<div class="profile-page-container">
+    <div class="profile-container">
+        <div class="title">Profile</div>
+        <div class="statistics-container">
+            <div class="statistics">
+                <div class="statistic">
+                    <div class="statistic-image"><i class="fa-solid fa-gamepad"></i></div>
+                    <div class="statistic-content">
+                        <div class="statistic-description">Parties jouées</div>
+                        <div class="statistic-value">{{ totalGamesPlayed }}</div>
+                    </div>
+                </div>
+                <div class="statistic">
+                    <div class="statistic-image"><i class="fa-solid fa-trophy"></i></div>
+                    <div class="statistic-content">
+                        <div class="statistic-description">Parties gagnées</div>
+                        <div class="statistic-value">{{ gamesWon }}</div>
+                    </div>
+                </div>
+                <div class="statistic">
+                    <div class="statistic-image"><i class="fa-solid fa-circle-check"></i></div>
+                    <div class="statistic-content">
+                        <div class="statistic-description">Moyenne de bonnes réponses</div>
+                        <div class="statistic-value">{{ averageCorrectAnswers }}</div>
+                    </div>
+                </div>
+                <div class="statistic">
+                    <div class="statistic-image"><i class="fa-solid fa-stopwatch"></i></div>
+                    <div class="statistic-content">
+                        <div class="statistic-description">Temps moyen par partie</div>
+                        <div class="statistic-value">{{ averageTimePerGame }}</div>
+                    </div>
                 </div>
             </div>
+            <div class="game-logs">
+                <table class="logs-table header-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%">Début</th>
+                            <th style="width: 20%">Fin</th>
+                            <th style="width: 30%">Nom du jeu</th>
+                            <th style="width: 15%">Statut</th>
+                            <th style="width: 15%">Résultat</th>
+                        </tr>
+                    </thead>
+                </table>
 
-            <div class="button-section">
-                <button class="equip-btn" [disabled]="!selectedAvatar" (click)="equipSelectedAvatar()">Équiper l'avatar sélectionné</button>
-
-                <div class="upload-section">
-                    <input type="file" (change)="onFileSelected($event)" accept="image/*" #fileInput style="display: none" />
-                    <button (click)="fileInput.click()" class="upload-btn">Choisir un avatar personnalisé</button>
-                    <button (click)="onUpload()" class="upload-btn" [disabled]="!selectedFile">Téléverser l'avatar</button>
+                <div class="table-body-container">
+                    <table class="logs-table body-table">
+                        <tbody>
+                            <tr *ngFor="let game of gameLogs">
+                                <td style="width: 20%">{{ game.startTime ?? '--' }}</td>
+                                <td style="width: 20%">{{ game.endTime ?? '--' }}</td>
+                                <td style="width: 30%">{{ game.gameName ?? '--' }}</td>
+                                <td style="width: 15%">{{ this.getStatusDisplay(game.status || 'abandoned') }}</td>
+                                <td style="width: 15%">{{ this.getResultDisplay(game.result || 'lose') }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div>
-        <h2>Paramètres du compte</h2>
-        <form [formGroup]="profileForm" (ngSubmit)="onUsernameSubmit()">
-            <div class="form-group">
-                <label for="username">Pseudonyme:</label>
-                <input
-                    type="text"
-                    id="username"
-                    formControlName="username"
-                    (blur)="checkUsername()"
-                    (input)="onInput($event)"
-                    [class.invalid]="profileForm.get('username')?.invalid && profileForm.get('username')?.touched"
-                    [pattern]="usernamePattern"
-                    [maxlength]="maxUsernameLength"
-                    placeholder="Lettres, chiffres, points, tirets et underscores uniquement"
-                />
-
-                <div class="validation-messages" *ngIf="profileForm.get('username')?.touched">
-                    <p class="error" *ngIf="profileForm.get('username')?.hasError('required')">Le pseudonyme est requis.</p>
-                    <p class="error" *ngIf="profileForm.get('username')?.hasError('pattern')">
-                        Le pseudonyme doit contenir entre 3 et 20 caractères et ne peut inclure que des lettres, des chiffres, des points, des
-                        underscores ou des tirets.
-                    </p>
-                    <p
-                        class="error"
-                        *ngIf="
-                            !profileForm.get('username')?.invalid &&
-                            isUsernameTaken &&
-                            !isCheckingUsername &&
-                            !isTypingUsername &&
-                            !profileForm.get('username')?.hasError('pattern')
-                        "
-                    >
-                        Ce pseudonyme est déjà utilisé.
-                    </p>
+        <div class="settings-container">
+            <div class="avatar-selection-container">
+                <div class="avatar-container">
+                    <div class="avatar-title">Avatars par défaut</div>
+                    <div class="avatars">
+                        <div
+                            *ngFor="let avatar of defaultAvatars"
+                            class="avatar-option"
+                            [class.selected]="avatar === selectedAvatar"
+                            (click)="selectAvatar(avatar)"
+                        >
+                            <img [src]="avatar" alt="Avatar par défaut" class="avatar-image" />
+                        </div>
+                        <button
+                            class="custom-button"
+                            [disabled]="!selectedAvatar"
+                            (click)="equipSelectedAvatar()"
+                            [ngClass]="{ 'custom-button-disabled': !selectedAvatar }"
+                        >
+                            Équiper
+                        </button>
+                    </div>
                 </div>
+                <div class="avatar-upload-container">
+                    <input type="file" (change)="onFileSelected($event)" accept="image/*" #fileInput style="display: none" />
+                    <button (click)="fileInput.click()" class="custom-button">Choisir un avatar personnalisé</button>
+                    <button
+                        (click)="onUpload()"
+                        class="custom-button"
+                        [disabled]="!selectedFile"
+                        [ngClass]="{ 'custom-button-disabled': !selectedFile }"
+                    >
+                        Téléverser l'avatar
+                    </button>
+                </div>
+            </div>
+            <div class="connection-logs-container">
+                <table class="logs-table header-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%">Horodatage</th>
+                            <th style="width: 60%">Action</th>
+                        </tr>
+                    </thead>
+                </table>
 
-                <div class="status-messages">
-                    <div *ngIf="isCheckingUsername" class="ms-2">
-                        <div class="spinner-border spinner-border-sm text-secondary" role="status">
-                            <span class="visually-hidden">Chargement...</span>
+                <div class="table-body-container">
+                    <table class="logs-table body-table">
+                        <tbody>
+                            <tr *ngFor="let log of logs">
+                                <td style="width: 40%">{{ log.timestamp }}</td>
+                                <td style="width: 60%">{{ getActionDisplay(log.action) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="username-container">
+                <div class="username-container-title">Paramètres du compte</div>
+                <form [formGroup]="profileForm" (ngSubmit)="onUsernameSubmit()">
+                    <div class="form-group">
+                        <label for="username">Pseudonyme:</label>
+                        <input
+                            type="text"
+                            id="username"
+                            formControlName="username"
+                            (blur)="checkUsername()"
+                            (input)="onInput($event)"
+                            [class.invalid]="profileForm.get('username')?.invalid && profileForm.get('username')?.touched"
+                            [pattern]="usernamePattern"
+                            [maxlength]="maxUsernameLength"
+                            placeholder="Entrez le pseudonyme"
+                        />
+
+                        <div
+                            class="validation-messages"
+                            *ngIf="
+                                profileForm.get('username')?.hasError('required') ||
+                                profileForm.get('username')?.hasError('pattern') ||
+                                (!profileForm.get('username')?.invalid &&
+                                    isUsernameTaken &&
+                                    !isCheckingUsername &&
+                                    !isTypingUsername &&
+                                    !profileForm.get('username')?.hasError('pattern'))
+                            "
+                        >
+                            <p class="error" *ngIf="profileForm.get('username')?.hasError('required')">Le pseudonyme est requis.</p>
+                            <p class="error" *ngIf="profileForm.get('username')?.hasError('pattern')">
+                                Le pseudonyme doit contenir entre 3 et 20 caractères et ne peut inclure que des lettres, des chiffres, des points, des
+                                underscores ou des tirets.
+                            </p>
+                            <p
+                                class="error"
+                                *ngIf="
+                                    !profileForm.get('username')?.invalid &&
+                                    isUsernameTaken &&
+                                    !isCheckingUsername &&
+                                    !isTypingUsername &&
+                                    !profileForm.get('username')?.hasError('pattern')
+                                "
+                            >
+                                Ce pseudonyme est déjà utilisé.
+                            </p>
+                        </div>
+
+                        <div
+                            *ngIf="
+                                isCheckingUsername ||
+                                (!isUsernameTaken &&
+                                    !isCheckingUsername &&
+                                    !isTypingUsername &&
+                                    profileForm.get('username')?.value !== currentUsername &&
+                                    !profileForm.get('username')?.hasError('pattern') &&
+                                    !profileForm.get('username')?.hasError('required'))
+                            "
+                            class="status-messages"
+                        >
+                            <div *ngIf="isCheckingUsername" class="ms-2">
+                                <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                                    <span class="visually-hidden">Chargement...</span>
+                                </div>
+                            </div>
+                            <p
+                                class="success"
+                                *ngIf="
+                                    !isUsernameTaken &&
+                                    !isCheckingUsername &&
+                                    !isTypingUsername &&
+                                    profileForm.get('username')?.value !== currentUsername &&
+                                    !profileForm.get('username')?.hasError('pattern') &&
+                                    !profileForm.get('username')?.hasError('required')
+                                "
+                            >
+                                Le pseudonyme est disponible
+                            </p>
                         </div>
                     </div>
-                    <p
-                        class="success"
-                        *ngIf="
-                            !isUsernameTaken &&
-                            !isCheckingUsername &&
-                            !isTypingUsername &&
-                            profileForm.get('username')?.value !== currentUsername &&
-                            !profileForm.get('username')?.hasError('pattern') &&
-                            !profileForm.get('username')?.hasError('required')
+
+                    <button
+                        type="submit"
+                        [disabled]="
+                            profileForm.invalid || isUsernameTaken || isCheckingUsername || profileForm.get('username')?.value === currentUsername
                         "
+                        class="custom-button"
+                        [ngClass]="{
+                            'custom-button-disabled':
+                                profileForm.invalid || isUsernameTaken || isCheckingUsername || profileForm.get('username')?.value === currentUsername
+                        }"
                     >
-                        Le pseudonyme est disponible
-                    </p>
-                </div>
+                        Mettre à jour le pseudonyme
+                    </button>
+                </form>
             </div>
-
-            <button
-                type="submit"
-                [disabled]="profileForm.invalid || isUsernameTaken || isCheckingUsername || profileForm.get('username')?.value === currentUsername"
-            >
-                Mettre à jour le pseudonyme
-            </button>
-        </form>
-    </div>
-
-    <div>
-        <h2>Statistiques</h2>
-        <div class="statistics-container">
-            <p>Parties jouées: {{ totalGamesPlayed }}</p>
-            <p>Parties gagnées: {{ gamesWon }}</p>
-            <p>Moyenne de bonnes réponses: {{ averageCorrectAnswers }}%</p>
-            <p>Temps moyen par partie: {{ averageTimePerGame }}</p>
-            <button class="btn custom-button" routerLink="/profile/logs">Voir les logs</button>
         </div>
-        <!-- <button class="btn custom-button" (click)="goToHistory()">View History</button> -->
     </div>
 </div>
-
-<router-outlet></router-outlet>
