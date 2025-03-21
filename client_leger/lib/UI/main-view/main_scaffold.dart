@@ -172,21 +172,96 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                               onSelected: (value) {
                                 if (value == 1) {
                                   _logout();
+                                } else if (value == 2) {
+                                  GoRouter.of(context).go(Paths.profile);
                                 }
                               },
                               itemBuilder: (context) => [
                                 PopupMenuItem<int>(
+                                  enabled: false,
+                                  height: 80,
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 8, horizontal: 16),
+                                  child: SizedBox(
+                                    width:
+                                        180, // Fixed width for the entire content
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 24,
+                                          backgroundImage: user
+                                                      ?.avatarEquipped !=
+                                                  null
+                                              ? NetworkImage(
+                                                  user!.avatarEquipped!)
+                                              : const AssetImage(
+                                                      'assets/default-avatar.png')
+                                                  as ImageProvider,
+                                          backgroundColor: Colors.transparent,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          user?.username ?? 'Username',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: colorScheme.onSurface,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                        Text(
+                                          user?.email ?? 'email@example.com',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: colorScheme.onSurface
+                                                .withValues(alpha: 0.7),
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                // Divider
+                                PopupMenuItem<int>(
+                                  enabled: false,
+                                  height: 1,
+                                  padding: EdgeInsets.zero,
+                                  child: Divider(
+                                      height: 1,
+                                      color: colorScheme.onSurface
+                                          .withValues(alpha: 0.2)),
+                                ),
+                                // Regular menu items
+                                PopupMenuItem<int>(
+                                  value: 2,
+                                  child: Text(
+                                    'Modifier le profil',
+                                    style: TextStyle(
+                                        color: colorScheme.onSurface,
+                                        fontSize: 16),
+                                  ),
+                                ),
+                                PopupMenuItem<int>(
                                   value: 1,
                                   child: Text(
                                     'Déconnexion',
-                                    style:
-                                        TextStyle(color: colorScheme.onSurface),
+                                    style: TextStyle(
+                                        color: colorScheme.onSurface,
+                                        fontSize: 16),
                                   ),
                                 ),
                               ],
-                              color: colorScheme.surface,
+                              color: colorScheme.surface.withValues(alpha: 0.9),
                               shadowColor: colorScheme.shadow,
-                              offset: Offset(0, 48),
+                              position: PopupMenuPosition.under,
+                              offset: Offset(175, 6.5),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
                               child: CircleAvatar(
                                 radius: 22,
                                 backgroundImage: user?.avatarEquipped != null
@@ -239,8 +314,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
             ),
           ),
         ),
-        //),
-        //),
         body: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
