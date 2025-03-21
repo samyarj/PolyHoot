@@ -56,6 +56,11 @@
                             <small class="text-danger" *ngIf="isQuestionTextValid()">Entrez votre question</small>
                         </div>
                     </div>
+                    <div>
+                        Date et Heure:
+                        <input type="datetime-local" name="endDate" #endDate="ngModel" id="dateTimePicker" [(ngModel)]="poll.endDate" required />
+                    </div>
+                    <small class="text-danger" *ngIf="isDateValid()">Date invalide</small>
 
                     <div class="form-group answers-section">
                         <label class="form-label">Réponses:</label>
@@ -90,7 +95,7 @@
                                 </small>
                             </div>
                         </div>
-                        <div *ngIf="question.choices"> {{question.choices.length}}</div>
+                        <div *ngIf="question.choices">{{ question.choices.length }}</div>
                         <button
                             class="btn btn-secondary btn-sm"
                             type="button"

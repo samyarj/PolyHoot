@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { addQuestionAnimation, deleteQuestionAnimation, gameFormAnimation, questionFormAnimation } from '@app/animations/animation';
 import { EMPTY_STRING, MAX_CHOICES, MIN_CHOICES } from '@app/constants/constants';
@@ -22,7 +22,7 @@ import { Observer } from 'rxjs';
     styleUrls: ['./create-poll-page.component.scss'],
     animations: [addQuestionAnimation, deleteQuestionAnimation, questionFormAnimation, gameFormAnimation],
 })
-export class CreatePollPageComponent {
+export class CreatePollPageComponent implements AfterViewInit {
     question: Question = JSON.parse(JSON.stringify(EMPTY_POLL_QUESTION));
     submitPollButton: string = ButtonType.CREATE;
     submitQuestionButton: string = ButtonType.ADD;
@@ -46,6 +46,11 @@ export class CreatePollPageComponent {
     get poll(): Poll {
         return this.pollService.poll;
     }
+
+    ngAfterViewInit(): void {
+        this.setMinDate();
+    }
+
     drop(event: CdkDragDrop<QuestionChoice[]>) {
         if (this.question.choices) {
             moveItemInArray(this.question.choices, event.previousIndex, event.currentIndex);
@@ -95,6 +100,18 @@ export class CreatePollPageComponent {
     isQuestionTextValid() {
         return this.validationService.isStringEmpty(this.question.text);
     }
+    isDateValid(): boolean {
+        if (!this.poll.endDate) {
+            return false; // Aucune date sélectionnée
+        }
+
+        const selectedDate = new Date(this.poll.endDate);
+        const now = new Date();
+        now.setSeconds(0, 0); // Ignore les millisecondes et secondes pour éviter des problèmes de précision
+
+        return selectedDate <= now;
+    }
+
     deleteAnswer(index: number): void {
         if (this.question.choices && this.question.choices.length > MIN_CHOICES) {
             this.question.choices.splice(index, 1);
@@ -143,5 +160,28 @@ export class CreatePollPageComponent {
         this.question = JSON.parse(JSON.stringify(EMPTY_POLL_QUESTION));
 
         this.question.id = id;
+    }
+    private setMinDate(): void {
+        const dateTimeInput = document.querySelector<HTMLInputElement>('#dateTimePicker');
+
+        if (dateTimeInput) {
+            const updateMinDateTime = () => {
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // Ajustement fuseau horaire
+
+                const minDateTime = now.toISOString().slice(0, 16); // Format YYYY-MM-DDTHH:MM
+                dateTimeInput.setAttribute('min', minDateTime);
+
+                // Vérifier si la valeur sélectionnée est devenue invalide
+                const selectedDateTime = new Date(dateTimeInput.value);
+                if (selectedDateTime < now) {
+                    dateTimeInput.value = minDateTime; // Réinitialiser si la valeur devient invalide
+                }
+            };
+
+            // Mettre à jour immédiatement et ensuite toutes les secondes
+            updateMinDateTime();
+            setInterval(updateMinDateTime, 1000);
+        }
     }
 }
