@@ -28,7 +28,7 @@ export const PUBLISHED_POLL_1: PublishedPoll = {
     expired: true,
     endDate: new Date(2024, 4, 1).toISOString(),
     isPublished: true,
-    publicationDate: new Date(),
+    publicationDate: new Date().toISOString(),
     totalVotes: [
         [0, 0, 1],
         [1, 0, 0, 0],
