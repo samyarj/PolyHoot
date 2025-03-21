@@ -93,4 +93,16 @@ export class PollService {
     emptyPoll() {
         this.poll = JSON.parse(JSON.stringify(EMPTY_POLL));
     }
+    sortPollBySomething(polls: Poll[]): Poll[] {
+        return polls.sort();
+        //
+    }
+    publishPoll(id: string) {
+        return this.http.patch<Poll[]>(`${this.baseUrl}/publish/${id}`, {}).pipe(
+            map((polls) => {
+                return polls;
+            }),
+            catchError(this.messageHandler.handleHttpError),
+        );
+    }
 }

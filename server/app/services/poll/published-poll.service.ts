@@ -36,9 +36,9 @@ export class PublishedPollService {
         }
     }
 
-    async findPublishedPollByTitle(title: string) {
+    /* async findPublishedPollByTitle(title: string) {
         const escapedTitle = title.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
         const titleRegex = new RegExp('^' + escapedTitle + '$', 'i');
         return await this.publishedPollModel.findOne({ title: titleRegex });
-    }
+    } */
 }

@@ -3,6 +3,7 @@ import { ERROR } from '@app/constants/error-messages';
 //import { MOCK_POLLZES } from '@app/constants/mock-Polls';
 //import { SUCCESS } from '@app/constants/success-messages';
 import { CreatePollDto } from '@app/model/dto/poll/create-poll.dto';
+import { CreatePublishedPollDto } from '@app/model/dto/poll/create-published-poll.dto';
 import { UpdatePollDto } from '@app/model/dto/poll/update-poll.dto';
 import { Poll, PollDocument } from '@app/model/schema/poll/poll';
 import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
@@ -55,6 +56,12 @@ export class PollService {
         const createdPoll = new this.pollModel(createPollDto);
         return createdPoll.save();
     }
+    async createPublishedPoll(createPublishedPollDto: CreatePublishedPollDto): Promise<Poll> {
+        const existingPoll = await this.findPollByTitle(createPublishedPollDto.title);
+        if (existingPoll && existingPoll.title) throw new ConflictException(ERROR.POLL.ALREADY_EXISTS);
+        const createdPublishedPoll = new this.pollModel(createPublishedPollDto);
+        return createdPublishedPoll.save();
+    }
 
     async verifyAndUpdatePoll(id: string, updatePollDto: UpdatePollDto): Promise<Poll> {
         if (updatePollDto.title) {
@@ -89,7 +96,7 @@ export class PollService {
                 title: updateData.title,
                 description: updateData.description,
                 expired: updateData.expired,
-                expireDate: updateData.expireDate,
+                endDate: updateData.endDate,
                 questions: updateData.questions,
             };
             try {

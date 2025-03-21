@@ -1,7 +1,9 @@
 import { ERROR } from '@app/constants/error-messages';
 import { CreatePollDto } from '@app/model/dto/poll/create-poll.dto';
+import { CreatePublishedPollDto } from '@app/model/dto/poll/create-published-poll.dto';
 import { UpdatePollDto } from '@app/model/dto/poll/update-poll.dto';
 import { Poll } from '@app/model/schema/poll/poll';
+import { PublishedPoll } from '@app/model/schema/poll/published-poll.schema';
 import { PollService } from '@app/services/poll/poll.service';
 import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Res } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
@@ -56,7 +58,7 @@ export class PollController {
     @Post('/create')
     async createPoll(@Body() createPollDto: CreatePollDto, @Res() response: Response) {
         try {
-            console.log("sondage créé ", createPollDto)
+            console.log('sondage créé ', createPollDto);
             await this.pollService.createPoll(createPollDto);
             const updatedPolls = await this.pollService.getAllPolls();
             response.status(HttpStatus.CREATED).json(updatedPolls);
@@ -107,6 +109,43 @@ export class PollController {
             } else {
                 response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: ERROR.INTERNAL_SERVER_ERROR });
             }
+        }
+    }
+    @ApiOkResponse({
+        description: 'Poll published successfully',
+        type: PublishedPoll,
+    })
+    @ApiNotFoundResponse({
+        description: 'Poll not found or could not be published',
+    })
+    @Patch('publish/:id')
+    async publishPoll(@Param('id') id: string, @Res() response: Response) {
+        try {
+            // 1. Récupérer le sondage existant
+            const poll = await this.pollService.getPollById(id);
+            if (!poll) {
+                return response.status(HttpStatus.NOT_FOUND).send({ message: ERROR.POLL.ID_NOT_FOUND });
+            }
+
+            // 2. Construire le DTO de PublishedPoll
+            const createPublishedPollDto: CreatePublishedPollDto = {
+                ...poll,
+                publicationDate: new Date(),
+                isPublished: true,
+                totalVotes: poll.questions.map(() => []), // Initialisation des votes
+            };
+
+            // 3. Créer le sondage publié
+            const publishedPoll = await this.pollService.createPublishedPoll(createPublishedPollDto);
+
+            // 4. Supprimer l'ancien sondage
+            await this.pollService.deletePollById(id);
+
+            // 5. Retourner le sondage publié
+            return response.status(HttpStatus.OK).json(publishedPoll);
+        } catch (error) {
+            console.error(error);
+            return response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: ERROR.INTERNAL_SERVER_ERROR });
         }
     }
 }

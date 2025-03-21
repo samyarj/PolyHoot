@@ -28,7 +28,7 @@ export class Poll {
 
     @ApiProperty({ description: 'The expire date of the poll' })
     @Prop({default: new Date().toString() })
-    expireDate: string;
+    endDate: Date;
 
     @ApiProperty({ description: 'The duration of the poll in minutes' })
     @Prop({ required: true })

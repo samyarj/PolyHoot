@@ -106,7 +106,7 @@ export class CreateQuizComponent {
 
     private emptyQuizAndRedirectCallback() {
         this.quizHandler.emptyQuiz();
-        this.router.navigate([AppRoute.POLLS]);
+        this.router.navigate([AppRoute.QUIZMANAGEMENT]);
     }
 
     private emptyQuestion(questionType?: string) {
