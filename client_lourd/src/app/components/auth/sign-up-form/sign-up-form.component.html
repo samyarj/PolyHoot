@@ -145,12 +145,7 @@
                 }"
             >
                 <span *ngIf="!isLoading"> Créer un nouveau compte </span>
-                <div
-                    *ngIf="isLoading"
-                    class="spinner-border text-light position-absolute bottom-0 end-0"
-                    style="width: 1.5rem; height: 1.5rem"
-                    role="status"
-                >
+                <div *ngIf="isLoading" class="spinner-border" style="width: 1.5rem; height: 1.5rem" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
             </button>

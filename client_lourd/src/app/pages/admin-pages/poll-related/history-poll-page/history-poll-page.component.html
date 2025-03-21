@@ -1,3 +1,84 @@
 <div class="poll-page-container">
-    <div class="poll-page-content">Page d'historique de sondages.<br />Mettre ton contenu ici.</div>
+    <div class="poll-page-content">
+        <div class="past-polls-container">
+            <div class="past-poll active">
+                <div class="poll-info">
+                    <div class="title">Titre</div>
+                    <div class="date">Date 10.01.2025 13h:40</div>
+                </div>
+                <!-- <button class="custom-button-medium">Show</button> -->
+            </div>
+            <div class="past-poll" [ngClass]="{ active: isShown }">
+                <div class="poll-info">
+                    <div class="title">Titre</div>
+                    <div>Date 10.01.2025 13h:40</div>
+                </div>
+                <button (click)="show()" class="custom-button-medium">Show</button>
+            </div>
+            <div class="past-poll">
+                <div class="poll-info">
+                    <div class="title">Titre</div>
+                    <div>Date 10.01.2025 13h:40</div>
+                </div>
+                <button class="custom-button-medium">Show</button>
+            </div>
+            <div class="past-poll">
+                <div class="poll-info">
+                    <div class="title">Titre</div>
+                    <div>Date 10.01.2025 13h:40</div>
+                </div>
+                <button class="custom-button-medium">Show</button>
+            </div>
+        </div>
+        <div class="poll-big-container">
+            <div class="poll-container">
+                <div class="poll-info">
+                    <div class="title">
+                        <div class="title-content">Titre</div>
+                        <div class="date">Date 10.01.2025 13h:40</div>
+                    </div>
+                    <div class="description">
+                        Lorem ipsum dolor, sit amet consectetur adipisicing elit. Esse deserunt impedit eum dolorum, eligendi quis repellat illo
+                        mollitia sed animi! Veritatis quos atque recusandae inventore omnis nihil expedita eius tempora? Lorem ipsum dolor sit amet
+                        consectetur adipisicing elit. Earum dignissimos repellendus numquam nostrum modi quas odit expedita pariatur perferendis,
+                        rerum dolore omnis voluptas hic, ut recusandae. Nostrum corporis in repudiandae.
+                    </div>
+                </div>
+                <div class="question-container">
+                    <button class="custom-button-medium">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <div class="question-content">
+                        <div class="question-title">
+                            <div class="question-title-content">Titre de la question</div>
+                            <div class="divider"></div>
+                        </div>
+                        <div class="pie-chart">
+                            <canvas baseChart [data]="pieChartData" [options]="pieChartOptions" [type]="pieChartType"> </canvas>
+                        </div>
+                        <!-- <div class="legend two-choices">
+                            <div>Choix</div>
+                            <div>Choix</div>
+                        </div> -->
+
+                        <!-- <div class="legend three-choices">
+                            <div>Choix</div>
+                            <div>Choix</div>
+                            <div>Choix</div>
+                        </div> -->
+
+                        <div class="legend four-choices">
+                            <div>Choix</div>
+                            <div>Choix</div>
+                            <div>Choix</div>
+                            <div>Choix</div>
+                        </div>
+                    </div>
+                    <button class="custom-button-medium">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
