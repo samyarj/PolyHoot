@@ -25,10 +25,11 @@ class _DailyfreeState extends State<Dailyfree> {
   Timer? _timer;
   double minutesLeft = 0;
   num hoursLeft = 0;
+  bool _isOpeningDailyFree = false;
 
   void startTimer() {
     if (_timer == null && dailyFree != null && !dailyFree!.canClaim) {
-      AppLogger.e("START TIMER");
+      AppLogger.i("START TIMER");
       _timer = Timer.periodic(
         const Duration(milliseconds: 12000), // 12 seconds = 0.2 minutes
         (timer) {
@@ -60,10 +61,18 @@ class _DailyfreeState extends State<Dailyfree> {
 
   Future<void> loadDailyFree() async {
     try {
+      if (_timer != null) {
+        AppLogger.i("CANCEL TIMER");
+        _timer!.cancel();
+        _timer = null;
+      }
       final daily = await lootBoxService.getDailyFree();
       if (!daily.canClaim) {
         hoursLeft = daily.hoursLeft;
         minutesLeft = daily.minutesLeft;
+      }
+      if (_isOpeningDailyFree) {
+        _isOpeningDailyFree = false;
       }
       if (mounted) {
         setState(() {
@@ -110,6 +119,11 @@ class _DailyfreeState extends State<Dailyfree> {
 
   openDailyFree() async {
     try {
+      setState(
+        () {
+          _isOpeningDailyFree = true;
+        },
+      );
       final reward = await lootBoxService.openDailyFree();
       if (mounted) openLootBoxWinDialog(reward, context);
       loadDailyFree();
@@ -228,11 +242,11 @@ class _DailyfreeState extends State<Dailyfree> {
                       // ouvrir pour button
                       Divider(indent: 64, endIndent: 64, thickness: 2),
                       GestureDetector(
-                        onTap: () {
-                          if (dailyFree!.canClaim) {
-                            openDailyFree();
-                          }
-                        },
+                        onTap: dailyFree!.canClaim
+                            ? () {
+                                openDailyFree();
+                              }
+                            : null,
                         child: IntrinsicWidth(
                           child: Container(
                             margin: const EdgeInsets.only(top: 8),
@@ -253,18 +267,20 @@ class _DailyfreeState extends State<Dailyfree> {
                                   BorderRadius.circular(50), // Rounded corners
                             ),
                             alignment: Alignment.center,
-                            child: Text(
-                              dailyFree!.canClaim
-                                  ? "Reclamer le prix quotidien !"
-                                  : getDisplayedText(), // Button text
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimary, // Text color
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            child: _isOpeningDailyFree
+                                ? ThemedProgressIndicator()
+                                : Text(
+                                    dailyFree!.canClaim
+                                        ? "Reclamer le prix quotidien !"
+                                        : getDisplayedText(), // Button text
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary, // Text color
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                           ),
                         ),
                       ),
