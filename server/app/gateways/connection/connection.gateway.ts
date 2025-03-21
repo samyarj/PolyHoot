@@ -21,7 +21,7 @@ export class ConnectionGateway implements OnGatewayDisconnect {
         private userService: UserService,
     ) {}
 
-    @SubscribeMessage(ConnectEvents.IdentifyMobileClient)
+    @SubscribeMessage(ConnectEvents.IdentifyClient)
     handleIdentify(@MessageBody() uid: string, @ConnectedSocket() client: Socket) {
         this.userService.addUserToMap(client.id, uid);
     }

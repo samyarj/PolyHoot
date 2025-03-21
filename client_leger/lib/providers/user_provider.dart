@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/user.dart' as user_model;
 import 'package:client_leger/utilities/logger.dart';
+import 'package:client_leger/utilities/socket_events.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -50,8 +52,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
 
       WebSocketManager.instance.initializeSocketConnection(idToken);
 
-      WebSocketManager.instance
-          .webSocketSender("identifyMobileClient", firebaseUser.uid);
+      WebSocketManager.instance.webSocketSender(
+          ConnectEvents.IdentifyClient.value, firebaseUser.uid);
 
       // Set up real-time listener for user document
       setupUserDocListener(firebaseUser.uid);
