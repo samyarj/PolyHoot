@@ -1,9 +1,13 @@
+import 'dart:async';
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/luck/lootbox/lootbox_coin_svg.dart';
 import 'package:client_leger/UI/luck/lootbox/lootbox_rarity_design.dart';
+import 'package:client_leger/UI/luck/lootbox/lootbox_win_dialog.dart';
 import 'package:client_leger/backend-communication-services/chance/lootbox_service.dart';
+import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/models/chance/dailyfree.dart';
 import 'package:client_leger/models/enums.dart';
+import 'package:client_leger/utilities/logger.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -18,17 +22,99 @@ class Dailyfree extends StatefulWidget {
 class _DailyfreeState extends State<Dailyfree> {
   final lootBoxService = LootboxService();
   DailyFree? dailyFree;
+  Timer? _timer;
+  double minutesLeft = 0;
+  num hoursLeft = 0;
+
+  void startTimer() {
+    if (_timer == null && dailyFree != null && !dailyFree!.canClaim) {
+      AppLogger.e("START TIMER");
+      _timer = Timer.periodic(
+        const Duration(milliseconds: 12000), // 12 seconds = 0.2 minutes
+        (timer) {
+          AppLogger.i("Timer tick before condition");
+          if (dailyFree != null && !dailyFree!.canClaim && mounted) {
+            AppLogger.i("Timer tick min left = $minutesLeft");
+            setState(() {
+              minutesLeft -= 0.2;
+              if (minutesLeft <= 0) {
+                hoursLeft -= 1;
+                if (hoursLeft < 0) {
+                  loadDailyFree();
+                }
+                minutesLeft =
+                    59.9999998; // So that it floors towards 59 when displayed
+              }
+            });
+          }
+        },
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   Future<void> loadDailyFree() async {
     try {
       final daily = await lootBoxService.getDailyFree();
+      if (!daily.canClaim) {
+        hoursLeft = daily.hoursLeft;
+        minutesLeft = daily.minutesLeft;
+      }
       if (mounted) {
         setState(() {
           dailyFree = daily;
         });
+        startTimer();
       }
     } catch (e) {
       if (mounted) showErrorDialog(context, e.toString());
+    }
+  }
+
+  String getDisplayedText() {
+    if (hoursLeft < 0) {
+      return "Prix disponible dans moins d'une minute!";
+    } else {
+      if (hoursLeft > 1) {
+        if (minutesLeft.floor() > 1) {
+          return 'Prix disponible dans $hoursLeft heures et ${minutesLeft.floor()} minutes';
+        } else if (minutesLeft.floor() == 1) {
+          return 'Prix disponible dans $hoursLeft heures et ${minutesLeft.floor()} minute';
+        } else {
+          return 'Prix disponible dans $hoursLeft heures';
+        }
+      } else if (hoursLeft == 1) {
+        if (minutesLeft.floor() > 1) {
+          return 'Prix disponible dans $hoursLeft heure et ${minutesLeft.floor()} minutes';
+        } else if (minutesLeft.floor() == 1) {
+          return 'Prix disponible dans $hoursLeft heure et ${minutesLeft.floor()} minute';
+        } else {
+          return 'Prix disponible dans $hoursLeft heure';
+        }
+      } else {
+        if (minutesLeft.floor() > 1) {
+          return 'Prix disponible dans ${minutesLeft.floor()} minutes';
+        } else if (minutesLeft.floor() == 1) {
+          return 'Prix disponible dans ${minutesLeft.floor()} minute';
+        } else {
+          return "Prix disponible dans moins d'une minute!";
+        }
+      }
+    }
+  }
+
+  openDailyFree() async {
+    try {
+      final reward = await lootBoxService.openDailyFree();
+      if (mounted) openLootBoxWinDialog(reward, context);
+      loadDailyFree();
+    } catch (e) {
+      if (mounted) showErrorDialog(context, getCustomError(e));
     }
   }
 
@@ -97,7 +183,7 @@ class _DailyfreeState extends State<Dailyfree> {
                               height: 100,
                               decoration: getDecoration(reward.rarity),
                               margin: index == 0
-                                  ? const EdgeInsets.only(left: 16)
+                                  ? const EdgeInsets.only(left: 46)
                                   : null,
                               padding: const EdgeInsets.all(8),
                               alignment: Alignment.center,
@@ -142,35 +228,42 @@ class _DailyfreeState extends State<Dailyfree> {
                       // ouvrir pour button
                       Divider(indent: 64, endIndent: 64, thickness: 2),
                       GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          margin: const EdgeInsets.only(top: 8),
-                          width: 200,
-                          height: 50, // Fixed height for medium button
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8), // Padding for content
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primary, // Background color
-                            border: Border.all(
+                        onTap: () {
+                          if (dailyFree!.canClaim) {
+                            openDailyFree();
+                          }
+                        },
+                        child: IntrinsicWidth(
+                          child: Container(
+                            margin: const EdgeInsets.only(top: 8),
+                            height: 50, // Fixed height for medium button
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16), // Padding for content
+                            decoration: BoxDecoration(
                               color: Theme.of(context)
                                   .colorScheme
-                                  .tertiary, // Border color
-                              width: 3,
+                                  .primary, // Background color
+                              border: Border.all(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .tertiary, // Border color
+                                width: 3,
+                              ),
+                              borderRadius:
+                                  BorderRadius.circular(50), // Rounded corners
                             ),
-                            borderRadius:
-                                BorderRadius.circular(50), // Rounded corners
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            "Ouvrir", // Button text
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimary, // Text color
-                              fontWeight: FontWeight.bold,
+                            alignment: Alignment.center,
+                            child: Text(
+                              dailyFree!.canClaim
+                                  ? "Reclamer le prix quotidien !"
+                                  : getDisplayedText(), // Button text
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimary, // Text color
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
