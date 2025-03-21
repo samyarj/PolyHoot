@@ -97,8 +97,8 @@ export class PollService {
         return polls.sort();
         //
     }
-    publishPoll(pollId: string) {
-        return this.http.patch<Poll[]>(`${this.baseUrl}/poll/${pollId}/publish`, {}).pipe(
+    publishPoll(id: string) {
+        return this.http.patch<Poll[]>(`${this.baseUrl}/publish/${id}`, {}).pipe(
             map((polls) => {
                 return polls;
             }),

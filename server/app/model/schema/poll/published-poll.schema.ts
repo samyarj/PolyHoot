@@ -20,7 +20,7 @@ export type PublishedPollDocument = PublishedPoll & Document;
 export class PublishedPoll extends Poll {
     @ApiProperty({ description: 'The publication date of the poll' })
     @Prop({ required: true })
-    publicationDate: string;
+    publicationDate: Date;
 
     @ApiProperty({ description: 'Total votes for each question' })
     @Prop({ type: [[Number]], default: [] })
