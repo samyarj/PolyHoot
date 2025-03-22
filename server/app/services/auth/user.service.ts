@@ -1,7 +1,7 @@
 import { DEFAULT_AVATAR_URL, DEFAULT_AVATARS, emptyUser } from '@app/constants';
 import { User } from '@app/interface/user';
 import { CloudinaryService } from '@app/modules/cloudinary/cloudinary.service';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { UserCredential } from 'firebase/auth';
 
@@ -10,11 +10,14 @@ export class UserService {
     private adminAuth = admin.auth();
     private firestore = admin.firestore();
     private usersSocketIdMap = new Map<string, string>();
+    private readonly logger = new Logger(UserService.name);
 
     constructor(private readonly cloudinaryService: CloudinaryService) {}
 
     addUserToMap(socketId: string, uid: string) {
         this.usersSocketIdMap.set(socketId, uid);
+        this.setLog(uid, 'connect').catch((error) => console.error('Failed to log connection:', error));
+        this.logger.log(`User ${uid} connected with socket ID ${socketId}`);
     }
 
     isUserInMap(socketId: string): boolean {
@@ -27,6 +30,46 @@ export class UserService {
 
     removeUserFromMap(socketId: string) {
         this.usersSocketIdMap.delete(socketId);
+        const uid = this.usersSocketIdMap.get(socketId);
+        if (uid) {
+            this.setLog(uid, 'disconnect').catch((error) => console.error('Failed to log disconnection:', error));
+            this.logger.log(`User ${uid} disconnected after losing socket connection`);
+        }
+    }
+
+    async setLog(uid: string, action: 'connect' | 'disconnect'): Promise<void> {
+        if (!uid) return;
+
+        const userRef = this.firestore.collection('users').doc(uid);
+
+        // Create a log entry for the action
+        const logEntry = {
+            timestamp: this.formatTimestamp(new Date()),
+            action: action,
+        };
+
+        // Use a transaction to ensure atomicity
+        await this.firestore.runTransaction(async (transaction) => {
+            const userDoc = await transaction.get(userRef);
+
+            if (!userDoc.exists) {
+                throw new Error("L'utilisateur n'existe pas.");
+            }
+
+            const updateData: any = {
+                isOnline: action === 'connect', // Set isOnline based on the action
+            };
+
+            // Check if cxnLogs exists, if not initialize it
+            if (!userDoc.data().cxnLogs) {
+                updateData.cxnLogs = [logEntry]; // Initialize cxnLogs with the new log entry
+            } else {
+                updateData.cxnLogs = admin.firestore.FieldValue.arrayUnion(logEntry); // Add the log entry to cxnLogs
+            }
+
+            // Update the user's online status and log the action
+            transaction.update(userRef, updateData);
+        });
     }
 
     // Sign up a new user and return user data with token
@@ -56,7 +99,6 @@ export class UserService {
     async signInWithGoogle(uid: string, email: string, displayName: string): Promise<User> {
         try {
             const userDoc = await this.firestore.collection('users').doc(uid).get();
-
             if (userDoc.exists) {
                 // User exists, update isOnline status and return the user
                 return await this.getUserByUid(uid);
@@ -126,14 +168,42 @@ export class UserService {
 
             // Update the user's online status and log the disconnect
             transaction.update(userRef, updateData);
+            this.logger.log(`User ${uid} disconnected after logging out`);
         });
     }
 
     async getUserByUid(uid: string): Promise<User> {
         const userRecord = await this.adminAuth.getUser(uid);
         const userDoc = await this.getUserFromFirestore(uid);
-        await this.firestore.collection('users').doc(uid).update({ isOnline: true });
+        // await this.firestore.collection('users').doc(uid).update({ isOnline: true });
         return this.mapUserFromFirestore(userRecord, userDoc);
+    }
+
+    async getReportState(uid: string): Promise<{ isBanned: boolean; message: string }> {
+        const userDoc = await this.firestore.collection('users').doc(uid).get();
+        if (!userDoc || !userDoc.data()) {
+            return {
+                message: `Bienvenue!`,
+                isBanned: false,
+            };
+        }
+        const unBanDate: Date | null = !(userDoc.data() === undefined || userDoc.data().unBanDate === null)
+            ? userDoc.data().unBanDate.toDate()
+            : null;
+        if (unBanDate) {
+            let timeDiff: number = unBanDate.getTime() - new Date().getTime();
+            if (timeDiff > 0) {
+                const minutesLeft = Math.ceil(timeDiff / (1000 * 60));
+                return {
+                    message: `Vous êtes banni pendant les prochaines ${minutesLeft} minutes`,
+                    isBanned: true,
+                };
+            }
+        }
+        return {
+            message: `Bienvenue!`,
+            isBanned: false,
+        };
     }
 
     async getEmailByUsername(username: string): Promise<string> {
@@ -289,7 +359,7 @@ export class UserService {
         // default avatar so it doesn't change/show errors.
         avatars.push('https://res.cloudinary.com/dtu6fkkm9/image/upload/v1737478954/default-avatar_qcaycl.jpg');
 
-        const canEquipAvatar = avatars.includes(avatarURL) || DEFAULT_AVATARS.includes(avatarURL);
+        const canEquipAvatar = avatars.includes(avatarURL) || DEFAULT_AVATARS.includes(avatarURL) || avatarURL === currentAvatarUrl;
         if (canEquipAvatar) {
             await userRef.update({ avatarEquipped: avatarURL });
             await this.deleteOldUploadedAvatar(currentAvatarUrl, avatars);
@@ -310,6 +380,7 @@ export class UserService {
             await userRef.update({ borderEquipped: bannerURL });
             return true;
         } else if (bannerURL === '') {
+            await userRef.update({ borderEquipped: bannerURL });
             return true;
         }
         return false;
@@ -384,7 +455,7 @@ export class UserService {
             },
             nWins: userDoc.nWins || 0,
             nGames: userDoc.nGames || 0,
-            isOnline: true,
+            isOnline: userDoc.isOnline,
             pity: userDoc.pity || 0,
             nextDailyFree: userDoc.nextDailyFree || new Date(),
         };
@@ -721,10 +792,56 @@ export class UserService {
         }
     }
 
+    async reportUser(signalerUID: string, reportedUID: string): Promise<boolean | null> {
+        const userRef = this.firestore.collection('users').doc(reportedUID);
+        const userDoc = await userRef.get();
+
+        if (!userDoc.exists) {
+            throw new UnauthorizedException("L'utilisateur n'existe pas.");
+        }
+
+        const data = userDoc.data();
+        const playerReports: string[] = data?.playerReports || [];
+        if (data.role === 'admin') return null;
+        if (!playerReports.includes(signalerUID) && signalerUID !== reportedUID && data.role === 'player') {
+            const updatedReports = [...playerReports, signalerUID];
+            const newNbReports = (data.nbReport || 0) + 1;
+            let unbanDate: Date = new Date(0, 0, 0);
+            let newNbBans = data.nbBan;
+            switch (newNbReports) {
+                case 4:
+                    unbanDate = new Date(Date.now() + 1 * 60 * 1000);
+                    newNbBans++;
+                    break;
+                case 5:
+                    unbanDate = new Date(Date.now() + 5 * 60 * 1000);
+                    newNbBans++;
+                    break;
+                case 6:
+                default:
+                    if (newNbReports >= 6) {
+                        unbanDate = new Date(Date.now() + 10 * 60 * 1000);
+                        newNbBans++;
+                    }
+                    break;
+            }
+
+            await userRef.update({
+                playerReports: updatedReports,
+                nbReport: data.nbReport + 1,
+                unBanDate: unbanDate,
+                nbBan: newNbBans,
+            });
+
+            return true;
+        }
+        return false;
+    }
+
     formatTimestamp(date: Date): string {
         const pad = (n: number) => n.toString().padStart(2, '0');
         const day = pad(date.getDate());
-        const month = pad(date.getMonth() + 1); // Months are zero-based
+        const month = pad(date.getMonth() + 1);
         const year = date.getFullYear();
         const hours = pad(date.getHours());
         const minutes = pad(date.getMinutes());

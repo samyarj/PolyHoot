@@ -106,7 +106,7 @@ enum JoinErrors {
 enum ConnectEvents {
   UserToGame('userConnectedToGamePage'),
   AllPlayersLeft('AllPlayersLeft'),
-  IdentifyMobileClient('identifyMobileClient');
+  IdentifyClient('identifyClient');
 
   final String value;
   const ConnectEvents(this.value);

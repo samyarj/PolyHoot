@@ -12,6 +12,19 @@ import { environment } from 'src/environments/environment';
 
 const SECONDS_IN_MINUTE = 60;
 
+interface GameLogEntry {
+    gameName?: string;
+    startTime?: string;
+    endTime?: string;
+    status?: 'complete' | 'abandoned';
+    result?: 'win' | 'lose';
+}
+
+interface CnxLogEntry {
+    timestamp: string;
+    action: 'connect' | 'disconnect';
+}
+
 @Component({
     selector: 'app-profile-page',
     templateUrl: './profile-page.component.html',
@@ -26,7 +39,9 @@ export class ProfilePageComponent implements OnInit {
     isCheckingUsername: boolean = false;
     isUsernameTaken: boolean = false;
     isTypingUsername: boolean = false;
-
+    math = Math;
+    gameLogs: GameLogEntry[];
+    logs: CnxLogEntry[];
     // Constants for username validation
     readonly usernamePattern: string = USERNAME_REGEX.source;
     readonly maxUsernameLength: number = USERNAME_MAX_LENGTH;
@@ -58,6 +73,24 @@ export class ProfilePageComponent implements OnInit {
     ngOnInit() {
         this.loadDefaultAvatars();
         this.loadUserProfile();
+        this.loadLogs();
+    }
+    loadLogs() {
+        const user = this.authService.getUser();
+        this.logs = user?.cxnLogs ?? [];
+        this.gameLogs = user?.gameLogs ?? [];
+    }
+
+    getActionDisplay(action: 'connect' | 'disconnect'): string {
+        return action === 'connect' ? 'Connection' : 'Déconnection';
+    }
+
+    getStatusDisplay(status: 'complete' | 'abandoned'): string {
+        return status === 'complete' ? 'Complété' : 'Abandonné';
+    }
+
+    getResultDisplay(result: 'win' | 'lose'): string {
+        return result === 'win' ? 'Gagné' : 'Perdu';
     }
 
     loadUserProfile() {
@@ -175,7 +208,8 @@ export class ProfilePageComponent implements OnInit {
     }
 
     selectAvatar(avatarUrl: string) {
-        this.selectedAvatar = avatarUrl;
+        if (this.selectedAvatar !== avatarUrl) this.selectedAvatar = avatarUrl;
+        else this.selectedAvatar = null;
     }
 
     equipSelectedAvatar() {
@@ -183,9 +217,11 @@ export class ProfilePageComponent implements OnInit {
             this.uploadImgService.updateSelectedDefaultAvatar(this.selectedAvatar).subscribe({
                 next: () => {
                     this.toastr.success('Avatar mis à jour avec succès !');
+                    this.selectedAvatar = null;
                 },
                 error: (error) => {
                     this.toastr.error(`Erreur lors de l'équipement de l'avatar : ${error.message}`);
+                    this.selectedAvatar = null;
                 },
             });
         }

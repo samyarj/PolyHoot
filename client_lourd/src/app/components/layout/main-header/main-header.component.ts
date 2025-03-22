@@ -66,7 +66,7 @@ export class MainHeaderComponent {
             // width: '40%',
             backdropClass: 'quiz-info-popup',
             panelClass: 'custom-container',
-            data: this.poll,
+            data: { poll: this.poll, isAdmin: false },
         });
 
         dialogRef.afterClosed().subscribe((result) => {

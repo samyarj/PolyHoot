@@ -50,3 +50,22 @@ extension ChoiceFeedbackExtension on ChoiceFeedback {
     }
   }
 }
+
+enum RewardType {
+  Theme('theme'),
+  Avatar('avatar'),
+  Border('border'),
+  Coins('coins');
+
+  final String value;
+  const RewardType(this.value);
+}
+
+enum RewardRarity {
+  Common('common'),
+  Rare('rare'),
+  VeryRare('very-rare');
+
+  final String value;
+  const RewardRarity(this.value);
+}

@@ -27,7 +27,7 @@ class FirebaseChatService {
 
   CollectionReference get _usersCollection => _firestore.collection('users');
 
-  static const int messagesLimit = 1;
+  static const int messagesLimit = 8;
 
   Future<void> sendMessage(
       String currentUserUid, String channel, String message) async {

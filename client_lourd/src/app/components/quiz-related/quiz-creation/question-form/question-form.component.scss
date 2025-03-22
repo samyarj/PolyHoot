@@ -127,3 +127,16 @@ $primary-color: #00115a;
     box-shadow: 5px rgba(0, 0, 0, 0.2);
     transition: transform 0.1s ease;
 }
+
+.answers-section {
+    .form-group {
+        .form-label {
+            width: 140px;
+            text-align: left;
+        }
+
+        input {
+            border-radius: 5px;
+        }
+    }
+}
