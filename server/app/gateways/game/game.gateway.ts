@@ -131,7 +131,11 @@ export class GameGateway {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         const playerName = game.players.find((player) => player.socket === client).name;
-        game.organizer.socket.emit(GameEvents.QRLAnswerSubmitted, { playerName, playerAnswer });
+        if (game.timer.timerValue > 0) {
+            game.organizer.socket.emit(GameEvents.QRLAnswerSubmitted, { playerName, playerAnswer });
+        } else {
+            game.organizer.socket.emit(GameEvents.QRLAnswerSubmitted, { playerName, playerAnswer: '' });
+        }
     }
 
     @SubscribeMessage(JoinEvents.ValidateGameId)

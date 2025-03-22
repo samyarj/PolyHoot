@@ -1,8 +1,12 @@
 import 'package:client_leger/UI/global/header_title.dart';
+import 'package:client_leger/UI/global/item_widget.dart';
 import 'package:client_leger/UI/global/unified_item_gird.dart';
 import 'package:client_leger/providers/theme_provider.dart';
 import 'package:client_leger/utilities/enums.dart';
 import 'package:flutter/material.dart';
+
+// Special constant to identify the "remove banner" option
+const String REMOVE_BANNER_ID = "remove_banner";
 
 class InventorySection extends StatelessWidget {
   final List<String> avatars;
@@ -28,7 +32,7 @@ class InventorySection extends StatelessWidget {
     final itemSize = 60.0;
     final screenWidth = MediaQuery.of(context).size.width;
     final itemsPerRow = (screenWidth > 1200)
-        ? 5
+        ? 6
         : (screenWidth > 800)
             ? 4
             : 3;
@@ -37,10 +41,7 @@ class InventorySection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0, bottom: 16.0, top: 8.0),
-            child: const AnimatedTitleWidget(title: 'Inventaire', fontSize: 58),
-          ),
+          const AnimatedTitleWidget(title: 'Inventaire', fontSize: 58),
           Container(
             height: 1,
             margin: const EdgeInsets.only(bottom: 24.0),
@@ -89,13 +90,7 @@ class InventorySection extends StatelessWidget {
                           'Vous n\'avez pas de bannières obtenues, allez-en obtenir dans la boutique ou dans les lootbox!',
                           colorScheme,
                         )
-                      : UnifiedItemGrid.grid(
-                          items: banners,
-                          itemType: ItemType.banner,
-                          onItemSelected: onBannerSelected,
-                          crossAxisCount: itemsPerRow,
-                          itemSize: itemSize,
-                        ),
+                      : _buildBannerGrid(context, itemsPerRow, itemSize),
                   const SizedBox(height: 24),
 
                   // Themes section
@@ -108,13 +103,84 @@ class InventorySection extends StatelessWidget {
                     crossAxisCount: itemsPerRow,
                     itemSize: itemSize,
                   ),
-                  // Add padding at the bottom for better scrolling experience
                   const SizedBox(height: 20),
                 ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBannerGrid(
+      BuildContext context, int itemsPerRow, double itemSize) {
+    final allBannerOptions = [REMOVE_BANNER_ID, ...banners];
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: itemsPerRow,
+        crossAxisSpacing: 10.0,
+        mainAxisSpacing: 10.0,
+        childAspectRatio: 1.0,
+      ),
+      itemCount: allBannerOptions.length,
+      itemBuilder: (context, index) {
+        final item = allBannerOptions[index];
+
+        if (item == REMOVE_BANNER_ID) {
+          return _buildRemoveBannerItem(context, () {
+            onBannerSelected(REMOVE_BANNER_ID);
+          }, itemSize);
+        } else {
+          return ItemWidget.inventory(
+            item: item,
+            itemType: ItemType.banner,
+            onTap: () => onBannerSelected(item),
+            size: itemSize,
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildRemoveBannerItem(
+      BuildContext context, VoidCallback onTap, double size) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: colorScheme.primary,
+          border: Border.all(
+            color: colorScheme.secondary,
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.remove_circle_outline,
+              color: colorScheme.onPrimary,
+              size: size * 0.5,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Retirer',
+              style: TextStyle(
+                color: colorScheme.onPrimary,
+                fontSize: 10,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

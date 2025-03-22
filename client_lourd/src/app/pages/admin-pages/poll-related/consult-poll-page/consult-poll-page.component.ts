@@ -1,7 +1,9 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { backInLeftAnimation, backInRightAnimation, bounceOutAnimation, zoomInAnimation } from '@app/animations/animation';
+import { PollPlayerPopInComponent } from '@app/components/general-elements/poll-player-pop-in/poll-player-pop-in.component';
 import { AppRoute, ConfirmationMessage } from '@app/constants/enum-class';
 import { Poll, PublishedPoll } from '@app/interfaces/poll';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
@@ -31,12 +33,22 @@ export class ConsultPollPageComponent {
         private router: Router,
         private pollService: PollService,
         private messageHandlerService: MessageHandlerService,
+        private dialog: MatDialog,
     ) {
         this.pollService.getAllPolls().subscribe(this.pollsObserver);
     }
 
     navigate(route: string): void {
         this.router.navigate([route]);
+    }
+
+    consultPoll(poll: Poll) {
+        this.dialog.open(PollPlayerPopInComponent, {
+            // width: '40%',
+            backdropClass: 'quiz-info-popup',
+            panelClass: 'custom-container',
+            data: { poll, isAdmin: true },
+        });
     }
 
     goToEdit(id: string | undefined) {

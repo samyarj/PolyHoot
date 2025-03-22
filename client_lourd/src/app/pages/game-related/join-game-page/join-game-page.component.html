@@ -8,9 +8,13 @@
                 <div class="game-info">
                     <span class="game-title"> Mode classique: {{ lobby.title }} </span>
                     <div class="specific-game-info">
-                        <div class="players">{{ lobby.nbPlayers }} <i class="fa-solid fa-users"></i></div>
+                        <div class="players" matTooltip="Nombre d'utilisateurs">{{ lobby.nbPlayers }} <i class="fa-solid fa-users"></i></div>
                         <div class="vertical-separator"></div>
-                        <i (click)="openQuizInfoDialog(lobby.quiz)" class="fa-solid fa-clipboard-question"></i>
+                        <i
+                            (click)="openQuizInfoDialog(lobby.quiz)"
+                            class="fa-solid fa-clipboard-question"
+                            matTooltip="Consulter le quiz de cette partie"
+                        ></i>
                     </div>
                 </div>
                 <div class="separator"></div>

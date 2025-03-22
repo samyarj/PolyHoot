@@ -117,18 +117,18 @@
                 required
                 #toleranceInput="ngModel"
             />
-            <div>
-                <small *ngIf="!toleranceValid()" class="text-danger">
-                    La marge de tolérance doit être supérieure à 0 et ne peut dépasser 1/4 de l'intervalle.
-                </small>
-                <small *ngIf="!minBoundValid()" class="text-danger"> La borne minimale doit être inférieure à la bonne réponse.<br /> </small>
-                <small *ngIf="!maxBoundValid()" class="text-danger">
-                    La borne maximale doit être supérieure à la borne minimale et à la bonne réponse.<br />
-                </small>
-                <small *ngIf="!goodAnswerValid()" class="text-danger">
-                    La bonne réponse doit être comprise entre la borne minimale et la borne maximale.<br />
-                </small>
-            </div>
+        </div>
+        <div>
+            <small *ngIf="!toleranceValid()" class="text-danger">
+                La marge de tolérance doit être supérieure à 0 et ne peut dépasser 1/4 de l'intervalle.
+            </small>
+            <small *ngIf="!minBoundValid()" class="text-danger"> La borne minimale doit être inférieure à la bonne réponse.<br /> </small>
+            <small *ngIf="!maxBoundValid()" class="text-danger">
+                La borne maximale doit être supérieure à la borne minimale et à la bonne réponse.<br />
+            </small>
+            <small *ngIf="!goodAnswerValid()" class="text-danger">
+                La bonne réponse doit être comprise entre la borne minimale et la borne maximale.<br />
+            </small>
         </div>
     </div>
 

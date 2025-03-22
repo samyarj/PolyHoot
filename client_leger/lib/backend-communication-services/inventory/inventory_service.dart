@@ -68,8 +68,11 @@ class InventoryServiceNotifier extends StateNotifier<InventoryState> {
           equippedAvatar: null,
           equippedBanner: null,
         )) {
-    _loadhInventory();
+    // Initial refresh
+    _loadInventory();
+
     _ref.listen(userProvider, (previous, next) {
+      // Only update if this is a new user state (not the initial load)
       if (previous != null && next != null) {
         next.whenData((user) {
           if (user != null) {
@@ -83,24 +86,21 @@ class InventoryServiceNotifier extends StateNotifier<InventoryState> {
     });
   }
 
-  Future<void> _loadhInventory() async {
+  Future<void> _loadInventory() async {
     try {
       final userAsync = _ref.read(userProvider);
-
-      userAsync.whenData((user) {
+      await userAsync.whenData((user) {
         if (user != null) {
+          AppLogger.d('Refreshing inventory from user data');
           _updateFromUser(user);
-        } else {
-          _clearInventory();
         }
       });
-
-      AppLogger.d('Inventory refreshed from user provider');
     } catch (e) {
-      AppLogger.e('Error refreshing inventory: ${e.toString()}');
+      AppLogger.e('Error refreshing inventory: $e');
     }
   }
 
+  // Clear inventory data
   void _clearInventory() {
     state = InventoryState(
       avatars: [],
@@ -113,6 +113,7 @@ class InventoryServiceNotifier extends StateNotifier<InventoryState> {
 
   void _updateFromUser(User user) {
     AppLogger.w('Updating inventory from user data');
+    AppLogger.d('User inventory data: ${user.inventory}');
 
     // Start with default themes
     List<AppTheme> themes = [AppTheme.dark, AppTheme.light];
@@ -150,7 +151,7 @@ class InventoryServiceNotifier extends StateNotifier<InventoryState> {
             // Convert theme strings to AppTheme enums
             for (var themeStr in themesData) {
               try {
-                final theme = stringToAppTheme(themeStr.toString());
+                final theme = getAppThemeFromString(themeStr.toString());
                 // Only add if it's not already in the list (to avoid duplicates)
                 if (!themes.contains(theme)) {
                   themes.add(theme);
@@ -168,7 +169,6 @@ class InventoryServiceNotifier extends StateNotifier<InventoryState> {
       AppLogger.w('User has no inventory, using defaults');
     }
 
-    // Update state with new inventory data
     state = InventoryState(
       avatars: avatars,
       banners: banners,
@@ -179,11 +179,8 @@ class InventoryServiceNotifier extends StateNotifier<InventoryState> {
 
     AppLogger.d(
         'Final inventory state: ${avatars.length} avatars, ${banners.length} banners, ${themes.length} themes');
-  }
-
-  // Helper method to convert AppTheme enum to string
-  String appThemeToString(AppTheme theme) {
-    return theme.name.toLowerCase();
+    AppLogger.d(
+        'Equipped avatar: ${user.avatarEquipped}, Equipped banner: ${user.borderEquipped}');
   }
 
   Future<bool> setAvatar(String avatarUrl) async {
@@ -227,6 +224,7 @@ class InventoryServiceNotifier extends StateNotifier<InventoryState> {
 
       final token = await currentUser.getIdToken();
 
+      // Send the bannerURL parameter, which will be an empty string when removing the banner
       final response = await http.post(
         Uri.parse('$baseUrl/banner'),
         headers: {
@@ -237,8 +235,10 @@ class InventoryServiceNotifier extends StateNotifier<InventoryState> {
       );
 
       if (response.statusCode == 200) {
-        // Update state with new equipped banner
-        state = state.copyWith(equippedBanner: bannerUrl);
+        // Update state with new equipped banner (or null to remove it)
+        state = bannerUrl.isEmpty
+            ? state.copyWith(clearEquippedBanner: true)
+            : state.copyWith(equippedBanner: bannerUrl);
         return true;
       } else {
         AppLogger.w('Failed to set banner: ${response.body}');

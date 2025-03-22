@@ -165,7 +165,11 @@ class _InventoryPageState extends ConsumerState<InventoryPage> {
           _setAvatar(currentAvatar!);
         }
         if (currentBanner != null) {
-          _setBanner(currentBanner!);
+          if (currentBanner == REMOVE_BANNER_ID) {
+            _setBanner("");
+          } else {
+            _setBanner(currentBanner!);
+          }
         }
       }
     }
