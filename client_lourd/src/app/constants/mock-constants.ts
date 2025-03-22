@@ -66,36 +66,14 @@ export const EMPTY_POLL: Poll = {
     description: '',
     questions: [],
     expired: false,
-    expireDate: new Date(9999, 1, 1),
+    endDate: new Date(9999, 1, 1),
     isPublished: false,
 };
-
-export const POLL_1: Poll = {
-    title: 'Premier sondage',
-    description: 'Sondage portant sur les items par défaut de la boutique',
-    questions: [
-        {
-            type: QuestionType.QCM,
-            text: 'Quel est votre avatar préféré ?',
-            points: 0,
-            choices: [{ text: 'Wonder Woman' }, { text: 'Superman' }, { text: 'Spider-man' }],
-        },
-        {
-            type: QuestionType.QCM,
-            text: 'Quel est votre thème préféré ?',
-            points: 0,
-            choices: [{ text: 'vice' }, { text: 'celstial' }, { text: 'dark' }, { text: 'sunset' }],
-        },
-        {
-            type: QuestionType.QCM,
-            text: 'Quel est votre banner préférée ?',
-            points: 0,
-            choices: [{ text: 'league of legends' }, { text: 'le cercle jaune là' }],
-        },
-    ],
-    expired: false,
-    expireDate: new Date(9999, 1, 1),
-    isPublished: false,
+export const EMPTY_POLL_QUESTION: Question = {
+    type: QuestionType.QCM,
+    text: '',
+    points: 10,
+    choices: [{ text: '' }, { text: '' }],
 };
 
 export const EMPTY_QUESTION_WITHOUT_CHOICES: Question = {

@@ -23,4 +23,12 @@ export const ERROR = {
         FAILED_TO_DELETE: "Erreur lors de la suppression de l'historique des parties.",
         LIST_FAILED_TO_LOAD: "Erreur lors de la lecture de l'historique des parties dans la base de donnees.",
     },
+    POLL: {
+        ALREADY_EXISTS: 'Un sondage avec le meme titre existe deja.',
+        ID_NOT_FOUND: 'Aucun sondage avec cet ID a ete trouve.',
+        FAILED_TO_CREATE: 'Impossible de creer le sondage.',
+        FAILED_TO_UPDATE: 'Impossible de mettre a jour le sondage.',
+        LIST_FAILED_TO_LOAD: 'Erreur lors de la lecture des sondages dans la banque.',
+        FAILED_TO_INSERT: "Erreur lors de l'insertion des sondages dans la base de donnees.",
+    }
 };

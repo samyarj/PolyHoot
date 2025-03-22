@@ -1,7 +1,7 @@
 import { DEFAULT_AVATAR_URL, DEFAULT_AVATARS, emptyUser } from '@app/constants';
 import { User } from '@app/interface/user';
 import { CloudinaryService } from '@app/modules/cloudinary/cloudinary.service';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { UserCredential } from 'firebase/auth';
 
@@ -10,11 +10,14 @@ export class UserService {
     private adminAuth = admin.auth();
     private firestore = admin.firestore();
     private usersSocketIdMap = new Map<string, string>();
+    private readonly logger = new Logger(UserService.name);
 
     constructor(private readonly cloudinaryService: CloudinaryService) {}
 
     addUserToMap(socketId: string, uid: string) {
         this.usersSocketIdMap.set(socketId, uid);
+        this.setLog(uid, 'connect').catch((error) => console.error('Failed to log connection:', error));
+        this.logger.log(`User ${uid} connected with socket ID ${socketId}`);
     }
 
     isUserInMap(socketId: string): boolean {
@@ -27,6 +30,46 @@ export class UserService {
 
     removeUserFromMap(socketId: string) {
         this.usersSocketIdMap.delete(socketId);
+        const uid = this.usersSocketIdMap.get(socketId);
+        if (uid) {
+            this.setLog(uid, 'disconnect').catch((error) => console.error('Failed to log disconnection:', error));
+            this.logger.log(`User ${uid} disconnected after losing socket connection`);
+        }
+    }
+
+    async setLog(uid: string, action: 'connect' | 'disconnect'): Promise<void> {
+        if (!uid) return;
+
+        const userRef = this.firestore.collection('users').doc(uid);
+
+        // Create a log entry for the action
+        const logEntry = {
+            timestamp: this.formatTimestamp(new Date()),
+            action: action,
+        };
+
+        // Use a transaction to ensure atomicity
+        await this.firestore.runTransaction(async (transaction) => {
+            const userDoc = await transaction.get(userRef);
+
+            if (!userDoc.exists) {
+                throw new Error("L'utilisateur n'existe pas.");
+            }
+
+            const updateData: any = {
+                isOnline: action === 'connect', // Set isOnline based on the action
+            };
+
+            // Check if cxnLogs exists, if not initialize it
+            if (!userDoc.data().cxnLogs) {
+                updateData.cxnLogs = [logEntry]; // Initialize cxnLogs with the new log entry
+            } else {
+                updateData.cxnLogs = admin.firestore.FieldValue.arrayUnion(logEntry); // Add the log entry to cxnLogs
+            }
+
+            // Update the user's online status and log the action
+            transaction.update(userRef, updateData);
+        });
     }
 
     // Sign up a new user and return user data with token
@@ -126,6 +169,7 @@ export class UserService {
 
             // Update the user's online status and log the disconnect
             transaction.update(userRef, updateData);
+            this.logger.log(`User ${uid} disconnected after logging out`);
         });
     }
 
@@ -724,7 +768,7 @@ export class UserService {
     formatTimestamp(date: Date): string {
         const pad = (n: number) => n.toString().padStart(2, '0');
         const day = pad(date.getDate());
-        const month = pad(date.getMonth() + 1); // Months are zero-based
+        const month = pad(date.getMonth() + 1);
         const year = date.getFullYear();
         const hours = pad(date.getHours());
         const minutes = pad(date.getMinutes());

@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/user.dart' as user_model;
 import 'package:client_leger/utilities/logger.dart';
+import 'package:client_leger/utilities/socket_events.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -47,12 +49,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       }
 
       final idToken = await firebaseUser.getIdToken();
-      final headers = {'Authorization': 'Bearer $idToken'};
 
       WebSocketManager.instance.initializeSocketConnection(idToken);
 
-      WebSocketManager.instance
-          .webSocketSender("identifyMobileClient", firebaseUser.uid);
+      WebSocketManager.instance.webSocketSender(
+          ConnectEvents.IdentifyClient.value, firebaseUser.uid);
 
       // Set up real-time listener for user document
       setupUserDocListener(firebaseUser.uid);
@@ -195,6 +196,51 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       state = AsyncValue.error(e, stack);
       isLoggedIn.value = false;
       rethrow;
+    }
+  }
+
+  Future<bool> updateUsername(String newUsername) async {
+    try {
+      //state = const AsyncValue.loading();
+
+      // Get current Firebase user
+      final currentUser = FirebaseAuth.instance.currentUser;
+      AppLogger.w('Current user: $currentUser');
+      if (currentUser == null) {
+        throw Exception('User not authenticated');
+      }
+
+      // First update Firebase Auth display name
+      await currentUser.updateDisplayName(newUsername);
+
+      // Get a fresh ID token
+      final token = await currentUser.getIdToken();
+      AppLogger.w('ID token: $token');
+
+      // Then update Firestore through backend
+      final response = await http.patch(
+        Uri.parse(auth_service.updateUserNameUrl),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json'
+        },
+        body: jsonEncode({'username': newUsername}),
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw Exception(jsonDecode(response.body)['message'] ??
+            'Failed to update username');
+      }
+    } catch (e) {
+      AppLogger.e('Error updating username: ${e.toString()}');
+
+      if (state is! AsyncError) {
+        state = AsyncError(getCustomError(e), StackTrace.current);
+      }
+
+      throw Exception(getCustomError(e));
     }
   }
 
