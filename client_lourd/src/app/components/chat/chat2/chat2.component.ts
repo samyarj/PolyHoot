@@ -38,7 +38,7 @@ export class Chat2Component implements OnChanges {
                 next: (value: boolean | null) => {
                     switch (value) {
                         case true: {
-                            this.toastr.success('Merci pour votre contribution à la bonne atmosphère du jeu.');
+                            this.toastr.success('Merci pour votre contribution à la bonne atmosphère du jeu. Le joueur est signalé.');
 
                             break;
                         }
