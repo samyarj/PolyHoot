@@ -163,7 +163,7 @@ export class GamePageComponent implements OnDestroy {
     }
 
     finalizeAnswer() {
-        if (!this.submitted) {
+        if (!this.submitted && this.choiceFeedback === 'idle') {
             this.gameClientService.finalizeAnswer();
             if (this.currentQuestion.type === 'QRL') {
                 this.gameClientService.sendAnswerForCorrection(this.gameClientService.answer);

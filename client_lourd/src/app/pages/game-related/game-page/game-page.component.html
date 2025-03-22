@@ -43,17 +43,34 @@
                     <p *ngIf="currentQuestion.type === 'QRE' && choiceFeedback === 'exact'" style="color: white">
                         Félicitations, c'était la réponse exacte! Un bonus de point de 20% vous est accordé
                     </p>
-                    <p *ngIf="choiceFeedback === 'correct'" style="color: white">
+                    <p *ngIf="choiceFeedback === 'correct' && submitted" style="color: white">
                         Bonne réponse{{ currentQuestion.type === 'QCM' ? ', mais pas la première!' : '!' }} Tous les points sont accordés.
                     </p>
-                    <p *ngIf="choiceFeedback === 'awaiting'" style="color: white">En attente de la réponse des autres joueurs.</p>
-                    <p *ngIf="choiceFeedback === 'idle'" style="color: white">
-                        En attente de votre {{ currentQuestion.type === 'QCM' ? 'sélection de choix.' : 'réponse.' }}
+                    <p *ngIf="choiceFeedback === 'correct' && !submitted" style="color: white">
+                        L'organisateur vous a donné tous les points malgré que vous avez oublié de soumettre votre réponse. Wow. Favoritisme.
                     </p>
-                    <p *ngIf="choiceFeedback === 'awaitingCorrection'" style="color: white">Nous attendons la correction de l'organisateur...</p>
-                    <p *ngIf="choiceFeedback === 'incorrect'" style="color: white">Mauvaise réponse, aucun point accordé.</p>
-                    <p *ngIf="choiceFeedback === 'partial' && currentQuestion.type === 'QRL'" style="color: white">
+                    <p *ngIf="choiceFeedback === 'awaiting'" style="color: white">En attente des soumissions des autres joueurs.</p>
+                    <p *ngIf="choiceFeedback === 'idle'" style="color: white">
+                        En attente de votre soumission de {{ currentQuestion.type === 'QCM' ? 'sélection de choix.' : 'réponse.' }}
+                    </p>
+                    <p *ngIf="choiceFeedback === 'awaitingCorrection' && submitted" style="color: white">
+                        Nous attendons la correction de l'organisateur...
+                    </p>
+                    <p *ngIf="choiceFeedback === 'awaitingCorrection' && !submitted" style="color: white">
+                        L'organisateur n'a pas reçu votre réponse car vous ne l'avez pas soumise.
+                    </p>
+                    <p *ngIf="choiceFeedback === 'incorrect' && submitted" style="color: white">Mauvaise réponse, aucun point accordé.</p>
+                    <p *ngIf="choiceFeedback === 'incorrect' && !submitted && currentQuestion.type !== 'QRL'" style="color: white">
+                        Vous devez soumettre votre réponse pour qu'elle soit corrigée. Vous ne recevrez pas de points.
+                    </p>
+                    <p *ngIf="choiceFeedback === 'incorrect' && !submitted && currentQuestion.type === 'QRL'" style="color: white">
+                        L'organisateur ne vous a donné aucun point pour votre soumission non-existante.
+                    </p>
+                    <p *ngIf="choiceFeedback === 'partial' && currentQuestion.type === 'QRL' && submitted" style="color: white">
                         Pas tout à fait! L'organisateur vous a accordé des points partiels.
+                    </p>
+                    <p *ngIf="choiceFeedback === 'partial' && currentQuestion.type === 'QRL' && !submitted" style="color: white">
+                        L'organisateur vous a offert des points par pitié même si vous avez oublié de soumettre.
                     </p>
                     <div *ngIf="currentQuestion.type === 'QCM'" id="multiple-choice-section">
                         <div
@@ -71,7 +88,7 @@
                         id="question-answer-input"
                         [(ngModel)]="answer"
                         maxlength="{{ MAX_CHARACTERS }}"
-                        [disabled]="submitted"
+                        [disabled]="submitted || this.showAnswers || choiceFeedback === 'incorrect' || choiceFeedback === 'awaitingCorrection'"
                     ></textarea>
 
                     <div *ngIf="currentQuestion.type === 'QRE'" id="range-selection-section">
@@ -91,7 +108,7 @@
                                 [min]="currentQuestion.qreAttributes.minBound"
                                 [max]="currentQuestion.qreAttributes.maxBound"
                                 [(ngModel)]="qreAnswer"
-                                [disabled]="submitted"
+                                [disabled]="submitted || this.showAnswers"
                             />
                         </div>
                         <div id="range-values" *ngIf="currentQuestion.qreAttributes">
@@ -108,11 +125,12 @@
                     </div>
 
                     <button
-                        [disabled]="submitted"
+                        [disabled]="submitted || this.showAnswers || choiceFeedback === 'incorrect' || choiceFeedback === 'awaitingCorrection'"
                         id="submit-choice-button"
                         [ngClass]="{
                             'custom-button-big': !submitted,
-                            'custom-button-big-disabled': submitted
+                            'custom-button-big-disabled':
+                                submitted || this.showAnswers || choiceFeedback === 'incorrect' || choiceFeedback === 'awaitingCorrection'
                         }"
                         (click)="finalizeAnswer()"
                     >

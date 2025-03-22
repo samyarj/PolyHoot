@@ -433,6 +433,8 @@
                                 text-overflow: ellipsis;
                                 overflow: hidden;
                                 white-space: nowrap;
+                                word-break: break-word; /* Forces breaking long strings */
+                                overflow-wrap: break-word;
                             }
                         }
 
@@ -444,6 +446,8 @@
                         #answer {
                             font-size: 1.1rem;
                             color: var(--text-color);
+                            word-break: break-word; /* Forces breaking long strings */
+                            overflow-wrap: break-word;
                         }
                     }
 
