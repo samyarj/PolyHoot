@@ -31,5 +31,7 @@ export const ERROR = {
         FAILED_TO_UPDATE: 'Impossible de mettre a jour le sondage.',
         LIST_FAILED_TO_LOAD: 'Erreur lors de la lecture des sondages dans la banque.',
         FAILED_TO_INSERT: "Erreur lors de l'insertion des sondages dans la base de donnees.",
+        INVALID_RESULTS: "Mauvais résultats",
+        INVALID_CHOICE_INDEX: "Mauvais index",
     },
 };

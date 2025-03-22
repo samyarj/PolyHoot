@@ -28,16 +28,16 @@ export const PUBLISHED_POLL_1: PublishedPoll = {
         },
     ],
     expired: true,
-    endDate: new Date(2024, 4, 1),
+    endDate: '',
     isPublished: true,
-    publicationDate: new Date(),
+    publicationDate: new Date().toISOString(),
     totalVotes: [
         [0, 0, 1],
         [1, 0, 0, 0],
         [0, 1],
     ],
 };
-export const PUBLISHED_POLL_2: PublishedPoll = {
+/* export const PUBLISHED_POLL_2: PublishedPoll = {
     title: 'Préférences alimentaires',
     description: 'Sondage pour découvrir les plats préférés des utilisateurs',
     questions: [
@@ -61,9 +61,9 @@ export const PUBLISHED_POLL_2: PublishedPoll = {
         },
     ],
     expired: true,
-    endDate: new Date(2024, 5, 15),
+    endDate: new Date(2024, 5, 15).toISOString(),
     isPublished: true,
-    publicationDate: new Date(),
+    publicationDate: new Date().toISOString(),
     totalVotes: [
         [2, 3, 1, 4], // Votes pour les plats
         [5, 2, 3], // Votes pour les desserts
@@ -135,7 +135,7 @@ export const PUBLISHED_POLL_4: PublishedPoll = {
         [9, 14, 11, 6], // Votes pour les types de voyage
         [20, 8, 5, 7], // Votes pour les moyens de transport
     ],
-};
+}; */
 
 @Component({
     selector: 'app-history-poll-page',
@@ -147,7 +147,7 @@ export class HistoryPollPageComponent {
     currentQuestionIndex: number;
     labels: string[] = [];
     data: number[] = [];
-    polls: PublishedPoll[] = [];
+    publishedPolls: PublishedPoll[] = [];
     backgroundColors: string[] = [
         '#4E5D6C', // muted steel blue-gray
         '#3C3F41', // deep charcoal
@@ -178,11 +178,11 @@ export class HistoryPollPageComponent {
     pieChartType: 'pie' = 'pie';
 
     constructor() {
-        this.polls = this.getPublishedPolls();
+        this.publishedPolls = this.getPublishedPolls();
     }
 
     getPublishedPolls() {
-        return [PUBLISHED_POLL_1, PUBLISHED_POLL_2, PUBLISHED_POLL_3, PUBLISHED_POLL_4];
+        return [PUBLISHED_POLL_1 /* , PUBLISHED_POLL_2, PUBLISHED_POLL_3, PUBLISHED_POLL_4 */];
     }
 
     show(poll: PublishedPoll) {

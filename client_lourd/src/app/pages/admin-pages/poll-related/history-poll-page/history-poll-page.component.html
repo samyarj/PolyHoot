@@ -1,17 +1,17 @@
-<div class="poll-page-container">
-    <div class="poll-page-content">
+<div class="publishedPoll-page-container">
+    <div class="publishedPoll-page-content">
         <div class="past-polls-container">
-            <div *ngFor="let poll of polls" class="past-poll" [ngClass]="{ active: poll === currentPoll }">
-                <div class="poll-info">
-                    <div class="title">{{ poll.title }}</div>
-                    <div class="date">Date fin :&nbsp;{{ poll.endDate }}</div>
+            <div *ngFor="let publishedPoll of publishedPolls"class="past-publishedPoll" [ngClass]="{ active: publishedPoll === currentPoll }">
+                <div class="publishedPoll-info">
+                    <div class="title">{{ publishedPoll.title }}</div>
+                    <div class="date">Date fin :&nbsp;{{ publishedPoll.endDate }}</div>
                 </div>
-                <button *ngIf="poll !== currentPoll" class="custom-button-medium" (click)="show(poll)">Consulter</button>
+                <button *ngIf="publishedPoll !== currentPoll" class="custom-button-medium" (click)="show(publishedPoll)">Consulter</button>
             </div>
         </div>
-        <div class="poll-big-container">
-            <div *ngIf="currentPoll" class="poll-container">
-                <div class="poll-info">
+        <div class="publishedPoll-big-container">
+            <div *ngIf="currentPoll" class="publishedPoll-container">
+                <div class="publishedPoll-info">
                     <div class="title">
                         <div class="title-content">{{ currentPoll.title }}</div>
                         <div class="date">Date fin :&nbsp;{{ currentPoll.endDate }}</div>
@@ -79,7 +79,7 @@
                 </div>
             </div>
 
-            <div *ngIf="!currentPoll" class="poll-container">
+            <div *ngIf="!currentPoll" class="publishedPoll-container">
                 <div style="display: flex; justify-content: center; align-items: center; height: 100%; width: 100%; text-align: center">
                     Aucun sondage sélectionné
                 </div>

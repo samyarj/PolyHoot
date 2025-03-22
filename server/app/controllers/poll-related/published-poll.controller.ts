@@ -1,8 +1,8 @@
 import { ERROR } from '@app/constants/error-messages';
 import { PublishedPoll } from '@app/model/schema/poll/published-poll.schema';
 import { PublishedPollService } from '@app/services/poll/published-poll.service';
-import { Controller, Delete, Get, HttpStatus, Param, Res } from '@nestjs/common';
-import { ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Res } from '@nestjs/common';
+import { ApiBadRequestResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 
 @ApiTags('PublishedPolls')
@@ -62,6 +62,26 @@ export class PublishedPollController {
         } catch (error) {
             if (error.status === HttpStatus.NOT_FOUND) {
                 response.status(HttpStatus.NOT_FOUND).send({ message: error.message });
+            } else {
+                response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: ERROR.INTERNAL_SERVER_ERROR });
+            }
+        }
+    }
+    @ApiOkResponse({ description: 'Published poll votes successfully updated' })
+    @ApiNotFoundResponse({ description: 'Published poll not found' })
+    @ApiBadRequestResponse({ description: 'Bad request' })
+    @Patch('/:id')
+    async updatePublishedPollVotes(@Param('id') id: string, @Body() results: number[], @Res() response: Response) {
+        try {
+            const updatedPublishedPoll = await this.publishedPollService.updatePublishedPollVotes(id, results);
+            const testSiUpdatedAvecResultats = await this.publishedPollService.getPublishedPollById(id);
+            console.log(testSiUpdatedAvecResultats);
+            response.status(HttpStatus.OK).json(updatedPublishedPoll);
+        } catch (error) {
+            if (error.status === HttpStatus.NOT_FOUND) {
+                response.status(HttpStatus.NOT_FOUND).send({ message: error.message });
+            } else if (error.status === HttpStatus.BAD_REQUEST) {
+                response.status(HttpStatus.BAD_REQUEST).send({ message: error.message });
             } else {
                 response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: ERROR.INTERNAL_SERVER_ERROR });
             }

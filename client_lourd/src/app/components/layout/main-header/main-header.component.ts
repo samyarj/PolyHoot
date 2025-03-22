@@ -1,12 +1,14 @@
+import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { PollPlayerPopInComponent } from '@app/components/general-elements/poll-player-pop-in/poll-player-pop-in.component';
-import { Poll } from '@app/interfaces/poll';
+import { Poll, PublishedPoll } from '@app/interfaces/poll';
 import { QuestionType } from '@app/interfaces/question-type';
 import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
 import { HeaderNavigationService } from '@app/services/ui-services/header-navigation.service';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from 'src/environments/environment';
 
 @Component({
     selector: 'app-main-header',
@@ -49,6 +51,7 @@ export class MainHeaderComponent {
         private headerService: HeaderNavigationService,
         private dialog: MatDialog,
         private toastr: ToastrService,
+        private http: HttpClient,
     ) {
         this.authService.user$.subscribe({
             next: (user: User | null) => {
@@ -72,6 +75,7 @@ export class MainHeaderComponent {
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
                 this.toastr.success('Sondage complete, voir console pour les reponses retournees!');
+                this.http.patch<PublishedPoll[]>(`${environment.serverUrl}/published-polls/${this.poll.id}`, result);
                 console.log('Resultat du sondage envoye:');
                 console.log(result);
             } else {

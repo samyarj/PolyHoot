@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */ // Mongo utilise des attributs avec un underscore
 import { ERROR } from '@app/constants/error-messages';
 import { PublishedPoll, PublishedPollDocument } from '@app/model/schema/poll/published-poll.schema';
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -36,9 +36,35 @@ export class PublishedPollService {
         }
     }
 
-    /* async findPublishedPollByTitle(title: string) {
-        const escapedTitle = title.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-        const titleRegex = new RegExp('^' + escapedTitle + '$', 'i');
-        return await this.publishedPollModel.findOne({ title: titleRegex });
-    } */
+    async updatePublishedPollVotes(id: string, results: number[]): Promise<PublishedPoll> {
+        // 1. Vérifier que le sondage publié existe
+        const publishedPoll = await this.publishedPollModel.findById(id).exec();
+        if (!publishedPoll) {
+            throw new NotFoundException(ERROR.POLL.ID_NOT_FOUND);
+        }
+
+        // 2. Vérifier que results est valide
+        if (!results || !Array.isArray(results)) {
+            throw new BadRequestException(ERROR.POLL.INVALID_RESULTS);
+        }
+
+        // 3. Mettre à jour totalVotes en fonction des results
+        for (let i = 0; i < results.length; i++) {
+            const questionIndex = i; // Index de la question
+            const choiceIndex = results[i]; // Index du choix sélectionné pour cette question
+
+            // Vérifier que l'index du choix est valide
+            if (choiceIndex < 0 || choiceIndex >= publishedPoll.totalVotes[questionIndex].length) {
+                throw new BadRequestException(ERROR.POLL.INVALID_CHOICE_INDEX);
+            }
+
+            // Incrémenter le vote pour le choix sélectionné
+            publishedPoll.totalVotes[questionIndex][choiceIndex]++;
+        }
+
+        // 4. Sauvegarder les modifications
+        const updatedPublishedPoll = await publishedPoll.save();
+
+        return updatedPublishedPoll;
+    }
 }
