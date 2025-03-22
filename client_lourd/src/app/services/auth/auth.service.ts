@@ -15,6 +15,7 @@ import {
 import { doc, Firestore, updateDoc } from '@angular/fire/firestore';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ConnectEvents } from '@app/constants/enum-class';
 import { User } from '@app/interfaces/user';
 import { ReportService } from '@app/services/report-service';
 import { handleErrorsGlobally } from '@app/utils/rxjs-operators';
@@ -34,6 +35,8 @@ export class AuthService {
     private tokenBS: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
     private isAuthenticating = false;
     private isSigningUp = false;
+    private isPostSignupSetup = false;
+    private clientIsIdentified = false;
     private userSnapshotUnsubscribe: (() => void) | null = null;
     // eslint-disable-next-line @typescript-eslint/member-ordering
     user$ = this.userBS.asObservable();
@@ -66,19 +69,20 @@ export class AuthService {
         return this.socketClientService;
     }
 
-    monitorTokenChangesAfterSignUp() {
-        this.monitorTokenChanges(false);
-    }
-
     signUp(username: string, email: string, password: string): Observable<User> {
         this.isSigningUp = true;
         return this.createUser(email, password).pipe(
             switchMap((userCredential) => this.updateUserProfile(userCredential.user, { displayName: username }).pipe(map(() => userCredential))),
             switchMap((userCredential) =>
                 this.handleAuthAndFetchUser(userCredential, `${this.baseUrl}/create-user`, 'POST').pipe(
+                    tap((user) => {
+                        // Store the user right away to prevent logout
+                        this.userBS.next(user);
+                    }),
                     finalize(() => {
+                        this.isPostSignupSetup = true; // Set flag before changing isSigningUp
                         this.isSigningUp = false;
-                        this.monitorTokenChangesAfterSignUp();
+                        this.setupTokenListener(userCredential.user);
                     }),
                 ),
             ),
@@ -244,21 +248,15 @@ export class AuthService {
         if (!uid) return;
 
         const userDocRef = doc(this.firestore, `users/${uid}`);
-        const logEntry = {
-            timestamp: this.formatTimestamp(new Date()),
-            action: status ? 'connect' : 'disconnect',
-        };
+
         runTransaction(this.firestore, async (transaction) => {
             const userDoc = await transaction.get(userDocRef);
             if (!userDoc.exists()) {
                 throw new Error('User document does not exist');
             }
 
-            const currentLogs = userDoc.data()?.cxnLogs || [];
-            const updatedLogs = [...currentLogs, logEntry];
             transaction.update(userDocRef, {
                 isOnline: status,
-                cxnLogs: updatedLogs,
             });
         }).catch((error) => {
             console.error('Transaction failed: ', error);
@@ -284,14 +282,14 @@ export class AuthService {
             }),
             tap((user) => {
                 if (user && user.uid) {
-                    this.socketClientService.send('identifyMobileClient', user.uid);
-                    this.monitorTokenChanges(true);
+                    this.socketClientService.send(ConnectEvents.IdentifyClient, user.uid);
+                    this.clientIsIdentified = true;
                 }
             }),
         );
     }
 
-    private monitorTokenChanges(signIn: boolean): void {
+    private monitorTokenChanges(): void {
         this.loadingTokenBS.next(true);
 
         onIdTokenChanged(this.auth, async (firebaseUser) => {
@@ -317,25 +315,29 @@ export class AuthService {
                     this.socketClientService.connect(idToken);
 
                     this.isUserOnline(firebaseUser.uid).subscribe((isOnline) => {
-                        if (isOnline && signIn && !this.userBS.value) {
+                        if (isOnline && !this.userBS.value && !this.isPostSignupSetup) {
                             this.loadingTokenBS.next(false);
                             this.signOutAndClearSession();
                             throw new Error("L'utilisateur est déjà connecté sur un autre appareil.");
                         }
 
+                        if (this.isPostSignupSetup) {
+                            this.isPostSignupSetup = false;
+                        }
+
                         const userDocRef = doc(this.firestore, `users/${firebaseUser.uid}`);
 
-                        if (!this.userBS.value) {
-                            this.setIsOnline(true, firebaseUser.uid);
-                        }
-                        this.socketClientService.send('identifyMobileClient', firebaseUser.uid);
+                        if (!this.userBS.value) this.setIsOnline(true, firebaseUser.uid);
 
                         this.userSnapshotUnsubscribe = onSnapshot(
                             userDocRef,
                             (docSnapshot) => {
                                 if (docSnapshot.exists()) {
                                     const userData = docSnapshot.data() as User;
-                                    console.log(userData);
+                                    if (!this.clientIsIdentified) {
+                                        this.socketClientService.send(ConnectEvents.IdentifyClient, firebaseUser.uid);
+                                        this.clientIsIdentified = true;
+                                    }
                                     this.userBS.next(userData);
                                 } else {
                                     this.userBS.next(null);
@@ -363,6 +365,44 @@ export class AuthService {
                 this.router.navigate(['/login']);
             }
         });
+    }
+
+    private setupTokenListener(firebaseUser: FirebaseUser): void {
+        if (!firebaseUser) return;
+
+        // Cancel any existing listener
+        if (this.userSnapshotUnsubscribe) {
+            this.userSnapshotUnsubscribe();
+            this.userSnapshotUnsubscribe = null;
+        }
+
+        try {
+            const userDocRef = doc(this.firestore, `users/${firebaseUser.uid}`);
+
+            this.userSnapshotUnsubscribe = onSnapshot(
+                userDocRef,
+                (docSnapshot) => {
+                    if (docSnapshot.exists()) {
+                        const userData = docSnapshot.data() as User;
+                        if (!this.clientIsIdentified) {
+                            this.socketClientService.send(ConnectEvents.IdentifyClient, firebaseUser.uid);
+                            this.clientIsIdentified = true;
+                        }
+                        this.userBS.next(userData);
+                    } else {
+                        this.userBS.next(null);
+                    }
+                    this.loadingTokenBS.next(false);
+                },
+                (error) => {
+                    console.error('Error fetching user data:', error);
+                    this.loadingTokenBS.next(false);
+                },
+            );
+        } catch (error) {
+            console.error('Error setting up token listener:', error);
+            this.loadingTokenBS.next(false);
+        }
     }
 
     private signOutAndClearSession(): void {
@@ -441,17 +481,5 @@ export class AuthService {
 
     private updateUserProfile(user: FirebaseUser, profileData: Partial<Pick<FirebaseUser, 'displayName' | 'photoURL'>>): Observable<void> {
         return from(updateProfile(user, profileData));
-    }
-
-    private formatTimestamp(date: Date): string {
-        const pad = (n: number) => n.toString().padStart(2, '0');
-        const day = pad(date.getDate());
-        const month = pad(date.getMonth() + 1); // Months are zero-based
-        const year = date.getFullYear();
-        const hours = pad(date.getHours());
-        const minutes = pad(date.getMinutes());
-        const seconds = pad(date.getSeconds());
-
-        return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
     }
 }

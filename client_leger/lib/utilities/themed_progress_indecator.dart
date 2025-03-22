@@ -5,9 +5,9 @@ class ThemedProgressIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme; // Get dynamic colors
+    final colorScheme = Theme.of(context).colorScheme;
     return CircularProgressIndicator(
-      color: colorScheme.onPrimary, // Use primary color from theme
+      color: colorScheme.onPrimary,
     );
   }
 }

@@ -130,7 +130,7 @@ export enum JoinErrors {
 export enum ConnectEvents {
     UserToGame = 'userConnectedToGamePage',
     AllPlayersLeft = 'AllPlayersLeft',
-    IdentifyMobileClient = 'identifyMobileClient',
+    IdentifyClient = 'identifyClient',
 }
 
 export enum DisconnectEvents {
