@@ -42,7 +42,6 @@ export const emptyUser = {
         nQuestions: 0,
         nGoodAnswers: 0,
         rightAnswerPercentage: 0,
-        timeSpent: 0,
     },
     nWins: 0,
     nGames: 0,

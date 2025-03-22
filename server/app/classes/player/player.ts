@@ -23,7 +23,6 @@ export class Player {
         nQuestions: number;
         nGoodAnswers: number;
         rightAnswerPercentage: number;
-        timeSpent: number;
     };
     uid: string;
     equippedAvatar: string;
@@ -43,7 +42,6 @@ export class Player {
             nQuestions: 0,
             nGoodAnswers: 0,
             rightAnswerPercentage: 0,
-            timeSpent: 0,
         };
         this.uid = user.uid;
         this.equippedAvatar = user.avatarEquipped;
