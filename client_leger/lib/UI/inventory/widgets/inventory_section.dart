@@ -1,6 +1,7 @@
 import 'package:client_leger/UI/global/header_title.dart';
-import 'package:client_leger/UI/inventory/widgets/item_grid.dart';
+import 'package:client_leger/UI/global/unified_item_gird.dart';
 import 'package:client_leger/providers/theme_provider.dart';
+import 'package:client_leger/utilities/enums.dart';
 import 'package:flutter/material.dart';
 
 class InventorySection extends StatelessWidget {
@@ -72,7 +73,7 @@ class InventorySection extends StatelessWidget {
                           'Vous n\'avez pas d\'avatars obtenus, allez-en obtenir dans la boutique ou dans les lootbox!',
                           colorScheme,
                         )
-                      : ItemGrid(
+                      : UnifiedItemGrid.grid(
                           items: avatars,
                           itemType: ItemType.avatar,
                           onItemSelected: onAvatarSelected,
@@ -88,7 +89,7 @@ class InventorySection extends StatelessWidget {
                           'Vous n\'avez pas de bannières obtenues, allez-en obtenir dans la boutique ou dans les lootbox!',
                           colorScheme,
                         )
-                      : ItemGrid(
+                      : UnifiedItemGrid.grid(
                           items: banners,
                           itemType: ItemType.banner,
                           onItemSelected: onBannerSelected,
@@ -100,7 +101,7 @@ class InventorySection extends StatelessWidget {
                   // Themes section
                   _buildSectionTitle('Thèmes de couleur', colorScheme),
                   const SizedBox(height: 8),
-                  ItemGrid(
+                  UnifiedItemGrid.grid(
                     items: themes,
                     itemType: ItemType.theme,
                     onItemSelected: onThemeSelected,

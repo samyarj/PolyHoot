@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:client_leger/UI/inventory/widgets/item_grid.dart';
 import 'package:client_leger/backend-communication-services/environment.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/models/shop/shop-item-model.dart';
 import 'package:client_leger/providers/user_provider.dart';
+import 'package:client_leger/utilities/enums.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -76,24 +76,6 @@ class ShopService {
         _fetchShopData();
       }
     });
-
-    // Set up listener to update shop when user data changes
-    _ref.listen(userProvider, (previous, next) {
-      next.whenData((user) {
-        if (user != null) {
-          _fetchShopData();
-
-          // Update user coins
-          _userCoins = user.coins ?? 0;
-        } else {
-          // Clear data when user is null
-          _avatars = [];
-          _banners = [];
-          _themes = [];
-          _userCoins = 0;
-        }
-      });
-    });
   }
 
   void _updateShopData() {
@@ -129,12 +111,10 @@ class ShopService {
     }
   }
 
-  // Method to refresh shop data from the server
   Future<void> refreshShop() async {
     try {
       await _fetchShopData();
 
-      // Update user coins
       final userAsync = _ref.read(userProvider);
       userAsync.whenData((user) {
         if (user != null) {
@@ -228,7 +208,6 @@ class ShopService {
           throw ArgumentError('Invalid item type');
       }
 
-      // Log the request details for debugging
       AppLogger.d('Sending buy request - Type: $itemType, Link: $itemLink');
 
       final response = await http.post(
@@ -239,18 +218,15 @@ class ShopService {
         },
         body: json.encode({
           'type': itemType,
-          'itemURL': itemLink, // This matches your Angular implementation
+          'itemURL': itemLink,
         }),
       );
 
       if (response.statusCode == 200) {
-        // Log successful response
         AppLogger.d('Purchase successful: ${response.body}');
 
-        // Refresh shop data after purchase
         _fetchShopData();
 
-        // Update user coins
         final userAsync = _ref.read(userProvider);
         userAsync.whenData((user) {
           if (user != null) {
@@ -271,7 +247,6 @@ class ShopService {
     }
   }
 
-  // Clean up when app is closed
   void dispose() {
     isLoggedIn.removeListener(_updateShopData);
   }

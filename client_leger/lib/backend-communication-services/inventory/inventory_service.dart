@@ -5,145 +5,130 @@ import 'package:client_leger/backend-communication-services/error-handlers/globa
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/providers/theme_provider.dart';
 import 'package:client_leger/providers/user_provider.dart';
+import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
-// Create a provider for the inventory service
-final inventoryServiceProvider = Provider<InventoryService>((ref) {
-  final service = InventoryService(ref);
-  ref.onDispose(() {
-    service.dispose();
+// Define a state class to hold inventory data
+class InventoryState {
+  final List<String> avatars;
+  final List<String> banners;
+  final List<AppTheme> themes;
+  final String? equippedAvatar;
+  final String? equippedBanner;
+
+  InventoryState({
+    required this.avatars,
+    required this.banners,
+    required this.themes,
+    this.equippedAvatar,
+    this.equippedBanner,
   });
-  return service;
+
+  // Copy with method for easy state updates
+  InventoryState copyWith({
+    List<String>? avatars,
+    List<String>? banners,
+    List<AppTheme>? themes,
+    String? equippedAvatar,
+    String? equippedBanner,
+    bool clearEquippedAvatar = false,
+    bool clearEquippedBanner = false,
+  }) {
+    return InventoryState(
+      avatars: avatars ?? this.avatars,
+      banners: banners ?? this.banners,
+      themes: themes ?? this.themes,
+      equippedAvatar:
+          clearEquippedAvatar ? null : (equippedAvatar ?? this.equippedAvatar),
+      equippedBanner:
+          clearEquippedBanner ? null : (equippedBanner ?? this.equippedBanner),
+    );
+  }
+}
+
+// Create a StateNotifierProvider for the inventory service
+final inventoryServiceProvider =
+    StateNotifierProvider<InventoryServiceNotifier, InventoryState>((ref) {
+  return InventoryServiceNotifier(ref);
 });
 
-class InventoryService {
+class InventoryServiceNotifier extends StateNotifier<InventoryState> {
   final Ref _ref;
-
-  // Initialize with empty lists
-  List<String> _avatars = [];
-  List<String> _banners = [];
-
-  // Default themes that are always available
-  List<AppTheme> _themes = [
-    AppTheme.dark,
-    AppTheme.light,
-  ];
-
-  // Additional themes that may be added from user inventory
-  final List<AppTheme> _additionalThemes = [
-    AppTheme.gold,
-    AppTheme.emerald,
-    AppTheme.lava,
-    AppTheme.inferno,
-    AppTheme.toxic,
-    AppTheme.vice,
-    AppTheme.celestial,
-    AppTheme.neon,
-    AppTheme.sunset,
-  ];
-
-  String? _equippedAvatar;
-  String? _equippedBanner;
-
-  // Create a singleton instance with proper ref injection
-  static final Map<Ref, InventoryService> _instances = {};
-
-  factory InventoryService(Ref ref) {
-    if (_instances.containsKey(ref)) {
-      return _instances[ref]!;
-    } else {
-      final instance = InventoryService._internal(ref);
-      _instances[ref] = instance;
-      return instance;
-    }
-  }
-
-  InventoryService._internal(this._ref) {
-    // Initialize by listening to user changes
-    isLoggedIn.addListener(_updateUserData);
-    _initializeInventory();
-  }
-
   final String baseUrl = '${Environment.serverUrl}/inventory';
 
-  // Getters for the inventory items
-  List<String> get avatars => _avatars;
-  List<String> get banners => _banners;
-  List<AppTheme> get themes => _themes;
-  String? get equippedAvatar => _equippedAvatar;
-  String? get equippedBanner => _equippedBanner;
-
-  // Initialize inventory from current user state
-  void _initializeInventory() {
-    final userAsync = _ref.read(userProvider);
-
-    userAsync.whenData((user) {
-      if (user != null) {
-        _updateFromUser(user);
-      }
-    });
-
-    // Set up listener to update inventory when user data changes
+  // Initialize with default state
+  InventoryServiceNotifier(this._ref)
+      : super(InventoryState(
+          avatars: [],
+          banners: [],
+          themes: [AppTheme.dark, AppTheme.light],
+          equippedAvatar: null,
+          equippedBanner: null,
+        )) {
+    _loadhInventory();
     _ref.listen(userProvider, (previous, next) {
-      next.whenData((user) {
-        if (user != null) {
-          _updateFromUser(user);
-        } else {
-          // Clear data when user is null
-          _avatars = [];
-          _banners = [];
-          _equippedAvatar = null;
-          _equippedBanner = null;
-
-          // Reset themes to only include default ones
-          _themes = [AppTheme.dark, AppTheme.light];
-        }
-      });
+      if (previous != null && next != null) {
+        next.whenData((user) {
+          if (user != null) {
+            AppLogger.d('User data changed, updating inventory');
+            _updateFromUser(user);
+          } else {
+            _clearInventory();
+          }
+        });
+      }
     });
   }
 
-  void _updateUserData() {
-    if (isLoggedIn.value) {
-      // User data should already be updated by the auth system
+  Future<void> _loadhInventory() async {
+    try {
       final userAsync = _ref.read(userProvider);
+
       userAsync.whenData((user) {
         if (user != null) {
           _updateFromUser(user);
+        } else {
+          _clearInventory();
         }
       });
-    } else {
-      // Clear data when user logs out
-      _avatars = [];
-      _banners = [];
-      _equippedAvatar = null;
-      _equippedBanner = null;
 
-      // Reset themes to only include default ones
-      _themes = [AppTheme.dark, AppTheme.light];
+      AppLogger.d('Inventory refreshed from user provider');
+    } catch (e) {
+      AppLogger.e('Error refreshing inventory: ${e.toString()}');
     }
   }
 
-  void _updateFromUser(User user) {
-    AppLogger.d('Updating inventory from user data');
+  void _clearInventory() {
+    state = InventoryState(
+      avatars: [],
+      banners: [],
+      themes: [AppTheme.dark, AppTheme.light],
+      equippedAvatar: null,
+      equippedBanner: null,
+    );
+  }
 
-    // Start with the default themes
-    _themes = [AppTheme.dark, AppTheme.light];
+  void _updateFromUser(User user) {
+    AppLogger.w('Updating inventory from user data');
+
+    // Start with default themes
+    List<AppTheme> themes = [AppTheme.dark, AppTheme.light];
+    List<String> avatars = [];
+    List<String> banners = [];
 
     // Extract data from user inventory
     if (user.inventory != null) {
-      AppLogger.d('Processing user inventory');
-
       try {
         // Extract avatars
         if (user.inventory!.containsKey('avatars')) {
           final avatarsData = user.inventory!['avatars'];
 
           if (avatarsData is List) {
-            _avatars = avatarsData.map((a) => a.toString()).toList();
-            AppLogger.d('Found ${_avatars.length} avatars');
+            avatars = avatarsData.map((a) => a.toString()).toList();
+            AppLogger.d('Found ${avatars.length} avatars');
           }
         }
 
@@ -152,8 +137,8 @@ class InventoryService {
           final bannersData = user.inventory!['banners'];
 
           if (bannersData is List) {
-            _banners = bannersData.map((b) => b.toString()).toList();
-            AppLogger.d('Found ${_banners.length} banners');
+            banners = bannersData.map((b) => b.toString()).toList();
+            AppLogger.d('Found ${banners.length} banners');
           }
         }
 
@@ -165,10 +150,10 @@ class InventoryService {
             // Convert theme strings to AppTheme enums
             for (var themeStr in themesData) {
               try {
-                final theme = _stringToAppTheme(themeStr.toString());
+                final theme = stringToAppTheme(themeStr.toString());
                 // Only add if it's not already in the list (to avoid duplicates)
-                if (!_themes.contains(theme)) {
-                  _themes.add(theme);
+                if (!themes.contains(theme)) {
+                  themes.add(theme);
                 }
               } catch (e) {
                 AppLogger.w('Unknown theme: $themeStr');
@@ -183,45 +168,21 @@ class InventoryService {
       AppLogger.w('User has no inventory, using defaults');
     }
 
-    _equippedAvatar = user.avatarEquipped;
-    _equippedBanner = user.borderEquipped;
+    // Update state with new inventory data
+    state = InventoryState(
+      avatars: avatars,
+      banners: banners,
+      themes: themes,
+      equippedAvatar: user.avatarEquipped,
+      equippedBanner: user.borderEquipped,
+    );
 
     AppLogger.d(
-        'Final inventory state: ${_avatars.length} avatars, ${_banners.length} banners, ${_themes.length} themes');
-  }
-
-  // Helper method to convert string to AppTheme enum
-  AppTheme _stringToAppTheme(String themeString) {
-    switch (themeString.toLowerCase()) {
-      case 'light':
-        return AppTheme.light;
-      case 'dark':
-        return AppTheme.dark;
-      case 'sunset':
-        return AppTheme.sunset;
-      case 'neon':
-        return AppTheme.neon;
-      case 'lava':
-        return AppTheme.lava;
-      case 'inferno':
-        return AppTheme.inferno;
-      case 'emerald':
-        return AppTheme.emerald;
-      case 'toxic':
-        return AppTheme.toxic;
-      case 'vice':
-        return AppTheme.vice;
-      case 'gold':
-        return AppTheme.gold;
-      case 'celestial':
-        return AppTheme.celestial;
-      default:
-        return AppTheme.dark;
-    }
+        'Final inventory state: ${avatars.length} avatars, ${banners.length} banners, ${themes.length} themes');
   }
 
   // Helper method to convert AppTheme enum to string
-  String _appThemeToString(AppTheme theme) {
+  String appThemeToString(AppTheme theme) {
     return theme.name.toLowerCase();
   }
 
@@ -244,7 +205,8 @@ class InventoryService {
       );
 
       if (response.statusCode == 200) {
-        _equippedAvatar = avatarUrl;
+        // Update state with new equipped avatar
+        state = state.copyWith(equippedAvatar: avatarUrl);
         return true;
       } else {
         AppLogger.w('Failed to set avatar: ${response.body}');
@@ -275,7 +237,8 @@ class InventoryService {
       );
 
       if (response.statusCode == 200) {
-        _equippedBanner = bannerUrl;
+        // Update state with new equipped banner
+        state = state.copyWith(equippedBanner: bannerUrl);
         return true;
       } else {
         AppLogger.w('Failed to set banner: ${response.body}');
@@ -295,7 +258,7 @@ class InventoryService {
       }
 
       final token = await currentUser.getIdToken();
-      final themeString = _appThemeToString(theme);
+      final themeString = appThemeToString(theme);
 
       final response = await http.post(
         Uri.parse('$baseUrl/theme'),
@@ -307,6 +270,7 @@ class InventoryService {
       );
 
       if (response.statusCode == 200) {
+        // No need to update state for theme as it's managed by the theme provider
         return true;
       } else {
         AppLogger.w('Failed to set theme: ${response.body}');
@@ -316,27 +280,5 @@ class InventoryService {
       AppLogger.e('Error setting theme: ${e.toString()}');
       throw Exception(getCustomError(e));
     }
-  }
-
-  // Method to refresh inventory data from the current user state (no server call)
-  Future<void> refreshInventory() async {
-    try {
-      // Read the current user state from the provider
-      final userAsync = _ref.read(userProvider);
-
-      // Update inventory from current user data
-      userAsync.whenData((user) {
-        if (user != null) {
-          _updateFromUser(user);
-        }
-      });
-    } catch (e) {
-      AppLogger.e('Error refreshing inventory: ${e.toString()}');
-    }
-  }
-
-  // Clean up when app is closed
-  void dispose() {
-    isLoggedIn.removeListener(_updateUserData);
   }
 }

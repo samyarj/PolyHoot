@@ -23,51 +23,31 @@ class _InventoryPageState extends ConsumerState<InventoryPage> {
   bool isLoading = true;
 
   @override
-  void initState() {
-    super.initState();
-    _refreshInventory();
-  }
-
-  Future<void> _refreshInventory() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      // Get the inventory service from the provider
-      final inventoryService = ref.read(inventoryServiceProvider);
-      await inventoryService.refreshInventory();
-
-      // Log inventory contents
-      AppLogger.d('Available avatars: ${inventoryService.avatars.length}');
-      AppLogger.d('Available banners: ${inventoryService.banners.length}');
-      AppLogger.d('Available themes: ${inventoryService.themes.length}');
-    } catch (e) {
-      AppLogger.e('Error refreshing inventory: $e');
-      // Show error message if needed
-    } finally {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final inventoryService = ref.watch(inventoryServiceProvider);
+
+    // Get inventory state from provider - this will rebuild when state changes
+    final inventoryState = ref.watch(inventoryServiceProvider);
 
     bool canEquip = !(currentTheme == null &&
         currentAvatar == null &&
         currentBanner == null);
     bool waitingForServerEquip =
         isChangingAvatar || isChangingBanner || isChangingTheme;
+    if (isLoading &&
+        (inventoryState.avatars.isNotEmpty ||
+            inventoryState.banners.isNotEmpty ||
+            inventoryState.themes.isNotEmpty)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          isLoading = false;
+        });
+      });
+    }
 
     // Debug the inventory contents
-    AppLogger.d(
-        'RENDER - Avatars: ${inventoryService.avatars.length}, Banners: ${inventoryService.banners.length}');
+    AppLogger.w(
+        'RENDER - Avatars: ${inventoryState.avatars.length}, Banners: ${inventoryState.banners.length}');
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -92,9 +72,9 @@ class _InventoryPageState extends ConsumerState<InventoryPage> {
                   Expanded(
                     flex: 6,
                     child: InventorySection(
-                      avatars: inventoryService.avatars,
-                      banners: inventoryService.banners,
-                      themes: inventoryService.themes,
+                      avatars: inventoryState.avatars,
+                      banners: inventoryState.banners,
+                      themes: inventoryState.themes,
                       onAvatarSelected: _selectAvatar,
                       onBannerSelected: _selectBanner,
                       onThemeSelected: _selectTheme,
@@ -127,8 +107,8 @@ class _InventoryPageState extends ConsumerState<InventoryPage> {
                       currentTheme: currentTheme,
                       currentAvatar: currentAvatar,
                       currentBanner: currentBanner,
-                      equippedAvatar: inventoryService.equippedAvatar,
-                      equippedBanner: inventoryService.equippedBanner,
+                      equippedAvatar: inventoryState.equippedAvatar,
+                      equippedBanner: inventoryState.equippedBanner,
                       canEquip: canEquip,
                       waitingForServerEquip: waitingForServerEquip,
                       onEquip: _equip,
@@ -141,27 +121,27 @@ class _InventoryPageState extends ConsumerState<InventoryPage> {
   }
 
   void _selectAvatar(String avatarUrl) {
-    final inventoryService = ref.read(inventoryServiceProvider);
+    final inventoryState = ref.read(inventoryServiceProvider);
 
     setState(() {
       currentTheme = null;
       currentAvatar = avatarUrl;
 
-      if (currentBanner == null && inventoryService.equippedBanner != null) {
-        currentBanner = inventoryService.equippedBanner;
+      if (currentBanner == null && inventoryState.equippedBanner != null) {
+        currentBanner = inventoryState.equippedBanner;
       }
     });
   }
 
   void _selectBanner(String bannerUrl) {
-    final inventoryService = ref.read(inventoryServiceProvider);
+    final inventoryState = ref.read(inventoryServiceProvider);
 
     setState(() {
       currentTheme = null;
       currentBanner = bannerUrl;
 
-      if (currentAvatar == null && inventoryService.equippedAvatar != null) {
-        currentAvatar = inventoryService.equippedAvatar;
+      if (currentAvatar == null && inventoryState.equippedAvatar != null) {
+        currentAvatar = inventoryState.equippedAvatar;
       }
     });
   }
@@ -199,7 +179,7 @@ class _InventoryPageState extends ConsumerState<InventoryPage> {
         isChangingAvatar = true;
       });
 
-      final inventoryService = ref.read(inventoryServiceProvider);
+      final inventoryService = ref.read(inventoryServiceProvider.notifier);
       inventoryService.setAvatar(avatarUrl).then((isAvatarEquipped) {
         if (!isAvatarEquipped) {
           _showErrorDialog(
@@ -224,7 +204,7 @@ class _InventoryPageState extends ConsumerState<InventoryPage> {
         isChangingBanner = true;
       });
 
-      final inventoryService = ref.read(inventoryServiceProvider);
+      final inventoryService = ref.read(inventoryServiceProvider.notifier);
       inventoryService.setBanner(bannerUrl).then((isBannerEquipped) {
         if (!isBannerEquipped) {
           _showErrorDialog(
@@ -249,7 +229,7 @@ class _InventoryPageState extends ConsumerState<InventoryPage> {
         isChangingTheme = true;
       });
 
-      final inventoryService = ref.read(inventoryServiceProvider);
+      final inventoryService = ref.read(inventoryServiceProvider.notifier);
       inventoryService.setTheme(theme).then((isThemeEquipped) {
         if (!isThemeEquipped) {
           _showErrorDialog(

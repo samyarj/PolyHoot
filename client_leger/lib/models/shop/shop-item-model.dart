@@ -1,4 +1,4 @@
-import 'package:client_leger/UI/inventory/widgets/item_grid.dart';
+import 'package:client_leger/utilities/enums.dart';
 
 class ShopItem {
   final String name;

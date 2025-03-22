@@ -1,10 +1,11 @@
 import 'package:client_leger/UI/global/header_title.dart';
-import 'package:client_leger/UI/inventory/widgets/item_grid.dart';
+import 'package:client_leger/UI/global/unified_item_gird.dart';
 import 'package:client_leger/UI/shop/widgets/empty-message.dart';
-import 'package:client_leger/UI/shop/widgets/horizontal-item-grid.dart';
 import 'package:client_leger/UI/shop/widgets/shop-confirmation-dialog.dart';
 import 'package:client_leger/backend-communication-services/shop/shop-service.dart';
 import 'package:client_leger/providers/theme_provider.dart';
+import 'package:client_leger/utilities/enums.dart';
+import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -43,17 +44,10 @@ class _ShopPageState extends ConsumerState<ShopPage> {
     });
 
     try {
-      // Get the shop service from the provider
       final shopService = ref.read(shopServiceProvider);
       await shopService.refreshShop();
 
-      // Convert shop items to formats needed by InventorySection
       _convertShopItems(shopService);
-
-      // Log shop contents
-      AppLogger.d('Available avatars: ${_avatarUrls.length}');
-      AppLogger.d('Available banners: ${_bannerUrls.length}');
-      AppLogger.d('Available themes: ${_themeItems.length}');
     } catch (e) {
       AppLogger.e('Error refreshing shop: $e');
 
@@ -105,7 +99,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
 
     // Process themes
     for (var item in shopService.themes) {
-      final theme = _getAppThemeFromString(item.name);
+      final theme = getAppThemeFromString(item.name);
       _themeItems.add(theme);
       _themePrices[theme] = item.price;
     }
@@ -152,7 +146,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
                           const SizedBox(height: 16),
 
                           // Avatars section
-                          HorizontalItemGrid(
+                          UnifiedItemGrid.horizontal(
                             items: _avatarUrls,
                             itemType: ItemType.avatar,
                             onItemSelected: _handleAvatarSelection,
@@ -167,7 +161,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
                           const SizedBox(height: 20),
 
                           // Banners section
-                          HorizontalItemGrid(
+                          UnifiedItemGrid.horizontal(
                             items: _bannerUrls,
                             itemType: ItemType.banner,
                             onItemSelected: _handleBannerSelection,
@@ -182,7 +176,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
                           const SizedBox(height: 20),
 
                           // Themes section
-                          HorizontalItemGrid(
+                          UnifiedItemGrid.horizontal(
                             items: _themeItems,
                             itemType: ItemType.theme,
                             onItemSelected: _handleThemeSelection,
@@ -259,13 +253,13 @@ class _ShopPageState extends ConsumerState<ShopPage> {
     bool confirmed = await showShopConfirmationDialog(
       context: context,
       type: 'theme',
-      itemUrl: _appThemeToString(theme),
+      itemUrl: appThemeToString(theme),
       price: price,
     );
 
     if (!confirmed) return;
 
-    await _purchaseItem(ItemType.theme, _appThemeToString(theme));
+    await _purchaseItem(ItemType.theme, appThemeToString(theme));
   }
 
   Future<void> _purchaseItem(ItemType type, String itemUrl) async {
@@ -280,16 +274,16 @@ class _ShopPageState extends ConsumerState<ShopPage> {
       if (result == true) {
         _showSuccessMessage();
       } else if (result == false) {
-        _showAlreadyOwnedDialog();
+        _showAlreadyOwnedMessage();
       } else {
-        _showNotEnoughCoinsDialog();
+        _showNotEnoughCoinsMessage();
       }
 
       // Refresh the shop data
       await shopService.refreshShop();
       _convertShopItems(shopService); // Update our converted lists
     } catch (e) {
-      _showErrorDialog(e.toString());
+      _showErrorMessage(e.toString());
     } finally {
       if (mounted) {
         setState(() {
@@ -307,104 +301,30 @@ class _ShopPageState extends ConsumerState<ShopPage> {
     );
   }
 
-  void _showAlreadyOwnedDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Information'),
-        content: const Text(
-            "Vous possédez déjà l'item obtenu. Vous serez ramboursé sur l'item."),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+  void _showAlreadyOwnedMessage() {
+    showToast(
+      context,
+      "Vous possédez déjà l'item obtenu. Vous serez remboursé sur l'item.",
+      type: ToastificationType.info,
+      duration: const Duration(seconds: 4),
     );
   }
 
-  void _showNotEnoughCoinsDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Erreur'),
-        content: const Text(
-            "Vous n'avez pas assez d'argent pour vous procurer l'item :(."),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+  void _showNotEnoughCoinsMessage() {
+    showToast(
+      context,
+      "Vous n'avez pas assez d'argent pour vous procurer l'item :(.",
+      type: ToastificationType.error,
+      duration: const Duration(seconds: 4),
     );
   }
 
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Erreur'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+  void _showErrorMessage(String message) {
+    showToast(
+      context,
+      message,
+      type: ToastificationType.error,
+      duration: const Duration(seconds: 4),
     );
   }
-
-  // Helper methods for themes
-  AppTheme _getAppThemeFromString(String themeName) {
-    switch (themeName.toLowerCase()) {
-      case 'dark':
-        return AppTheme.dark;
-      case 'light':
-        return AppTheme.light;
-      case 'sunset':
-        return AppTheme.sunset;
-      case 'neon':
-        return AppTheme.neon;
-      case 'lava':
-        return AppTheme.lava;
-      case 'inferno':
-        return AppTheme.inferno;
-      case 'emerald':
-        return AppTheme.emerald;
-      case 'toxic':
-        return AppTheme.toxic;
-      case 'vice':
-        return AppTheme.vice;
-      case 'gold':
-        return AppTheme.gold;
-      case 'celestial':
-        return AppTheme.celestial;
-      default:
-        return AppTheme.dark;
-    }
-  }
-
-  String _appThemeToString(AppTheme theme) {
-    return theme.name.toLowerCase();
-  }
-}
-
-// Toast notification helper
-void showToast(
-  BuildContext context,
-  String message, {
-  ToastificationType type = ToastificationType.info,
-}) {
-  toastification.show(
-    context: context,
-    title: Text(message),
-    type: type,
-    autoCloseDuration: const Duration(seconds: 3),
-    alignment: Alignment.topCenter,
-    style: ToastificationStyle.flatColored,
-    showIcon: true,
-  );
 }
