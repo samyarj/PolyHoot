@@ -1,3 +1,100 @@
 <div class="player-info-container">
-    <div class="player-info-content">Page de consultation de liste de joueurs. Mettre ton contenu ici.</div>
+    <div class="player-info-content">
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="Rechercher un joueur..." />
+                <button class="clear-search-btn" title="Effacer">✕</button>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="logs-table header-table">
+                <thead>
+                    <tr>
+                        <th class="col-player">Joueur</th>
+                        <th class="col-coins">Coins</th>
+                        <th class="col-status">Statut</th>
+                        <th class="col-reports">Signalements</th>
+                        <th class="col-actions">Bannir</th>
+                    </tr>
+                </thead>
+            </table>
+
+            <div class="table-body-container">
+                <table class="logs-table body-table">
+                    <tbody>
+                        <tr>
+                            <td class="col-player">
+                                <div class="player-info">
+                                    <div class="player-avatar">JP</div>
+                                    <span>Joueur Pro</span>
+                                </div>
+                            </td>
+                            <td class="col-coins">
+                                <div class="coin-display">
+                                    <span>100</span>
+                                </div>
+                            </td>
+                            <td class="col-status">
+                                <span class="status-badge online">En ligne</span>
+                            </td>
+                            <td class="col-reports">2</td>
+                            <td class="col-actions">
+                                <button class="action-btn ban-btn" title="Bannir">
+                                    <span>🚫</span>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="col-player">
+                                <div class="player-info">
+                                    <div class="player-avatar">NJ</div>
+                                    <span>Nouveau Joueur</span>
+                                </div>
+                            </td>
+                            <td class="col-coins">
+                                <div class="coin-display">
+                                    <span>50</span>
+                                </div>
+                            </td>
+                            <td class="col-status">
+                                <span class="status-badge offline">Hors ligne</span>
+                            </td>
+                            <td class="col-reports">0</td>
+                            <td class="col-actions">
+                                <button class="action-btn ban-btn" title="Bannir">
+                                    <span>🚫</span>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="col-player">
+                                <div class="player-info">
+                                    <div class="player-avatar">EJ</div>
+                                    <span>Expert Joueur</span>
+                                </div>
+                            </td>
+                            <td class="col-coins">
+                                <div class="coin-display">
+                                    <span>250</span>
+                                </div>
+                            </td>
+                            <td class="col-status">
+                                <span class="status-badge online">En ligne</span>
+                            </td>
+                            <td class="col-reports">1</td>
+                            <td class="col-actions">
+                                <button class="action-btn ban-btn" title="Bannir">
+                                    <span>🚫</span>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
