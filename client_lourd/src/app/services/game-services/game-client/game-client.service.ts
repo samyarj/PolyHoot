@@ -167,7 +167,7 @@ export class GameClientService {
             if (!this.playerInfo.submitted && this.currentQuestion.type === QuestionType.QRL) {
                 this.sendAnswerForCorrection(this.answer);
             }
-            this.playerInfo.submitted = true;
+            // this.playerInfo.submitted = true;
             this.time = time;
         });
     }

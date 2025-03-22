@@ -84,6 +84,7 @@ import { FriendSystemService } from './services/friend-system.service'; // Impor
 import { FrenchPaginatorIntlService } from './services/general-services/french-paginator/french-paginator-intl.service';
 import { InventoryService } from './services/general-services/inventory.service';
 import { GlobalErrorHandlerService } from './services/global-error-handler.service';
+import { ReportService } from './services/report-service';
 import { HeaderNavigationService } from './services/ui-services/header-navigation.service';
 import { ThemeService } from './services/ui-services/theme/theme.service';
 import { SocketClientService } from './services/websocket-services/general/socket-client-manager.service';
@@ -162,6 +163,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         InventoryService,
         HeaderNavigationService,
         FriendSystemService,
+        ReportService,
         { provide: WINDOW, useValue: window },
         { provide: MatPaginatorIntl, useClass: FrenchPaginatorIntlService },
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
