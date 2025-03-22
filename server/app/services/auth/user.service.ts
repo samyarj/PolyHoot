@@ -56,7 +56,7 @@ export class UserService {
     async signInWithGoogle(uid: string, email: string, displayName: string): Promise<User> {
         try {
             const userDoc = await this.firestore.collection('users').doc(uid).get();
-
+            console.log(`We're signing in and our userDoc exists? ${userDoc.exists}`);
             if (userDoc.exists) {
                 // User exists, update isOnline status and return the user
                 return await this.getUserByUid(uid);
@@ -133,7 +133,37 @@ export class UserService {
         const userRecord = await this.adminAuth.getUser(uid);
         const userDoc = await this.getUserFromFirestore(uid);
         await this.firestore.collection('users').doc(uid).update({ isOnline: true });
+        console.log(`updated to true: ${uid}`);
         return this.mapUserFromFirestore(userRecord, userDoc);
+    }
+
+    async getReportState(uid: string): Promise<{ isBanned: boolean; message: string }> {
+        const userDoc = await this.firestore.collection('users').doc(uid).get();
+        if (!userDoc || !userDoc.data()) {
+            return {
+                message: `Bienvenue!`,
+                isBanned: false,
+            };
+        }
+        const unBanDate: Date | null = !(userDoc.data() === undefined || userDoc.data().unBanDate === null)
+            ? userDoc.data().unBanDate.toDate()
+            : null;
+        console.log(unBanDate);
+        if (unBanDate) {
+            let timeDiff: number = unBanDate.getTime() - new Date().getTime();
+            if (timeDiff > 0) {
+                const minutesLeft = Math.ceil(timeDiff / (1000 * 60));
+                console.log(minutesLeft);
+                return {
+                    message: `Vous êtes banni pendant les prochaines ${minutesLeft} minutes`,
+                    isBanned: true,
+                };
+            }
+        }
+        return {
+            message: `Bienvenue!`,
+            isBanned: false,
+        };
     }
 
     async getEmailByUsername(username: string): Promise<string> {
@@ -384,7 +414,7 @@ export class UserService {
             },
             nWins: userDoc.nWins || 0,
             nGames: userDoc.nGames || 0,
-            isOnline: true,
+            isOnline: userDoc.isOnline,
             pity: userDoc.pity || 0,
             nextDailyFree: userDoc.nextDailyFree || new Date(),
         };
@@ -719,6 +749,52 @@ export class UserService {
             console.error('Failed to update game log:', error);
             return false;
         }
+    }
+
+    async reportUser(signalerUID: string, reportedUID: string) {
+        const userRef = this.firestore.collection('users').doc(reportedUID);
+        const userDoc = await userRef.get();
+
+        if (!userDoc.exists) {
+            throw new UnauthorizedException("L'utilisateur n'existe pas.");
+        }
+
+        const data = userDoc.data();
+        const playerReports: string[] = data?.playerReports || [];
+
+        if (!playerReports.includes(signalerUID) && data.role !== 'admin') {
+            const updatedReports = [...playerReports, signalerUID];
+            const newNbReports = (data.nbReport || 0) + 1;
+            let unbanDate: Date;
+            let newNbBans = data.nbBan;
+            switch (newNbReports) {
+                case 4:
+                    unbanDate = new Date(Date.now() + 1 * 60 * 1000);
+                    newNbBans++;
+                    break;
+                case 5:
+                    unbanDate = new Date(Date.now() + 5 * 60 * 1000);
+                    newNbBans++;
+                    break;
+                case 6:
+                default:
+                    if (newNbReports >= 6) {
+                        unbanDate = new Date(Date.now() + 10 * 60 * 1000);
+                        newNbBans++;
+                    }
+                    break;
+            }
+
+            await userRef.update({
+                playerReports: updatedReports,
+                nbReport: data.nbReport + 1,
+                unBanDate: unbanDate,
+                nbBan: newNbBans,
+            });
+
+            return true;
+        }
+        return false;
     }
 
     formatTimestamp(date: Date): string {

@@ -12,12 +12,13 @@ import {
     updateProfile,
     UserCredential,
 } from '@angular/fire/auth';
-import { doc, Firestore, runTransaction, updateDoc } from '@angular/fire/firestore';
+import { doc, Firestore, updateDoc } from '@angular/fire/firestore';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { User } from '@app/interfaces/user';
+import { ReportService } from '@app/services/report-service';
 import { handleErrorsGlobally } from '@app/utils/rxjs-operators';
-import { collection, getDocs, onSnapshot, query, where } from '@firebase/firestore';
+import { collection, getDocs, onSnapshot, query, runTransaction, where } from '@firebase/firestore';
 import { User as FirebaseUser, onIdTokenChanged, sendPasswordResetEmail } from 'firebase/auth';
 import { BehaviorSubject, catchError, finalize, from, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -29,7 +30,7 @@ export class AuthService {
     private readonly baseUrl = `${environment.serverUrl}/users`;
     private userBS: BehaviorSubject<User | null> = new BehaviorSubject<User | null>(null);
     private googleProvider = new GoogleAuthProvider();
-    private loadingTokenBS = new BehaviorSubject<boolean>(true);
+    private loadingTokenBS = new BehaviorSubject<boolean>(false);
     private tokenBS: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
     private isAuthenticating = false;
     private isSigningUp = false;
@@ -48,7 +49,15 @@ export class AuthService {
         private router: Router,
         private firestore: Firestore,
         private socketClientService: SocketClientService,
+        private reportService: ReportService,
     ) {
+        this.user$.subscribe({
+            next: (user: User | null) => {
+                if (user && user.nbReport !== undefined && user.nbReport > 2) {
+                    this.reportService.behaviourWarning();
+                }
+            },
+        });
         this.monitorTokenChanges(true);
     }
 
@@ -83,14 +92,27 @@ export class AuthService {
             switchMap((email) =>
                 this.signInUser(email, password).pipe(
                     switchMap((userCredential) =>
-                        this.isUserOnline(userCredential.user.uid).pipe(
-                            switchMap((isOnline) => {
-                                if (isOnline) {
-                                    return from(this.auth.signOut()).pipe(
-                                        switchMap(() => throwError(() => new Error("L'utilisateur est déjà connecté sur un autre appareil. "))),
+                        this.isUserBanned(userCredential.user.uid).pipe(
+                            switchMap(({ isBanned, message }) => {
+                                if (isBanned) {
+                                    return from(this.auth.signOut()).pipe(switchMap(() => throwError(() => new Error(message))));
+                                } else {
+                                    return this.isUserOnline(userCredential.user.uid).pipe(
+                                        switchMap((isOnline) => {
+                                            console.log(`we are not banned, we're checking isOnline: ${isOnline}`);
+                                            if (isOnline) {
+                                                return from(this.auth.signOut()).pipe(
+                                                    switchMap(() =>
+                                                        throwError(
+                                                            () => new Error("L'utilisateur est déjà connecté sur un autre appareil SKIBIDI SIGMA."),
+                                                        ),
+                                                    ),
+                                                );
+                                            }
+                                            return this.handleAuthAndFetchUser(userCredential, `${this.baseUrl}/profile`);
+                                        }),
                                     );
                                 }
-                                return this.handleAuthAndFetchUser(userCredential, `${this.baseUrl}/profile`);
                             }),
                         ),
                     ),
@@ -109,12 +131,23 @@ export class AuthService {
                     switchMap((isOnline) => {
                         if (isOnline) {
                             return from(this.auth.signOut()).pipe(
-                                switchMap(() => throwError(() => new Error("L'utilisateur est déjà connecté sur un autre appareil. "))),
+                                switchMap(() => throwError(() => new Error("L'utilisateur est déjà connecté sur un autre appareil."))),
                             );
                         }
                         return this.updateUserProfile(userCredential.user, {
                             displayName: userCredential.user.displayName,
-                        }).pipe(switchMap(() => this.handleAuthAndFetchUser(userCredential, `${this.baseUrl}/signin-google`, 'POST')));
+                        }).pipe(
+                            switchMap(() =>
+                                this.isUserBanned(userCredential.user.uid).pipe(
+                                    switchMap(({ isBanned, message }) => {
+                                        if (isBanned) {
+                                            return from(this.auth.signOut()).pipe(switchMap(() => throwError(() => new Error(message))));
+                                        }
+                                        return this.handleAuthAndFetchUser(userCredential, `${this.baseUrl}/signin-google`, 'POST');
+                                    }),
+                                ),
+                            ),
+                        );
                     }),
                 ),
             ),
@@ -215,7 +248,6 @@ export class AuthService {
             timestamp: this.formatTimestamp(new Date()),
             action: status ? 'connect' : 'disconnect',
         };
-
         runTransaction(this.firestore, async (transaction) => {
             const userDoc = await transaction.get(userDocRef);
             if (!userDoc.exists()) {
@@ -224,7 +256,6 @@ export class AuthService {
 
             const currentLogs = userDoc.data()?.cxnLogs || [];
             const updatedLogs = [...currentLogs, logEntry];
-
             transaction.update(userDocRef, {
                 isOnline: status,
                 cxnLogs: updatedLogs,
@@ -235,6 +266,7 @@ export class AuthService {
     }
 
     private handleAuthAndFetchUser(userCredential: UserCredential, endpoint: string, method: 'GET' | 'POST' = 'GET'): Observable<User> {
+        console.log('handling fetch and auth user');
         return from(userCredential.user.getIdToken()).pipe(
             switchMap((idToken) => {
                 const options = { headers: { Authorization: `Bearer ${idToken}` } };
@@ -292,7 +324,9 @@ export class AuthService {
 
                         const userDocRef = doc(this.firestore, `users/${firebaseUser.uid}`);
 
-                        if (!this.userBS.value) this.setIsOnline(true, firebaseUser.uid);
+                        if (!this.userBS.value) {
+                            this.setIsOnline(true, firebaseUser.uid);
+                        }
                         this.socketClientService.send('identifyMobileClient', firebaseUser.uid);
 
                         this.userSnapshotUnsubscribe = onSnapshot(
@@ -316,6 +350,7 @@ export class AuthService {
                 } catch {
                     this.loadingTokenBS.next(false);
                     this.tokenBS.next(null);
+                    this.userBS.next(null);
                     this.socketClientService.disconnect();
                     this.logout();
                 }
@@ -342,6 +377,7 @@ export class AuthService {
 
     private clearSession(): void {
         this.tokenBS.next(null);
+        this.reportService.resetParams();
         this.router.navigate(['/login']);
     }
 
@@ -352,7 +388,6 @@ export class AuthService {
 
         const usersCollection = collection(this.firestore, 'users');
         const uidQuery = query(usersCollection, where('uid', '==', uid));
-
         return from(getDocs(uidQuery)).pipe(
             map((querySnapshot) => {
                 if (querySnapshot.empty) {
@@ -362,6 +397,17 @@ export class AuthService {
                 return userDoc.data()?.isOnline === true;
             }),
             catchError(() => of(false)),
+        );
+    }
+
+    private isUserBanned(uid: string | null): Observable<{ isBanned: boolean; message: string }> {
+        if (!uid) {
+            return of({ isBanned: false, message: '' });
+        }
+
+        return this.reportService.getReportState(uid).pipe(
+            map((res) => ({ isBanned: res.isBanned, message: res.message })),
+            catchError(() => of({ isBanned: false, message: '' })), // fallback if error
         );
     }
 
