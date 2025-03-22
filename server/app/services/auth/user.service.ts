@@ -380,6 +380,7 @@ export class UserService {
             await userRef.update({ borderEquipped: bannerURL });
             return true;
         } else if (bannerURL === '') {
+            await userRef.update({ borderEquipped: bannerURL });
             return true;
         }
         return false;
