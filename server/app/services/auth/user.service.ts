@@ -99,7 +99,6 @@ export class UserService {
     async signInWithGoogle(uid: string, email: string, displayName: string): Promise<User> {
         try {
             const userDoc = await this.firestore.collection('users').doc(uid).get();
-            console.log(`We're signing in and our userDoc exists? ${userDoc.exists}`);
             if (userDoc.exists) {
                 // User exists, update isOnline status and return the user
                 return await this.getUserByUid(uid);
@@ -176,8 +175,7 @@ export class UserService {
     async getUserByUid(uid: string): Promise<User> {
         const userRecord = await this.adminAuth.getUser(uid);
         const userDoc = await this.getUserFromFirestore(uid);
-        await this.firestore.collection('users').doc(uid).update({ isOnline: true });
-        console.log(`updated to true: ${uid}`);
+        // await this.firestore.collection('users').doc(uid).update({ isOnline: true });
         return this.mapUserFromFirestore(userRecord, userDoc);
     }
 
@@ -192,12 +190,10 @@ export class UserService {
         const unBanDate: Date | null = !(userDoc.data() === undefined || userDoc.data().unBanDate === null)
             ? userDoc.data().unBanDate.toDate()
             : null;
-        console.log(unBanDate);
         if (unBanDate) {
             let timeDiff: number = unBanDate.getTime() - new Date().getTime();
             if (timeDiff > 0) {
                 const minutesLeft = Math.ceil(timeDiff / (1000 * 60));
-                console.log(minutesLeft);
                 return {
                     message: `Vous êtes banni pendant les prochaines ${minutesLeft} minutes`,
                     isBanned: true,
@@ -795,7 +791,7 @@ export class UserService {
         }
     }
 
-    async reportUser(signalerUID: string, reportedUID: string) {
+    async reportUser(signalerUID: string, reportedUID: string): Promise<boolean | null> {
         const userRef = this.firestore.collection('users').doc(reportedUID);
         const userDoc = await userRef.get();
 
@@ -805,11 +801,11 @@ export class UserService {
 
         const data = userDoc.data();
         const playerReports: string[] = data?.playerReports || [];
-
-        if (!playerReports.includes(signalerUID) && data.role !== 'admin') {
+        if (data.role === 'admin') return null;
+        if (!playerReports.includes(signalerUID) && signalerUID !== reportedUID && data.role === 'player') {
             const updatedReports = [...playerReports, signalerUID];
             const newNbReports = (data.nbReport || 0) + 1;
-            let unbanDate: Date;
+            let unbanDate: Date = new Date(0, 0, 0);
             let newNbBans = data.nbBan;
             switch (newNbReports) {
                 case 4:

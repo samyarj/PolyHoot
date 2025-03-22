@@ -58,17 +58,33 @@ export class AuthService {
             next: (user: User | null) => {
                 if (user && user.nbReport !== undefined && user.nbReport > 2) {
                     this.reportService.behaviourWarning();
+                    this.reportService.getReportState(user.uid).subscribe({
+                        next: (value: { message: string; isBanned: boolean }) => {
+                            if (value.isBanned) {
+                                this.reportService.banInfo(value.message);
+                                this.loadingTokenBS.next(false);
+                                this.tokenBS.next(null);
+                                this.userBS.next(null);
+                                this.socketClientService.disconnect();
+                                this.logout();
+                            }
+                        },
+                    });
                 }
             },
         });
-        // this.monitorTokenChanges(true);
+        this.reportService.subscribeToToken(this.token$);
+        this.monitorTokenChanges();
     }
 
     // Necessary to remove circular dependency
     getSocketService() {
         return this.socketClientService;
     }
-
+    // Necessary to remove circular dependency
+    getReportService() {
+        return this.reportService;
+    }
     signUp(username: string, email: string, password: string): Observable<User> {
         this.isSigningUp = true;
         return this.createUser(email, password).pipe(
@@ -103,13 +119,10 @@ export class AuthService {
                                 } else {
                                     return this.isUserOnline(userCredential.user.uid).pipe(
                                         switchMap((isOnline) => {
-                                            console.log(`we are not banned, we're checking isOnline: ${isOnline}`);
                                             if (isOnline) {
                                                 return from(this.auth.signOut()).pipe(
                                                     switchMap(() =>
-                                                        throwError(
-                                                            () => new Error("L'utilisateur est déjà connecté sur un autre appareil SKIBIDI SIGMA."),
-                                                        ),
+                                                        throwError(() => new Error("L'utilisateur est déjà connecté sur un autre appareil.")),
                                                     ),
                                                 );
                                             }
@@ -264,7 +277,6 @@ export class AuthService {
     }
 
     private handleAuthAndFetchUser(userCredential: UserCredential, endpoint: string, method: 'GET' | 'POST' = 'GET'): Observable<User> {
-        console.log('handling fetch and auth user');
         return from(userCredential.user.getIdToken()).pipe(
             switchMap((idToken) => {
                 const options = { headers: { Authorization: `Bearer ${idToken}` } };

@@ -50,8 +50,6 @@ export class AuthController {
     async signInWithGoogle(@Req() request: AuthenticatedRequest, @Res() response: Response) {
         this.logger.log(`Attempting Google sign-in for: ${request.user.email}`);
         try {
-            console.log('Entering sign-in-google');
-            console.log(request.user.uid, request.user.email, request.user.displayName);
             const user = await this.userService.signInWithGoogle(request.user.uid, request.user.email, request.user.displayName);
             this.logger.log(`Google sign-in successful for: ${user.email}`);
             response.status(HttpStatus.CREATED).json(user);
@@ -169,7 +167,6 @@ export class AuthController {
     @Post('logout')
     async logout(@Req() req: AuthenticatedRequest, @Res() response: Response) {
         try {
-            console.log('Loggin out here');
             await this.userService.logout(req.user.uid);
             response.status(HttpStatus.OK).send({ message: 'Déconnexion réussie.' });
         } catch (error) {

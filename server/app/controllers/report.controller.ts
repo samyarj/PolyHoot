@@ -20,7 +20,7 @@ export class ReportController {
     async reportUser(@Body() body: { reportedUID: string }, @Req() req: AuthenticatedRequest, @Res() response: Response) {
         this.logger.log(`Report made by user : ${req.user.displayName} for uid: ${body.reportedUID}`);
         try {
-            const isReported = this.userService.reportUser(req.user.uid, body.reportedUID);
+            const isReported = await this.userService.reportUser(req.user.uid, body.reportedUID);
             response.status(HttpStatus.OK).json(isReported);
         } catch (error) {
             this.logger.error(`Error reporting user: ${error.message}`);

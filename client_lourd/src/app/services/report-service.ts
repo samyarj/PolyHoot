@@ -42,13 +42,12 @@ export class ReportService {
         this.toastr.error(message);
     }
 
-    reportPlayer(uid: string): Observable<boolean> {
+    reportPlayer(uid: string): Observable<boolean | null> {
         const options = {
             headers: { authorization: `Bearer ${this.tokenID}` },
         };
-
         return this.http
-            .post<boolean>(`${this.baseUrl}/report`, { reportedUID: uid }, options)
+            .post<boolean | null>(`${this.baseUrl}/report`, { reportedUID: uid }, options)
             .pipe(catchError((error) => this.messageHandler.handleHttpError(error)));
     }
 
