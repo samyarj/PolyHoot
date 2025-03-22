@@ -58,7 +58,7 @@ export class AuthService {
                 }
             },
         });
-        this.monitorTokenChanges(true);
+        // this.monitorTokenChanges(true);
     }
 
     // Necessary to remove circular dependency
@@ -285,6 +285,7 @@ export class AuthService {
             tap((user) => {
                 if (user && user.uid) {
                     this.socketClientService.send('identifyMobileClient', user.uid);
+                    this.monitorTokenChanges(true);
                 }
             }),
         );
