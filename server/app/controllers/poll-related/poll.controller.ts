@@ -5,6 +5,7 @@ import { UpdatePollDto } from '@app/model/dto/poll/update-poll.dto';
 import { Poll } from '@app/model/schema/poll/poll';
 import { PublishedPoll } from '@app/model/schema/poll/published-poll.schema';
 import { PollService } from '@app/services/poll/poll.service';
+import { PublishedPollService } from '@app/services/poll/published-poll.service';
 import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Res } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
@@ -12,7 +13,10 @@ import { Response } from 'express';
 @ApiTags('Polls')
 @Controller('polls')
 export class PollController {
-    constructor(private readonly pollService: PollService) {}
+    constructor(
+        private readonly pollService: PollService,
+        private readonly publishedPollService: PublishedPollService,
+    ) {}
 
     @ApiOkResponse({
         description: 'Returns all polls',
@@ -23,7 +27,8 @@ export class PollController {
     async getAllPolls(@Res() response: Response) {
         try {
             const polls = await this.pollService.getAllPolls();
-            response.status(HttpStatus.OK).json(polls);
+            const publishedPolls = await this.publishedPollService.getAllPublishedPolls();
+            response.status(HttpStatus.OK).json({ polls, publishedPolls });
         } catch (error) {
             if (error.status === HttpStatus.NOT_FOUND) {
                 response.status(HttpStatus.NOT_FOUND).send({ message: error.message });
@@ -117,19 +122,14 @@ export class PollController {
     @ApiNotFoundResponse({
         description: 'Poll not found or could not be published',
     })
-    @Patch('publish/:id')
-    async publishPoll(@Param('id') id: string, @Res() response: Response) {
+    @Patch('publish')
+    @Patch('publish')
+    async publishPoll(@Body() poll: Poll, @Res() response: Response) {
         try {
-            // 1. Récupérer le sondage existant
-            const poll = await this.pollService.getPollById(id);
-            if (!poll) {
-                return response.status(HttpStatus.NOT_FOUND).send({ message: ERROR.POLL.ID_NOT_FOUND });
-            }
-
             // 2. Construire le DTO de PublishedPoll
             const createPublishedPollDto: CreatePublishedPollDto = {
                 ...poll,
-                publicationDate: new Date(),
+                publicationDate: new Date().toISOString(),
                 isPublished: true,
                 totalVotes: poll.questions.map(() => []), // Initialisation des votes
             };
@@ -138,10 +138,14 @@ export class PollController {
             const publishedPoll = await this.pollService.createPublishedPoll(createPublishedPollDto);
 
             // 4. Supprimer l'ancien sondage
-            await this.pollService.deletePollById(id);
+            await this.pollService.deletePollById(poll.id);
+
+            // Récupérer la liste de sondages et celle des publiés
+            const updatedPolls = await this.pollService.getAllPolls();
+            const updatedPublishedPolls = await this.publishedPollService.getAllPublishedPolls();
 
             // 5. Retourner le sondage publié
-            return response.status(HttpStatus.OK).json(publishedPoll);
+            return response.status(HttpStatus.OK).json({ polls: updatedPolls, publishedPolls: updatedPublishedPolls });
         } catch (error) {
             console.error(error);
             return response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: ERROR.INTERNAL_SERVER_ERROR });

@@ -159,6 +159,7 @@ export enum ConfirmationMessage {
     CancelPollCreation = 'Êtes-vous sûr de vouloir annuler la création du sondage ?',
     CancelPollModification = 'Êtes-vous sûr de vouloir annuler la modification du sondage ?',
     BanPlayer = 'Êtes-vous sûr de vouloir bannir ce joueur ?',
+    PublishPoll = 'Êtes-vous sûr de vouloir publier ce sondage ?',
 }
 
 export enum GameStatus {

@@ -11,6 +11,6 @@ export interface Poll {
 
 export interface PublishedPoll extends Poll {
     isPublished: true;
-    publicationDate: Date;
+    publicationDate: string;
     totalVotes: number[][];
 }

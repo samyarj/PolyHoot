@@ -5,26 +5,27 @@
                 <h1>Sondages</h1>
                 <div id="innerContainer">
                     <div class="pollPublishedContainer" *ngFor="let publishedPoll of publishedPolls; trackBy: trackByFn; let i = index" @bounceOut>
-                        <span id="publishedPollInfo">
-                            {{ publishedPoll.title + ' ' + (publishedPoll.endDate | date: 'yyyy-MM-dd HH:mm') }}
+                        <span id="publishedPollInfo" style="color: red;">
+                            <span id="publishedPollInfo"> {{ publishedPoll.title }} Date d'expiration: {{ publishedPoll.endDate | date: 'yyyy-MM-dd HH:mm' }} Date de publication: {{ publishedPoll.publicationDate | date: 'yyyy-MM-dd HH:mm' }}</span>
                         </span>
                     </div>
                     <div class="pollContainer" *ngFor="let poll of polls; trackBy: trackByFn; let i = index" @bounceOut>
                         <span id="pollInfo"> {{ poll.title }} Date d'expiration: {{ poll.endDate | date: 'yyyy-MM-dd HH:mm' }} </span>
-                        <button id="delete" mat-icon-button (click)="delete(poll.id)" matTooltip="Supprimer">
+                        <button *ngIf="!poll.isPublished" id="delete" mat-icon-button (click)="delete(poll.id)" matTooltip="Supprimer">
                             <mat-icon [ngStyle]="{ color: 'white' }">delete</mat-icon>
                         </button>
-                        <button id="edit" mat-icon-button (click)="goToEdit(poll.id)" matTooltip="Modifier">
+                        <button *ngIf="!poll.isPublished" id="edit" mat-icon-button (click)="goToEdit(poll.id)" matTooltip="Modifier">
                             <mat-icon [ngStyle]="{ color: 'white' }">edit_square</mat-icon>
                         </button>
-                        <!-- <button
-                            *ngIf="poll.isPublished"
+                        <button
+                            *ngIf="!poll.isPublished"
                             class="publish"
                             mat-icon-button
                             (click)="publish(poll.id)"
                             matTooltip="Publier le sondage pour tous les utilisateurs"
                         >
-                            <mat-icon [ngStyle]="{ color: 'white' }">publication</mat-icon> -->
+                            <mat-icon [ngStyle]="{ color: 'white' }">publication</mat-icon>
+                        </button>
                     </div>
                 </div>
             </div>

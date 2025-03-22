@@ -18,6 +18,10 @@ export type PollDocument = Poll & Document;
     toObject: { virtuals: true },
 })
 export class Poll {
+    @ApiProperty({ description: 'The id of the poll' })
+    @Prop({ required: false })
+    id: string;
+    
     @ApiProperty({ description: 'The title of the poll' })
     @Prop({ required: true })
     title: string;

@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { INVALID_INDEX } from '@app/constants/constants';
+import { INVALID_INDEX, MIN_CHOICES } from '@app/constants/constants';
 import { ErrorMessage } from '@app/constants/enum-class';
-import { EMPTY_POLL } from '@app/constants/mock-constants';
+import { EMPTY_POLL, EMPTY_POLL_QUESTION } from '@app/constants/mock-constants';
 import { Poll } from '@app/interfaces/poll';
 import { Question } from '@app/interfaces/question';
 import { QuestionValidationService } from '@app/services/admin-services/validation-services/question-validation-service/question-validation.service';
@@ -17,6 +17,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class CreatePollService {
     readonly baseUrl = `${environment.serverUrl}/polls`;
     poll: Poll = JSON.parse(JSON.stringify(EMPTY_POLL));
+    question: Question = JSON.parse(JSON.stringify(EMPTY_POLL_QUESTION));
     constructor(
         private http: HttpClient,
         private messageHandler: MessageHandlerService,
@@ -71,5 +72,18 @@ export class CreatePollService {
     }
     emptyPoll() {
         this.poll = JSON.parse(JSON.stringify(EMPTY_POLL));
+    }
+    editQuestion(index: number) {
+        this.question = this.poll.questions[index];
+    }
+    emptyQuestion() {
+        const id = this.question.id;
+        this.question = JSON.parse(JSON.stringify(EMPTY_POLL_QUESTION));
+        this.question.id = id;
+    }
+    deleteAnswer(index: number): void {
+        if (this.question.choices && this.question.choices.length > MIN_CHOICES) {
+            this.question.choices.splice(index, 1);
+        }
     }
 }

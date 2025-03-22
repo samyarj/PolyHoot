@@ -19,8 +19,18 @@ export class ConsultPollPageComponent {
     publishedPolls: PublishedPoll[] = [];
     private pollsObserver: Partial<Observer<Poll[]>> = {
         next: (polls: Poll[]) => {
-            console.log('Dans le next avec ', polls);
             this.polls = polls;
+        },
+        error: (httpErrorResponse: HttpErrorResponse) => {
+            this.messageHandlerService.popUpErrorDialog(httpErrorResponse.error.message);
+        },
+    };
+    private allPollsObserver: Partial<Observer<{ polls: Poll[]; publishedPolls: PublishedPoll[] }>> = {
+        next: (response: { polls: Poll[]; publishedPolls: PublishedPoll[] }) => {
+            console.log('Dans le next avec ', response);
+            this.polls = response.polls; // Mettre à jour la liste des sondages non publiés
+            console.log('arrt tes conneries', response.publishedPolls);
+            this.publishedPolls = response.publishedPolls; // Mettre à jour la liste des sondages publiés
         },
         error: (httpErrorResponse: HttpErrorResponse) => {
             this.messageHandlerService.popUpErrorDialog(httpErrorResponse.error.message);
@@ -31,7 +41,7 @@ export class ConsultPollPageComponent {
         private consultPollService: ConsultPollService,
         private messageHandlerService: MessageHandlerService,
     ) {
-        this.consultPollService.getAllPolls().subscribe(this.pollsObserver);
+        this.consultPollService.getAllPolls().subscribe(this.allPollsObserver);
     }
 
     navigate(route: string): void {
@@ -52,7 +62,20 @@ export class ConsultPollPageComponent {
         }
     }
 
+    publish(id: string | undefined) {
+        if (id) {
+            this.messageHandlerService.confirmationDialog(ConfirmationMessage.PublishPoll, () => this.publishCallback(id));
+        }
+    }
     private deleteCallback(id: string) {
         this.consultPollService.deletePollById(id).subscribe(this.pollsObserver);
+    }
+    private publishCallback(id: string) {
+        const pollToPublish = this.polls.find((poll) => poll.id === id);
+        if (pollToPublish) {
+            this.consultPollService.publishPoll(pollToPublish).subscribe(this.allPollsObserver);
+        } else {
+            console.error(`Sondage avec l'ID ${id} non trouvé.`);
+        }
     }
 }

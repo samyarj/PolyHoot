@@ -6,6 +6,7 @@ import { CreatePollDto } from '@app/model/dto/poll/create-poll.dto';
 import { CreatePublishedPollDto } from '@app/model/dto/poll/create-published-poll.dto';
 import { UpdatePollDto } from '@app/model/dto/poll/update-poll.dto';
 import { Poll, PollDocument } from '@app/model/schema/poll/poll';
+import { PublishedPoll, PublishedPollDocument } from '@app/model/schema/poll/published-poll.schema';
 import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -14,26 +15,9 @@ import { Model } from 'mongoose';
 export class PollService {
     constructor(
         @InjectModel(Poll.name) private pollModel: Model<PollDocument>,
+        @InjectModel(PublishedPoll.name)private publishedPollModel: Model<PublishedPollDocument>,
         private readonly logger: Logger,
-    ) {
-        //this.start();
-    }
-
-    /* async start() {
-        const count = await this.pollModel.countDocuments();
-        if (count === 0) {
-            this.populateDB();
-        }
-    } */
-
-    /* async populateDB(): Promise<void> {
-        try {
-            await this.pollModel.insertMany(MOCK_QUIZZES);
-            this.logger.log(SUCCESS.QUIZ_INSERTION);
-        } catch (error) {
-            this.logger.error(ERROR.QUIZ.FAILED_TO_INSERT, error);
-        }
-    } */
+    ) {}
 
     async getAllPolls(): Promise<Poll[]> {
         try {
@@ -61,19 +45,11 @@ export class PollService {
     }
 
     async createPublishedPoll(createPublishedPollDto: CreatePublishedPollDto): Promise<Poll> {
-        const existingPoll = await this.findPollByTitle(createPublishedPollDto.title);
-        if (existingPoll && existingPoll.title) throw new ConflictException(ERROR.POLL.ALREADY_EXISTS);
-        const createdPublishedPoll = new this.pollModel(createPublishedPollDto);
+        const createdPublishedPoll = new this.publishedPollModel(createPublishedPollDto);
         return createdPublishedPoll.save();
     }
 
     async verifyAndUpdatePoll(id: string, updatePollDto: UpdatePollDto): Promise<Poll> {
-        if (updatePollDto.title) {
-            const existingPoll = await this.findPollByTitle(updatePollDto.title);
-            if (existingPoll && existingPoll._id.toString() !== id) {
-                throw new ConflictException(ERROR.POLL.ALREADY_EXISTS);
-            }
-        }
         return await this.updatePoll(id, updatePollDto);
     }
 
@@ -85,12 +61,15 @@ export class PollService {
         }
     }
 
-    private async findPollByTitle(title: string) {
-        const escapedTitle = title.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-        const titleRegex = new RegExp('^' + escapedTitle + '$', 'i');
-        return await this.pollModel.findOne({ title: titleRegex });
+    private async findPollByTitle(title: string): Promise<Poll | null> {
+        try {
+            // Recherche un sondage avec le titre exact (insensible à la casse)
+            return await this.pollModel.findOne({ title: { $regex: new RegExp(`^${title}$`, 'i') } }).exec();
+        } catch (error) {
+            this.logger.error(`Erreur lors de la recherche du sondage par titre : ${title}`, error);
+            throw new NotFoundException(ERROR.POLL.FAILED_TO_FIND_BY_TITLE);
+        }
     }
-
     private async updatePoll(id: string, updateData: UpdatePollDto): Promise<Poll> {
         const poll = await this.pollModel.findById(id).exec();
 

@@ -4,9 +4,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AfterViewInit, Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { addQuestionAnimation, deleteQuestionAnimation, pollFormAnimation, questionFormAnimation } from '@app/animations/animation';
-import { EMPTY_STRING, MAX_CHOICES, MIN_CHOICES } from '@app/constants/constants';
+import { EMPTY_STRING, MAX_CHOICES } from '@app/constants/constants';
 import { AppRoute, ButtonType, ConfirmationMessage } from '@app/constants/enum-class';
-import { EMPTY_POLL_QUESTION } from '@app/constants/mock-constants';
 import { Poll } from '@app/interfaces/poll';
 import { Question } from '@app/interfaces/question';
 import { QuestionChoice } from '@app/interfaces/question-choice';
@@ -23,7 +22,6 @@ import { Observer, tap } from 'rxjs';
     animations: [addQuestionAnimation, deleteQuestionAnimation, questionFormAnimation, pollFormAnimation],
 })
 export class CreatePollPageComponent implements AfterViewInit, OnDestroy {
-    question: Question = JSON.parse(JSON.stringify(EMPTY_POLL_QUESTION));
     submitPollButton: string = ButtonType.CREATE;
     submitQuestionButton: string = ButtonType.ADD;
     showButton: boolean = true;
@@ -58,6 +56,9 @@ export class CreatePollPageComponent implements AfterViewInit, OnDestroy {
     get poll(): Poll {
         return this.createPollService.poll;
     }
+    get question(): Question {
+        return this.createPollService.question;
+    }
 
     ngOnDestroy(): void {
         this.resetAnswers();
@@ -80,14 +81,14 @@ export class CreatePollPageComponent implements AfterViewInit, OnDestroy {
     }
 
     editQuestion(index: number) {
-        this.question = this.poll.questions[index];
+        this.createPollService.editQuestion(index);
         this.submitQuestionButton = ButtonType.MODIFY;
     }
 
     deleteQuestion(index: number) {
         if (this.submitQuestionButton === ButtonType.MODIFY && this.question.id === this.poll.questions[index].id) {
             this.submitQuestionButton = ButtonType.ADD;
-            this.emptyQuestion();
+            this.createPollService.emptyQuestion();
         }
         this.createPollService.deleteQuestionFromPoll(index);
     }
@@ -96,11 +97,11 @@ export class CreatePollPageComponent implements AfterViewInit, OnDestroy {
         if (this.submitQuestionButton === ButtonType.MODIFY) {
             this.createPollService.modifyQuestionInPoll(this.question);
             this.submitQuestionButton = ButtonType.ADD;
-            this.emptyQuestion();
+            this.createPollService.emptyQuestion();
             return;
         }
         this.createPollService.addQuestionToPoll(this.question);
-        this.emptyQuestion();
+        this.createPollService.emptyQuestion();
     }
 
     isPollTitleEmpty(): boolean {
@@ -117,24 +118,16 @@ export class CreatePollPageComponent implements AfterViewInit, OnDestroy {
     }
     isDateValid(): boolean {
         if (!this.poll.endDate) {
-            return false; // Aucune date sélectionnée
+            return false;
         }
-
-        // Convertir la chaîne en objet Date
         const selectedDate = new Date(this.poll.endDate);
-
-        // Obtenir la date actuelle
         const now = new Date();
-        now.setSeconds(0, 0); // Ignore les millisecondes et secondes pour éviter des problèmes de précision
-
-        // Comparer les dates
+        now.setSeconds(0, 0);
         return selectedDate >= now;
     }
 
     deleteAnswer(index: number): void {
-        if (this.question.choices && this.question.choices.length > MIN_CHOICES) {
-            this.question.choices.splice(index, 1);
-        }
+        this.createPollService.deleteAnswer(index);
     }
     addAnswer(): void {
         if (this.question.choices && this.question.choices.length < MAX_CHOICES) this.question.choices.push({ text: EMPTY_STRING, isCorrect: false });
@@ -142,18 +135,13 @@ export class CreatePollPageComponent implements AfterViewInit, OnDestroy {
     validUniqueChoiceTexts() {
         return this.validationService.areTextsUnique(this.question.choices);
     }
-    resetAnswers(): void {
-        this.createPollService.emptyPoll();
-    }
     emptyPollAndRedirect() {
-        console.log('emptyPollAndRedirect avec ', this.poll.id);
         if (this.poll.id)
             this.messageHandlerService.confirmationDialog(ConfirmationMessage.CancelPollModification, () => this.emptyPollAndRedirectCallback());
         else this.messageHandlerService.confirmationDialog(ConfirmationMessage.CancelPollCreation, () => this.emptyPollAndRedirectCallback());
     }
 
     validatePoll(): boolean {
-        console.log('Date Valid: ', this.isDateValid());
         return (
             this.isDateValid() &&
             !this.isPollTitleEmpty() &&
@@ -166,7 +154,6 @@ export class CreatePollPageComponent implements AfterViewInit, OnDestroy {
         return this.areQuestionChoicesTextValid() && this.validUniqueChoiceTexts() && !this.isQuestionTextEmpty();
     }
     submitPollEvent() {
-        /* this.createPollService.disableAnimations = true; */
         if (this.poll.id) {
             this.createPollService
                 .updatePoll(this.poll.id, this.poll)
@@ -189,14 +176,12 @@ export class CreatePollPageComponent implements AfterViewInit, OnDestroy {
             )
             .subscribe(this.errorObserver);
     }
+    resetAnswers() {
+        this.createPollService.emptyPoll();
+    }
     private emptyPollAndRedirectCallback() {
         this.resetAnswers();
         this.router.navigate([AppRoute.POLLS]);
-    }
-    private emptyQuestion() {
-        const id = this.question.id;
-        this.question = JSON.parse(JSON.stringify(EMPTY_POLL_QUESTION));
-        this.question.id = id;
     }
     private setMinDate(): void {
         const dateTimeInput = document.querySelector<HTMLInputElement>('#dateTimePicker');
