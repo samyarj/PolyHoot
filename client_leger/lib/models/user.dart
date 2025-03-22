@@ -1,4 +1,5 @@
 import 'package:client_leger/models/game-log-entry-model.dart';
+import 'package:client_leger/models/stats-related/stats.dart';
 
 class User {
   final String? avatarEquipped;
@@ -21,7 +22,7 @@ class User {
   final int? pity;
   final List<String>? playedGameLogs;
   final String? role;
-  final Map<String, dynamic>? stats; // Added
+  final Stats? stats; // Added
   final String uid;
   final DateTime? unBanDate;
   final String username;
@@ -90,7 +91,8 @@ class User {
           ?.map((e) => e as String)
           .toList(),
       role: json['role'] as String?,
-      stats: json['stats'] as Map<String, dynamic>?, // Added
+      stats:
+          json['stats'] != null ? Stats.fromJson(json['stats']) : null, // Added
       uid: json['uid'] as String,
       unBanDate:
           json['unBanDate'] != null ? DateTime.parse(json['unBanDate']) : null,

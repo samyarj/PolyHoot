@@ -38,9 +38,6 @@ class UserStatsAndLogsPage extends ConsumerWidget {
         // Calculate statistics
         final totalGamesPlayed = user.nGames ?? 0;
         final gamesWon = user.nWins ?? 0;
-        final winRate = totalGamesPlayed > 0
-            ? (gamesWon / totalGamesPlayed * 100).toStringAsFixed(1)
-            : '0.0';
 
         return Scaffold(
           backgroundColor: colorScheme.primary,
@@ -74,7 +71,9 @@ class UserStatsAndLogsPage extends ConsumerWidget {
                             child: UserStatisticsPanel(
                               totalGamesPlayed: totalGamesPlayed,
                               gamesWon: gamesWon,
-                              winRate: winRate,
+                              winRate: user.stats?.rightAnswerPercentage
+                                      ?.toString() ??
+                                  '0.0',
                               averageTimePerGame:
                                   getAverageTimePerGame(user.gameLogs),
                             ),
