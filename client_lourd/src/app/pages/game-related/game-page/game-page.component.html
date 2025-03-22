@@ -64,7 +64,7 @@
                         Vous devez soumettre votre réponse pour qu'elle soit corrigée. Vous ne recevrez pas de points.
                     </p>
                     <p *ngIf="choiceFeedback === 'incorrect' && !submitted && currentQuestion.type === 'QRL'" style="color: white">
-                        L'organisateur ne vous a donné aucun point pour votre soumission non-existante.
+                        L'organisateur n'a pas osé donner des points pour votre soumission non-existante.
                     </p>
                     <p *ngIf="choiceFeedback === 'partial' && currentQuestion.type === 'QRL' && submitted" style="color: white">
                         Pas tout à fait! L'organisateur vous a accordé des points partiels.
