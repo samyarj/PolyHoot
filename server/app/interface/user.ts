@@ -17,6 +17,7 @@ export interface User {
     nbReport?: number; // Number of reports
     nbBan?: number; // Number of bans
     unBanDate?: Date; // Date when the user will be unbanned
+    playerReports?: string[]; // List of player uids that reported the user.
     inventory?: {
         banners?: string[]; // Links to owned banners
         themes?: string[]; // Links to owned themes

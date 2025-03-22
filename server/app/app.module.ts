@@ -12,6 +12,7 @@ import { PollController } from './controllers/poll-related/poll.controller';
 import { PublishedPollController } from './controllers/poll-related/published-poll.controller';
 import { QuestionController } from './controllers/question/question.controller';
 import { QuizController } from './controllers/quiz/quiz.controller';
+import { ReportController } from './controllers/report.controller';
 import { ShopController } from './controllers/shop.controller';
 import { ChatGateway } from './gateways/chat/chat.gateway';
 import { CoinflipGateway } from './gateways/coinflip/coinflip.gateway';
@@ -94,6 +95,7 @@ import { ShopService } from './services/shop.service';
         FriendSystemController,
         PollController,
         PublishedPollController,
+        ReportController,
     ],
 })
 export class AppModule {}

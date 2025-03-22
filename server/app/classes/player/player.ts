@@ -80,7 +80,7 @@ export class Player {
             if (qreAttributes) {
                 const minTolerated = qreAttributes.goodAnswer - qreAttributes.tolerance;
                 const maxTolerated = qreAttributes.goodAnswer + qreAttributes.tolerance;
-                if (this.qreAnswer > maxTolerated || this.qreAnswer < minTolerated) correct = false;
+                if (this.qreAnswer > maxTolerated || this.qreAnswer < minTolerated || this.submitted === false) correct = false;
             }
         }
 

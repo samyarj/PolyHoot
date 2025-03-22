@@ -40,7 +40,7 @@ export class ProfilePageComponent implements OnInit {
     isCheckingUsername: boolean = false;
     isUsernameTaken: boolean = false;
     isTypingUsername: boolean = false;
-
+    math = Math;
     gameLogs: GameLogEntry[];
     logs: CnxLogEntry[];
     // Constants for username validation
