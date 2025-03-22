@@ -40,7 +40,7 @@ export class MainHeaderComponent {
         ],
         expired: false,
         // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-        endDate: new Date(9999, 1, 1,1,1),
+        endDate: new Date(0, 0, 0, 0, 0),
         isPublished: false,
     };
 

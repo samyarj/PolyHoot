@@ -3,7 +3,7 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AfterViewInit, Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { addQuestionAnimation, deleteQuestionAnimation, gameFormAnimation, questionFormAnimation } from '@app/animations/animation';
+import { addQuestionAnimation, deleteQuestionAnimation, pollFormAnimation, questionFormAnimation } from '@app/animations/animation';
 import { EMPTY_STRING, MAX_CHOICES, MIN_CHOICES } from '@app/constants/constants';
 import { AppRoute, ButtonType, ConfirmationMessage } from '@app/constants/enum-class';
 import { EMPTY_POLL_QUESTION } from '@app/constants/mock-constants';
@@ -13,14 +13,14 @@ import { QuestionChoice } from '@app/interfaces/question-choice';
 import { ValidationService } from '@app/services/admin-services/validation-services/common-validation-service/validation.service';
 import { QuestionValidationService } from '@app/services/admin-services/validation-services/question-validation-service/question-validation.service';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
-import { PollService } from '@app/services/poll.service';
-import { Observer } from 'rxjs';
+import { CreatePollService } from '@app/services/poll-services/create-poll.service';
+import { Observer, tap } from 'rxjs';
 
 @Component({
     selector: 'app-create-poll-page',
     templateUrl: './create-poll-page.component.html',
     styleUrls: ['./create-poll-page.component.scss'],
-    animations: [addQuestionAnimation, deleteQuestionAnimation, questionFormAnimation, gameFormAnimation],
+    animations: [addQuestionAnimation, deleteQuestionAnimation, questionFormAnimation, pollFormAnimation],
 })
 export class CreatePollPageComponent implements AfterViewInit {
     question: Question = JSON.parse(JSON.stringify(EMPTY_POLL_QUESTION));
@@ -29,14 +29,14 @@ export class CreatePollPageComponent implements AfterViewInit {
     showButton: boolean = true;
     private errorObserver: Partial<Observer<Poll[]>> = {
         next: () => {
-            this.router.navigate([AppRoute.QUIZMANAGEMENT]);
+            this.router.navigate([AppRoute.POLLS]);
         },
         error: (httpErrorResponse: HttpErrorResponse) => {
             this.messageHandlerService.popUpErrorDialog(httpErrorResponse.error.message);
         },
     };
     constructor(
-        private pollService: PollService,
+        private createPollService: CreatePollService,
         private validationService: ValidationService,
         private questionValidationService: QuestionValidationService,
         private router: Router,
@@ -44,7 +44,7 @@ export class CreatePollPageComponent implements AfterViewInit {
     ) {}
 
     get poll(): Poll {
-        return this.pollService.poll;
+        return this.createPollService.poll;
     }
 
     ngAfterViewInit(): void {
@@ -73,18 +73,17 @@ export class CreatePollPageComponent implements AfterViewInit {
             this.submitQuestionButton = ButtonType.ADD;
             this.emptyQuestion();
         }
-        this.pollService.deleteQuestionFromPoll(index);
+        this.createPollService.deleteQuestionFromPoll(index);
     }
 
     addQuestion() {
-        console.log('addQuestion');
         if (this.submitQuestionButton === ButtonType.MODIFY) {
-            this.pollService.modifyQuestionInQuiz(this.question);
+            this.createPollService.modifyQuestionInPoll(this.question);
             this.submitQuestionButton = ButtonType.ADD;
             this.emptyQuestion();
             return;
         }
-        this.pollService.addQuestionToPoll(this.question);
+        this.createPollService.addQuestionToPoll(this.question);
         this.emptyQuestion();
     }
 
@@ -97,7 +96,7 @@ export class CreatePollPageComponent implements AfterViewInit {
     isDescriptionEmpty(): boolean {
         return this.validationService.isStringEmpty(this.poll.description);
     }
-    isQuestionTextValid() {
+    isQuestionTextEmpty() {
         return this.validationService.isStringEmpty(this.question.text);
     }
     isDateValid(): boolean {
@@ -109,7 +108,7 @@ export class CreatePollPageComponent implements AfterViewInit {
         const now = new Date();
         now.setSeconds(0, 0); // Ignore les millisecondes et secondes pour éviter des problèmes de précision
 
-        return selectedDate <= now;
+        return selectedDate >= now;
     }
 
     deleteAnswer(index: number): void {
@@ -135,30 +134,47 @@ export class CreatePollPageComponent implements AfterViewInit {
 
     validatePoll(): boolean {
         return (
-            !this.validationService.isStringEmpty(this.poll.title) &&
-            !this.validationService.isStringEmpty(this.poll.description) &&
+            this.isDateValid() &&
+            !this.isPollTitleEmpty() &&
+            !this.isDescriptionEmpty() &&
             Array.isArray(this.poll.questions) &&
             this.poll.questions.length >= 1
         );
     }
+    validQuestion(): boolean {
+        console.log('1: ', this.areQuestionChoicesTextValid());
+        console.log('2: ', this.validUniqueChoiceTexts());
+        console.log('3: ', this.isQuestionTextEmpty());
+        return this.areQuestionChoicesTextValid() && this.validUniqueChoiceTexts() && !this.isQuestionTextEmpty();
+    }
     submitPollEvent() {
-        /* this.pollService.disableAnimations = true; */
+        /* this.createPollService.disableAnimations = true; */
         if (this.poll.id) {
-            this.pollService.updatePoll(this.poll.id, this.poll).subscribe(this.errorObserver);
+            this.createPollService.updatePoll(this.poll.id, this.poll).subscribe(this.errorObserver);
+            this.createPollService.updatePoll(this.poll.id, this.poll).subscribe(() => {
+                console.log('✅ Sondage modifié, maintenant on redirige...');
+                this.emptyPollAndRedirectCallback();
+            });
             return;
         }
-        this.pollService.createPoll(this.poll).subscribe(this.errorObserver);
-        this.emptyPollAndRedirectCallback();
+        this.createPollService
+            .createPoll(this.poll)
+            .pipe(
+                tap(() => {
+                    console.log('✅ Sondage créé, maintenant on redirige...');
+                    this.emptyPollAndRedirectCallback();
+                }),
+            )
+            .subscribe(this.errorObserver);
     }
     private emptyPollAndRedirectCallback() {
         this.resetAnswers();
-        this.pollService.emptyPoll();
+        this.createPollService.emptyPoll();
         this.router.navigate([AppRoute.POLLS]);
     }
     private emptyQuestion() {
         const id = this.question.id;
         this.question = JSON.parse(JSON.stringify(EMPTY_POLL_QUESTION));
-
         this.question.id = id;
     }
     private setMinDate(): void {

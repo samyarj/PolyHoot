@@ -151,6 +151,7 @@ export enum ConfirmationMessage {
     AbandonGame = 'Êtes-vous sûr de vouloir quitter la partie?',
     DeleteQuestion = 'Êtes-vous sûr de vouloir supprimer cette question?',
     DeleteGame = 'Êtes-vous sûr de vouloir supprimer ce jeu-questionnaire?',
+    DeletePoll = 'Êtes-vous sûr de vouloir supprimer ce sondage?',
     CleanHistory = "Êtes-vous sûr de vouloir supprimer l'historique?",
     CancelQuizCreation = 'Êtes-vous sûr de vouloir annuler la création du jeu-questionnaire ?',
     CancelQuizModification = 'Êtes-vous sûr de vouloir annuler la modification du jeu-questionnaire ?',

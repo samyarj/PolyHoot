@@ -5,16 +5,16 @@ import { ErrorMessage } from '@app/constants/enum-class';
 import { EMPTY_POLL } from '@app/constants/mock-constants';
 import { Poll } from '@app/interfaces/poll';
 import { Question } from '@app/interfaces/question';
+import { QuestionValidationService } from '@app/services/admin-services/validation-services/question-validation-service/question-validation.service';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
 import { Observable, catchError, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { v4 as uuidv4 } from 'uuid';
-import { QuestionValidationService } from './admin-services/validation-services/question-validation-service/question-validation.service';
 
 @Injectable({
     providedIn: 'root',
 })
-export class PollService {
+export class CreatePollService {
     readonly baseUrl = `${environment.serverUrl}/polls`;
     poll: Poll = JSON.parse(JSON.stringify(EMPTY_POLL));
     constructor(
@@ -23,28 +23,11 @@ export class PollService {
         private questionValidationService: QuestionValidationService,
     ) {}
 
-    getAllPolls(): Observable<Poll[]> {
-        return this.http.get<Poll[]>(this.baseUrl).pipe(
-            map((polls) => {
-                return polls;
-            }),
-            catchError(this.messageHandler.handleHttpError),
-        );
-    }
-
-    getPollById(id: string): Observable<Poll> {
-        return this.http.get<Poll>(`${this.baseUrl}/${id}`).pipe(
-            map((poll) => {
-                return poll;
-            }),
-            catchError(this.messageHandler.handleHttpError),
-        );
-    }
-
     createPoll(poll: Poll): Observable<Poll[]> {
         console.log('Envoyé au serveur: ', poll);
         return this.http.post<Poll[]>(`${this.baseUrl}/create`, poll).pipe(
             map((polls) => {
+                console.log('polls retourné du serveur normalement avec nouveau', polls);
                 return polls;
             }),
             catchError(this.messageHandler.handleHttpError),
@@ -59,15 +42,6 @@ export class PollService {
             catchError(this.messageHandler.handleHttpError),
         );
     }
-
-    deletePollById(id: string): Observable<Poll[]> {
-        return this.http.delete<Poll[]>(`${this.baseUrl}/delete/${id}`).pipe(
-            map((polls) => {
-                return polls;
-            }),
-            catchError(this.messageHandler.handleHttpError),
-        );
-    }
     addQuestionToPoll(clickedQuestion: Question): void {
         if (this.questionValidationService.isQuestionTitleUnique(clickedQuestion, this.poll.questions, false)) {
             clickedQuestion.id = uuidv4();
@@ -76,7 +50,7 @@ export class PollService {
         }
         this.messageHandler.popUpErrorDialog(ErrorMessage.QstTitleAlreadyInPoll);
     }
-    modifyQuestionInQuiz(newQuestion: Question): void {
+    modifyQuestionInPoll(newQuestion: Question): void {
         const index = this.poll.questions.findIndex((question) => question.id === newQuestion.id);
         const isQuestionTitleUnique = this.questionValidationService.isQuestionTitleUnique(newQuestion, this.poll.questions, true);
         if (index !== INVALID_INDEX && isQuestionTitleUnique) {
@@ -92,17 +66,5 @@ export class PollService {
     }
     emptyPoll() {
         this.poll = JSON.parse(JSON.stringify(EMPTY_POLL));
-    }
-    sortPollBySomething(polls: Poll[]): Poll[] {
-        return polls.sort();
-        //
-    }
-    publishPoll(id: string) {
-        return this.http.patch<Poll[]>(`${this.baseUrl}/publish/${id}`, {}).pipe(
-            map((polls) => {
-                return polls;
-            }),
-            catchError(this.messageHandler.handleHttpError),
-        );
     }
 }

@@ -58,8 +58,6 @@ export class PollController {
     @Post('/create')
     async createPoll(@Body() createPollDto: CreatePollDto, @Res() response: Response) {
         try {
-            console.log('sondage créé ', createPollDto);
-            console.log('choices: ', createPollDto.questions[0].choices)
             await this.pollService.createPoll(createPollDto);
             const updatedPolls = await this.pollService.getAllPolls();
             response.status(HttpStatus.CREATED).json(updatedPolls);

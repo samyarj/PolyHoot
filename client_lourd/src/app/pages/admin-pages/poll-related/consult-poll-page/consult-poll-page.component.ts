@@ -5,7 +5,7 @@ import { backInLeftAnimation, backInRightAnimation, bounceOutAnimation, zoomInAn
 import { AppRoute, ConfirmationMessage } from '@app/constants/enum-class';
 import { Poll, PublishedPoll } from '@app/interfaces/poll';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
-import { PollService } from '@app/services/poll.service';
+import { ConsultPollService } from '@app/services/poll-services/consult-poll.service';
 import { Observer } from 'rxjs';
 
 @Component({
@@ -17,11 +17,10 @@ import { Observer } from 'rxjs';
 export class ConsultPollPageComponent {
     polls: Poll[] = [];
     publishedPolls: PublishedPoll[] = [];
-
     private pollsObserver: Partial<Observer<Poll[]>> = {
         next: (polls: Poll[]) => {
-            this.polls = polls.filter((poll) => poll.title);
-            this.polls = this.pollService.sortPollBySomething(this.polls);
+            console.log('Dans le next avec ', polls);
+            this.polls = polls;
         },
         error: (httpErrorResponse: HttpErrorResponse) => {
             this.messageHandlerService.popUpErrorDialog(httpErrorResponse.error.message);
@@ -29,10 +28,10 @@ export class ConsultPollPageComponent {
     };
     constructor(
         private router: Router,
-        private pollService: PollService,
+        private consultPollService: ConsultPollService,
         private messageHandlerService: MessageHandlerService,
     ) {
-        this.pollService.getAllPolls().subscribe(this.pollsObserver);
+        this.consultPollService.getAllPolls().subscribe(this.pollsObserver);
     }
 
     navigate(route: string): void {
@@ -47,15 +46,13 @@ export class ConsultPollPageComponent {
         return item.id;
     }
 
-    publish(pollId: string | undefined) {
-        if (pollId) this.pollService.publishPoll(pollId).subscribe(this.pollsObserver);
+    delete(id: string | undefined) {
+        if (id) {
+            this.messageHandlerService.confirmationDialog(ConfirmationMessage.DeletePoll, () => this.deleteCallback(id));
+        }
     }
 
-    delete(pollId: string | undefined) {
-        if (pollId) this.messageHandlerService.confirmationDialog(ConfirmationMessage.DeleteGame, () => this.deleteCallback(pollId));
-    }
-
-    private deleteCallback(pollId: string) {
-        this.pollService.deletePollById(pollId).subscribe(this.pollsObserver);
+    private deleteCallback(id: string) {
+        this.consultPollService.deletePollById(id).subscribe(this.pollsObserver);
     }
 }
