@@ -27,9 +27,9 @@ export class PollPlayerPopInComponent {
     // eslint-disable-next-line max-params
     constructor(
         public dialogRef: MatDialogRef<PollPlayerPopInComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: Poll, // private dialog: MatDialog,
+        @Inject(MAT_DIALOG_DATA) public data: { poll: Poll; isAdmin: boolean }, // private dialog: MatDialog,
     ) {
-        this.poll = data;
+        this.poll = data.poll;
     }
 
     startPoll() {
