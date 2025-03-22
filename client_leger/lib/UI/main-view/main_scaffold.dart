@@ -1,4 +1,5 @@
 import 'package:client_leger/UI/error/error_dialog.dart';
+import 'package:client_leger/UI/global/avatar_banner_widget.dart';
 import 'package:client_leger/UI/main-view/sidebar/sidebar.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
@@ -149,13 +150,13 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                           icon: Icon(Icons.backpack),
                           iconSize: 28,
                           color: colorScheme.tertiary,
-                          onPressed: () => context.go(Paths.equipped),
+                          onPressed: () => context.go(Paths.inventory),
                         ),
                         IconButton(
                           icon: Icon(Icons.attach_money),
                           iconSize: 28,
                           color: colorScheme.tertiary,
-                          onPressed: () => context.go(Paths.coins),
+                          onPressed: () => context.go(Paths.shop),
                         ),
                       ],
                     ),
@@ -187,22 +188,15 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 8, horizontal: 16),
                                   child: SizedBox(
-                                    width:
-                                        180, // Fixed width for the entire content
+                                    width: 180,
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        CircleAvatar(
-                                          radius: 24,
-                                          backgroundImage: user
-                                                      ?.avatarEquipped !=
-                                                  null
-                                              ? NetworkImage(
-                                                  user!.avatarEquipped!)
-                                              : const AssetImage(
-                                                      'assets/default-avatar.png')
-                                                  as ImageProvider,
-                                          backgroundColor: Colors.transparent,
+                                        AvatarBannerWidget(
+                                          avatarUrl: user?.avatarEquipped,
+                                          bannerUrl: user?.borderEquipped,
+                                          size: 48,
+                                          avatarFit: BoxFit.cover,
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
@@ -284,13 +278,11 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: CircleAvatar(
-                                radius: 22,
-                                backgroundImage: user?.avatarEquipped != null
-                                    ? NetworkImage(user!.avatarEquipped!)
-                                    : AssetImage('assets/default-avatar.png')
-                                        as ImageProvider,
-                                backgroundColor: Colors.transparent,
+                              child: AvatarBannerWidget(
+                                avatarUrl: user?.avatarEquipped,
+                                bannerUrl: user?.borderEquipped,
+                                size: 44,
+                                avatarFit: BoxFit.cover,
                               ),
                             ),
                             SizedBox(width: 10),

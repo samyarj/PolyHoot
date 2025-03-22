@@ -3,6 +3,7 @@ import { Timestamp } from '@angular/fire/firestore';
 import { MAX_CHAR, MESSAGES_LIMIT } from '@app/constants/constants';
 import { FirebaseChatMessage } from '@app/interfaces/chat-message';
 import { AuthService } from '@app/services/auth/auth.service';
+import { ToastrService } from 'ngx-toastr';
 @Component({
     selector: 'app-chat2',
     templateUrl: './chat2.component.html',
@@ -20,10 +21,41 @@ export class Chat2Component implements OnChanges {
     wasAtBottom: boolean = true; // Track if user was at bottom before update
     inputMessage = '';
 
-    constructor(private authService: AuthService) {}
+    constructor(
+        private authService: AuthService,
+        private toastr: ToastrService,
+    ) {}
 
     get user() {
         return this.authService.user$;
+    }
+
+    reportUser(uid: string) {
+        this.authService
+            .getReportService()
+            .reportPlayer(uid)
+            .subscribe({
+                next: (value: boolean | null) => {
+                    switch (value) {
+                        case true: {
+                            this.toastr.success('Merci pour votre contribution à la bonne atmosphère du jeu.');
+
+                            break;
+                        }
+                        case false: {
+                            this.toastr.info('Vous avez déjà signalé cet utilisateur.');
+
+                            break;
+                        }
+                        case null: {
+                            this.toastr.info('Vous ne pouvez pas signaler un administrateur.');
+
+                            break;
+                        }
+                        // No default
+                    }
+                },
+            });
     }
 
     /**

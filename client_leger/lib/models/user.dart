@@ -10,7 +10,7 @@ class User {
   final String email;
   final List<String>? friendRequests;
   final List<String>? friends;
-  final List<GameLogEntry> gameLogs; // Added
+  final List<GameLogEntry>? gameLogs; // Added
   final Map<String, dynamic>? inventory;
   final bool? isOnline;
   final List<String>? joinedChannels;

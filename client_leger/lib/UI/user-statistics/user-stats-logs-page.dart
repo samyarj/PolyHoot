@@ -75,7 +75,7 @@ class UserStatsAndLogsPage extends ConsumerWidget {
                                       ?.toString() ??
                                   '0.0',
                               averageTimePerGame:
-                                  getAverageTimePerGame(user.gameLogs),
+                                  getAverageTimePerGame(user.gameLogs ?? []),
                             ),
                           ),
                         ),
