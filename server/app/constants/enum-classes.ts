@@ -112,7 +112,7 @@ export enum JoinErrors {
 
 export enum ConnectEvents {
     UserToGame = 'userConnectedToGamePage',
-    IdentifyMobileClient = 'identifyMobileClient',
+    IdentifyClient = 'identifyClient',
     AllPlayersLeft = 'AllPlayersLeft',
 }
 

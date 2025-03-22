@@ -2,6 +2,7 @@ import 'package:client_leger/UI/coins/coins_page.dart';
 import 'package:client_leger/UI/equipped/equipped_page.dart';
 import 'package:client_leger/UI/forgot-password/password_reset_page.dart';
 import 'package:client_leger/UI/login/login_page.dart';
+import 'package:client_leger/UI/luck/luck_page.dart';
 import 'package:client_leger/UI/main-view/main_scaffold.dart';
 import 'package:client_leger/UI/play/pages/creategamepage.dart';
 import 'package:client_leger/UI/play/pages/join_game.dart';
@@ -10,9 +11,11 @@ import 'package:client_leger/UI/play/pages/player_game_page.dart';
 import 'package:client_leger/UI/play/pages/playpage.dart';
 import 'package:client_leger/UI/play/pages/result_page.dart';
 import 'package:client_leger/UI/play/pages/waiting_page.dart';
-import 'package:client_leger/UI/luck/luck_page.dart';
+import 'package:client_leger/UI/profile/profile_page.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/UI/signup/signup_page.dart';
+import 'package:client_leger/UI/user-statistics/game-logs-page.dart';
+import 'package:client_leger/UI/user-statistics/user-stats-logs-page.dart';
 import 'package:client_leger/models/player_data.dart';
 import 'package:client_leger/providers/play/game_player_provider.dart';
 import 'package:client_leger/providers/play/join_game_provider.dart';
@@ -54,6 +57,21 @@ final GoRouter router = GoRouter(
         StatefulShellBranch(
           navigatorKey: _playShellNavigatorKey,
           routes: [
+            GoRoute(
+                path: Paths.profile,
+                builder: (context, state) {
+                  return ProfilePage();
+                }),
+            GoRoute(
+                path: Paths.userStats,
+                builder: (context, state) {
+                  return UserStatsAndLogsPage();
+                }),
+            GoRoute(
+                path: Paths.gamesLogs,
+                builder: (context, state) {
+                  return GameLogsPage();
+                }),
             GoRoute(
               path: Paths.play,
               builder: (context, state) => const PlayPage(),
