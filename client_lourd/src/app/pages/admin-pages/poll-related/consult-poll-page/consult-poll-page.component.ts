@@ -39,7 +39,7 @@ export class ConsultPollPageComponent {
     }
 
     goToEdit(id: string | undefined) {
-        if (id) this.router.navigate([AppRoute.CREATE + id]);
+        if (id) this.router.navigate(['polls/' + AppRoute.MODIFYPOLL + id]);
     }
 
     trackByFn(_index: number, item: Poll) {

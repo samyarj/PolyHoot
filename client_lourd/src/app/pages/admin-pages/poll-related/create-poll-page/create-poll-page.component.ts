@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpErrorResponse } from '@angular/common/http';
-import { AfterViewInit, Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { AfterViewInit, Component, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { addQuestionAnimation, deleteQuestionAnimation, pollFormAnimation, questionFormAnimation } from '@app/animations/animation';
 import { EMPTY_STRING, MAX_CHOICES, MIN_CHOICES } from '@app/constants/constants';
 import { AppRoute, ButtonType, ConfirmationMessage } from '@app/constants/enum-class';
@@ -22,11 +22,20 @@ import { Observer, tap } from 'rxjs';
     styleUrls: ['./create-poll-page.component.scss'],
     animations: [addQuestionAnimation, deleteQuestionAnimation, questionFormAnimation, pollFormAnimation],
 })
-export class CreatePollPageComponent implements AfterViewInit {
+export class CreatePollPageComponent implements AfterViewInit, OnDestroy {
     question: Question = JSON.parse(JSON.stringify(EMPTY_POLL_QUESTION));
     submitPollButton: string = ButtonType.CREATE;
     submitQuestionButton: string = ButtonType.ADD;
     showButton: boolean = true;
+    private pollObserver: Partial<Observer<Poll>> = {
+        next: (poll: Poll) => {
+            this.createPollService.poll = poll;
+            this.poll.endDate = poll.endDate.slice(0, 16);
+        },
+        error: (httpErrorResponse: HttpErrorResponse) => {
+            this.messageHandlerService.popUpErrorDialog(httpErrorResponse.error.message);
+        },
+    };
     private errorObserver: Partial<Observer<Poll[]>> = {
         next: () => {
             this.router.navigate([AppRoute.POLLS]);
@@ -40,11 +49,18 @@ export class CreatePollPageComponent implements AfterViewInit {
         private validationService: ValidationService,
         private questionValidationService: QuestionValidationService,
         private router: Router,
+        private route: ActivatedRoute,
         private messageHandlerService: MessageHandlerService,
-    ) {}
+    ) {
+        this.setMode();
+    }
 
     get poll(): Poll {
         return this.createPollService.poll;
+    }
+
+    ngOnDestroy(): void {
+        this.resetAnswers();
     }
 
     ngAfterViewInit(): void {
@@ -104,10 +120,14 @@ export class CreatePollPageComponent implements AfterViewInit {
             return false; // Aucune date sélectionnée
         }
 
+        // Convertir la chaîne en objet Date
         const selectedDate = new Date(this.poll.endDate);
+
+        // Obtenir la date actuelle
         const now = new Date();
         now.setSeconds(0, 0); // Ignore les millisecondes et secondes pour éviter des problèmes de précision
 
+        // Comparer les dates
         return selectedDate >= now;
     }
 
@@ -123,7 +143,7 @@ export class CreatePollPageComponent implements AfterViewInit {
         return this.validationService.areTextsUnique(this.question.choices);
     }
     resetAnswers(): void {
-        this.question = JSON.parse(JSON.stringify(EMPTY_POLL_QUESTION));
+        this.createPollService.emptyPoll();
     }
     emptyPollAndRedirect() {
         console.log('emptyPollAndRedirect avec ', this.poll.id);
@@ -133,6 +153,7 @@ export class CreatePollPageComponent implements AfterViewInit {
     }
 
     validatePoll(): boolean {
+        console.log('Date Valid: ', this.isDateValid());
         return (
             this.isDateValid() &&
             !this.isPollTitleEmpty() &&
@@ -142,19 +163,20 @@ export class CreatePollPageComponent implements AfterViewInit {
         );
     }
     validQuestion(): boolean {
-        console.log('1: ', this.areQuestionChoicesTextValid());
-        console.log('2: ', this.validUniqueChoiceTexts());
-        console.log('3: ', this.isQuestionTextEmpty());
         return this.areQuestionChoicesTextValid() && this.validUniqueChoiceTexts() && !this.isQuestionTextEmpty();
     }
     submitPollEvent() {
         /* this.createPollService.disableAnimations = true; */
         if (this.poll.id) {
-            this.createPollService.updatePoll(this.poll.id, this.poll).subscribe(this.errorObserver);
-            this.createPollService.updatePoll(this.poll.id, this.poll).subscribe(() => {
-                console.log('✅ Sondage modifié, maintenant on redirige...');
-                this.emptyPollAndRedirectCallback();
-            });
+            this.createPollService
+                .updatePoll(this.poll.id, this.poll)
+                .pipe(
+                    tap(() => {
+                        console.log('✅ Sondage modifié, maintenant on redirige...');
+                        this.emptyPollAndRedirectCallback();
+                    }),
+                )
+                .subscribe(this.errorObserver);
             return;
         }
         this.createPollService
@@ -169,7 +191,6 @@ export class CreatePollPageComponent implements AfterViewInit {
     }
     private emptyPollAndRedirectCallback() {
         this.resetAnswers();
-        this.createPollService.emptyPoll();
         this.router.navigate([AppRoute.POLLS]);
     }
     private emptyQuestion() {
@@ -199,5 +220,13 @@ export class CreatePollPageComponent implements AfterViewInit {
             updateMinDateTime();
             setInterval(updateMinDateTime, 1000);
         }
+    }
+    private setMode(): void {
+        const pollId = this.route.snapshot.params.id;
+        if (pollId) {
+            this.createPollService.getPollById(pollId).subscribe(this.pollObserver);
+            this.submitPollButton = ButtonType.MODIFY;
+        }
+        this.createPollService.poll.id = pollId;
     }
 }

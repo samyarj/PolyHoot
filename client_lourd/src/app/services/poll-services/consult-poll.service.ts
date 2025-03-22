@@ -20,9 +20,7 @@ export class ConsultPollService {
 
     getAllPolls(): Observable<Poll[]> {
         return this.http.get<Poll[]>(this.baseUrl).pipe(
-            tap((polls) => console.log('📡 Requête GET exécutée, sondages reçus:', polls)),
             catchError((error) => {
-                console.error('❌ Erreur lors de la récupération des sondages:', error);
                 return this.messageHandler.handleHttpError(error);
             }),
         );

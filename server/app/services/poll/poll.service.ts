@@ -51,26 +51,15 @@ export class PollService {
     }
 
     async createPoll(createPollDto: CreatePollDto): Promise<Poll> {
+        // Vérifier si un sondage avec le même titre existe déjà
         const existingPoll = await this.findPollByTitle(createPollDto.title);
-        if (existingPoll && existingPoll.title) throw new ConflictException(ERROR.POLL.ALREADY_EXISTS);    
-        // Vérifie si endDate est une chaîne et convertit en Date si nécessaire
-        if (typeof createPollDto.endDate === "string") {
-            console.log("endDate est un string");
-            createPollDto.endDate = new Date(createPollDto.endDate);
+        if (existingPoll && existingPoll.title) {
+            throw new ConflictException(ERROR.POLL.ALREADY_EXISTS);
         }
-        // Vérifie que endDate est bien une instance de Date avant d'ajuster l'heure
-        if (createPollDto.endDate instanceof Date && !isNaN(createPollDto.endDate.getTime())) {
-            createPollDto.endDate = new Date(createPollDto.endDate.getTime() - createPollDto.endDate.getTimezoneOffset() * 60000);
-        } else {
-            throw new BadRequestException("Invalid endDate format");
-        }
-    
-        console.log("2");
-    
         const createdPoll = new this.pollModel(createPollDto);
         return createdPoll.save();
     }
-    
+
     async createPublishedPoll(createPublishedPollDto: CreatePublishedPollDto): Promise<Poll> {
         const existingPoll = await this.findPollByTitle(createPublishedPollDto.title);
         if (existingPoll && existingPoll.title) throw new ConflictException(ERROR.POLL.ALREADY_EXISTS);

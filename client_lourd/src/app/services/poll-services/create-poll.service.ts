@@ -22,12 +22,17 @@ export class CreatePollService {
         private messageHandler: MessageHandlerService,
         private questionValidationService: QuestionValidationService,
     ) {}
+    getPollById(id: string): Observable<Poll> {
+        return this.http.get<Poll>(`${this.baseUrl}/${id}`).pipe(
+            catchError((error) => {
+                return this.messageHandler.handleHttpError(error);
+            }),
+        );
+    }
 
     createPoll(poll: Poll): Observable<Poll[]> {
-        console.log('Envoyé au serveur: ', poll);
         return this.http.post<Poll[]>(`${this.baseUrl}/create`, poll).pipe(
             map((polls) => {
-                console.log('polls retourné du serveur normalement avec nouveau', polls);
                 return polls;
             }),
             catchError(this.messageHandler.handleHttpError),

@@ -40,6 +40,7 @@ export enum AppRoute {
     JOINGAME = '/join-game',
     QUESTIONBANK = '/questionBank',
     POLLS = '/polls',
+    MODIFYPOLL = '/modifyPoll/',
 }
 export enum CoinFlipGameState {
     Uninitialized = 0,

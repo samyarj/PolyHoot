@@ -66,7 +66,7 @@ export const EMPTY_POLL: Poll = {
     description: '',
     questions: [],
     expired: false,
-    endDate: new Date(0, 0, 0, 0, 0),
+    endDate: '',
     isPublished: false,
 };
 export const EMPTY_POLL_QUESTION: Question = {

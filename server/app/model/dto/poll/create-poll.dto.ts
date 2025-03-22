@@ -18,7 +18,7 @@ export class CreatePollDto {
 
     @ApiProperty()
     @IsNotEmpty()
-    endDate: Date;
+    endDate: string;
 
     @ApiProperty()
     @IsOptional()
