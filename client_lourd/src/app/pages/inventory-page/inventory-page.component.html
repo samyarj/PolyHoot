@@ -2,6 +2,7 @@
     <div class="content-wrapper">
         <div class="inventory">
             <h1>Inventaire</h1>
+            <div class="horizontal-divider"></div>
             <div class="inventory-content">
                 <div class="inventory-section">
                     <div class="section-title">Avatars</div>
@@ -17,6 +18,7 @@
                 <div class="inventory-section">
                     <div class="section-title">Bannière d'avatar</div>
                     <div class="grid">
+                        <div *ngIf="banners.length >= 1" class="square" (click)="selectBanner('')">Aucun</div>
                         <div *ngFor="let banner of banners" class="square" (click)="selectBanner(banner)">
                             <img [src]="banner" alt="avatar" class="square-banner" />
                         </div>

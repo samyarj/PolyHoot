@@ -55,6 +55,19 @@
             </small>
         </div>
     </div>
+    <div class="upload-section">
+        <input type="file" (change)="onFileSelectedAndUpload($event)" accept="image/*" #fileInput style="display: none" />
+        <button (click)="fileInput.click(); $event.stopPropagation(); $event.preventDefault()" class="custom-button">
+            Téléverser une image pour votre question
+        </button>
+        <button (click)="deleteImage(); $event.stopPropagation(); $event.preventDefault()" class="custom-button">
+            Supprimer l'image de votre question
+        </button>
+        <div *ngIf="this.question.image">
+            <p>Image téléversée :</p>
+            <img [src]="this.question.image" alt="Image associée" style="max-width: 100%; height: auto" />
+        </div>
+    </div>
 
     <div class="form-group answers-section" *ngIf="questionType === 'QRE'">
         <div class="form-group">
@@ -98,24 +111,24 @@
             <input
                 *ngIf="question.qreAttributes"
                 type="number"
-                min = "0"
+                min="0"
                 [(ngModel)]="question.qreAttributes.tolerance"
                 name="tolerance"
                 required
                 #toleranceInput="ngModel"
             />
-            <div>
-                <small *ngIf="!toleranceValid()" class="text-danger"> La marge de tolérance doit être supérieure à 0 et ne peut dépasser 1/4 de l'intervalle. </small>
-                <small *ngIf="!minBoundValid()" class="text-danger">
-                    La borne minimale doit être inférieure à la bonne réponse.<br />
-                </small>
-                <small *ngIf="!maxBoundValid()" class="text-danger">
-                    La borne maximale doit être supérieure à la borne minimale et à la bonne réponse.<br />
-                </small>
-                <small *ngIf="!goodAnswerValid()" class="text-danger">
-                    La bonne réponse doit être comprise entre la borne minimale et la borne maximale.<br />
-                </small>
-            </div>
+        </div>
+        <div>
+            <small *ngIf="!toleranceValid()" class="text-danger">
+                La marge de tolérance doit être supérieure à 0 et ne peut dépasser 1/4 de l'intervalle.
+            </small>
+            <small *ngIf="!minBoundValid()" class="text-danger"> La borne minimale doit être inférieure à la bonne réponse.<br /> </small>
+            <small *ngIf="!maxBoundValid()" class="text-danger">
+                La borne maximale doit être supérieure à la borne minimale et à la bonne réponse.<br />
+            </small>
+            <small *ngIf="!goodAnswerValid()" class="text-danger">
+                La bonne réponse doit être comprise entre la borne minimale et la borne maximale.<br />
+            </small>
         </div>
     </div>
 
@@ -171,8 +184,14 @@
         <div *ngIf="!questionForm.valid || !areQuestionChoicesTextValid()" class="text-danger">*Tous les champs sont requis.</div>
     </div>
     <div class="submit-section">
-        <button *ngIf="showButton" type="button" class="btn btn-dark custom-width" (click)="resetAnswers()">Tout effacer</button>
-        <button *ngIf="showButton" type="submit" class="btn custom-button custom-width" [disabled]="!questionForm.valid || !validQuestion()">
+        <button *ngIf="showButton" type="button" class="custom-button-cancel-medium" (click)="resetAnswers()">Tout effacer</button>
+        <button
+            *ngIf="showButton"
+            type="submit"
+            class="custom-button-medium"
+            [ngClass]="{ 'custom-button-medium-disabled': !questionForm.valid || !validQuestion() }"
+            [disabled]="!questionForm.valid || !validQuestion()"
+        >
             {{ submitButton }}
         </button>
     </div>

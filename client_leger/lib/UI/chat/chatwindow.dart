@@ -1,8 +1,9 @@
 import 'dart:async';
+
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
-import 'package:client_leger/models/chat_message.dart';
 import 'package:client_leger/business/channel_manager.dart';
+import 'package:client_leger/models/chat_message.dart';
 import 'package:client_leger/providers/user_provider.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -112,7 +113,10 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
   @override
   Widget build(BuildContext context) {
     final userState = ref.read(userProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
+        backgroundColor: colorScheme.primary,
         resizeToAvoidBottomInset: true,
         body: userState.when(
             data: (user) {
@@ -121,8 +125,13 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      Text(widget.channel, style: TextStyle(fontSize: 18)),
-                      Divider(),
+                      Text(widget.channel,
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: colorScheme.tertiary,
+                              fontWeight: FontWeight.bold)),
+                      Divider(
+                          color: colorScheme.onPrimary.withValues(alpha: 0.5)),
                       Expanded(
                         child: SingleChildScrollView(
                           // sinon overflow on focus when keyboard appears
@@ -161,8 +170,8 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                       padding:
                                                           EdgeInsets.all(12),
                                                       decoration: BoxDecoration(
-                                                        color:
-                                                            Color(0xFF4F5487),
+                                                        color: colorScheme
+                                                            .primaryContainer,
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(15),
@@ -175,8 +184,8 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                           Text(
                                                             message.username!,
                                                             style: TextStyle(
-                                                                color: Colors
-                                                                    .white,
+                                                                color: colorScheme
+                                                                    .onPrimaryContainer,
                                                                 fontSize: 18,
                                                                 fontWeight:
                                                                     FontWeight
@@ -186,8 +195,8 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                             message.message,
                                                             softWrap: true,
                                                             style: TextStyle(
-                                                              color:
-                                                                  Colors.white,
+                                                              color: colorScheme
+                                                                  .onPrimaryContainer,
                                                               fontSize: 18,
                                                               fontStyle:
                                                                   FontStyle
@@ -201,8 +210,11 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                               formatDate(message
                                                                   .timestamp),
                                                               style: TextStyle(
-                                                                  color: Colors
-                                                                      .white,
+                                                                  color: colorScheme
+                                                                      .onPrimaryContainer
+                                                                      .withValues(
+                                                                          alpha:
+                                                                              0.7),
                                                                   fontSize: 16),
                                                             ),
                                                           ),
@@ -232,17 +244,30 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                       gradient: LinearGradient(
                                                         colors: isUserMessage
                                                             ? [
-                                                                Color(
-                                                                    0xFF47AE6C),
-                                                                Color(
-                                                                    0xFF2ECC71)
+                                                                colorScheme
+                                                                    .secondary
+                                                                    .withValues(
+                                                                        alpha:
+                                                                            0.4),
+                                                                colorScheme
+                                                                    .secondary
+                                                                    .withValues(
+                                                                        alpha:
+                                                                            0.7),
                                                               ]
                                                             : [
-                                                                Color(
-                                                                    0xFF4A69BB),
-                                                                Color(
-                                                                    0xFF3B5998)
+                                                                colorScheme
+                                                                    .surface
+                                                                    .withValues(
+                                                                        alpha:
+                                                                            0.6),
+                                                                colorScheme
+                                                                    .surface,
                                                               ],
+                                                        begin:
+                                                            Alignment.topLeft,
+                                                        end: Alignment
+                                                            .bottomRight,
                                                       ),
                                                       borderRadius:
                                                           BorderRadius.only(
@@ -269,8 +294,8 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                       boxShadow: [
                                                         BoxShadow(
                                                             color: Colors.black
-                                                                .withOpacity(
-                                                                    0.2),
+                                                                .withValues(
+                                                                    alpha: 0.2),
                                                             spreadRadius: 2,
                                                             blurRadius: 6),
                                                       ],
@@ -284,8 +309,11 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                           message.username ??
                                                               "Unknown",
                                                           style: TextStyle(
-                                                              color:
-                                                                  Colors.white,
+                                                              color: isUserMessage
+                                                                  ? colorScheme
+                                                                      .onSecondary
+                                                                  : colorScheme
+                                                                      .onSurface,
                                                               fontSize: 18,
                                                               fontWeight:
                                                                   FontWeight
@@ -295,8 +323,11 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                           message.message,
                                                           softWrap: true,
                                                           style: TextStyle(
-                                                              color:
-                                                                  Colors.white,
+                                                              color: isUserMessage
+                                                                  ? colorScheme
+                                                                      .onSecondary
+                                                                  : colorScheme
+                                                                      .onSurface,
                                                               fontSize: 18),
                                                         ),
                                                         Align(
@@ -306,8 +337,14 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                             formatDate(message
                                                                 .timestamp),
                                                             style: TextStyle(
-                                                                color: Colors
-                                                                    .white,
+                                                                color: (isUserMessage
+                                                                        ? colorScheme
+                                                                            .onSecondary
+                                                                        : colorScheme
+                                                                            .onSurface)
+                                                                    .withValues(
+                                                                        alpha:
+                                                                            0.7),
                                                                 fontSize: 16),
                                                           ),
                                                         ),
@@ -329,15 +366,24 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                   focusNode: _focusNode,
                                   minLines: 1,
                                   maxLines: null,
+                                  style:
+                                      TextStyle(color: colorScheme.onSurface),
                                   decoration: InputDecoration(
                                     hintText: 'Écrivez un message...',
+                                    filled: true,
+                                    fillColor: colorScheme.surface,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                      borderSide: BorderSide.none,
+                                    ),
                                     suffixIcon: IconButton(
-                                      icon:
-                                          Icon(Icons.send, color: Colors.white),
+                                      icon: Icon(Icons.send,
+                                          color: colorScheme.secondary),
                                       onPressed: () => sendMessage(),
                                     ),
                                     hintStyle: TextStyle(
-                                      color: Colors.white,
+                                      color: colorScheme.onSurface
+                                          .withValues(alpha: 0.6),
                                     ),
                                   ),
                                   textInputAction: TextInputAction.send,

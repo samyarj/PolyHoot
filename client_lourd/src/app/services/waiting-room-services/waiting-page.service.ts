@@ -1,13 +1,17 @@
 import { Injectable } from '@angular/core';
 import { DisconnectEvents, GameEvents, JoinEvents, TimerEvents } from '@app/constants/enum-class';
-import { SocketClientService } from '@app/services/websocket-services/general/socket-client-manager.service';
+import { AuthService } from '@app/services/auth/auth.service';
 import { Subject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
 })
 export class WaitingPageService {
-    players: string[] = [];
+    players: {
+        name: string;
+        avatar: string;
+        banner: string;
+    }[] = [];
     gameLocked = false;
     time: number | null;
     gameTitle: string;
@@ -21,13 +25,18 @@ export class WaitingPageService {
     timerEndSource = new Subject<boolean>();
     timerEnd$ = this.timerEndSource.asObservable();
 
-    constructor(private socketService: SocketClientService) {
+    isPlayersListEmpty: boolean = true;
+    constructor(private authService: AuthService) {
         this.handleUserSockets();
         this.handleGameSockets();
     }
 
+    get socketService() {
+        return this.authService.getSocketService();
+    }
+
     get playerName() {
-        return this.socketService.playerName;
+        return this.authService.user$;
     }
 
     get isOrganizer() {
@@ -36,6 +45,10 @@ export class WaitingPageService {
 
     get roomId() {
         return this.socketService.roomId;
+    }
+
+    onPopOutDone() {
+        this.isPlayersListEmpty = this.players.length === 0;
     }
 
     toggleGameLock() {
@@ -79,14 +92,29 @@ export class WaitingPageService {
     }
 
     private handlePlayerLeft() {
-        this.socketService.on<{ playerNames: string[]; roomId: string }>(GameEvents.PlayerLeft, ({ playerNames }) => {
-            this.players = playerNames;
+        this.socketService.on<{
+            playersInfo: {
+                name: string;
+                avatar: string;
+                banner: string;
+            }[];
+            roomId: string;
+        }>(GameEvents.PlayerLeft, ({ playersInfo }) => {
+            this.players = playersInfo;
         });
     }
 
     private handleJoinGameSuccess() {
-        this.socketService.on<{ playerNames: string[]; roomId: string }>(JoinEvents.JoinSuccess, ({ playerNames }) => {
-            this.players = playerNames;
+        this.socketService.on<{
+            playersInfo: {
+                name: string;
+                avatar: string;
+                banner: string;
+            }[];
+            roomId: string;
+        }>(JoinEvents.JoinSuccess, ({ playersInfo }) => {
+            this.players = playersInfo;
+            this.isPlayersListEmpty = false;
         });
     }
 
@@ -119,7 +147,7 @@ export class WaitingPageService {
     private handleCountdownEnd() {
         this.socketService.on(TimerEvents.GameCountdownEnd, () => {
             this.timerEndSource.next(true);
-            if (this.isOrganizer) this.startGame();
+            this.startGame();
             this.resetAttributes();
         });
     }

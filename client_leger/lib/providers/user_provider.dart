@@ -1,11 +1,13 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
-import 'package:client_leger/models/user.dart' as user_model;
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
+import 'package:client_leger/models/user.dart' as user_model;
 import 'package:client_leger/utilities/logger.dart';
+import 'package:client_leger/utilities/socket_events.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -22,11 +24,12 @@ final userProvider =
 ValueNotifier<bool> isLoggedIn = ValueNotifier<bool>(false);
 
 class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
+  StreamSubscription<DocumentSnapshot>? _userDocSubscription;
   AuthNotifier() : super(const AsyncValue.loading()) {
     fetchUser();
   }
 
-  // Fetch user from API
+  // Fetch user from API and setup listener
   Future<void> fetchUser() async {
     state = const AsyncValue.loading();
     try {
@@ -37,35 +40,61 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       if (firebaseUser == null) {
         state = const AsyncValue.data(null);
         WebSocketManager.instance.playerName = null;
-
         return;
       }
+
       if (await auth_service.isUserOnline(firebaseUser.email!)) {
         FirebaseAuth.instance.signOut();
         throw Exception("Cet utilisateur est déjà connecté.");
       }
 
       final idToken = await firebaseUser.getIdToken();
-      final headers = {'Authorization': 'Bearer $idToken'};
 
-      final http.Response response = await http
-          .get(Uri.parse(auth_service.getProfileUrl), headers: headers);
+      WebSocketManager.instance.initializeSocketConnection(idToken);
 
-      if (response.statusCode == 200) {
-        final userJson = jsonDecode(response.body);
-        final user = user_model.User.fromJson(userJson);
-        state = AsyncValue.data(user);
-        isLoggedIn.value = true;
-        WebSocketManager.instance.playerName = user.username;
-      } else {
-        throw Exception('Server error: ${response.reasonPhrase}');
-      }
+      WebSocketManager.instance.webSocketSender(
+          ConnectEvents.IdentifyClient.value, firebaseUser.uid);
+
+      // Set up real-time listener for user document
+      setupUserDocListener(firebaseUser.uid);
+
+      // Mark user as online
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(firebaseUser.uid)
+          .update({'isOnline': true});
     } catch (e, stack) {
       AppLogger.e("Error fetching user: $e");
       state = AsyncValue.error(e, stack);
       isLoggedIn.value = false;
       throw Exception(getCustomError(e));
     }
+  }
+
+  void setupUserDocListener(String uid) {
+    // Cancel any existing subscription
+    _userDocSubscription?.cancel();
+
+    // Listen to the user document
+    _userDocSubscription = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .snapshots()
+        .listen((docSnapshot) async {
+      if (docSnapshot.exists) {
+        final userData = docSnapshot.data() as Map<String, dynamic>;
+        final user = user_model.User.fromJson(userData);
+        state = AsyncValue.data(user);
+        isLoggedIn.value = true;
+        WebSocketManager.instance.playerName = user.username;
+        AppLogger.d("User data updated in real-time: ${user.username}");
+      } else {
+        throw Exception("User document not found in Firestore");
+      }
+    }, onError: (e, stack) {
+      AppLogger.e("Error in Firestore user document listener: $e");
+      state = AsyncValue.error(e, stack);
+    });
   }
 
   // Create a new user
@@ -85,6 +114,14 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
         state = AsyncValue.data(user);
         isLoggedIn.value = true;
         WebSocketManager.instance.playerName = user.username;
+        if (userCredential.user != null) {
+          WebSocketManager.instance.initializeSocketConnection(idToken);
+
+          WebSocketManager.instance.webSocketSender(
+              "identifyMobileClient", userCredential.user!.uid);
+
+          setupUserDocListener(userCredential.user!.uid);
+        }
       } else {
         throw Exception("Failed to create user: ${response.reasonPhrase}");
       }
@@ -162,26 +199,97 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
     }
   }
 
+  Future<bool> updateUsername(String newUsername) async {
+    try {
+      //state = const AsyncValue.loading();
+
+      // Get current Firebase user
+      final currentUser = FirebaseAuth.instance.currentUser;
+      AppLogger.w('Current user: $currentUser');
+      if (currentUser == null) {
+        throw Exception('User not authenticated');
+      }
+
+      // First update Firebase Auth display name
+      await currentUser.updateDisplayName(newUsername);
+
+      // Get a fresh ID token
+      final token = await currentUser.getIdToken();
+      AppLogger.w('ID token: $token');
+
+      // Then update Firestore through backend
+      final response = await http.patch(
+        Uri.parse(auth_service.updateUserNameUrl),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json'
+        },
+        body: jsonEncode({'username': newUsername}),
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw Exception(jsonDecode(response.body)['message'] ??
+            'Failed to update username');
+      }
+    } catch (e) {
+      AppLogger.e('Error updating username: ${e.toString()}');
+
+      if (state is! AsyncError) {
+        state = AsyncError(getCustomError(e), StackTrace.current);
+      }
+
+      throw Exception(getCustomError(e));
+    }
+  }
+
   Future<void> logout() async {
     state = const AsyncValue.loading();
     try {
       AppLogger.d("Logging out...");
+
+      // Cancel the Firestore listener first
+      _userDocSubscription?.cancel();
+      _userDocSubscription = null;
+
       final currentUser = FirebaseAuth.instance.currentUser;
 
       if (currentUser != null) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(currentUser.uid)
-            .update({'isOnline': false});
+        try {
+          // Try to update the online status, but don't fail if it doesn't work
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(currentUser.uid)
+              .update({'isOnline': false}).timeout(
+                  const Duration(seconds: 2)); // Add timeout
+        } catch (e) {
+          // Log the error but continue with logout
+          AppLogger.w("Failed to update online status: $e");
+        }
       }
 
+      // Sign out regardless of whether the Firestore update succeeded
       await FirebaseAuth.instance.signOut();
+
+      // Update state
       state = const AsyncValue.data(null);
       WebSocketManager.instance.playerName = null;
       isLoggedIn.value = false;
     } catch (e, stack) {
       AppLogger.e("Logout error: $e");
-      state = AsyncValue.error(e, stack);
+
+      // Even if there's an error, try to sign out and clean up state
+      try {
+        await FirebaseAuth.instance.signOut();
+      } catch (_) {
+        // Ignore any error here
+      }
+
+      state = const AsyncValue.data(null);
+      WebSocketManager.instance.playerName = null;
+      isLoggedIn.value = false;
+
       throw Exception(getCustomError(e));
     }
   }

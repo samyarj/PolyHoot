@@ -1,6 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { authGuard } from '@app/guards/auth.guard';
+import { authGuard, authGuardAdmin, authGuardPlayer } from '@app/guards/auth.guard';
+import { ActionLogsPageComponent } from '@app/pages/action-logs-page/action-logs-page.component';
+import { PlayerInfoPageComponent } from '@app/pages/admin-pages/player-info-page/player-info-page.component';
+import { ConsultPollPageComponent } from '@app/pages/admin-pages/poll-related/consult-poll-page/consult-poll-page.component';
+import { CreatePollPageComponent } from '@app/pages/admin-pages/poll-related/create-poll-page/create-poll-page.component';
+import { HistoryPollPageComponent } from '@app/pages/admin-pages/poll-related/history-poll-page/history-poll-page.component';
+import { PollMainPageComponent } from '@app/pages/admin-pages/poll-related/poll-main-page/poll-main-page.component';
 import { ForgotPasswordComponent } from '@app/pages/auth/forgot-password/forgot-password.component';
 import { LoginPageComponent } from '@app/pages/auth/login-page/login-page.component';
 import { SignUpComponent } from '@app/pages/auth/sign-up/sign-up.component';
@@ -19,7 +25,6 @@ import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { ProfilePageComponent } from '@app/pages/profile-page/profile-page.component';
 import { AdminPageComponent } from '@app/pages/quiz-question-related/admin-page/admin-page.component';
 import { AdminQuizCreateComponent } from '@app/pages/quiz-question-related/create-quiz/admin-create-quiz';
-import { HistoryPageComponent } from '@app/pages/quiz-question-related/history/history.component';
 import { QuestionBankPageComponent } from '@app/pages/quiz-question-related/question-bank-page/question-bank-page.component';
 import { QuizManagementMainPageComponent } from '@app/pages/quiz-question-related/quiz-management-main-page/quiz-management-main-page.component';
 import { ShopMainPageComponent } from '@app/pages/shop-related/shop-main-page/shop-main-page.component';
@@ -43,57 +48,69 @@ const routes: Routes = [
     {
         path: 'quiz-question-management',
         component: QuizManagementMainPageComponent,
-        canActivate: [authGuard],
+        canActivate: [authGuardPlayer],
         children: [
             { path: '', redirectTo: 'quizList', pathMatch: 'full' },
-            { path: 'quizList', component: AdminPageComponent, canActivate: [authGuard] },
-            { path: 'createQuiz', component: AdminQuizCreateComponent, canActivate: [authGuard] },
-            { path: 'modifierQuiz/:id', component: AdminQuizCreateComponent, canActivate: [authGuard] },
-            { path: 'questionBank', component: QuestionBankPageComponent, canActivate: [authGuard] },
-            { path: 'history', component: HistoryPageComponent, canActivate: [authGuard] },
+            { path: 'quizList', component: AdminPageComponent, canActivate: [authGuardPlayer] },
+            { path: 'createQuiz', component: AdminQuizCreateComponent, canActivate: [authGuardPlayer] },
+            { path: 'modifierQuiz/:id', component: AdminQuizCreateComponent, canActivate: [authGuardPlayer] },
+            { path: 'questionBank', component: QuestionBankPageComponent, canActivate: [authGuardPlayer] },
         ],
     },
-    { path: 'inventory', component: InventoryPageComponent, canActivate: [authGuard] },
+    { path: 'inventory', component: InventoryPageComponent, canActivate: [authGuardPlayer] },
     {
         path: 'game-home',
         component: GameMainPageComponent,
         canActivate: [authGuard],
         children: [
             { path: '', redirectTo: 'joinGame', pathMatch: 'full' },
-            { path: 'joinGame', component: JoinGamePageComponent, canActivate: [authGuard] },
-            { path: 'create', component: CreatePageComponent, canActivate: [authGuard] },
+            { path: 'joinGame', component: JoinGamePageComponent, canActivate: [authGuardPlayer] },
+            { path: 'create', component: CreatePageComponent, canActivate: [authGuardPlayer] },
         ],
     },
     {
         path: 'shop-home',
         component: ShopMainPageComponent,
-        canActivate: [authGuard],
+        canActivate: [authGuardPlayer],
         children: [
             { path: '', redirectTo: 'shop', pathMatch: 'full' },
-            { path: 'shop', component: ShopPageComponent, canActivate: [authGuard] },
-            { path: 'transfer', component: TransferPageComponent, canActivate: [authGuard] },
+            { path: 'shop', component: ShopPageComponent, canActivate: [authGuardPlayer] },
+            { path: 'transfer', component: TransferPageComponent, canActivate: [authGuardPlayer] },
         ],
     },
     {
         path: 'luck',
         component: LuckMainPageComponent,
-        canActivate: [authGuard],
+        canActivate: [authGuardPlayer],
         children: [
             { path: '', redirectTo: 'lootBox', pathMatch: 'full' },
-            { path: 'lootBox', component: LootBoxPageComponent, canActivate: [authGuard] },
-            { path: 'coinFlip', component: CoinFlipPageComponent, canActivate: [authGuard] },
-            { path: 'dailyFree', component: DailyFreePageComponent, canActivate: [authGuard] },
+            { path: 'lootBox', component: LootBoxPageComponent, canActivate: [authGuardPlayer] },
+            { path: 'coinFlip', component: CoinFlipPageComponent, canActivate: [authGuardPlayer] },
+            { path: 'dailyFree', component: DailyFreePageComponent, canActivate: [authGuardPlayer] },
         ],
     },
 
-    { path: 'game', component: GamePageComponent, canActivate: [authGuard] },
-    { path: 'results', component: ResultsPageComponent, canActivate: [authGuard] },
-    { path: 'waiting', component: WaitingPageComponent, canActivate: [authGuard] },
-    { path: 'organizer', component: OrganizerPageComponent, canActivate: [authGuard] },
+    { path: 'game', component: GamePageComponent, canActivate: [authGuardPlayer] },
+    { path: 'results', component: ResultsPageComponent, canActivate: [authGuardPlayer] },
+    { path: 'waiting', component: WaitingPageComponent, canActivate: [authGuardPlayer] },
+    { path: 'organizer', component: OrganizerPageComponent, canActivate: [authGuardPlayer] },
 
     { path: 'global-chat', component: GlobalChatComponent, canActivate: [authGuard] },
-    { path: 'profile', component: ProfilePageComponent, canActivate: [authGuard] },
-    { path: '**', redirectTo: '/home' },
+    { path: 'profile', component: ProfilePageComponent, canActivate: [authGuardPlayer] },
+    { path: 'profile/logs', component: ActionLogsPageComponent, canActivate: [authGuardPlayer] },
+
+    { path: 'playerInfo', component: PlayerInfoPageComponent, canActivate: [authGuardAdmin] },
+    {
+        path: 'polls',
+        component: PollMainPageComponent,
+        canActivate: [authGuardAdmin],
+        children: [
+            { path: '', redirectTo: 'consult', pathMatch: 'full' },
+            { path: 'consult', component: ConsultPollPageComponent, canActivate: [authGuardAdmin] },
+            { path: 'create', component: CreatePollPageComponent, canActivate: [authGuardAdmin] },
+            { path: 'history', component: HistoryPollPageComponent, canActivate: [authGuardAdmin] },
+        ],
+    },
 ];
 
 @NgModule({

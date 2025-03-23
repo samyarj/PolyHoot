@@ -22,4 +22,16 @@ export class CloudinaryService {
             toStream(file.buffer).pipe(upload);
         });
     }
+
+    async deleteImage(publicUrl: string): Promise<void> {
+        try {
+            const urlParts = publicUrl.split('/');
+            const fileName = urlParts[urlParts.length - 1];
+            const publicId = `avatars/${fileName.split('.')[0]}`;
+
+            await v2.uploader.destroy(publicId);
+        } catch (error) {
+            throw new Error(`Failed to delete image: ${error.message}`);
+        }
+    }
 }

@@ -12,6 +12,7 @@ import 'package:http/http.dart' as http;
 const String baseUrl = '${Environment.serverUrl}/users';
 const String getProfileUrl = '$baseUrl/profile';
 const String createUserUrl = '$baseUrl/create-user';
+const String updateUserNameUrl = '$baseUrl/update-username';
 const String logOutUrl = '$baseUrl/logout';
 const String checkEmailUrl = '$baseUrl/check-email';
 const String googleSignInUrl = '$baseUrl/signin-google';

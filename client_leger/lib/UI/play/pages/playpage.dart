@@ -8,6 +8,7 @@ class PlayPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
     return SingleChildScrollView(
       child: ConstrainedBox(
         constraints: BoxConstraints(
@@ -17,8 +18,8 @@ class PlayPage extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [colorScheme.primary, colorScheme.secondary],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
           ),
           child: Column(
@@ -31,7 +32,7 @@ class PlayPage extends StatelessWidget {
               Text(
                 "POLYHOOT",
                 style: TextStyle(
-                  color: Colors.white,
+                  color: colorScheme.onPrimary,
                   fontSize: 36,
                   fontFamily: 'Lato',
                   letterSpacing: 9.5,
@@ -40,7 +41,7 @@ class PlayPage extends StatelessWidget {
               Text(
                 "TESTEZ VOS CONNAISSANCES!",
                 style: TextStyle(
-                  color: Colors.white,
+                  color: colorScheme.onPrimary,
                   fontSize: 16,
                   fontFamily: 'Lato',
                   letterSpacing: 9.5,
@@ -56,12 +57,13 @@ class PlayPage extends StatelessWidget {
                           .push('${Paths.play}/${Paths.gameCreation}')
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onSurface,
                       padding:
                           EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
+                        side: BorderSide(color: colorScheme.tertiary, width: 2),
                       ),
                       textStyle: TextStyle(
                         fontSize: 18,
@@ -78,12 +80,13 @@ class PlayPage extends StatelessWidget {
                           .push('${Paths.play}/${Paths.joinGame}')
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onSurface,
                       padding:
                           EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
+                        side: BorderSide(color: colorScheme.tertiary, width: 2),
                       ),
                       textStyle: TextStyle(
                         fontSize: 18,

@@ -19,7 +19,7 @@ export class CreatePageComponent {
 
     quizzesObserver: Partial<Observer<Quiz[]>> = {
         next: (quizzes: Quiz[]) => {
-            const visibleQuizzes = quizzes.filter((quiz) => quiz.visibility && quiz.title !== 'Mode aléatoire');
+            const visibleQuizzes = quizzes.filter((quiz) => quiz.visibility && quiz.title);
             if (!visibleQuizzes.length) {
                 this.openErrorPopUp();
             } else {
@@ -43,8 +43,10 @@ export class CreatePageComponent {
 
     openDialog(quiz: Quiz): void {
         this.dialog.open(PopUpCreationComponent, {
-            width: this.quizPopUpWidth,
-            data: quiz,
+            width: '50%',
+            backdropClass: 'quiz-info-popup',
+            panelClass: 'custom-container',
+            data: { quiz, isCreate: true },
         });
     }
 

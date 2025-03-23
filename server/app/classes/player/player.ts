@@ -1,5 +1,6 @@
 import { BONUS_MULTIPLIER } from '@app/constants';
 import { QuestionType } from '@app/constants/enum-classes';
+import { User } from '@app/interface/user';
 import { Question } from '@app/model/schema/question/question';
 import { Injectable } from '@nestjs/common';
 import { ConnectedSocket } from '@nestjs/websockets';
@@ -18,8 +19,17 @@ export class Player {
     currentChoices: boolean[];
     qreAnswer: number;
     exactAnswer: boolean;
+    stats: {
+        nQuestions: number;
+        nGoodAnswers: number;
+        rightAnswerPercentage: number;
+        timeSpent: number;
+    };
+    uid: string;
+    equippedAvatar: string;
+    equippedBorder: string;
 
-    constructor(name: string, isOrganizer: boolean, @ConnectedSocket() client: Socket) {
+    constructor(name: string, isOrganizer: boolean, @ConnectedSocket() client: Socket, user: User) {
         this.name = name;
         this.isOrganizer = isOrganizer;
         this.isInGame = false;
@@ -29,6 +39,15 @@ export class Player {
         this.submitted = false;
         this.currentChoices = [false, false, false, false];
         this.qreAnswer = null;
+        this.stats = {
+            nQuestions: 0,
+            nGoodAnswers: 0,
+            rightAnswerPercentage: 0,
+            timeSpent: 0,
+        };
+        this.uid = user.uid;
+        this.equippedAvatar = user.avatarEquipped;
+        this.equippedBorder = user.borderEquipped;
     }
 
     prepareForNextQuestion() {
@@ -63,9 +82,17 @@ export class Player {
             if (qreAttributes) {
                 const minTolerated = qreAttributes.goodAnswer - qreAttributes.tolerance;
                 const maxTolerated = qreAttributes.goodAnswer + qreAttributes.tolerance;
-                if (this.qreAnswer > maxTolerated || this.qreAnswer < minTolerated) correct = false;
+                if (this.qreAnswer > maxTolerated || this.qreAnswer < minTolerated || this.submitted === false) correct = false;
             }
         }
+
+        // Update stats
+        this.stats.nQuestions++;
+        if (correct) {
+            this.stats.nGoodAnswers++;
+        }
+        this.stats.rightAnswerPercentage = (this.stats.nGoodAnswers / this.stats.nQuestions) * 100;
+
         return correct;
     }
 }

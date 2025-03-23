@@ -31,15 +31,20 @@
 
         <!-- Submit Button -->
         <div class="form-group position-relative">
-            <button type="submit" [disabled]="loginForm.invalid || isSubmitting" class="btn btn-primary w-100">Login</button>
-            <div
-                *ngIf="isSubmitting"
-                class="spinner-border text-light position-absolute bottom-0 end-0"
-                style="width: 1.5rem; height: 1.5rem"
-                role="status"
+            <button
+                type="submit"
+                [disabled]="loginForm.invalid || isSubmitting"
+                class="w-100 custom-button-medium"
+                [ngClass]="{
+                    'custom-button-medium-disabled': loginForm.invalid || isSubmitting,
+                    'custom-button-medium': !(loginForm.invalid || isSubmitting)
+                }"
             >
-                <span class="visually-hidden">Loading...</span>
-            </div>
+                <span *ngIf="!isSubmitting">Login</span>
+                <div *ngIf="isSubmitting" class="spinner-border" style="width: 1.5rem; height: 1.5rem" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </button>
         </div>
     </form>
 
@@ -57,13 +62,15 @@
 
     <!-- Divider -->
     <hr />
-    <p class="divider-text text-center">or</p>
 
     <!-- Google Login -->
     <button
-        [disabled]="isSubmitting"
         (click)="loginWithGoogle()"
-        class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center"
+        class="w-100"
+        [ngClass]="{
+            'custom-button-medium-disabled': isSubmitting,
+            'custom-button-medium': !isSubmitting
+        }"
     >
         <div class="d-flex align-items-center gap-2">
             <span class="iconify" data-icon="logos:google-icon" style="font-size: 20px"></span>

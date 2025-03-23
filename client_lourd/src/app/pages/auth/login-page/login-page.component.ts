@@ -21,7 +21,7 @@ export class LoginPageComponent {
     passwordObserver: Partial<Observer<boolean>> = {
         next: (isPasswordOk: boolean) => {
             if (isPasswordOk) {
-                const route = this.route.snapshot.queryParams['returnUrl'] || AppRoute.ADMIN;
+                const route = this.route.snapshot.queryParams['returnUrl'] || AppRoute.QUIZMANAGEMENT;
                 this.authentification.authorize();
                 this.router.navigate([route]);
             } else {

@@ -1,0 +1,89 @@
+<div class="poll-page-container">
+    <div class="poll-page-content">
+        <div class="past-polls-container">
+            <div *ngFor="let poll of polls" class="past-poll" [ngClass]="{ active: poll === currentPoll }">
+                <div class="poll-info">
+                    <div class="title">{{ poll.title }}</div>
+                    <div class="date">Date fin :&nbsp;{{ poll.endDate }}</div>
+                </div>
+                <button *ngIf="poll !== currentPoll" class="custom-button-medium" (click)="show(poll)">Consulter</button>
+            </div>
+        </div>
+        <div class="poll-big-container">
+            <div *ngIf="currentPoll" class="poll-container">
+                <div class="poll-info">
+                    <div class="title">
+                        <div class="title-content">{{ currentPoll.title }}</div>
+                        <div class="date">Date fin :&nbsp;{{ currentPoll.endDate }}</div>
+                    </div>
+                    <div class="description">
+                        {{ currentPoll.description }}
+                    </div>
+                </div>
+                <div class="question-container">
+                    <button
+                        (disabled)="(currentQuestionIndex === 0)"
+                        class="custom-button-medium"
+                        [ngClass]="{
+                            'custom-button-medium-disabled': currentQuestionIndex === 0
+                        }"
+                        (click)="previousQuestion()"
+                    >
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <div class="question-content">
+                        <div class="question-title">
+                            <div class="question-title-content">{{ currentQuestion?.text }}</div>
+                            <div class="divider"></div>
+                        </div>
+                        <div class="pie-chart">
+                            <canvas baseChart [data]="pieChartData" [options]="pieChartOptions" [type]="pieChartType"> </canvas>
+                        </div>
+                        <!-- <div class="legend two-choices">
+                            <div>Choix</div>
+                            <div>Choix</div>
+                        </div> -->
+
+                        <!-- <div class="legend three-choices">
+                            <div>Choix</div>
+                            <div>Choix</div>
+                            <div>Choix</div>
+                        </div> -->
+
+                        <div
+                            class="legend four-choices"
+                            [ngClass]="{
+                                'two-choices': currentQuestion?.choices?.length === 2,
+                                'three-choices': currentQuestion?.choices?.length === 3,
+                                'four-choices': currentQuestion?.choices?.length === 4
+                            }"
+                        >
+                            <div
+                                *ngFor="let choice of currentQuestion?.choices; let index = index"
+                                [style.background-color]="backgroundColors[index]"
+                            >
+                                {{ choice.text }}
+                            </div>
+                        </div>
+                    </div>
+                    <button
+                        (disabled)="(currentQuestionIndex === currentPoll.questions.length - 1)"
+                        class="custom-button-medium"
+                        [ngClass]="{
+                            'custom-button-medium-disabled': currentQuestionIndex === currentPoll.questions.length - 1
+                        }"
+                        (click)="nextQuestion()"
+                    >
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div *ngIf="!currentPoll" class="poll-container">
+                <div style="display: flex; justify-content: center; align-items: center; height: 100%; width: 100%; text-align: center">
+                    Aucun sondage sélectionné
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

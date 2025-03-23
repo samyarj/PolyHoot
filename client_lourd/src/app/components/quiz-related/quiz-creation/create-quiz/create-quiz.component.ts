@@ -96,8 +96,8 @@ export class CreateQuizComponent {
 
     emptyQuizAndRedirect() {
         if (this.quizHandler.quizId)
-            this.messageHandlerService.confirmationDialog(ConfirmationMessage.CancelModification, () => this.emptyQuizAndRedirectCallback());
-        else this.messageHandlerService.confirmationDialog(ConfirmationMessage.CancelCreation, () => this.emptyQuizAndRedirectCallback());
+            this.messageHandlerService.confirmationDialog(ConfirmationMessage.CancelQuizModification, () => this.emptyQuizAndRedirectCallback());
+        else this.messageHandlerService.confirmationDialog(ConfirmationMessage.CancelQuizCreation, () => this.emptyQuizAndRedirectCallback());
     }
 
     trackByFn(_index: number, item: Question) {
@@ -106,7 +106,7 @@ export class CreateQuizComponent {
 
     private emptyQuizAndRedirectCallback() {
         this.quizHandler.emptyQuiz();
-        this.router.navigate([AppRoute.ADMIN]);
+        this.router.navigate([AppRoute.QUIZMANAGEMENT]);
     }
 
     private emptyQuestion(questionType?: string) {

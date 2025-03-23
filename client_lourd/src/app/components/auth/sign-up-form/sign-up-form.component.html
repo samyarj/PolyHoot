@@ -134,16 +134,22 @@
 
         <!-- Submit Button -->
         <div class="form-group position-relative">
-            <button (click)="signUp()" type="submit" [disabled]="invalidFormStatus()" class="btn btn-primary w-100">Créer un nouveau compte</button>
-            <!-- Form Loading Spinner -->
-            <div
-                *ngIf="isLoading"
-                class="spinner-border text-light position-absolute bottom-0 end-0"
-                style="width: 1.5rem; height: 1.5rem"
-                role="status"
+            <button
+                (click)="signUp()"
+                type="submit"
+                [disabled]="invalidFormStatus()"
+                class="w-100 custom-button-medium"
+                [ngClass]="{
+                    'custom-button-medium-disabled': invalidFormStatus(),
+                    'custom-button-medium': !invalidFormStatus()
+                }"
             >
-                <span class="visually-hidden">Loading...</span>
-            </div>
+                <span *ngIf="!isLoading"> Créer un nouveau compte </span>
+                <div *ngIf="isLoading" class="spinner-border" style="width: 1.5rem; height: 1.5rem" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </button>
+            <!-- Form Loading Spinner -->
         </div>
     </form>
 
@@ -152,17 +158,20 @@
 
     <!-- Divider -->
     <hr />
-    <p class="divider-text text-center">ou</p>
 
     <!-- Google Sign up -->
     <button
         (click)="signUpWithGoogle()"
         [disabled]="isLoading"
-        class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center"
+        class="w-100"
+        [ngClass]="{
+            'custom-button-medium-disabled': isLoading,
+            'custom-button-medium': !isLoading
+        }"
     >
         <div class="d-flex align-items-center gap-2">
             <span class="iconify" data-icon="logos:google-icon" style="font-size: 20px"></span>
-            <span>S'inscrire avec Google</span>
+            <span> S'inscrire avec Google</span>
         </div>
     </button>
 </div>

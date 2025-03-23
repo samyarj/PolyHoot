@@ -11,14 +11,17 @@
         *ngFor="let chatmessage of chatMessages"
         [ngClass]="{
             systemMessage: chatmessage.username === 'System',
-            user: (user | async)?.username === chatmessage.username,
-            otherUser: (user | async)?.username !== chatmessage.username
+            user: (user | async)?.uid === chatmessage.uid,
+            otherUser: (user | async)?.uid !== chatmessage.uid
         }"
         class="chat-message user otherUser"
     >
         <div class="chat-header">
             <img [src]="chatmessage.avatar" alt="avatar" class="chat-avatar" />
             <span class="chat-username">{{ chatmessage.username }}</span>
+            <div *ngIf="(user | async)?.uid !== chatmessage.uid" class="report-button" (click)="reportUser(chatmessage.uid)" matTooltip="Signaler">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
         </div>
         <div class="message">{{ chatmessage.message }}</div>
         <div class="date-container">

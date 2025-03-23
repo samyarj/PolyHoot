@@ -4,17 +4,19 @@ import 'package:client_leger/UI/main-view/sidebar/channels.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/user.dart' as user_model;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SideBar extends StatefulWidget {
+class SideBar extends ConsumerStatefulWidget {
   const SideBar({super.key, required this.user});
 
   final user_model.User? user;
 
   @override
-  State<SideBar> createState() => _SideBarState();
+  ConsumerState<SideBar> createState() => _SideBarState();
 }
 
-class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
+class _SideBarState extends ConsumerState<SideBar>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final socketManager = WebSocketManager.instance;
 
@@ -23,7 +25,7 @@ class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
 
   @override
   void initState() {
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 4, vsync: this, initialIndex: 0);
     super.initState();
   }
 
@@ -50,25 +52,21 @@ class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.rectangle,
-        gradient: LinearGradient(
-          colors: [Color(0xFF00115A), Color(0xFF004080)], // Gradient colors
-          begin: Alignment.topCenter, // Start at the top
-          end: Alignment.bottomCenter, // End at the bottom
-        ),
+        color: colorScheme.primary,
       ),
       child: Column(
         children: [
           TabBar(
             controller: _tabController,
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white,
+            labelColor: colorScheme.onPrimary,
+            unselectedLabelColor: colorScheme.tertiary,
             labelStyle: TextStyle(fontSize: 18),
             indicator: BoxDecoration(
-              color: const Color.fromARGB(
-                  164, 68, 137, 255), // Highlight color for the selected tab
+              color: colorScheme.secondary,
             ),
             indicatorSize: TabBarIndicatorSize
                 .tab, // Make the indicator cover the entire tab
@@ -96,13 +94,16 @@ class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
   }
 
   Widget _buildIngameChat() {
+    final colorScheme = Theme.of(context).colorScheme;
     return ValueListenableBuilder<String?>(
       valueListenable: socketManager.currentRoomIdNotifier,
       builder: (context, currentRoomId, child) {
         return currentRoomId == null
             ? Center(
                 child: Text('Pas de partie courante.',
-                    style: TextStyle(color: Colors.white)))
+                    style: TextStyle(
+                      color: colorScheme.onPrimary,
+                    )))
             : InGameChatWindow();
       },
     );
@@ -113,6 +114,8 @@ class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
   }
 
   Widget _buildRecentChat() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return ValueListenableBuilder<String?>(
       valueListenable: _recentChannelNotifier,
       builder: (context, recentChannel, child) {
@@ -120,7 +123,7 @@ class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
           return Center(
             child: Text(
               'Aucun canal courant.',
-              style: TextStyle(color: Colors.white, fontSize: 18),
+              style: TextStyle(color: colorScheme.onPrimary, fontSize: 18),
             ),
           );
         }

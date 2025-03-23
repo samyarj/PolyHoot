@@ -1,0 +1,29 @@
+<div class="poll-page-container">
+    <div class="poll-page-content">
+        <div id="outerContainer">
+            <div class="outerPollContainer" @zoomIn>
+                <h1>Sondages</h1>
+                <div id="innerContainer">
+                    <div class="pollPublishedContainer" *ngFor="let publishedPoll of publishedPolls; trackBy: trackByFn; let i = index" @bounceOut>
+                        <span id="publishedPollInfo"> {{ publishedPoll.title + +publishedPoll.endDate }} </span>
+                    </div>
+                    <div class="pollContainer" *ngFor="let poll of polls; trackBy: trackByFn; let i = index" @bounceOut>
+                        <span id="pollInfo"> {{ poll.title + poll.endDate }} </span>
+                        <button id="delete" mat-icon-button (click)="delete(poll.id)" matTooltip="Supprimer">
+                            <mat-icon [ngStyle]="{ color: 'white' }">delete</mat-icon>
+                        </button>
+                        <button id="edit" mat-icon-button (click)="goToEdit(poll.id)" matTooltip="Modifier">
+                            <mat-icon [ngStyle]="{ color: 'white' }">edit_square</mat-icon>
+                        </button>
+                        <button class="publish" mat-icon-button (click)="publish(poll.id)" matTooltip="Publier le sondage pour tous les utilisateurs">
+                            <mat-icon [ngStyle]="{ color: 'white' }">publication</mat-icon>
+                        </button>
+                        <button class="publish" mat-icon-button matTooltip="Consulter le sondage" (click)="consultPoll(poll)">
+                            <i class="fa-solid fa-clipboard-question"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,11 +1,18 @@
 import { GameEvents, GameState, JoinErrors, JoinEvents, TimerEvents } from '@app/constants/enum-classes';
+import { WsAuthGuard } from '@app/guards/auth/auth.guard';
+import { AuthenticatedSocket } from '@app/interface/authenticated-request';
+import { User } from '@app/interface/user';
 import { Quiz } from '@app/model/schema/quiz/quiz';
+import { UserService } from '@app/services/auth/user.service';
 import { GameManagerService } from '@app/services/game-manager/game-manager.service';
 import { HistoryManagerService } from '@app/services/history-manager/history-manager.service';
+import { PlayerResult } from '@common/partial-player';
+import { UseGuards } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 
 @WebSocketGateway()
+@UseGuards(WsAuthGuard)
 export class GameGateway {
     @WebSocketServer()
     server: Server;
@@ -13,10 +20,11 @@ export class GameGateway {
     constructor(
         private gameManager: GameManagerService,
         private historyManager: HistoryManagerService,
-    ) { }
+        private userService: UserService,
+    ) {}
 
     @SubscribeMessage(TimerEvents.Pause)
-    handlePauseGame(@ConnectedSocket() client: Socket) {
+    handlePauseGame(@ConnectedSocket() client: AuthenticatedSocket) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {
@@ -25,7 +33,7 @@ export class GameGateway {
     }
 
     @SubscribeMessage(TimerEvents.AlertGameMode)
-    handleAlertGameMode(@ConnectedSocket() client: Socket) {
+    handleAlertGameMode(@ConnectedSocket() client: AuthenticatedSocket) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {
@@ -33,7 +41,7 @@ export class GameGateway {
         }
     }
     @SubscribeMessage(GameEvents.StartQuestionCountdown)
-    handleNextQuestion(@ConnectedSocket() client: Socket) {
+    handleNextQuestion(@ConnectedSocket() client: AuthenticatedSocket) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {
@@ -41,7 +49,7 @@ export class GameGateway {
         }
     }
     @SubscribeMessage(JoinEvents.TitleRequest)
-    handleGetTitleForPlayer(@ConnectedSocket() client: Socket): string {
+    handleGetTitleForPlayer(@ConnectedSocket() client: AuthenticatedSocket): string {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {
@@ -49,22 +57,26 @@ export class GameGateway {
         } else return 'Vue Joueur';
     }
     @SubscribeMessage(GameEvents.QuestionEndByTimer)
-    handleQuestionEndByTimer(@ConnectedSocket() client: Socket) {
+    handleQuestionEndByTimer(@ConnectedSocket() client: AuthenticatedSocket) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) game.preparePlayersForNextQuestion();
     }
 
     @SubscribeMessage(GameEvents.GetCurrentPlayers)
-    handleCurrentPlayers(@ConnectedSocket() client: Socket, @MessageBody() data: { roomId: string }) {
+    handleCurrentPlayers(@ConnectedSocket() client: AuthenticatedSocket, @MessageBody() data: { roomId: string }) {
         const roomId = data.roomId;
         const game = this.gameManager.getGameByRoomId(roomId);
-        const playerNames = game.players.map((player) => player.name);
-        return playerNames;
+        const playersInfo = game.players.map((player) => ({
+            name: player.name,
+            avatar: player.equippedAvatar,
+            banner: player.equippedBorder,
+        }));
+        return { playersInfo };
     }
 
     @SubscribeMessage(GameEvents.GetCurrentGames)
-    handleGetCurrentGames(@ConnectedSocket() client: Socket) {
+    handleGetCurrentGames(@ConnectedSocket() client: AuthenticatedSocket) {
         const currentGamesInfos = [];
         this.gameManager.currentGames.forEach((game) => {
             currentGamesInfos.push({
@@ -72,44 +84,62 @@ export class GameGateway {
                 nbPlayers: game.players.length,
                 roomId: game.roomId,
                 isLocked: game.isLocked,
+                quiz: game.quiz,
             });
         });
         this.server.emit(GameEvents.GetCurrentGames, currentGamesInfos);
     }
 
     @SubscribeMessage(JoinEvents.Create)
-    handleCreateGame(@ConnectedSocket() client: Socket, @MessageBody() data: Quiz) {
+    async handleCreateGame(@ConnectedSocket() client: AuthenticatedSocket, @MessageBody() data: Quiz) {
         const quiz = data;
-        const roomId = this.gameManager.createGame(quiz, client);
+        const user: User = await this.userService.getUserByUid(client.user.uid);
+        const roomId = this.gameManager.createGame(quiz, client, user);
         client.join(roomId);
         const game = this.gameManager.getGameByRoomId(roomId);
         game.gameState = GameState.WAITING;
         this.gameManager.socketRoomsMap.set(client, roomId);
-        const lobbyInfos = { title: quiz.title, nbPlayers: game.players.length, roomId: roomId, isLocked: game.isLocked };
+        const lobbyInfos = { title: quiz.title, nbPlayers: game.players.length, roomId: roomId, isLocked: game.isLocked, quiz: quiz };
         this.server.emit(JoinEvents.LobbyCreated, lobbyInfos);
         return roomId;
     }
 
     @SubscribeMessage(GameEvents.FinalizePlayerAnswer)
-    handleFinalizePlayerAnswer(@ConnectedSocket() client: Socket, @MessageBody() answerData: { choiceSelected: boolean[]; qreAnswer: number }) {
+    async handleFinalizePlayerAnswer(
+        @ConnectedSocket() client: AuthenticatedSocket,
+        @MessageBody() answerData: { choiceSelected: boolean[]; qreAnswer: number },
+    ) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {
-            game.finalizePlayerAnswer(client, answerData);
+            const player = game.findTargetedPlayer(client);
+            const wasCorrect = game.finalizePlayerAnswer(client, answerData);
+
+            // Update user stats if they are authenticated
+            if (client.user?.uid) {
+                const newStats = {
+                    nQuestions: 1,
+                    nGoodAnswers: wasCorrect ? 1 : 0,
+                };
+                await this.userService.updateStats(client.user.uid, newStats);
+            }
         }
     }
 
     @SubscribeMessage(GameEvents.QRLAnswerSubmitted)
-    handleQRLAnswer(@ConnectedSocket() client: Socket, @MessageBody() playerAnswer: string) {
+    handleQRLAnswer(@ConnectedSocket() client: AuthenticatedSocket, @MessageBody() playerAnswer: string) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
-        console.log('2:Data reçue du serveur ', playerAnswer);
         const playerName = game.players.find((player) => player.socket === client).name;
-        game.organizer.socket.emit(GameEvents.QRLAnswerSubmitted, { playerName, playerAnswer });
+        if (game.timer.timerValue > 0) {
+            game.organizer.socket.emit(GameEvents.QRLAnswerSubmitted, { playerName, playerAnswer });
+        } else {
+            game.organizer.socket.emit(GameEvents.QRLAnswerSubmitted, { playerName, playerAnswer: '' });
+        }
     }
 
     @SubscribeMessage(JoinEvents.ValidateGameId)
-    handleValidGameId(@ConnectedSocket() client: Socket, @MessageBody() data: string) {
+    handleValidGameId(@ConnectedSocket() client: AuthenticatedSocket, @MessageBody() data: string) {
         const isValidId = this.gameManager.validRoom(data);
         const game = this.gameManager.getGameByRoomId(data);
         let isRoomLocked: boolean;
@@ -125,15 +155,21 @@ export class GameGateway {
     }
 
     @SubscribeMessage(JoinEvents.Join)
-    handleJoinGame(@ConnectedSocket() client: Socket, @MessageBody() data: { gameId: string; playerName: string }) {
+    async handleJoinGame(@ConnectedSocket() client: AuthenticatedSocket, @MessageBody() data: { gameId: string; playerName: string }) {
         const { gameId, playerName } = data;
-        const canJoinGame = this.gameManager.joinGame(gameId, playerName, client);
+        const user: User = await this.userService.getUserByUid(client.user.uid);
+        const canJoinGame = this.gameManager.joinGame(gameId, playerName, client, user);
         const game = this.gameManager.getGameByRoomId(gameId);
         if (canJoinGame) {
-            const playerNames = game.players.map((player) => player.name);
-            client.emit(JoinEvents.CanJoin, { playerNames, gameId });
+            const playersInfo = game.players.map((player) => ({
+                name: player.name,
+                avatar: player.equippedAvatar,
+                banner: player.equippedBorder,
+            }));
+
+            client.emit(JoinEvents.CanJoin, { playerName: user.username, gameId });
             const roomId = Array.from(client.rooms.values())[1];
-            this.server.emit(JoinEvents.JoinSuccess, { playerNames, roomId });
+            this.server.emit(JoinEvents.JoinSuccess, { playersInfo, roomId });
             this.gameManager.socketRoomsMap.set(client, data.gameId);
         } else if (game.isPlayerBanned(playerName)) {
             client.emit(JoinErrors.BannedName);
@@ -145,7 +181,7 @@ export class GameGateway {
     }
 
     @SubscribeMessage(GameEvents.StartGameCountdown)
-    handleStartGameCountdown(@ConnectedSocket() client: Socket, @MessageBody() timerValue: number) {
+    handleStartGameCountdown(@ConnectedSocket() client: AuthenticatedSocket, @MessageBody() timerValue: number) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {
@@ -155,21 +191,36 @@ export class GameGateway {
     }
 
     @SubscribeMessage(GameEvents.StartGame)
-    handleStartGame(@ConnectedSocket() client: Socket) {
+    async handleStartGame(@ConnectedSocket() client: AuthenticatedSocket) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
-        if (game) this.historyManager.addGameRecord(game.quiz.title, roomId);
+        if (game) {
+            // Only increment games for non-organizer players
+            if (client.user?.uid && game.organizer.socket.id !== client.id) {
+                await this.userService.incrementGames(client.user.uid);
+                await this.userService.addGameLog(client.user.uid, {
+                    gameName: game.quiz.title,
+                    startTime: this.userService.formatTimestamp(new Date()),
+                    status: 'abandoned', // Default to abandoned, change to complete later
+                    result: 'lose',
+                });
+            }
+            // Only create the game record if this is the organizer
+            if (game.organizer.socket.id === client.id) {
+                this.historyManager.addGameRecord(game.quiz.title, roomId);
+            }
+        }
     }
 
     @SubscribeMessage(GameEvents.ToggleLock)
-    handleGameLock(@ConnectedSocket() client: Socket) {
+    handleGameLock(@ConnectedSocket() client: AuthenticatedSocket) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         const isLocked = game.toggleGameLock();
         this.server.emit(GameEvents.AlertLockToggled, { isLocked, roomId });
     }
     @SubscribeMessage(GameEvents.PlayerBan)
-    handleBanPlayer(@ConnectedSocket() client: Socket, @MessageBody() playerName: string) {
+    handleBanPlayer(@ConnectedSocket() client: AuthenticatedSocket, @MessageBody() playerName: string) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {
@@ -177,14 +228,19 @@ export class GameGateway {
             const player = game.players.find((player) => player.name === playerName);
             player.socket.emit(GameEvents.PlayerBanned);
             game.removePlayer(playerName);
+            this.gameManager.socketRoomsMap.delete(player.socket);
         }
-        const playerNames = this.gameManager.getGameByRoomId(roomId).players.map((player) => player.name);
-        this.server.emit(GameEvents.PlayerLeft, { playerNames, roomId });
+        const playersInfo = this.gameManager.getGameByRoomId(roomId).players.map((player) => ({
+            name: player.name,
+            avatar: player.equippedAvatar,
+            banner: player.equippedBorder,
+        }));
+        this.server.emit(GameEvents.PlayerLeft, { playersInfo, roomId });
     }
 
     @SubscribeMessage(GameEvents.CorrectionFinished)
     handleCorrectionFinished(
-        @ConnectedSocket() client: Socket,
+        @ConnectedSocket() client: AuthenticatedSocket,
         @MessageBody() data: { pointsTotal: { playerName: string; points: number }[] /*  answers: number[]  */ },
     ) {
         const roomId = Array.from(client.rooms.values())[1];
@@ -193,14 +249,45 @@ export class GameGateway {
     }
 
     @SubscribeMessage(GameEvents.ShowResults)
-    handleShowResults(@ConnectedSocket() client: Socket) {
+    async handleShowResults(@ConnectedSocket() client: AuthenticatedSocket) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {
-            const results = game.getResults();
-            if (results) this.server.to(roomId).emit(GameEvents.SendResults, results);
-            game.gameState = GameState.RESULTS;
-            this.historyManager.saveGameRecordToDB(roomId, results);
+            const results: PlayerResult[] = await game.getResults();
+            if (results) {
+                // Find the player with the highest points who is still in the game
+                const winner = results.filter((player) => player.isInGame).reduce((prev, current) => (prev.points > current.points ? prev : current));
+
+                // Find the winner's socket to get their user ID
+                const winnerSocket = game.players.find((p) => p.name === winner.name)?.socket as AuthenticatedSocket;
+                if (winnerSocket?.user?.uid) {
+                    console.log('Incrementing wins for user:', winnerSocket.user.uid);
+                    await this.userService.incrementWins(winnerSocket.user.uid);
+                    await this.userService.updateGameLog(winnerSocket.user.uid, {
+                        result: 'win',
+                    });
+                }
+
+                // Update time spent for all authenticated players
+                for (const player of game.players) {
+                    const playerSocket = player.socket as AuthenticatedSocket;
+                    if (playerSocket?.user?.uid) {
+                        await this.userService.updateStats(playerSocket.user.uid, {
+                            timeSpent: game.timer.timerValue,
+                        });
+                        await this.userService.updateGameLog(playerSocket.user.uid, {
+                            gameName: game.quiz.title,
+                            endTime: this.userService.formatTimestamp(new Date()),
+                            status: 'complete',
+                            result: player.name === winner.name ? 'win' : 'lose',
+                        });
+                    }
+                }
+
+                this.server.to(roomId).emit(GameEvents.SendResults, results);
+                game.gameState = GameState.RESULTS;
+                this.historyManager.saveGameRecordToDB(roomId, results);
+            }
         }
     }
 }

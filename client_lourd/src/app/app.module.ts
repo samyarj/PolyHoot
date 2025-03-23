@@ -18,6 +18,7 @@ import { AppComponent } from '@app/pages/app/app.component';
 import { GamePageComponent } from '@app/pages/game-related/game-page/game-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { WINDOW } from '@app/services/general-services/window.token';
+import { NgChartsModule } from 'ng2-charts';
 import { ToastrModule } from 'ngx-toastr';
 import { environment } from 'src/environments/environment';
 import { ForgotPasswordFormComponent } from './components/auth/forgot-password-form/forgot-password-form.component';
@@ -29,6 +30,7 @@ import { AvatarBannerComponent } from './components/general-elements/avatar-bann
 import { ConfirmationDialogComponent } from './components/general-elements/confirmation-dialog/confirmation-dialog.component';
 import { ErrorDialogComponent } from './components/general-elements/error-dialog/error-dialog.component';
 import { LootBoxWinDialogComponent } from './components/general-elements/lootbox-win-dialog/lootbox-win-dialog.component';
+import { PollPlayerPopInComponent } from './components/general-elements/poll-player-pop-in/poll-player-pop-in.component';
 import { PopUpCreationComponent } from './components/general-elements/pop-up-creation/pop-up-creation.component';
 import { HeaderGameComponent } from './components/layout/filler/header-game/header-game.component';
 import { SecondaryHeaderGameComponent } from './components/layout/filler/secondary-header-game/secondary-header-game.component';
@@ -44,6 +46,12 @@ import { CreateQuizComponent } from './components/quiz-related/quiz-creation/cre
 import { QuestionFormComponent } from './components/quiz-related/quiz-creation/question-form/question-form.component';
 import { ErrorInterceptor } from './interceptors/error.interceptor';
 import { AppRoutingModule } from './modules/app-routing.module';
+import { ActionLogsPageComponent } from './pages/action-logs-page/action-logs-page.component';
+import { PlayerInfoPageComponent } from './pages/admin-pages/player-info-page/player-info-page.component';
+import { ConsultPollPageComponent } from './pages/admin-pages/poll-related/consult-poll-page/consult-poll-page.component';
+import { CreatePollPageComponent } from './pages/admin-pages/poll-related/create-poll-page/create-poll-page.component';
+import { HistoryPollPageComponent } from './pages/admin-pages/poll-related/history-poll-page/history-poll-page.component';
+import { PollMainPageComponent } from './pages/admin-pages/poll-related/poll-main-page/poll-main-page.component';
 import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-password.component';
 import { LoginPageComponent } from './pages/auth/login-page/login-page.component';
 import { SignUpComponent } from './pages/auth/sign-up/sign-up.component';
@@ -72,12 +80,14 @@ import { AuthService } from './services/auth/auth.service';
 import { QuestionService } from './services/back-end-communication-services/question-service/question.service';
 import { QuizService } from './services/back-end-communication-services/quiz-service/quiz.service';
 import { FirebaseChatService } from './services/chat-services/firebase/firebase-chat.service';
+import { FriendSystemService } from './services/friend-system.service'; // Import the service
 import { FrenchPaginatorIntlService } from './services/general-services/french-paginator/french-paginator-intl.service';
 import { InventoryService } from './services/general-services/inventory.service';
 import { GlobalErrorHandlerService } from './services/global-error-handler.service';
+import { ReportService } from './services/report-service';
+import { HeaderNavigationService } from './services/ui-services/header-navigation.service';
 import { ThemeService } from './services/ui-services/theme/theme.service';
 import { SocketClientService } from './services/websocket-services/general/socket-client-manager.service';
-
 /**
  * Main module that is used in main.ts.
  * All automatically generated components will appear in this module.
@@ -135,6 +145,13 @@ import { SocketClientService } from './services/websocket-services/general/socke
         LootBoxComponent,
         ProfilePageComponent,
         AvatarBannerComponent,
+        ActionLogsPageComponent,
+        PlayerInfoPageComponent,
+        HistoryPollPageComponent,
+        ConsultPollPageComponent,
+        CreatePollPageComponent,
+        PollMainPageComponent,
+        PollPlayerPopInComponent,
     ],
     providers: [
         AuthService,
@@ -144,6 +161,9 @@ import { SocketClientService } from './services/websocket-services/general/socke
         FirebaseChatService,
         ThemeService,
         InventoryService,
+        HeaderNavigationService,
+        FriendSystemService,
+        ReportService,
         { provide: WINDOW, useValue: window },
         { provide: MatPaginatorIntl, useClass: FrenchPaginatorIntlService },
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
@@ -162,6 +182,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         MatCardModule,
         MatExpansionModule,
         MatIconModule,
+        NgChartsModule,
         provideFirebaseApp(() => initializeApp(environment.firebase)),
         provideAuth(() => getAuth()),
         provideFirestore(() => getFirestore()),

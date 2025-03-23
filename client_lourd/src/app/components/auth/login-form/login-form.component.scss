@@ -1,0 +1,26 @@
+p,
+.mb-4,
+.mb-3,
+a {
+    color: var(--text-color);
+}
+
+.mb-4 {
+    font-weight: bold;
+}
+
+hr {
+    border: 1px solid var(--text-color);
+}
+
+a {
+    transition:
+        transform 0.2s ease-in-out,
+        color 0.2s ease-in-out;
+}
+
+a:hover {
+    display: inline-block;
+    color: var(--secondary-color);
+    transform: scale(1.02);
+}

@@ -17,18 +17,18 @@ export class PopUpCreationComponent {
     errorMessage: string | null = null;
     component: { title: string; description: string; duration: number; questions: { text: string }[] };
     isQuizValid: boolean = false;
-
+    isCreated: boolean = false;
     // constructeur a 6 parametres permis selon les charges et le prof, etant donne la nature des attributs
     // eslint-disable-next-line max-params
     constructor(
         public dialogRef: MatDialogRef<PopUpCreationComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: Quiz,
+        @Inject(MAT_DIALOG_DATA) public data: { quiz: Quiz; isCreate: boolean },
         private quizService: QuizService,
         private router: Router,
         private dialog: MatDialog,
         private socketService: SocketClientService,
     ) {
-        this.fetchQuizById(this.data.id);
+        this.fetchQuizById(this.data.quiz.id);
     }
 
     onClose(): void {
@@ -36,13 +36,16 @@ export class PopUpCreationComponent {
     }
 
     openNewGame(): void {
-        const quiz = this.data;
-        this.socketService.send(JoinEvents.Create, quiz, (roomId: string) => {
-            this.socketService.roomId = roomId;
-            this.socketService.isOrganizer = true;
-            this.verifyLocalStorage();
-            this.navigate('/waiting');
-        });
+        const quiz = this.data.quiz;
+        if (!this.isCreated) {
+            this.isCreated = true;
+            this.socketService.send(JoinEvents.Create, quiz, (roomId: string) => {
+                this.socketService.roomId = roomId;
+                this.socketService.isOrganizer = true;
+                this.verifyLocalStorage();
+                this.navigate('/waiting');
+            });
+        }
     }
 
     navigate(route: string): void {
@@ -57,6 +60,7 @@ export class PopUpCreationComponent {
         this.dialogRef.close();
         this.dialog.open(ErrorDialogComponent, {
             width: '400px',
+            panelClass: 'custom-container',
             data: { message: this.errorMessage, reloadOnClose: true },
         });
     }
@@ -71,7 +75,7 @@ export class PopUpCreationComponent {
             this.quizService.getQuizById(id).subscribe({
                 next: (quiz: Quiz) => {
                     if (quiz.visibility) {
-                        this.data = quiz;
+                        this.data.quiz = quiz;
                         this.isQuizValid = true;
                     } else {
                         this.errorMessage = 'Le jeu a été caché aux utilisateurs!';

@@ -1,7 +1,7 @@
 import { AuthGuard } from '@app/guards/auth/auth.guard';
 import { AuthenticatedRequest } from '@app/interface/authenticated-request';
 import { UserService } from '@app/services/auth/user.service';
-import { Body, Controller, Get, HttpStatus, Logger, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Logger, Patch, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import {
     ApiBadRequestResponse,
     ApiConflictResponse,
@@ -171,6 +171,26 @@ export class AuthController {
             response.status(HttpStatus.OK).send({ message: 'Déconnexion réussie.' });
         } catch (error) {
             response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
+        }
+    }
+
+    @UseGuards(AuthGuard)
+    @ApiOkResponse({ description: 'Username successfully updated' })
+    @ApiBadRequestResponse({ description: 'Invalid username format or username taken' })
+    @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+    @Patch('update-username')
+    async updateUsername(@Req() req: AuthenticatedRequest, @Body('username') username: string, @Res() response: Response) {
+        this.logger.log(`Updating username for user: ${req.user.displayName} to ${username}`);
+        try {
+            const user = await this.userService.updateUsername(req.user.uid, username);
+            response.status(HttpStatus.OK).json(user);
+        } catch (error) {
+            this.logger.error(`Error updating username: ${error.message}`);
+            if (error.message.includes('Ce pseudonyme est déjà pris')) {
+                response.status(HttpStatus.CONFLICT).send({ message: error.message });
+            } else {
+                response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
+            }
         }
     }
 }

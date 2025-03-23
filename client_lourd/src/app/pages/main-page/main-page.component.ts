@@ -2,19 +2,10 @@
 import { AfterViewChecked, AfterViewInit, Component, ElementRef, OnDestroy, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { DEFAULT_HOVER_INDEX } from '@app/constants/constants';
-
-interface Screenshot {
-    image: string;
-    route: string;
-    buttonDescription: string;
-}
-
-interface NavItem {
-    title: string;
-    description: string;
-    screenshots: Screenshot[];
-}
+import { DEFAULT_HOVER_INDEX, NAV_ADMIN_INFO, NAV_PLAYER_INFO } from '@app/constants/constants';
+import { User } from '@app/interfaces/user';
+import { NavItem } from '@app/interfaces/ux-related';
+import { AuthService } from '@app/services/auth/auth.service';
 
 @Component({
     selector: 'app-main-page',
@@ -28,98 +19,7 @@ export class MainPageComponent implements AfterViewInit, AfterViewChecked, OnDes
 
     activeSlideIndex: number = 0;
     hoverIndex: number = DEFAULT_HOVER_INDEX;
-    navInfo: NavItem[] = [
-        {
-            title: ' Jouer',
-            description: 'Testez vos connaissances en joignant ou créant une partie!',
-            screenshots: [
-                {
-                    image: 'joinGame.png',
-                    route: '/game-home/joinGame',
-                    buttonDescription: 'Joindre une partie',
-                },
-                {
-                    image: 'create.png',
-                    route: '/game-home/create',
-                    buttonDescription: 'Créer une partie',
-                },
-                {
-                    image: '',
-                    route: '/game-home/lobby-list',
-                    buttonDescription: 'Voir les parties',
-                },
-            ],
-        },
-        {
-            title: 'Section chance',
-            description: 'Tentez votre chance dans la section chance!',
-            screenshots: [
-                {
-                    image: 'dailyFree.png',
-                    route: '/luck/dailyFree',
-                    buttonDescription: 'Prix Quotidien',
-                },
-                {
-                    image: 'lootBox.png',
-                    route: '/luck/lootBox',
-                    buttonDescription: 'Ouvrir une LootBox',
-                },
-                {
-                    image: 'coinFlip.png',
-                    route: '/luck/coinFlip',
-                    buttonDescription: 'Jouer au coin flip',
-                },
-            ],
-        },
-        {
-            title: 'Administrer les quiz', // Administrer les quiz
-            description: 'Gérez et créez des quiz pour les utilisateurs!',
-            screenshots: [
-                {
-                    image: 'quizList.png',
-                    route: '/quiz-question-management/quizList',
-                    buttonDescription: 'Gérer les quiz',
-                },
-                {
-                    image: 'createQuiz.png',
-                    route: '/quiz-question-management/createQuiz',
-                    buttonDescription: 'Créer un quiz',
-                },
-                {
-                    image: 'questionBank.png',
-                    route: '/quiz-question-management/questionBank',
-                    buttonDescription: 'Gérer les questions',
-                },
-            ],
-        },
-        {
-            title: 'Inventaire',
-            description: 'Gérez votre inventaire et vos objets!',
-            screenshots: [
-                {
-                    image: 'inventory.png',
-                    route: '/inventory',
-                    buttonDescription: "Voir l'inventaire",
-                },
-            ],
-        },
-        {
-            title: 'Boutique',
-            description: 'Achetez des objets dans notre boutique!',
-            screenshots: [
-                {
-                    image: 'shop.png',
-                    route: '/shop-home/shop',
-                    buttonDescription: 'Voir la boutique',
-                },
-                {
-                    image: '',
-                    route: '/shop-home/transfer',
-                    buttonDescription: 'Transférer des coins',
-                },
-            ],
-        },
-    ];
+    navInfo: NavItem[] = NAV_PLAYER_INFO;
 
     private buttonListeners: (() => void)[] = [];
     private screenshotListeners: (() => void)[] = [];
@@ -127,9 +27,19 @@ export class MainPageComponent implements AfterViewInit, AfterViewChecked, OnDes
     constructor(
         private router: Router,
         public dialog: MatDialog,
+        private authService: AuthService,
     ) {
         this.activeSlideIndex = 0;
         this.hoverIndex = DEFAULT_HOVER_INDEX;
+        this.authService.user$.subscribe({
+            next: (user: User | null) => {
+                if (user?.role === 'admin') {
+                    this.navInfo = NAV_ADMIN_INFO;
+                } else {
+                    this.navInfo = NAV_PLAYER_INFO;
+                }
+            },
+        });
     }
 
     ngAfterViewInit(): void {

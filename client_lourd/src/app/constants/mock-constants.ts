@@ -1,6 +1,7 @@
 /* eslint-disable max-lines */
 // notre fichier des constantes, donc nous nous permettons de depasser les lignes
 import { Game } from '@app/interfaces/game';
+import { Poll } from '@app/interfaces/poll';
 import { Question } from '@app/interfaces/question';
 import { QuestionType } from '@app/interfaces/question-type';
 import { Quiz } from '@app/interfaces/quiz';
@@ -59,6 +60,20 @@ export const EMPTY_QRE_QUESTION: Question = {
         maxBound: 0,
         tolerance: 0,
     },
+};
+export const EMPTY_POLL: Poll = {
+    title: '',
+    description: '',
+    questions: [],
+    expired: false,
+    endDate: new Date(9999, 1, 1),
+    isPublished: false,
+};
+export const EMPTY_POLL_QUESTION: Question = {
+    type: QuestionType.QCM,
+    text: '',
+    points: 10,
+    choices: [{ text: '' }, { text: '' }],
 };
 
 export const EMPTY_QUESTION_WITHOUT_CHOICES: Question = {

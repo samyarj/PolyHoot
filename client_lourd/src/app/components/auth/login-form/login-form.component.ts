@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@app/services/auth/auth.service';
@@ -17,7 +17,8 @@ export class LoginFormComponent {
         private fb: FormBuilder,
         private authService: AuthService,
         private router: Router,
-        private route: ActivatedRoute, // private themeService: ThemeService,
+        private route: ActivatedRoute,
+        private cdr: ChangeDetectorRef, // private themeService: ThemeService,
     ) {
         if (authService.isAuthenticated()) {
             router.navigate(['/home']);
@@ -25,6 +26,9 @@ export class LoginFormComponent {
         this.loginForm = this.fb.group({
             identifier: ['', [Validators.required]],
             password: ['', Validators.required],
+        });
+        this.loginForm.valueChanges.subscribe(() => {
+            this.cdr.detectChanges();
         });
     }
 

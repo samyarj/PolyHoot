@@ -28,7 +28,7 @@ export class ThemeService {
         },
     };
     constructor(private authService: AuthService) {
-        this.setTheme('light');
+        this.setTheme('dark');
         this.authService.user$.subscribe(this.ownedThemesObserver);
     }
 
