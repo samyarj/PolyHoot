@@ -820,7 +820,7 @@ export class UserService {
                 case 6:
                 default:
                     if (newNbReports >= 6) {
-                        unbanDate = new Date(Date.now() + 10 * 60 * 1000);
+                        unbanDate = new Date(Date.now() + 15 * 60 * 1000);
                         newNbBans++;
                     }
                     break;
