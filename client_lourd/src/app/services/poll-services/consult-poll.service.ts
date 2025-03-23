@@ -50,4 +50,13 @@ export class ConsultPollService {
             }),
         );
     }
+    expirePublishedPoll(poll: Poll): Observable<PublishedPoll> {
+        console.log('Envoie au serveur cet id à expirer ', poll.id);
+        return this.http.patch<PublishedPoll>(`${environment.serverUrl}/published-polls/expire/${poll.id}`, {}).pipe(
+            catchError((error) => {
+                console.error('❌ Erreur lors de la publication du sondage', error);
+                return this.messageHandler.handleHttpError(error);
+            }),
+        );
+    }
 }

@@ -1,4 +1,5 @@
 import { ERROR } from '@app/constants/error-messages';
+import { UpdatePublishedPollDto } from '@app/model/dto/poll/update-published-poll';
 import { PublishedPoll } from '@app/model/schema/poll/published-poll.schema';
 import { PublishedPollService } from '@app/services/poll/published-poll.service';
 import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Res } from '@nestjs/common';
@@ -87,4 +88,22 @@ export class PublishedPollController {
             }
         }
     }
+    @Patch('expire/:id')
+async expirePublishedPoll(
+    @Param('id') id: string, // Récupérer l'ID du PublishedPoll à mettre à jour
+    @Res() response: Response,
+) {
+    try {
+        console.log("Rentre au bon endroit avec id ", id)
+        // Appeler le service pour mettre à jour le PublishedPoll
+        const updatedPublishedPoll = await this.publishedPollService.expirePublishedPoll(id);
+        response.status(HttpStatus.OK).json(updatedPublishedPoll);
+    } catch (error) {
+        if (error.status === HttpStatus.NOT_FOUND) {
+            response.status(HttpStatus.NOT_FOUND).send({ message: error.message });
+        } else {
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: ERROR.INTERNAL_SERVER_ERROR });
+        }
+    }
+}
 }

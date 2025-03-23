@@ -1,7 +1,8 @@
 /* eslint-disable no-underscore-dangle */ // Mongo utilise des attributs avec un underscore
 import { ERROR } from '@app/constants/error-messages';
+import { UpdatePublishedPollDto } from '@app/model/dto/poll/update-published-poll';
 import { PublishedPoll, PublishedPollDocument } from '@app/model/schema/poll/published-poll.schema';
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -66,5 +67,30 @@ export class PublishedPollService {
         const updatedPublishedPoll = await publishedPoll.save();
 
         return updatedPublishedPoll;
+    }
+    async expirePublishedPoll(id: string): Promise<PublishedPoll> {
+        try {
+            // 1. Récupérer le PublishedPoll existant
+            const existingPublishedPoll = await this.publishedPollModel.findById(id).exec();
+    
+            if (!existingPublishedPoll) {
+                throw new NotFoundException(ERROR.POLL.ID_NOT_FOUND);
+            }
+    
+            // 2. Mettre à jour l'attribut expired
+            existingPublishedPoll.expired = true;
+    
+            // 3. Sauvegarder les modifications
+            const updatedPublishedPoll = await existingPublishedPoll.save();
+    
+            return updatedPublishedPoll;
+        } catch (error) {
+            // Gérer les erreurs
+            if (error instanceof NotFoundException) {
+                throw error; // Propager l'erreur 404
+            } else {
+                throw new InternalServerErrorException(ERROR.INTERNAL_SERVER_ERROR);
+            }
+        }
     }
 }

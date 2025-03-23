@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core'; // Ajoutez OnDestroy et OnInit
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { backInLeftAnimation, backInRightAnimation, bounceOutAnimation, zoomInAnimation } from '@app/animations/animation';
@@ -16,9 +16,12 @@ import { Observer } from 'rxjs';
     styleUrls: ['./consult-poll-page.component.scss'],
     animations: [backInLeftAnimation, backInRightAnimation, zoomInAnimation, bounceOutAnimation],
 })
-export class ConsultPollPageComponent {
+export class ConsultPollPageComponent implements OnInit, OnDestroy {
+    // Implémentez OnInit et OnDestroy
     polls: Poll[] = [];
     publishedPolls: PublishedPoll[] = [];
+    private intervalId: any; // Pour stocker l'ID de l'intervalle
+
     private pollsObserver: Partial<Observer<Poll[]>> = {
         next: (polls: Poll[]) => {
             this.polls = polls;
@@ -27,24 +30,40 @@ export class ConsultPollPageComponent {
             this.messageHandlerService.popUpErrorDialog(httpErrorResponse.error.message);
         },
     };
+
     private allPollsObserver: Partial<Observer<{ polls: Poll[]; publishedPolls: PublishedPoll[] }>> = {
         next: (response: { polls: Poll[]; publishedPolls: PublishedPoll[] }) => {
-            console.log('Dans le next avec ', response);
-            this.polls = response.polls; // Mettre à jour la liste des sondages non publiés
-            console.log('arrt tes conneries', response.publishedPolls);
-            this.publishedPolls = response.publishedPolls; // Mettre à jour la liste des sondages publiés
+            console.log('Dans le next du getAllPolls avec ', response.publishedPolls);
+            this.polls = response.polls;
+            this.publishedPolls = response.publishedPolls.filter((poll) => !poll.expired);
         },
         error: (httpErrorResponse: HttpErrorResponse) => {
             this.messageHandlerService.popUpErrorDialog(httpErrorResponse.error.message);
         },
     };
+
     constructor(
         private router: Router,
         private consultPollService: ConsultPollService,
         private messageHandlerService: MessageHandlerService,
         private dialog: MatDialog,
-    ) {
+    ) {}
+
+    ngOnInit(): void {
+        // Charger les sondages au démarrage
         this.consultPollService.getAllPolls().subscribe(this.allPollsObserver);
+
+        // Démarrer la vérification toutes les secondes
+        this.intervalId = setInterval(() => {
+            this.checkAndUpdateExpiredStatus();
+        }, 1000); // 1000 ms = 1 seconde
+    }
+
+    ngOnDestroy(): void {
+        // Nettoyer l'intervalle lorsque le composant est détruit
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+        }
     }
 
     navigate(route: string): void {
@@ -53,7 +72,6 @@ export class ConsultPollPageComponent {
 
     consultPoll(poll: Poll) {
         this.dialog.open(PollPlayerPopInComponent, {
-            // width: '40%',
             backdropClass: 'quiz-info-popup',
             panelClass: 'custom-container',
             data: { poll, isAdmin: true },
@@ -79,9 +97,11 @@ export class ConsultPollPageComponent {
             this.messageHandlerService.confirmationDialog(ConfirmationMessage.PublishPoll, () => this.publishCallback(id));
         }
     }
+
     private deleteCallback(id: string) {
         this.consultPollService.deletePollById(id).subscribe(this.pollsObserver);
     }
+
     private publishCallback(id: string) {
         const pollToPublish = this.polls.find((poll) => poll.id === id);
         if (pollToPublish) {
@@ -89,5 +109,32 @@ export class ConsultPollPageComponent {
         } else {
             console.error(`Sondage avec l'ID ${id} non trouvé.`);
         }
+    }
+
+    private checkAndUpdateExpiredStatus(): void {
+        const currentDate = new Date(); // Obtenir la date actuelle
+
+        this.publishedPolls.forEach((poll) => {
+            const pollEndDate = new Date(poll.endDate); // Convertir endDate en objet Date
+            // Vérifier si la date de fin est maintenant ou dans le passé
+            if (pollEndDate <= currentDate && !poll.expired) {
+                console.log('Le sondage est expiré');
+                poll.expired = true;
+                // this.publishedPolls = this.publishedPolls.map((p) => (p.id === poll.id ? poll : p));
+                this.expirePublishedPoll(poll);
+            }
+        });
+    }
+
+    private expirePublishedPoll(poll: PublishedPoll): void {
+        this.consultPollService.expirePublishedPoll(poll).subscribe({
+            next: () => {
+                // Récupérer toutes les polls mises à jour depuis le serveur
+                this.consultPollService.getAllPolls().subscribe(this.allPollsObserver);
+            },
+            error: (error) => {
+                console.error('Erreur lors de la mise à jour du sondage :', error);
+            },
+        });
     }
 }

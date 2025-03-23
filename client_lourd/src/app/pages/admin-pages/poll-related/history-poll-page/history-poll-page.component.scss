@@ -1,11 +1,11 @@
-.poll-page-container {
+.publishedPoll-page-container {
     position: relative;
     width: 100%;
     height: calc(100% - 100px);
     background: linear-gradient(to bottom, var(--primary-color), var(--primary-color), var(--secondary-color));
     overflow: hidden;
     padding-top: 50px;
-    .poll-page-content {
+    .publishedPoll-page-content {
         width: 100%;
         height: 100%;
         background: color-mix(in srgb, var(--primary-color) 20%, transparent);
@@ -15,7 +15,7 @@
         display: flex;
         flex-direction: row;
 
-        .past-polls-container {
+        .past-publishedPolls-container {
             position: relative;
             background: color-mix(in srgb, var(--primary-color) 50%, transparent);
             box-shadow: inset -5px 0 5px -5px var(--tertiary-color);
@@ -30,7 +30,7 @@
             overflow-x: visible;
             direction: rtl;
 
-            .past-poll {
+            .past-publishedPoll {
                 position: relative;
                 direction: ltr;
                 width: calc(100% - 20px);
@@ -64,7 +64,7 @@
                     box-shadow: 0 0 10px var(--tertiary-color);
                 }
 
-                .poll-info {
+                .publishedPoll-info {
                     width: 70%;
                     height: 100%;
                     display: flex;
@@ -119,12 +119,12 @@
             }
         }
 
-        .poll-big-container {
+        .publishedPoll-big-container {
             background: color-mix(in srgb, var(--primary-color) 50%, transparent);
             width: 65%;
             height: 100%;
             padding: 30px;
-            .poll-container {
+            .publishedPoll-container {
                 width: 100%;
                 height: 100%;
                 border-radius: 30px;
@@ -135,7 +135,7 @@
                 justify-content: space-between;
                 flex-direction: column;
 
-                .poll-info {
+                .publishedPoll-info {
                     box-shadow: inset 0 0 10px var(--tertiary-color);
                     width: 100%;
                     height: 30%;

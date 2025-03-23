@@ -1,9 +1,13 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { PublishedPoll } from '@app/interfaces/poll';
 import { Question } from '@app/interfaces/question';
 import { QuestionType } from '@app/interfaces/question-type';
+import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
+import { HistoryPublishedPollService } from '@app/services/poll-services/history-poll.service';
 import { ChartConfiguration, ChartData } from 'chart.js';
+import { Observer } from 'rxjs';
 export const PUBLISHED_POLL_1: PublishedPoll = {
     title: 'Premier sondage',
     description: 'Sondage portant sur les items par défaut de la boutique',
@@ -176,9 +180,19 @@ export class HistoryPollPageComponent {
     };
 
     pieChartType: 'pie' = 'pie';
-
-    constructor() {
-        this.publishedPolls = this.getPublishedPolls();
+    private pollsObserver: Partial<Observer<PublishedPoll[]>> = {
+        next: (publishedPolls: PublishedPoll[]) => {
+            this.publishedPolls = publishedPolls.filter((poll) => poll.expired);
+        },
+        error: (httpErrorResponse: HttpErrorResponse) => {
+            this.messageHandler.popUpErrorDialog(httpErrorResponse.error.message);
+        },
+    };
+    constructor(
+        private historyPublishedPollService: HistoryPublishedPollService,
+        private messageHandler: MessageHandlerService,
+    ) {
+        this.historyPublishedPollService.getAllPublishedPolls().subscribe(this.pollsObserver);
     }
 
     getPublishedPolls() {
