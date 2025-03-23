@@ -10,6 +10,7 @@ class AppThemes {
       surface: const Color(0xFF1E1E2E),
       onPrimary: Colors.white,
       onSecondary: Colors.white,
+      onTertiary: const Color(0xFF000729),
       onSurface: const Color(0xFFF0F8FF),
     ),
     useMaterial3: true,

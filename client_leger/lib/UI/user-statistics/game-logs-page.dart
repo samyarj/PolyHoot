@@ -71,7 +71,7 @@ class GameLogsPage extends ConsumerWidget {
                           ),
                         ),
                         child: GameLogsTable(
-                          gameLogs: user.gameLogs,
+                          gameLogs: user.gameLogs ?? [],
                         ),
                       ),
                     ),
