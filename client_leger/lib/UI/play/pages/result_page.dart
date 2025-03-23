@@ -22,6 +22,7 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
   late final String _username;
   late final bool _isOrganizer;
   late final String _nameForDisconnect;
+  late final int maxPoints;
 
   @override
   void initState() {
@@ -32,6 +33,7 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
     } else {
       _nameForDisconnect = _username;
     }
+    maxPoints = widget.playerList[0].points;
     super.initState();
   }
 
@@ -92,7 +94,7 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
                 ),
               ],
             ),
-            height: 500,
+            height: 450,
             padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32),
             child: ListView.separated(
               separatorBuilder: (context, index) => SizedBox(
@@ -101,8 +103,46 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
               itemCount: widget.playerList.length,
               itemBuilder: (context, index) {
                 final player = widget.playerList[index];
-                return ResultPlayerInfo(player: player);
+                return ResultPlayerInfo(
+                  player: player,
+                  maxPoints: maxPoints,
+                );
               },
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.of(context).pop();
+              },
+              child: Container(
+                margin: const EdgeInsets.only(top: 8),
+                width: 100,
+                height: 50, // Fixed height for medium button
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 8), // Padding for content
+                decoration: BoxDecoration(
+                  color:
+                      Theme.of(context).colorScheme.primary, // Background color
+                  border: Border.all(
+                    color:
+                        Theme.of(context).colorScheme.tertiary, // Border color
+                    width: 3,
+                  ),
+                  borderRadius: BorderRadius.circular(50), // Rounded corners
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  "Quitter", // Button text
+                  style: TextStyle(
+                    fontSize: 16,
+                    color:
+                        Theme.of(context).colorScheme.onPrimary, // Text color
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ),
           ),
         ],

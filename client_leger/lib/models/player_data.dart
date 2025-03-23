@@ -5,9 +5,9 @@ class PlayerData {
   int points;
   int noBonusesObtained;
   bool isInGame;
-  String equippedAvatar; // pic link (for result page)
-  String equippedBanner; // pic link (for result page)
-  Reward reward; // for result page (for result page)
+  String? equippedAvatar; // pic link (for result page)
+  String? equippedBanner; // pic link (for result page)
+  Reward? reward; // for result page (for result page)
 
   PlayerData({
     required this.name,
@@ -27,7 +27,7 @@ class PlayerData {
       isInGame: json['isInGame'],
       equippedAvatar: json['equippedAvatar'],
       equippedBanner: json['equippedBanner'],
-      reward: Reward.fromJson(json['reward']),
+      reward: json['reward'] != null ? Reward.fromJson(json['reward']) : null,
     );
   }
 
@@ -39,7 +39,7 @@ class PlayerData {
       'isInGame': isInGame,
       'equippedAvatar': equippedAvatar,
       'equippedBanner': equippedBanner,
-      'reward': reward.toJson(),
+      'reward': reward?.toJson(),
     };
   }
 }
