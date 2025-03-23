@@ -3,10 +3,12 @@ import 'package:client_leger/UI/global/avatar_banner_widget.dart';
 import 'package:client_leger/UI/main-view/sidebar/sidebar.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
+import 'package:client_leger/models/svg-pics/svg_constants.dart';
 import 'package:client_leger/providers/user_provider.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
@@ -147,13 +149,20 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                           onPressed: () => context.go(Paths.luck),
                         ),
                         IconButton(
-                          icon: Icon(Icons.backpack),
-                          iconSize: 28,
+                          icon: SizedBox(
+                            width: 34,
+                            height: 34,
+                            child: SvgPicture.string(
+                              getInventorySvg(),
+                              colorFilter: ColorFilter.mode(
+                                  colorScheme.tertiary, BlendMode.srcIn),
+                            ),
+                          ),
                           color: colorScheme.tertiary,
                           onPressed: () => context.go(Paths.inventory),
                         ),
                         IconButton(
-                          icon: Icon(Icons.attach_money),
+                          icon: Icon(FontAwesomeIcons.sackDollar),
                           iconSize: 28,
                           color: colorScheme.tertiary,
                           onPressed: () => context.go(Paths.shop),

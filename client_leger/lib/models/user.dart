@@ -1,5 +1,6 @@
 import 'package:client_leger/models/game-log-entry-model.dart';
 import 'package:client_leger/models/stats-related/stats.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class User {
   final String? avatarEquipped;
@@ -24,7 +25,7 @@ class User {
   final String? role;
   final Stats? stats; // Added
   final String uid;
-  final DateTime? unBanDate;
+  final Timestamp? unBanDate;
   final String username;
 
   User({
@@ -95,7 +96,7 @@ class User {
           json['stats'] != null ? Stats.fromJson(json['stats']) : null, // Added
       uid: json['uid'] as String,
       unBanDate:
-          json['unBanDate'] != null ? DateTime.parse(json['unBanDate']) : null,
+          json['unBanDate'] != null ? json['unBanDate'] as Timestamp : null,
       username: json['username'] as String,
     );
   }

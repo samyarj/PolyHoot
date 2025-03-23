@@ -163,23 +163,15 @@ class InventorySection extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(4),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.remove_circle_outline,
+        child: Center(
+          child: Text(
+            'AUCUN',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
               color: colorScheme.onPrimary,
-              size: size * 0.5,
             ),
-            const SizedBox(height: 4),
-            Text(
-              'Retirer',
-              style: TextStyle(
-                color: colorScheme.onPrimary,
-                fontSize: 10,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

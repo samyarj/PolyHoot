@@ -58,7 +58,7 @@ class AvatarPreview extends StatelessWidget {
                     ),
                   ),
 
-                if (bannerUrl != null && bannerUrl!.isNotEmpty)
+                if (bannerUrl != null && bannerUrl!.isNotEmpty && bannerUrl != 'remove_banner')
                   _buildBannerImage(bannerUrl!, containerSize),
               ],
             ),
