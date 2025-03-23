@@ -1,3 +1,5 @@
+import 'package:client_leger/UI/global/header_title.dart';
+import 'package:client_leger/UI/play/widgets/result_player_info.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/player_data.dart';
 import 'package:client_leger/providers/user_provider.dart';
@@ -46,48 +48,64 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Résultats'),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: ListView.builder(
-          itemCount: widget.playerList.length,
-          itemBuilder: (context, index) {
-            final player = widget.playerList[index];
-            return Container(
-              padding: EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: Colors.grey),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    player.name,
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      decoration: player.isInGame
-                          ? TextDecoration.none
-                          : TextDecoration.lineThrough,
-                    ),
-                  ),
-                  Text(
-                    '${player.points} points',
-                    style: TextStyle(fontSize: 18.0),
-                  ),
-                  Text(
-                    '${player.noBonusesObtained} bonus',
-                    style: TextStyle(fontSize: 18.0),
-                  ),
-                ],
-              ),
-            );
-          },
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.secondary,
+          ],
         ),
+      ),
+      padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 64),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          AnimatedTitleWidget(
+            title: "PODIUM",
+            fontSize: 40,
+          ),
+          SizedBox(height: 32),
+          Container(
+            decoration: BoxDecoration(
+              color:
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.55),
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(
+                color: Theme.of(context)
+                    .colorScheme
+                    .tertiary
+                    .withValues(alpha: 0.3), // Border color
+                width: 2, // Border width
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .tertiary
+                      .withValues(alpha: 0.3),
+                  spreadRadius: 0,
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            height: 500,
+            padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32),
+            child: ListView.separated(
+              separatorBuilder: (context, index) => SizedBox(
+                height: 16,
+              ),
+              itemCount: widget.playerList.length,
+              itemBuilder: (context, index) {
+                final player = widget.playerList[index];
+                return ResultPlayerInfo(player: player);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
