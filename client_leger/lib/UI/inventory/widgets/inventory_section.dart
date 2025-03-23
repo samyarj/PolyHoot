@@ -1,8 +1,8 @@
 import 'package:client_leger/UI/global/header_title.dart';
 import 'package:client_leger/UI/global/item_widget.dart';
 import 'package:client_leger/UI/global/unified_item_gird.dart';
+import 'package:client_leger/models/enums.dart';
 import 'package:client_leger/providers/theme_provider.dart';
-import 'package:client_leger/utilities/enums.dart';
 import 'package:flutter/material.dart';
 
 // Special constant to identify the "remove banner" option

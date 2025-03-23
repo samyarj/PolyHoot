@@ -35,16 +35,23 @@ class __ConfirmationDialogState extends State<_ConfirmationDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return AlertDialog(
-      title: Text('Confirmation',
-          style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+      backgroundColor: colorScheme.surface,
+      title: Text(
+        'Confirmation',
+        style: TextStyle(color: colorScheme.onPrimary),
+      ),
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
             Text(
               widget.message,
               style: TextStyle(
-                  fontSize: 18, color: Theme.of(context).colorScheme.primary),
+                fontSize: 18,
+                color: colorScheme.onPrimary,
+              ),
             ),
             if (_isLoading)
               Padding(
@@ -63,9 +70,15 @@ class __ConfirmationDialogState extends State<_ConfirmationDialog> {
               : () {
                   Navigator.of(context).pop();
                 },
+          style: TextButton.styleFrom(
+            foregroundColor: colorScheme.onPrimary,
+          ),
           child: Text(
             'Annuler',
-            style: TextStyle(fontSize: 18),
+            style: TextStyle(
+              fontSize: 18,
+              color: colorScheme.onPrimary,
+            ),
           ),
         ),
         TextButton(
@@ -87,9 +100,15 @@ class __ConfirmationDialogState extends State<_ConfirmationDialog> {
                         Navigator.of(context).pop();
                       }
                     },
+          style: TextButton.styleFrom(
+            foregroundColor: colorScheme.onPrimary,
+          ),
           child: Text(
             'Continuer',
-            style: TextStyle(fontSize: 18),
+            style: TextStyle(
+              fontSize: 18,
+              color: colorScheme.onPrimary,
+            ),
           ),
         ),
       ],
