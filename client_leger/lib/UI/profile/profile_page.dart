@@ -11,7 +11,7 @@ import 'package:client_leger/backend-communication-services/upload-image/upload_
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/providers/user_provider.dart';
 import 'package:client_leger/utilities/logger.dart';
-import 'package:client_leger/utilities/toastNotification.dart';
+import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';

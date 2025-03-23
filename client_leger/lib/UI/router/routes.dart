@@ -16,4 +16,6 @@ class Paths {
   static const String equipped = '/equipped';
   static const String coins = '/coins';
   static const String luck = '/luck';
+  static const String inventory = '/inventory';
+  static const String shop = '/shop';
 }

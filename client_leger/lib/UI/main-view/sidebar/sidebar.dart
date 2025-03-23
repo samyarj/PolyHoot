@@ -25,7 +25,7 @@ class _SideBarState extends ConsumerState<SideBar>
 
   @override
   void initState() {
-    _tabController = TabController(length: 4, vsync: this, initialIndex: 1);
+    _tabController = TabController(length: 4, vsync: this, initialIndex: 0);
     super.initState();
   }
 
