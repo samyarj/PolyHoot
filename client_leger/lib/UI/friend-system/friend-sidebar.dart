@@ -33,11 +33,14 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
   bool _isSearchLoading = false;
   String _searchTerm = '';
   Timer? _debounce;
+  Map<String, FriendState> _friendsMap = {};
+  StreamSubscription? _onlineStatusSubscription;
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
+    _subscribeToOnlineStatusUpdates();
   }
 
   @override
@@ -45,7 +48,40 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     _debounce?.cancel();
+    _onlineStatusSubscription?.cancel(); // Properly cancel subscription
     super.dispose();
+  }
+
+  void _subscribeToOnlineStatusUpdates() {
+    // Cancel any existing subscription first
+    _onlineStatusSubscription?.cancel();
+
+    // Create a new subscription
+    _onlineStatusSubscription = _friendService.getFriendsOnlineStatus().listen(
+      (onlineStatusMap) {
+        if (mounted) {
+          setState(() {
+            // Update all online statuses at once
+            onlineStatusMap.forEach((uid, isOnline) {
+              if (_friendsMap.containsKey(uid)) {
+                _friendsMap[uid]!.isOnline = isOnline;
+              }
+            });
+          });
+        }
+      },
+      onError: (error) {
+        print("Online status stream error: $error");
+      },
+    );
+  }
+
+  void _updateFriendOnlineStatus(String uid, bool isOnline) {
+    if (_friendsMap.containsKey(uid)) {
+      setState(() {
+        _friendsMap[uid]!.isOnline = isOnline;
+      });
+    }
   }
 
   void _onSearchChanged() {
@@ -150,7 +186,8 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
     return StreamBuilder<List<UserWithId>>(
       stream: _friendService.getFriends(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            _friendsMap.isEmpty) {
           return const Center(child: ThemedProgressIndicator());
         }
 
@@ -163,9 +200,35 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
           );
         }
 
-        final friends = snapshot.data ?? [];
+        // Update the friends map with new data, preserving online status
+        if (snapshot.hasData) {
+          final newFriends = snapshot.data ?? [];
 
-        if (friends.isEmpty) {
+          // Update existing entries or add new ones
+          for (var friend in newFriends) {
+            if (_friendsMap.containsKey(friend.user.uid)) {
+              // Preserve online status but update other fields
+              final currentOnlineStatus =
+                  _friendsMap[friend.user.uid]!.isOnline;
+              _friendsMap[friend.user.uid] = FriendState(
+                userWithId: friend,
+                isOnline: friend.user.isOnline ?? currentOnlineStatus,
+              );
+            } else {
+              // Add new friend
+              _friendsMap[friend.user.uid] = FriendState(
+                userWithId: friend,
+                isOnline: friend.user.isOnline ?? false,
+              );
+            }
+          }
+
+          // Remove friends that are no longer in the list
+          _friendsMap.removeWhere(
+              (uid, _) => !newFriends.any((friend) => friend.user.uid == uid));
+        }
+
+        if (_friendsMap.isEmpty) {
           return Center(
             child: Text(
               'Vous n\'avez pas encore d\'amis',
@@ -174,11 +237,15 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
           );
         }
 
+        // Convert map to list for ListView
+        final friendsList = _friendsMap.values.toList();
+
         return ListView.builder(
-          itemCount: friends.length,
+          itemCount: friendsList.length,
           itemBuilder: (context, index) {
-            final friend = friends[index];
-            final isOnline = friend.user.isOnline ?? false;
+            final friendState = friendsList[index];
+            final friend = friendState.userWithId;
+            final isOnline = friendState.isOnline;
 
             return ListTile(
               leading: Stack(
@@ -186,7 +253,7 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
                   AvatarBannerWidget(
                     avatarUrl: friend.user.avatarEquipped,
                     bannerUrl: friend.user.borderEquipped,
-                    size: 40,
+                    size: 55,
                     avatarFit: BoxFit.cover,
                   ),
                   if (isOnline)
@@ -317,7 +384,7 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
                               leading: AvatarBannerWidget(
                                 avatarUrl: user.user.avatarEquipped,
                                 bannerUrl: user.user.borderEquipped,
-                                size: 40,
+                                size: 55,
                                 avatarFit: BoxFit.cover,
                               ),
                               title: Text(
@@ -354,31 +421,36 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
   }
 
   Future<void> _showRemoveFriendDialog(UserWithId friend) async {
-    try {
-      await showConfirmationDialog(
-        context,
-        'Êtes-vous sûr de vouloir supprimer ${friend.user.username} de votre liste d\'amis?',
-        () async {
-          setState(() {
-            _isLoading = true;
-          });
+    await showConfirmationDialog(
+      context,
+      'Êtes-vous sûr de vouloir supprimer ${friend.user.username} de votre liste d\'amis?',
+      null,
+      () {
+        Future.delayed(Duration.zero, () {
+          if (mounted) {
+            setState(() {
+              _isLoading = true;
+            });
 
-          try {
-            await _friendService.removeFriend(friend.user.uid);
-          } finally {
-            if (mounted) {
-              setState(() {
-                _isLoading = false;
-              });
-            }
+            _friendService.removeFriend(friend.user.uid).then((_) {
+              if (mounted) {
+                setState(() {
+                  _isLoading = false;
+                });
+              }
+            }).catchError((error) {
+              if (mounted) {
+                setState(() {
+                  _isLoading = false;
+                });
+                showToast(context, error.toString(),
+                    type: ToastificationType.error);
+              }
+            });
           }
-        },
-        null,
-      );
-    } catch (e) {
-      if (!mounted) return;
-      showErrorDialog(context, e.toString());
-    }
+        });
+      },
+    );
   }
 
   Future<void> _sendFriendRequest(String friendUid) async {

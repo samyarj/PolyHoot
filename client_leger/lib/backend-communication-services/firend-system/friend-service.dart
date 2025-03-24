@@ -3,6 +3,7 @@ import 'package:client_leger/models/user.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:rxdart/rxdart.dart';
 
 class FriendService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -77,6 +78,43 @@ class FriendService {
                 id: doc.id,
               ))
           .toList();
+    });
+  }
+
+  Stream<Map<String, bool>> getFriendsOnlineStatus() {
+    final currentUser = _auth.currentUser;
+    if (currentUser == null) {
+      return Stream.value({});
+    }
+
+    return _firestore
+        .collection('users')
+        .where('uid', isEqualTo: currentUser.uid)
+        .snapshots()
+        .switchMap((userSnapshot) {
+      if (userSnapshot.docs.isEmpty) return Stream.value({});
+
+      final userData = userSnapshot.docs.first.data();
+      final friends = List<String>.from(userData['friends'] ?? []);
+
+      if (friends.isEmpty) return Stream.value({});
+
+      return _firestore
+          .collection('users')
+          .where('uid', whereIn: friends)
+          .snapshots()
+          .map((friendsSnapshot) {
+        Map<String, bool> onlineStatusMap = {};
+
+        for (var doc in friendsSnapshot.docs) {
+          final userData = doc.data();
+          final uid = userData['uid'] as String;
+          final isOnline = userData['isOnline'] as bool? ?? false;
+          onlineStatusMap[uid] = isOnline;
+        }
+
+        return onlineStatusMap;
+      });
     });
   }
 
@@ -402,10 +440,16 @@ class FriendService {
   }
 }
 
-// Helper class to include Firestore document ID with User data
 class UserWithId {
   final User user;
   final String id;
 
   UserWithId({required this.user, required this.id});
+}
+
+class FriendState {
+  final UserWithId userWithId;
+  bool isOnline;
+
+  FriendState({required this.userWithId, this.isOnline = false});
 }

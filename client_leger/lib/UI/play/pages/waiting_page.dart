@@ -1,5 +1,6 @@
-import 'package:client_leger/UI/global/avatar_banner_widget.dart';
 import 'package:client_leger/UI/global/header_title.dart';
+import 'package:client_leger/UI/play/widgets/leave_game_button.dart';
+import 'package:client_leger/UI/play/widgets/player_info.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/providers/play/waiting_page_provider.dart';
@@ -177,121 +178,10 @@ class WaitingPage extends ConsumerWidget {
                                       waitingState.playersInfo[index];
                                   final isOrganizer =
                                       WebSocketManager.instance.isOrganizer;
-                                  final isNotPlayer =
-                                      WebSocketManager.instance.playerName !=
-                                              player.name ||
-                                          isOrganizer;
 
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 6, horizontal: 20),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 22, vertical: 8),
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            colorScheme.secondary
-                                                .withValues(alpha: 0.4),
-                                            if (isNotPlayer)
-                                              colorScheme.secondary
-                                                  .withValues(alpha: 0.3),
-                                            if (isNotPlayer)
-                                              colorScheme.primary
-                                                  .withValues(alpha: 0.6),
-                                            if (isNotPlayer)
-                                              colorScheme.primary,
-                                            if (isNotPlayer)
-                                              colorScheme.primary,
-                                            if (isNotPlayer)
-                                              colorScheme.primary
-                                                  .withValues(alpha: 0.6),
-                                            if (isNotPlayer)
-                                              colorScheme.secondary
-                                                  .withValues(alpha: 0.3),
-                                            colorScheme.secondary
-                                                .withValues(alpha: 0.4),
-                                          ],
-                                          begin: Alignment.centerLeft,
-                                          end: Alignment.centerRight,
-                                        ),
-                                        borderRadius: BorderRadius.circular(35),
-                                        border: Border.all(
-                                          color: colorScheme.tertiary,
-                                          width: 2,
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          // Avatar
-                                          AvatarBannerWidget(
-                                            avatarUrl: player.avatar,
-                                            bannerUrl: player.banner,
-                                            size:
-                                                44, // This is equivalent to radius*2 (22*2)
-                                            avatarFit: BoxFit.cover,
-                                          ),
-                                          // Username text
-                                          Text(
-                                            player.name,
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                              color: colorScheme.onPrimary,
-                                            ),
-                                          ),
-
-                                          // Ban button (conditionally shown)
-                                          socketManager.isOrganizer &&
-                                                  player != "Organisateur"
-                                              ? ElevatedButton(
-                                                  onPressed: () {
-                                                    ref
-                                                        .read(
-                                                            waitingPageProvider
-                                                                .notifier)
-                                                        .banPlayer(player.name);
-                                                  },
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                    backgroundColor: colorScheme
-                                                        .primary
-                                                        .withValues(alpha: 0.8),
-                                                    foregroundColor:
-                                                        colorScheme.onPrimary,
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 20,
-                                                        vertical: 12),
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              25),
-                                                      side: BorderSide(
-                                                        color: colorScheme
-                                                            .tertiary,
-                                                        width: 2,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  child: const Text(
-                                                    "Exclure",
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                )
-                                              : const SizedBox(
-                                                  width:
-                                                      80), // Empty space to maintain alignment when no button
-                                        ],
-                                      ),
-                                    ),
+                                  return PlayerInfoWidget(
+                                    player: player,
+                                    isOrganizer: isOrganizer,
                                   );
                                 },
                               ),
@@ -428,38 +318,12 @@ class WaitingPage extends ConsumerWidget {
                     ),
 
                     // Quit button in an Align to position it at the right
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 30),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            requestLeaveWaitingPage(context, ref);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: colorScheme.primary.withValues(
-                              alpha: 0.9,
-                            ),
-                            foregroundColor: colorScheme.onPrimary,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 15, horizontal: 20),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(40),
-                              side: BorderSide(
-                                color: colorScheme.tertiary,
-                                width: 2,
-                              ),
-                            ),
-                          ),
-                          child: const Text(
-                            "Quitter",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
+                    LeaveGameButton(
+                      text: "Quitter",
+                      onPressed: () {
+                        requestLeaveWaitingPage(context, ref);
+                      },
+                      alignRight: true,
                     ),
                   ],
                 ),
