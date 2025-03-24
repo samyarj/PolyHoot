@@ -5,9 +5,12 @@ import { FirebaseChatMessage } from '@app/interfaces/chat-message';
 import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
 import { ChatChannel, chatChannelFromJson } from '@app/services/chat-services/chat-channels';
+import { ChatEvents } from '@app/services/chat-services/chat-events';
+import { ChatService } from '@app/services/chat-services/chat.service';
 import { FirebaseChatService } from '@app/services/chat-services/firebase/firebase-chat.service';
 import { FriendSystemService } from '@app/services/friend-system.service';
 import { HeaderNavigationService } from '@app/services/ui-services/header-navigation.service';
+import { ChatMessage } from '@common/chat-message';
 import { Observable, Subscription } from 'rxjs';
 
 @Component({
@@ -47,6 +50,11 @@ export class SideBarComponent implements OnInit, OnDestroy {
     searchResults: { id: string; username: string }[] = [];
     private searchSubscription: Subscription;
 
+    gameChatMessages: ChatMessage[] = [];
+    private gameChatSubscription: Subscription;
+    private chatEventsSubscription: Subscription;
+    private isGameChatInitialized: boolean = false;
+
     constructor(
         private authService: AuthService,
         private router: Router,
@@ -54,6 +62,7 @@ export class SideBarComponent implements OnInit, OnDestroy {
         private headerService: HeaderNavigationService,
         private friendSystemService: FriendSystemService,
         private firestore: Firestore,
+        private chatService: ChatService,
     ) {
         this.user$ = this.authService.user$;
     }
@@ -85,6 +94,28 @@ export class SideBarComponent implements OnInit, OnDestroy {
                 this.setupRealtimeUserUpdates(user.uid);
             }
         });
+
+        // Subscribe to game chat messages
+        this.gameChatSubscription = this.chatService.allChatMessagesObservable.subscribe({
+            next: (messages) => {
+                this.gameChatMessages = messages;
+            },
+            error: (err) => {
+                console.error('Error while fetching game chat messages:', err);
+            },
+        });
+
+        // Subscribe to chat events to handle game chat clearing
+        this.chatEventsSubscription = this.chatService.chatEvents$.subscribe((event) => {
+            if (event.event === ChatEvents.RoomLeft) {
+                this.cleanupGameChat();
+            }
+        });
+
+        // Initialize game chat if we're on a game page
+        if (this.isOnGamePage) {
+            this.initializeGameChat();
+        }
     }
 
     private setupRealtimeUserUpdates(uid: string) {
@@ -155,6 +186,12 @@ export class SideBarComponent implements OnInit, OnDestroy {
         }
         if (this.searchSubscription) {
             this.searchSubscription.unsubscribe();
+        }
+        if (this.gameChatSubscription) {
+            this.gameChatSubscription.unsubscribe();
+        }
+        if (this.chatEventsSubscription) {
+            this.chatEventsSubscription.unsubscribe();
         }
     }
 
@@ -473,6 +510,31 @@ export class SideBarComponent implements OnInit, OnDestroy {
             await this.friendSystemService.cancelFriendRequest(friendId, this.userUID);
         } catch (error) {
             console.error("Erreur lors du refu de la demande d'ami:", error);
+        }
+    }
+
+    private initializeGameChat(): void {
+        if (!this.isGameChatInitialized) {
+            if (!this.chatService.isInitialized) {
+                this.chatService.configureChatSocketFeatures();
+                this.chatService.getHistory();
+            } else {
+                this.chatService.retrieveRoomIdChat();
+            }
+            this.isGameChatInitialized = true;
+        }
+    }
+
+    private cleanupGameChat(): void {
+        if (this.isGameChatInitialized) {
+            this.gameChatMessages = [];
+            this.isGameChatInitialized = false;
+        }
+    }
+
+    async handleSendMessageToGame(message: string): Promise<void> {
+        if (this.isOnGamePage) {
+            this.chatService.sendMessageToRoom(message);
         }
     }
 }

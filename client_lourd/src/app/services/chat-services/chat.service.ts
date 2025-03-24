@@ -1,15 +1,15 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { ChatData } from '@app/interfaces/chat-data';
 import { AuthService } from '@app/services/auth/auth.service';
 import { SocketClientService } from '@app/services/websocket-services/general/socket-client-manager.service';
 import { ChatMessage } from '@common/chat-message';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { ChatEvents } from './chat-events';
 
 @Injectable({
     providedIn: 'root',
 })
-export class ChatService {
+export class ChatService implements OnDestroy {
     private chatEventsSubject = new Subject<{ event: ChatEvents; data?: any }>();
     chatEvents$ = this.chatEventsSubject.asObservable();
 
@@ -18,6 +18,9 @@ export class ChatService {
     allChatMessagesObservable: Observable<ChatMessage[]>;
     isInitialized: boolean;
     roomId: string;
+    private messageAddedSubscription: Subscription;
+    private roomLeftSubscription: Subscription;
+    private userSubscription: Subscription;
 
     constructor(
         private socketClientService: SocketClientService,
@@ -45,15 +48,14 @@ export class ChatService {
 
     sendMessageToRoom(messageInput: string): boolean {
         if (this.socketClientService.roomId) {
-            this.authService.user$.subscribe((user) => {
-                if (user) {
-                    const message: ChatMessage = {
-                        message: messageInput,
-                        author: user.username,
-                    };
-                    this.socketClientService.send(ChatEvents.RoomMessage, message);
-                }
-            });
+            const user = this.authService.getUser();
+            if (user) {
+                const message: ChatMessage = {
+                    message: messageInput,
+                    author: user.username,
+                };
+                this.socketClientService.send(ChatEvents.RoomMessage, message);
+            }
             return true;
         }
         return false;
@@ -71,23 +73,38 @@ export class ChatService {
     }
 
     configureChatSocketFeatures() {
-        this.socketClientService.on(ChatEvents.MessageAdded, (newMessage: ChatMessage) => {
+        // Unsubscribe from previous subscriptions if they exist
+        if (this.messageAddedSubscription) {
+            this.messageAddedSubscription.unsubscribe();
+        }
+        if (this.roomLeftSubscription) {
+            this.roomLeftSubscription.unsubscribe();
+        }
+
+        // Subscribe to new messages
+        const messageAddedHandler = (newMessage: ChatMessage) => {
             this.allChatMessages.push(newMessage);
             this.allChatMessagesSource.next(this.allChatMessages);
-        });
-        this.socketClientService.on(ChatEvents.RoomLeft, (chatData: ChatData) => {
+        };
+        this.messageAddedSubscription = new Subscription();
+        this.socketClientService.on(ChatEvents.MessageAdded, messageAddedHandler);
+
+        // Subscribe to room left events
+        const roomLeftHandler = (chatData: ChatData) => {
             if (!chatData || this.socketClientService.playerName === chatData.playerName) {
                 this.socketClientService.roomId = '';
                 this.socketClientService.playerName = '';
                 this.socketClientService.isOrganizer = false;
-                this.clearMessages(); // Clear messages when the user leaves the room
-                this.chatEventsSubject.next({ event: ChatEvents.RoomLeft }); // Emit custom event
-                this.socketClientService.send(ChatEvents.RoomLeft, chatData); // Broadcast the event to all clients
+                this.clearMessages();
+                this.chatEventsSubject.next({ event: ChatEvents.RoomLeft });
+                this.socketClientService.send(ChatEvents.RoomLeft, chatData);
             } else {
                 this.allChatMessages.push(chatData.message);
                 this.allChatMessagesSource.next(this.allChatMessages);
             }
-        });
+        };
+        this.roomLeftSubscription = new Subscription();
+        this.socketClientService.on(ChatEvents.RoomLeft, roomLeftHandler);
 
         this.isInitialized = true;
     }
@@ -95,5 +112,17 @@ export class ChatService {
     private clearMessages(): void {
         this.allChatMessages = [];
         this.allChatMessagesSource.next(this.allChatMessages);
+    }
+
+    ngOnDestroy(): void {
+        if (this.messageAddedSubscription) {
+            this.messageAddedSubscription.unsubscribe();
+        }
+        if (this.roomLeftSubscription) {
+            this.roomLeftSubscription.unsubscribe();
+        }
+        if (this.userSubscription) {
+            this.userSubscription.unsubscribe();
+        }
     }
 }
