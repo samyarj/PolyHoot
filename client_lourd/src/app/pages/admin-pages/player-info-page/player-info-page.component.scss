@@ -373,3 +373,14 @@ th {
     font-size: 0.9rem;
     transition: background-color 0.2s;
 }
+
+// Add this to your existing styles
+.ban-timer {
+    color: #e74c3c;
+    font-size: 0.85rem;
+    font-weight: 500;
+    background-color: rgba(231, 76, 60, 0.1);
+    padding: 4px 8px;
+    border-radius: 10px;
+    display: inline-block;
+}

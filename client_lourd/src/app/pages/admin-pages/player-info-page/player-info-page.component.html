@@ -21,28 +21,33 @@
                         <th class="col-status sortable" (click)="sort('isOnline')">
                             Statut
                             <span class="sort-icon" *ngIf="sortColumn() === 'isOnline'">
-                                {{ sortDirection() === 'asc' ? '▲' : '▼' }}
+                                {{ sortDirection() === 'asc' ? '▼' : '▲' }}
                             </span>
                         </th>
                         <th class="col-coins sortable" (click)="sort('coins')">
                             Coins
                             <span class="sort-icon" *ngIf="sortColumn() === 'coins'">
-                                {{ sortDirection() === 'asc' ? '▲' : '▼' }}
+                                {{ sortDirection() === 'asc' ? '▼' : '▲' }}
                             </span>
                         </th>
                         <th class="col-wins sortable" (click)="sort('nWins')">
                             Victoires
                             <span class="sort-icon" *ngIf="sortColumn() === 'nWins'">
-                                {{ sortDirection() === 'asc' ? '▲' : '▼' }}
+                                {{ sortDirection() === 'asc' ? '▼' : '▲' }}
                             </span>
                         </th>
                         <th class="col-reports sortable" (click)="sort('nbReport')">
                             Signalements
                             <span class="sort-icon" *ngIf="sortColumn() === 'nbReport'">
+                                {{ sortDirection() === 'asc' ? '▼' : '▲' }}
+                            </span>
+                        </th>
+                        <th class="col-actions sortable" (click)="sort('banned')">
+                            Bannir
+                            <span class="sort-icon" *ngIf="sortColumn() === 'banned'">
                                 {{ sortDirection() === 'asc' ? '▲' : '▼' }}
                             </span>
                         </th>
-                        <th class="col-actions">Bannir</th>
                     </tr>
                 </thead>
             </table>
@@ -98,9 +103,12 @@
                             </td>
                             <td class="col-reports">{{ player.nbReport || 0 }}</td>
                             <td class="col-actions">
-                                <button class="action-btn ban-btn" title="Bannir" (click)="adminBanPlayer(player.uid)">
+                                <button *ngIf="!isBanned(player)" class="action-btn ban-btn" title="Bannir" (click)="adminBanPlayer(player.uid)">
                                     <span>🚫</span>
                                 </button>
+                                <span *ngIf="isBanned(player)" class="ban-timer" title="Utilisateur banni">
+                                    {{ formatUnbanDate(player) }}
+                                </span>
                             </td>
                         </tr>
 

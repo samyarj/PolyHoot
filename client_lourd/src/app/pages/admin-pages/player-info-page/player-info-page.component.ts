@@ -1,9 +1,10 @@
+/* eslint-disable complexity */
 import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
 import { User } from '@app/interfaces/user';
 import { AdminService } from '@app/services/back-end-communication-services/admin-service/admin.service';
 import { ToastrService } from 'ngx-toastr';
 // Add these types for sorting
-type SortColumn = 'username' | 'coins' | 'nWins' | 'isOnline' | 'nbReport' | null;
+type SortColumn = 'username' | 'coins' | 'nWins' | 'isOnline' | 'nbReport' | 'banned' | null;
 type SortDirection = 'asc' | 'desc';
 
 @Component({
@@ -45,6 +46,20 @@ export class PlayerInfoPageComponent implements OnInit, OnDestroy {
                     return direction === 'asc' ? isOnlineValueA - isOnlineValueB : isOnlineValueB - isOnlineValueA;
                 }
 
+                if (column === 'banned') {
+                    const isBannedA = this.isBanned(a) ? 1 : 0;
+                    const isBannedB = this.isBanned(b) ? 1 : 0;
+
+                    if (isBannedA === isBannedB && isBannedA === 1) {
+                        // If both are banned, sort by unban time (earliest first)
+                        const unbanDateA = this.getUnbanDate(a).getTime();
+                        const unbanDateB = this.getUnbanDate(b).getTime();
+                        return direction === 'asc' ? unbanDateA - unbanDateB : unbanDateB - unbanDateA;
+                    }
+
+                    return direction === 'asc' ? isBannedA - isBannedB : isBannedB - isBannedA;
+                }
+
                 const valueA = a[column] || 0;
                 const valueB = b[column] || 0;
                 return direction === 'asc' ? valueA - valueB : valueB - valueA;
@@ -80,7 +95,8 @@ export class PlayerInfoPageComponent implements OnInit, OnDestroy {
         } else {
             // Set new sort column and reset direction
             this.sortColumn.set(column);
-            this.sortDirection.set('asc');
+            // Default username to ascending (A-Z), but all other columns to descending (high-to-low)
+            this.sortDirection.set(column === 'username' ? 'asc' : 'desc');
         }
     }
 
@@ -127,13 +143,61 @@ export class PlayerInfoPageComponent implements OnInit, OnDestroy {
     }
 
     adminBanPlayer(playerId: string): void {
+        // find player by id
+        const player = this.players().find((p) => p.uid === playerId);
         this.adminService.adminBanPlayer(playerId).subscribe({
             next: () => {
-                this.toastr.success(`Player with ID: ${playerId} has been banned for 15 minutes.`);
+                this.toastr.success(`${player?.username} has been banned for 15 minutes.`);
             },
             error: (err) => {
-                this.toastr.error(`Failed to ban player with ID: ${playerId}. Error: ${err.message}`);
+                this.toastr.error(`Failed to ban ${player?.username}. Error: ${err.message}`);
             },
         });
+    }
+
+    // Add these methods to the PlayerInfoPageComponent class
+    isBanned(player: User): boolean {
+        if (!player.unBanDate) return false;
+
+        // Convert Firestore Timestamp to Date if needed
+        const unbanDate =
+            player.unBanDate instanceof Date
+                ? player.unBanDate
+                : (player.unBanDate as any).toDate
+                ? (player.unBanDate as any).toDate()
+                : new Date(player.unBanDate);
+
+        return unbanDate > new Date();
+    }
+
+    formatUnbanDate(player: User): string {
+        if (!player.unBanDate) return '';
+
+        // Convert Firestore Timestamp to Date if needed
+        const unbanDate =
+            player.unBanDate instanceof Date
+                ? player.unBanDate
+                : (player.unBanDate as any).toDate
+                ? (player.unBanDate as any).toDate()
+                : new Date(player.unBanDate);
+
+        // Calculate minutes left
+        const now = new Date();
+        const minutesLeft = Math.ceil((unbanDate.getTime() - now.getTime()) / (60 * 1000));
+
+        if (minutesLeft <= 0) return 'Débloqué';
+
+        return `Débloqué dans ${minutesLeft} min`;
+    }
+
+    private getUnbanDate(player: User): Date {
+        if (!player.unBanDate) return new Date(0); // Default to epoch time if no unban date
+
+        // Convert Firestore Timestamp to Date if needed
+        return player.unBanDate instanceof Date
+            ? player.unBanDate
+            : (player.unBanDate as any).toDate
+            ? (player.unBanDate as any).toDate()
+            : new Date(player.unBanDate);
     }
 }
