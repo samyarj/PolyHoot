@@ -1,6 +1,7 @@
 import 'package:client_leger/UI/coins/coins_page.dart';
 import 'package:client_leger/UI/equipped/equipped_page.dart';
 import 'package:client_leger/UI/forgot-password/password_reset_page.dart';
+import 'package:client_leger/UI/inventory/inventory_page.dart';
 import 'package:client_leger/UI/login/login_page.dart';
 import 'package:client_leger/UI/luck/luck_page.dart';
 import 'package:client_leger/UI/main-view/main_scaffold.dart';
@@ -13,6 +14,7 @@ import 'package:client_leger/UI/play/pages/result_page.dart';
 import 'package:client_leger/UI/play/pages/waiting_page.dart';
 import 'package:client_leger/UI/profile/profile_page.dart';
 import 'package:client_leger/UI/router/routes.dart';
+import 'package:client_leger/UI/shop/shop-page.dart';
 import 'package:client_leger/UI/signup/signup_page.dart';
 import 'package:client_leger/UI/user-statistics/game-logs-page.dart';
 import 'package:client_leger/UI/user-statistics/user-stats-logs-page.dart';
@@ -145,6 +147,22 @@ final GoRouter router = GoRouter(
             GoRoute(
               path: Paths.coins,
               builder: (context, state) => const CoinsPage(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Paths.inventory,
+              builder: (context, state) => const InventoryPage(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Paths.shop,
+              builder: (context, state) => const ShopPage(),
             ),
           ],
         ),

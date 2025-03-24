@@ -1,4 +1,5 @@
 import 'package:client_leger/UI/luck/coinflip/coinflip.dart';
+import 'package:client_leger/UI/luck/dailyfree/dailyfree.dart';
 import 'package:client_leger/UI/luck/lootbox/lootbox.dart';
 import 'package:flutter/material.dart';
 
@@ -37,7 +38,7 @@ class LuckPage extends StatelessWidget {
               children: [
                 getBackroundContainer(LootBox(), context),
                 getBackroundContainer(CoinFlipPage(), context),
-                getBackroundContainer(Text("Prix Quotidien"), context),
+                getBackroundContainer(Dailyfree(), context),
               ],
             ),
           ),

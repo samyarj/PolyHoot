@@ -1,3 +1,4 @@
+import 'package:client_leger/UI/global/avatar_banner_widget.dart';
 import 'package:client_leger/UI/global/header_title.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
@@ -225,12 +226,12 @@ class WaitingPage extends ConsumerWidget {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           // Avatar
-                                          CircleAvatar(
-                                            backgroundImage:
-                                                NetworkImage(player.avatar),
-                                            backgroundColor:
-                                                colorScheme.secondary,
-                                            radius: 22,
+                                          AvatarBannerWidget(
+                                            avatarUrl: player.avatar,
+                                            bannerUrl: player.banner,
+                                            size:
+                                                44, // This is equivalent to radius*2 (22*2)
+                                            avatarFit: BoxFit.cover,
                                           ),
                                           // Username text
                                           Text(
