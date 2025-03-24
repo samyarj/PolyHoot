@@ -243,12 +243,25 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
 
         state = state.copyWith(answersQRL: updatedAnswers);
         AppLogger.i("QRL Answer received from: ${answer.playerName}");
+      } else if (data is List && data.isEmpty) {
+        // If we receive an empty array, proceed to next question
+        nextQuestion();
+        AppLogger.i(
+            "Received empty answers array, proceeding to next question");
       }
     });
   }
 
   void _handleEveryoneSubmitted() {
     _socketManager.webSocketReceiver(GameEvents.EveryoneSubmitted.value, (_) {
+      // Check if there are any answers to grade
+      if (state.answersQRL.isEmpty) {
+        // If no answers, proceed to next question
+        nextQuestion();
+        AppLogger.i("No answers to grade, proceeding to next question");
+        return;
+      }
+
       final updatedGameInfo = GameInfo(
         time: 0,
         currentQuestionIndex: state.gameInfo.currentQuestionIndex,
@@ -282,6 +295,8 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
             isInGame: isInGame,
             submitted: false,
             points: updatedPlayerList[playerIndex].points,
+            avatarEquipped: updatedPlayerList[playerIndex].avatarEquipped,
+            bannerEquipped: updatedPlayerList[playerIndex].bannerEquipped,
           );
         }
 
@@ -319,6 +334,8 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
             name: playerName,
             submitted: updatedPlayerList[playerIndex].submitted,
             isInGame: updatedPlayerList[playerIndex].isInGame,
+            avatarEquipped: updatedPlayerList[playerIndex].avatarEquipped,
+            bannerEquipped: updatedPlayerList[playerIndex].bannerEquipped,
             points: points,
           );
 
@@ -335,10 +352,12 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
         bool allPlayersLeft = state.allPlayersLeft;
         final List<PartialPlayer> playerList = data.map((player) {
           return PartialPlayer(
-            name: player['name'],
-            isInGame: player['isInGame'],
+            name: player['name'] ?? '', // Add null check
+            isInGame: player['isInGame'] ?? false, // Add null check
             points: player['points'] ?? 0,
             submitted: player['submitted'] ?? false,
+            avatarEquipped: player['equippedAvatar'] ?? '', // Add null check
+            bannerEquipped: player['equippedBanner'] ?? '', // Add null check
           );
         }).toList();
 

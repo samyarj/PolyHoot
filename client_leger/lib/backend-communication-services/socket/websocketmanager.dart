@@ -11,6 +11,7 @@ final class WebSocketManager {
       ValueNotifier<String?>(null);
 
   bool isOrganizer = false;
+  bool isPlaying = false;
   String? playerName;
   IO.Socket? socket;
 

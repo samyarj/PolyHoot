@@ -234,13 +234,14 @@ class WaitingPage extends ConsumerWidget {
                               ),
 
                             const SizedBox(height: 16),
+                            if (socketManager.isOrganizer &&
+                                waitingState.gameTitle.isEmpty)
+                              // Toggle lock and start button in a row
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // Start game button
 
-                            // Toggle lock and start button in a row
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                // Start game button
-                                if (socketManager.isOrganizer)
                                   ElevatedButton(
                                     onPressed: canStartGame
                                         ? () {
@@ -280,10 +281,9 @@ class WaitingPage extends ConsumerWidget {
                                                   .withValues(alpha: 0.6)),
                                     ),
                                   ),
-                                const SizedBox(width: 12),
+                                  const SizedBox(width: 12),
 
-                                // Toggle lock icon
-                                if (socketManager.isOrganizer)
+                                  // Toggle lock icon
                                   GestureDetector(
                                     onTap: () {
                                       ref
@@ -310,8 +310,8 @@ class WaitingPage extends ConsumerWidget {
                                       ),
                                     ),
                                   )
-                              ],
-                            ),
+                                ],
+                              ),
                           ],
                         ),
                       ),
@@ -353,6 +353,7 @@ class WaitingPage extends ConsumerWidget {
       final route =
           socketManager.isOrganizer ? '/play' : '/play/${Paths.joinGame}';
       GoRouter.of(context).go(route);
+      WebSocketManager.instance.isPlaying = false;
     });
   }
 }

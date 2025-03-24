@@ -29,7 +29,6 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
   final FriendService _friendService = FriendService();
   final TextEditingController _searchController = TextEditingController();
   Set<String> _processingUsers = {};
-  bool _isLoading = false;
   bool _isSearchLoading = false;
   String _searchTerm = '';
   Timer? _debounce;
@@ -74,14 +73,6 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
         print("Online status stream error: $error");
       },
     );
-  }
-
-  void _updateFriendOnlineStatus(String uid, bool isOnline) {
-    if (_friendsMap.containsKey(uid)) {
-      setState(() {
-        _friendsMap[uid]!.isOnline = isOnline;
-      });
-    }
   }
 
   void _onSearchChanged() {
@@ -428,21 +419,11 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
       () {
         Future.delayed(Duration.zero, () {
           if (mounted) {
-            setState(() {
-              _isLoading = true;
-            });
-
-            _friendService.removeFriend(friend.user.uid).then((_) {
+            _friendService
+                .removeFriend(friend.user.uid)
+                .then((_) {})
+                .catchError((error) {
               if (mounted) {
-                setState(() {
-                  _isLoading = false;
-                });
-              }
-            }).catchError((error) {
-              if (mounted) {
-                setState(() {
-                  _isLoading = false;
-                });
                 showToast(context, error.toString(),
                     type: ToastificationType.error);
               }

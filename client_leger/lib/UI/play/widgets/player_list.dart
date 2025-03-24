@@ -1,20 +1,21 @@
+import 'package:client_leger/UI/global/avatar_banner_widget.dart';
 import 'package:client_leger/models/game-related/partial_player.dart';
 import 'package:client_leger/providers/play/game_organizer_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum SortField { name, points }
+enum SortField { name, points, status }
 
 enum SortOrder { ascending, descending }
 
-class SortablePlayerList extends ConsumerStatefulWidget {
-  const SortablePlayerList({super.key});
+class ImprovedPlayerList extends ConsumerStatefulWidget {
+  const ImprovedPlayerList({super.key});
 
   @override
-  ConsumerState<SortablePlayerList> createState() => _SortablePlayerListState();
+  ConsumerState<ImprovedPlayerList> createState() => _ImprovedPlayerListState();
 }
 
-class _SortablePlayerListState extends ConsumerState<SortablePlayerList> {
+class _ImprovedPlayerListState extends ConsumerState<ImprovedPlayerList> {
   SortField _sortField = SortField.name;
   SortOrder _sortOrder = SortOrder.ascending;
 
@@ -26,239 +27,293 @@ class _SortablePlayerListState extends ConsumerState<SortablePlayerList> {
     // Create a copy of the player list for sorting
     final sortedPlayers = _sortPlayers(List.from(playerList));
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return Column(
+      children: [
+        // Sorting controls (20% height)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Joueurs',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: colorScheme.primary,
+              // Sort field selector
+              DropdownButton<SortField>(
+                value: _sortField,
+                dropdownColor: colorScheme.primary,
+                style: TextStyle(color: colorScheme.onPrimary),
+                underline: Container(
+                  height: 2,
+                  color: colorScheme.tertiary,
                 ),
+                onChanged: (SortField? newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      _sortField = newValue;
+                    });
+                  }
+                },
+                items: <SortField>[
+                  SortField.name,
+                  SortField.points,
+                  SortField.status
+                ].map<DropdownMenuItem<SortField>>((SortField value) {
+                  return DropdownMenuItem<SortField>(
+                    value: value,
+                    child: Text(_getSortFieldName(value)),
+                  );
+                }).toList(),
               ),
-              _buildSortControls(context, colorScheme),
+
+              // Two separate buttons for sort order
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Ascending button
+                  IconButton(
+                    icon: Icon(
+                      Icons.arrow_upward,
+                      color: _sortOrder == SortOrder.ascending
+                          ? colorScheme.tertiary // Highlighted when active
+                          : colorScheme.onPrimary.withOpacity(0.6),
+                      size: 20,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _sortOrder = SortOrder.ascending;
+                      });
+                    },
+                    tooltip: 'Croissant',
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(
+                        minWidth: 36, minHeight: 36), // Smaller buttons
+                  ),
+
+                  // Descending button
+                  IconButton(
+                    icon: Icon(
+                      Icons.arrow_downward,
+                      color: _sortOrder == SortOrder.descending
+                          ? colorScheme.tertiary // Highlighted when active
+                          : colorScheme.onPrimary.withOpacity(0.6),
+                      size: 20,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _sortOrder = SortOrder.descending;
+                      });
+                    },
+                    tooltip: 'Décroissant',
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(
+                        minWidth: 36, minHeight: 36), // Smaller buttons
+                  ),
+                ],
+              ),
             ],
           ),
-          const SizedBox(height: 8),
-          _buildSortingHeader(colorScheme),
-          const SizedBox(height: 4),
-          SizedBox(
-            height: 150,
-            child: ListView.builder(
-              itemCount: sortedPlayers.length,
-              itemBuilder: (context, index) {
-                final player = sortedPlayers[index];
-                return ListTile(
-                  dense: true,
-                  title: Text(
-                    player.name,
-                    style: TextStyle(color: colorScheme.primary),
+        ),
+
+        // List headers
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Row(
+            children: [
+              // Avatar space
+              SizedBox(width: 40),
+
+              // Name column
+              Expanded(
+                flex: 5,
+                child: Text(
+                  'Nom',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: colorScheme.onPrimary,
                   ),
-                  subtitle: Text(
-                    'Points: ${player.points.toStringAsFixed(1)}',
-                    style: TextStyle(color: colorScheme.primary),
+                ),
+              ),
+
+              // Points column
+              Expanded(
+                flex: 3,
+                child: Text(
+                  'Points',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: colorScheme.onPrimary,
                   ),
-                  leading: Icon(
-                    Icons.person,
-                    color: player.isInGame ? Colors.green : Colors.red,
+                ),
+              ),
+
+              // Status column
+              Expanded(
+                flex: 2,
+                child: Text(
+                  'Statut',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: colorScheme.onPrimary,
                   ),
-                  trailing: player.submitted
-                      ? const Icon(Icons.check_circle, color: Colors.green)
-                      : const Icon(Icons.hourglass_empty, color: Colors.orange),
-                );
-              },
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Divider
+        Divider(
+          color: colorScheme.tertiary.withOpacity(0.3),
+          thickness: 1,
+          height: 8,
+        ),
+
+        // Player list (80% height)
+        Expanded(
+          child: ListView.builder(
+            itemCount: sortedPlayers.length,
+            padding: EdgeInsets.zero,
+            itemBuilder: (context, index) {
+              final player = sortedPlayers[index];
+              return _buildPlayerListItem(player, colorScheme, index);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPlayerListItem(
+      PartialPlayer player, ColorScheme colorScheme, int index) {
+    final isEvenRow = index % 2 == 0;
+
+    return Container(
+      color:
+          isEvenRow ? colorScheme.primary.withOpacity(0.3) : Colors.transparent,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            // Avatar with online status
+            Stack(
+              children: [
+                AvatarBannerWidget(
+                  avatarUrl: player.avatarEquipped,
+                  bannerUrl: player.bannerEquipped,
+                  size: 32,
+                  avatarFit: BoxFit.cover,
+                ),
+                if (player.isInGame)
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: colorScheme.surface,
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(width: 8),
+
+            // Name column
+            Expanded(
+              flex: 5,
+              child: Text(
+                player.name,
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: colorScheme.onPrimary,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+
+            // Points column
+            Expanded(
+              flex: 3,
+              child: Text(
+                player.points.toStringAsFixed(1),
+                style: TextStyle(
+                  color: colorScheme.onPrimary,
+                ),
+              ),
+            ),
+
+            // Status column (in game + submitted status)
+            Expanded(
+              flex: 2,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Show submission status icon
+                  Icon(
+                    player.submitted
+                        ? Icons.check_circle
+                        : Icons.hourglass_empty,
+                    color: player.submitted ? Colors.green : Colors.orange,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
-  }
-
-  Widget _buildSortControls(BuildContext context, ColorScheme colorScheme) {
-    return PopupMenuButton<Map<String, dynamic>>(
-      icon: Icon(
-        Icons.sort,
-        color: colorScheme.primary,
-      ),
-      tooltip: 'Trier la liste',
-      onSelected: (Map<String, dynamic> result) {
-        setState(() {
-          _sortField = result['field'];
-          _sortOrder = result['order'];
-        });
-      },
-      itemBuilder: (BuildContext context) =>
-          <PopupMenuEntry<Map<String, dynamic>>>[
-        PopupMenuItem<Map<String, dynamic>>(
-          value: {'field': SortField.name, 'order': SortOrder.ascending},
-          child: Row(
-            children: [
-              Icon(
-                Icons.arrow_upward,
-                color: _isSelected(SortField.name, SortOrder.ascending)
-                    ? colorScheme.primary
-                    : Colors.grey,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Nom (A-Z)',
-                style: TextStyle(color: colorScheme.primary),
-              ),
-            ],
-          ),
-        ),
-        PopupMenuItem<Map<String, dynamic>>(
-          value: {'field': SortField.name, 'order': SortOrder.descending},
-          child: Row(
-            children: [
-              Icon(
-                Icons.arrow_downward,
-                color: _isSelected(SortField.name, SortOrder.descending)
-                    ? colorScheme.primary
-                    : Colors.grey,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Nom (Z-A)',
-                style: TextStyle(color: colorScheme.primary),
-              ),
-            ],
-          ),
-        ),
-        const PopupMenuDivider(),
-        PopupMenuItem<Map<String, dynamic>>(
-          value: {'field': SortField.points, 'order': SortOrder.descending},
-          child: Row(
-            children: [
-              Icon(
-                Icons.arrow_downward,
-                color: _isSelected(SortField.points, SortOrder.descending)
-                    ? colorScheme.primary
-                    : Colors.grey,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Points (Élevé-Bas)',
-                style: TextStyle(color: colorScheme.primary),
-              ),
-            ],
-          ),
-        ),
-        PopupMenuItem<Map<String, dynamic>>(
-          value: {'field': SortField.points, 'order': SortOrder.ascending},
-          child: Row(
-            children: [
-              Icon(
-                Icons.arrow_upward,
-                color: _isSelected(SortField.points, SortOrder.ascending)
-                    ? colorScheme.primary
-                    : Colors.grey,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Points (Bas-Élevé)',
-                style: TextStyle(color: colorScheme.primary),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSortingHeader(ColorScheme colorScheme) {
-    return Row(
-      children: [
-        const SizedBox(width: 40), // Space for leading icon
-        Expanded(
-          child: Row(
-            children: [
-              Text(
-                'Nom',
-                style: TextStyle(
-                  fontWeight: _sortField == SortField.name
-                      ? FontWeight.bold
-                      : FontWeight.normal,
-                  fontSize: 12,
-                  color: colorScheme.primary,
-                ),
-              ),
-              if (_sortField == SortField.name)
-                Icon(
-                  _sortOrder == SortOrder.ascending
-                      ? Icons.arrow_upward
-                      : Icons.arrow_downward,
-                  size: 14,
-                  color: colorScheme.primary,
-                ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Row(
-            children: [
-              Text(
-                'Points',
-                style: TextStyle(
-                  fontWeight: _sortField == SortField.points
-                      ? FontWeight.bold
-                      : FontWeight.normal,
-                  fontSize: 12,
-                  color: colorScheme.primary,
-                ),
-              ),
-              if (_sortField == SortField.points)
-                Icon(
-                  _sortOrder == SortOrder.ascending
-                      ? Icons.arrow_upward
-                      : Icons.arrow_downward,
-                  size: 14,
-                  color: colorScheme.primary,
-                ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 40), // Space for trailing icon
-      ],
-    );
-  }
-
-  bool _isSelected(SortField field, SortOrder order) {
-    return _sortField == field && _sortOrder == order;
   }
 
   List<PartialPlayer> _sortPlayers(List<PartialPlayer> players) {
     // First sort by activity (in game vs not in game)
-    players.sort((a, b) => b.isInGame ? 1 : -1);
+    players
+        .sort((a, b) => a.isInGame == b.isInGame ? 0 : (a.isInGame ? -1 : 1));
 
     // Then apply user-selected sorting
-    if (_sortField == SortField.name) {
-      players.sort((a, b) {
-        final comparison = a.name.toLowerCase().compareTo(b.name.toLowerCase());
-        return _sortOrder == SortOrder.ascending ? comparison : -comparison;
-      });
-    } else {
-      players.sort((a, b) {
-        final comparison = a.points.compareTo(b.points);
-        return _sortOrder == SortOrder.ascending ? comparison : -comparison;
-      });
+    switch (_sortField) {
+      case SortField.name:
+        players.sort((a, b) {
+          final comparison =
+              a.name.toLowerCase().compareTo(b.name.toLowerCase());
+          return _sortOrder == SortOrder.ascending ? comparison : -comparison;
+        });
+        break;
+      case SortField.points:
+        players.sort((a, b) {
+          final comparison = a.points.compareTo(b.points);
+          return _sortOrder == SortOrder.ascending ? comparison : -comparison;
+        });
+        break;
+      case SortField.status:
+        players.sort((a, b) {
+          // Sort by submission status
+          final comparison =
+              a.submitted == b.submitted ? 0 : (a.submitted ? -1 : 1);
+          return _sortOrder == SortOrder.ascending ? comparison : -comparison;
+        });
+        break;
     }
 
     return players;
+  }
+
+  String _getSortFieldName(SortField field) {
+    switch (field) {
+      case SortField.name:
+        return 'Nom';
+      case SortField.points:
+        return 'Points';
+      case SortField.status:
+        return 'Statut';
+    }
   }
 }
