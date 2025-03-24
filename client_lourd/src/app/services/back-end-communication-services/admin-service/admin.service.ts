@@ -1,15 +1,16 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Firestore, collection, onSnapshot, query, where } from '@angular/fire/firestore';
 import { User } from '@app/interfaces/user';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { Firestore, collection, query, where, onSnapshot } from '@angular/fire/firestore';
 
 @Injectable({
     providedIn: 'root',
 })
 export class AdminService {
     private readonly apiUrl = `${environment.serverUrl}/users`;
+    private readonly reportUrl = `${environment.serverUrl}/report`;
 
     constructor(
         private http: HttpClient,
@@ -67,5 +68,9 @@ export class AdminService {
         );
 
         return unsubscribe;
+    }
+
+    adminBanPlayer(playerId: string): Observable<void> {
+        return this.http.post<void>(`${this.reportUrl}/ban-player`, { playerId });
     }
 }

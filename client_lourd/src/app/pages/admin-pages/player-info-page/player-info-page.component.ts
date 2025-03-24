@@ -1,7 +1,7 @@
 import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
 import { User } from '@app/interfaces/user';
 import { AdminService } from '@app/services/back-end-communication-services/admin-service/admin.service';
-
+import { ToastrService } from 'ngx-toastr';
 // Add these types for sorting
 type SortColumn = 'username' | 'coins' | 'nWins' | 'isOnline' | 'nbReport' | null;
 type SortDirection = 'asc' | 'desc';
@@ -57,7 +57,10 @@ export class PlayerInfoPageComponent implements OnInit, OnDestroy {
     // Store unsubscribe function for cleanup
     private unsubscribeFromPlayers: (() => void) | null = null;
 
-    constructor(private adminService: AdminService) {}
+    constructor(
+        private adminService: AdminService,
+        private toastr: ToastrService,
+    ) {}
 
     ngOnInit(): void {
         this.loadPlayersRealtime();
@@ -123,8 +126,14 @@ export class PlayerInfoPageComponent implements OnInit, OnDestroy {
         this.searchTerm.set('');
     }
 
-    banPlayer(playerId: string): void {
-        // Implement ban functionality
-        console.log(`Banning player with ID: ${playerId}`);
+    adminBanPlayer(playerId: string): void {
+        this.adminService.adminBanPlayer(playerId).subscribe({
+            next: () => {
+                this.toastr.success(`Player with ID: ${playerId} has been banned for 15 minutes.`);
+            },
+            error: (err) => {
+                this.toastr.error(`Failed to ban player with ID: ${playerId}. Error: ${err.message}`);
+            },
+        });
     }
 }

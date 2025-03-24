@@ -852,7 +852,7 @@ export class UserService {
                 try {
                     const userData = doc.data();
                     const userRecord = await this.adminAuth.getUser(doc.id);
-                    players.push(this.mapUserFromFirestore(userRecord, userData));  //? use simplified user?
+                    players.push(this.mapUserFromFirestore(userRecord, userData)); //? use simplified user?
                 } catch (userError) {
                     this.logger.warn(`Skipping user ${doc.id}: ${userError.message}`);
                 }
@@ -863,6 +863,25 @@ export class UserService {
             this.logger.error('Failed to get all players:', error);
             throw new Error('Failed to retrieve players.');
         }
+    }
+
+    async adminBanPlayer(playerId: string, unbanDate: Date): Promise<void> {
+        const userRef = this.firestore.collection('users').doc(playerId);
+
+        await this.firestore.runTransaction(async (transaction) => {
+            const userDoc = await transaction.get(userRef);
+
+            if (!userDoc.exists) {
+                throw new Error('User does not exist.');
+            }
+
+            const currentNbBan = userDoc.data().nbBan || 0;
+
+            transaction.update(userRef, {
+                unBanDate: unbanDate,
+                nbBan: currentNbBan + 1,
+            });
+        });
     }
 
     formatTimestamp(date: Date): string {
