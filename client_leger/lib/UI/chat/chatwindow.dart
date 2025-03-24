@@ -335,16 +335,22 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                           ],
                                                         ),
                                                         SizedBox(height: 8),
-                                                        Text(
-                                                          message.message,
-                                                          softWrap: true,
-                                                          style: TextStyle(
-                                                              color: isUserMessage
-                                                                  ? colorScheme
-                                                                      .onSecondary
-                                                                  : colorScheme
-                                                                      .onSurface,
-                                                              fontSize: 18),
+                                                        Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .only(
+                                                                  left: 8.0),
+                                                          child: Text(
+                                                            message.message,
+                                                            softWrap: true,
+                                                            style: TextStyle(
+                                                                color: isUserMessage
+                                                                    ? colorScheme
+                                                                        .onSecondary
+                                                                    : colorScheme
+                                                                        .onSurface,
+                                                                fontSize: 18),
+                                                          ),
                                                         ),
                                                         Align(
                                                           alignment: Alignment

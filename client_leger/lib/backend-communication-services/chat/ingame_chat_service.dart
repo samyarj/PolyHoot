@@ -87,7 +87,8 @@ class InGameChatService {
       uid: _uid,
     );
 
-    _socketManager.webSocketSender(ChatEvents.RoomMessage.value, message);
+    _socketManager.webSocketSender(
+        ChatEvents.RoomMessage.value, message.toJson());
   }
 
   Future<void> attachUrlToMessage(InGameChatMessage message) async {

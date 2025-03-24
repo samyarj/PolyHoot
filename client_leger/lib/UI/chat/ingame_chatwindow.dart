@@ -236,6 +236,7 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                                           avatarFit:
                                                               BoxFit.cover,
                                                         ),
+                                                        SizedBox(width: 8),
                                                         Text(
                                                           message.author,
                                                           style: TextStyle(
@@ -251,16 +252,22 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                                         ),
                                                       ],
                                                     ),
-                                                    Text(
-                                                      message.message,
-                                                      softWrap: true,
-                                                      style: TextStyle(
-                                                          color: isUserMessage
-                                                              ? colorScheme
-                                                                  .onSecondary
-                                                              : colorScheme
-                                                                  .onSurface,
-                                                          fontSize: 18),
+                                                    SizedBox(height: 8),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 8.0),
+                                                      child: Text(
+                                                        message.message,
+                                                        softWrap: true,
+                                                        style: TextStyle(
+                                                            color: isUserMessage
+                                                                ? colorScheme
+                                                                    .onSecondary
+                                                                : colorScheme
+                                                                    .onSurface,
+                                                            fontSize: 18),
+                                                      ),
                                                     ),
                                                     Align(
                                                       alignment:

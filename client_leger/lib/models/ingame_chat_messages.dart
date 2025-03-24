@@ -30,8 +30,6 @@ class InGameChatMessage {
       'author': author,
       'date': date?.toIso8601String(),
       'uid': uid,
-      'avatar': avatar,
-      'border': border,
     };
   }
 }
