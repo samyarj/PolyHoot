@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:client_leger/UI/error/error_dialog.dart';
+import 'package:client_leger/UI/global/avatar_banner_widget.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/business/channel_manager.dart';
 import 'package:client_leger/models/chat_message.dart';
@@ -305,30 +306,51 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                           CrossAxisAlignment
                                                               .start,
                                                       children: [
-                                                        Text(
-                                                          message.username ??
-                                                              "Unknown",
-                                                          style: TextStyle(
-                                                              color: isUserMessage
-                                                                  ? colorScheme
-                                                                      .onSecondary
-                                                                  : colorScheme
-                                                                      .onSurface,
-                                                              fontSize: 18,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
+                                                        Row(
+                                                          children: [
+                                                            AvatarBannerWidget(
+                                                              avatarUrl: message
+                                                                  .avatar,
+                                                              bannerUrl: message
+                                                                  .border,
+                                                              size: 50,
+                                                              avatarFit:
+                                                                  BoxFit.cover,
+                                                            ),
+                                                            SizedBox(width: 8),
+                                                            Text(
+                                                              message.username ??
+                                                                  "Unknown",
+                                                              style: TextStyle(
+                                                                  color: isUserMessage
+                                                                      ? colorScheme
+                                                                          .onSecondary
+                                                                      : colorScheme
+                                                                          .onSurface,
+                                                                  fontSize: 18,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold),
+                                                            ),
+                                                          ],
                                                         ),
-                                                        Text(
-                                                          message.message,
-                                                          softWrap: true,
-                                                          style: TextStyle(
-                                                              color: isUserMessage
-                                                                  ? colorScheme
-                                                                      .onSecondary
-                                                                  : colorScheme
-                                                                      .onSurface,
-                                                              fontSize: 18),
+                                                        SizedBox(height: 8),
+                                                        Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .only(
+                                                                  left: 8.0),
+                                                          child: Text(
+                                                            message.message,
+                                                            softWrap: true,
+                                                            style: TextStyle(
+                                                                color: isUserMessage
+                                                                    ? colorScheme
+                                                                        .onSecondary
+                                                                    : colorScheme
+                                                                        .onSurface,
+                                                                fontSize: 18),
+                                                          ),
                                                         ),
                                                         Align(
                                                           alignment: Alignment

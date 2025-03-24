@@ -200,9 +200,9 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
         feedback = ChoiceFeedback.Partial;
       }
 
-      bool isFirst = playerQuestionInfo['isFirst'];
+      bool isFirst = playerQuestionInfo['isFirst'] ?? false;
       int points = playerQuestionInfo['points'];
-      if (playerQuestionInfo['isFirst']) {
+      if (isFirst) {
         feedback = ChoiceFeedback.First;
       }
 
