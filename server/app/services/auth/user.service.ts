@@ -421,7 +421,7 @@ export class UserService {
     }
 
     // eslint-disable-next-line complexity
-    private mapUserFromFirestore(userRecord: UserCredential['user'] | admin.auth.UserRecord, userDoc: admin.firestore.DocumentData): User {
+    mapUserFromFirestore(userRecord: UserCredential['user'] | admin.auth.UserRecord, userDoc: admin.firestore.DocumentData): User {
         const isAdminUserRecord = (user: unknown): user is admin.auth.UserRecord => {
             return typeof user === 'object' && user !== null && 'uid' in user && 'displayName' in user;
         };
@@ -833,6 +833,34 @@ export class UserService {
             return true;
         }
         return false;
+    }
+
+    async getAllPlayers(): Promise<User[]> {
+        try {
+            const usersRef = this.firestore.collection('users');
+            const querySnapshot = await usersRef.where('role', '==', 'player').get();
+
+            if (querySnapshot.empty) {
+                return [];
+            }
+
+            const players: User[] = [];
+
+            for (const doc of querySnapshot.docs) {
+                try {
+                    const userData = doc.data();
+                    const userRecord = await this.adminAuth.getUser(doc.id);
+                    players.push(this.mapUserFromFirestore(userRecord, userData));  //? use simplified user?
+                } catch (userError) {
+                    this.logger.warn(`Skipping user ${doc.id}: ${userError.message}`);
+                }
+            }
+
+            return players;
+        } catch (error) {
+            this.logger.error('Failed to get all players:', error);
+            throw new Error('Failed to retrieve players.');
+        }
     }
 
     formatTimestamp(date: Date): string {

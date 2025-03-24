@@ -3,8 +3,8 @@
         <div class="search-container">
             <div class="search-input-wrapper">
                 <span class="search-icon">🔍</span>
-                <input type="text" class="search-input" placeholder="Rechercher un joueur..." />
-                <button class="clear-search-btn" title="Effacer">✕</button>
+                <input type="text" class="search-input" placeholder="Rechercher un joueur..." [value]="searchTerm()" (input)="updateSearch($event)" />
+                <button class="clear-search-btn" title="Effacer" (click)="clearSearch()" [class.hidden]="!searchTerm()">✕</button>
             </div>
         </div>
 
@@ -14,6 +14,7 @@
                     <tr>
                         <th class="col-player">Joueur</th>
                         <th class="col-coins">Coins</th>
+                        <th class="col-wins">Victoires</th>
                         <th class="col-status">Statut</th>
                         <th class="col-reports">Signalements</th>
                         <th class="col-actions">Bannir</th>
@@ -21,75 +22,67 @@
                 </thead>
             </table>
 
-            <div class="table-body-container">
+            <!-- Loading indicator -->
+            <div *ngIf="isLoading()" class="loading-container">
+                <div class="loading-spinner">
+                    <div class="spinner-circle"></div>
+                    <span class="loading-text">Chargement...</span>
+                </div>
+            </div>
+
+            <!-- Error message -->
+            <div *ngIf="error()" class="error-container">
+                <div class="error-message">{{ error() }}</div>
+                <button class="retry-btn" (click)="loadPlayers()">Réessayer</button>
+            </div>
+
+            <!-- Table body with dynamic data -->
+            <div *ngIf="!isLoading() && !error()" class="table-body-container">
                 <table class="logs-table body-table">
                     <tbody>
-                        <tr>
+                        <tr *ngFor="let player of filteredPlayers()">
                             <td class="col-player">
                                 <div class="player-info">
-                                    <div class="player-avatar">JP</div>
-                                    <span>Joueur Pro</span>
+                                    <!-- Display avatar if available, otherwise show initials -->
+                                    <div *ngIf="!player.avatarEquipped" class="player-avatar">
+                                        {{ player.username.substring(0, 2).toUpperCase() }}
+                                    </div>
+                                    <img
+                                        *ngIf="player.avatarEquipped"
+                                        [src]="player.avatarEquipped"
+                                        [alt]="player.username"
+                                        class="player-avatar-img"
+                                    />
+                                    <span>{{ player.username }}</span>
                                 </div>
                             </td>
                             <td class="col-coins">
                                 <div class="coin-display">
-                                    <span>100</span>
+                                    <span>{{ player.coins || 0 }}</span>
+                                </div>
+                            </td>
+                            <td class="col-wins">
+                                <div class="wins-display">
+                                    <span>{{ player.nWins || 0 }}</span>
                                 </div>
                             </td>
                             <td class="col-status">
-                                <span class="status-badge online">En ligne</span>
+                                <span class="status-badge" [class.online]="player.isOnline" [class.offline]="!player.isOnline">
+                                    {{ player.isOnline ? 'En ligne' : 'Hors ligne' }}
+                                </span>
                             </td>
-                            <td class="col-reports">2</td>
+                            <td class="col-reports">{{ player.nbReport || 0 }}</td>
                             <td class="col-actions">
-                                <button class="action-btn ban-btn" title="Bannir">
+                                <button class="action-btn ban-btn" title="Bannir" (click)="banPlayer(player.uid)">
                                     <span>🚫</span>
                                 </button>
                             </td>
                         </tr>
 
-                        <tr>
-                            <td class="col-player">
-                                <div class="player-info">
-                                    <div class="player-avatar">NJ</div>
-                                    <span>Nouveau Joueur</span>
-                                </div>
-                            </td>
-                            <td class="col-coins">
-                                <div class="coin-display">
-                                    <span>50</span>
-                                </div>
-                            </td>
-                            <td class="col-status">
-                                <span class="status-badge offline">Hors ligne</span>
-                            </td>
-                            <td class="col-reports">0</td>
-                            <td class="col-actions">
-                                <button class="action-btn ban-btn" title="Bannir">
-                                    <span>🚫</span>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td class="col-player">
-                                <div class="player-info">
-                                    <div class="player-avatar">EJ</div>
-                                    <span>Expert Joueur</span>
-                                </div>
-                            </td>
-                            <td class="col-coins">
-                                <div class="coin-display">
-                                    <span>250</span>
-                                </div>
-                            </td>
-                            <td class="col-status">
-                                <span class="status-badge online">En ligne</span>
-                            </td>
-                            <td class="col-reports">1</td>
-                            <td class="col-actions">
-                                <button class="action-btn ban-btn" title="Bannir">
-                                    <span>🚫</span>
-                                </button>
+                        <!-- Show message when no players are found -->
+                        <tr *ngIf="filteredPlayers().length === 0">
+                            <td colspan="6" class="no-players-message">
+                                {{ players().length === 0 ? 'Aucun joueur trouvé' : 'Aucun joueur ne correspond à votre recherche' }}
                             </td>
                         </tr>
                     </tbody>

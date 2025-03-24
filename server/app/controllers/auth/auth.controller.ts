@@ -193,4 +193,21 @@ export class AuthController {
             }
         }
     }
+
+    @UseGuards(AuthGuard)
+    @ApiOkResponse({ description: 'Players successfully fetched' })
+    @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+    @Get('players')
+    async getAllPlayers(@Res() response: Response) {
+        this.logger.log('Fetching all players');
+        try {
+            const players = await this.userService.getAllPlayers();
+            response.status(HttpStatus.OK).json(players);
+        } catch (error) {
+            this.logger.error(`Error fetching all players: ${error.message}`);
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
+                message: error.message || 'Erreur interne du serveur',
+            });
+        }
+    }
 }
