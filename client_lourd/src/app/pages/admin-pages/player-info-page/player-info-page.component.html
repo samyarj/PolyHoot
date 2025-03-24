@@ -73,16 +73,21 @@
                         <tr *ngFor="let player of filteredPlayers()">
                             <td class="col-player">
                                 <div class="player-info">
-                                    <!-- Display avatar if available, otherwise show initials -->
+                                    <!-- Default avatar with initials when no avatar is equipped -->
                                     <div *ngIf="!player.avatarEquipped" class="player-avatar">
                                         {{ player.username.substring(0, 2).toUpperCase() }}
                                     </div>
-                                    <img
-                                        *ngIf="player.avatarEquipped"
-                                        [src]="player.avatarEquipped"
-                                        [alt]="player.username"
-                                        class="player-avatar-img"
-                                    />
+
+                                    <!-- Wrap the avatar-banner in a container div -->
+                                    <div *ngIf="player.avatarEquipped" class="avatar-wrapper">
+                                        <app-avatar-banner
+                                            [avatarUrl]="player.avatarEquipped"
+                                            [bannerUrl]="player.borderEquipped"
+                                            class="player-avatar-img"
+                                        >
+                                        </app-avatar-banner>
+                                    </div>
+
                                     <span>{{ player.username }}</span>
                                 </div>
                             </td>

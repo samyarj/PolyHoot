@@ -85,7 +85,7 @@
         .table-wrapper {
             display: flex;
             flex-direction: column;
-            height: calc(100% - 120px); /* Adjusted to account for search bar */
+            height: calc(100% - 120px);
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -110,9 +110,9 @@
             }
 
             th {
-                display: table-cell; // Change from flex to table-cell
-                text-align: center; // Center-align the text
-                vertical-align: middle; // Ensure vertical alignment
+                display: table-cell;
+                text-align: center;
+                vertical-align: middle;
                 padding: 15px;
                 background-color: color-mix(in srgb, var(--tertiary-color) 30%, transparent);
                 font-weight: 600;
@@ -124,13 +124,13 @@
 
             // Column widths
             .col-player {
-                width: 25%; // Réduire légèrement pour faire de la place
+                width: 25%;
             }
             .col-coins {
                 width: 12%;
             }
             .col-wins {
-                width: 12%; // Nouvelle colonne des victoires
+                width: 12%;
             }
             .col-status {
                 width: 16%;
@@ -172,12 +172,22 @@
             border-radius: 6px;
         }
 
-        // Player info styling - Modified for consistent avatar size
         .player-info {
             display: flex;
             align-items: center;
             justify-content: flex-start;
-            gap: 12px;
+            gap: 16px;
+
+            .avatar-wrapper {
+                position: relative;
+                width: 36px;
+                height: 36px;
+                min-width: 36px;
+                min-height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
 
             .player-avatar {
                 width: 36px;
@@ -191,18 +201,29 @@
                 justify-content: center;
                 font-weight: bold;
                 font-size: 0.8rem;
-                overflow: hidden; // Prevent content overflow
+                overflow: hidden;
             }
 
             .player-avatar-img {
                 width: 36px;
                 height: 36px;
-                min-width: 36px; // Prevent shrinking
-                min-height: 36px; // Prevent shrinking
+                min-width: 36px;
+                min-height: 36px;
                 border-radius: 50%;
-                object-fit: cover; // Maintain aspect ratio and cover the area
-                object-position: center; // Center the image
-                overflow: hidden; // Prevent parts of image from overflowing
+                object-fit: cover;
+                object-position: center;
+                overflow: hidden;
+            }
+
+            app-avatar-banner.player-avatar-img {
+                width: 36px;
+                height: 36px;
+                min-width: 36px;
+                min-height: 36px;
+                border-radius: 50%;
+                display: flex;
+                position: relative;
+                overflow: visible;
             }
         }
 
@@ -218,7 +239,6 @@
             }
         }
 
-        // Style pour l'affichage des victoires (optionnel)
         .wins-display {
             display: flex;
             align-items: center;
@@ -341,8 +361,6 @@
     font-style: bold;
 }
 
-// Add to your component's SCSS file
-
 .sortable {
     cursor: pointer;
     user-select: none;
@@ -360,11 +378,10 @@
     }
 }
 
-// Ensure headers are properly aligned
 th {
-    display: table-cell; // Change from flex to table-cell
-    text-align: center; // Center-align the text
-    vertical-align: middle; // Ensure vertical alignment
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
     padding: 15px;
     background-color: color-mix(in srgb, var(--tertiary-color) 30%, transparent);
     font-weight: 600;
@@ -374,7 +391,6 @@ th {
     transition: background-color 0.2s;
 }
 
-// Add this to your existing styles
 .ban-timer {
     color: #e74c3c;
     font-size: 0.85rem;
