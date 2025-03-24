@@ -1,13 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/user.dart' as user_model;
 import 'package:client_leger/utilities/logger.dart';
-import 'package:client_leger/utilities/socket_events.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -40,15 +38,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       if (user != null) {
         // When the user is signed in or the token is refreshed
         final newToken = await user.getIdToken();
-        if (newToken != currentToken) {
-          currentToken = newToken;
-          AppLogger.w(
-              "about to disconnect and reconnect socket in listentotoken");
-          WebSocketManager.instance.disconnectFromSocket();
-          WebSocketManager.instance.initializeSocketConnection(currentToken);
-          WebSocketManager.instance
-              .webSocketSender(ConnectEvents.IdentifyClient.value, user.uid);
-        }
+        currentToken = newToken;
+        AppLogger.w(
+            "current token has expired or user just signed in, will call initializeSocketConnection");
+        WebSocketManager.instance
+            .initializeSocketConnection(currentToken, user.uid);
       }
     });
   }
@@ -135,7 +129,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
         WebSocketManager.instance.playerName = user.username;
         if (userCredential.user != null) {
           listenToTokenChanges(); // it will call  connect socket
-
           setupUserDocListener(userCredential.user!.uid);
         }
       } else {
@@ -286,7 +279,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
 
       // Update state
       state = const AsyncValue.data(null);
-      WebSocketManager.instance.playerName = null;
       WebSocketManager.instance.disconnectFromSocket();
       isLoggedIn.value = false;
     } catch (e, stack) {
@@ -300,7 +292,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       }
 
       state = const AsyncValue.data(null);
-      WebSocketManager.instance.playerName = null;
       WebSocketManager.instance.disconnectFromSocket();
       isLoggedIn.value = false;
 

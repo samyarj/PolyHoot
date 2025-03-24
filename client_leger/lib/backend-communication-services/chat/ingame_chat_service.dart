@@ -1,5 +1,7 @@
+import 'package:client_leger/backend-communication-services/chat/firebase_chat_service.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/ingame_chat_messages.dart';
+import 'package:client_leger/models/user.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:client_leger/utilities/socket_events.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +9,11 @@ import 'package:flutter/material.dart';
 class InGameChatService {
   InGameChatService._privateConstructor();
   final WebSocketManager _socketManager = WebSocketManager.instance;
+  final FirebaseChatService _firebaseChatService = FirebaseChatService();
   late String _username;
+  late String? _uid;
+  Map<String, PartialUser> _userDetails =
+      {}; // key = uid, value = border + avatar
 
   static final InGameChatService _instance =
       InGameChatService._privateConstructor();
@@ -29,11 +35,14 @@ class InGameChatService {
           "Resetting InGameChatService because we're not in a game anymore");
       _socketManager.socket?.off(ChatEvents.RoomLeft.value);
       _socketManager.socket?.off(ChatEvents.MessageAdded.value);
+      _userDetails = {};
+      inGameChatMessagesNotifier.value = [];
     }
   }
 
-  void setUsernameAndInitialize(String username) {
+  void setUserInfosAndInitialize(String username, String? uid) {
     _username = username;
+    _uid = uid;
     if (currentRoomId == _socketManager.roomId && currentRoomId != null) {
       AppLogger.i(
           "user changed channel tabs, not initializing InGameChatService");
@@ -57,10 +66,14 @@ class InGameChatService {
   getHistory() {
     AppLogger.i("getHistory");
     _socketManager.webSocketSender(ChatEvents.GetHistory.value, null,
-        (history) {
-      final messages = (history as List<dynamic>)
-          .map((message) => InGameChatMessage.fromJson(message))
-          .toList();
+        (history) async {
+      final messages = await Future.wait(
+        (history as List<dynamic>).map((message) async {
+          final chatMessage = InGameChatMessage.fromJson(message);
+          await attachUrlToMessage(chatMessage);
+          return chatMessage;
+        }),
+      );
       messages.sort((a, b) => b.date!.compareTo(a.date!));
       inGameChatMessagesNotifier.value = messages;
     });
@@ -71,16 +84,32 @@ class InGameChatService {
     final message = InGameChatMessage(
       message: inputMessage,
       author: getAuthor(),
+      uid: _uid,
     );
 
     _socketManager.webSocketSender(ChatEvents.RoomMessage.value, message);
   }
 
+  Future<void> attachUrlToMessage(InGameChatMessage message) async {
+    if (message.uid != null && !_userDetails.containsKey(message.uid)) {
+      final partialUserMap =
+          await _firebaseChatService.fetchUserDetails([message.uid!]);
+      if (partialUserMap[message.uid!] != null) {
+        _userDetails[message.uid!] = partialUserMap[message.uid!]!;
+      }
+    }
+    message.avatar = _userDetails[message.uid]?.avatarEquipped;
+    message.border = _userDetails[message.uid]?.borderEquipped;
+  }
+
   void configureChatSocketFeatures() {
     AppLogger.i("configuring ChatSocketFeatures");
     _socketManager.webSocketReceiver(ChatEvents.MessageAdded.value,
-        (newMessage) {
+        (newMessage) async {
       final message = InGameChatMessage.fromJson(newMessage);
+
+      await attachUrlToMessage(message);
+
       inGameChatMessagesNotifier.value = [
         message,
         ...inGameChatMessagesNotifier.value,
