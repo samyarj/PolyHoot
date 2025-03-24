@@ -42,6 +42,10 @@
                                 [class.selected]="selectedRecipient?.id === user.id"
                                 (click)="selectRecipient(user)"
                             >
+                                <div class="avatar-banner-container">
+                                    <img class="friend-avatar" [src]="user.avatarEquipped || 'assets/images/default-avatar.png'" alt="Avatar" />
+                                    <img *ngIf="user.borderEquipped" class="friend-banner" [src]="user.borderEquipped" alt="Banner" />
+                                </div>
                                 <span class="username">{{ user.username }}</span>
                             </div>
                         </div>
@@ -54,11 +58,15 @@
                                 [class.selected]="selectedRecipient?.id === friend.id"
                                 (click)="selectRecipient(friend)"
                             >
+                                <div class="avatar-banner-container">
+                                    <img class="friend-avatar" [src]="friend.avatarEquipped || 'assets/images/default-avatar.png'" alt="Avatar" />
+                                    <img *ngIf="friend.borderEquipped" class="friend-banner" [src]="friend.borderEquipped" alt="Banner" />
+                                </div>
                                 <span class="username">{{ friend.username }}</span>
                             </div>
                         </div>
                     </div>
-                    <div class="tab-navigation">
+                    <div class="tab-navigation" id="tab1">
                         <button class="next-button" (click)="canProceedToNextTab() ? (currentTab = 1) : null" [disabled]="!canProceedToNextTab()">
                             Suivant
                         </button>
@@ -109,9 +117,9 @@
                             <span class="label">Montant:</span>
                             <span class="value">{{ transferAmount }} coins</span>
                         </div>
-                        <div class="summary-item">
-                            <span class="label">Frais:</span>
-                            <span class="value">0 coins</span>
+                        <div class="summary-item" id="amount-after-transfer">
+                            <span class="label">Solde après transfert:</span>
+                            <span class="value">{{ userBalance - transferAmount }} coins</span>
                         </div>
                         <div class="summary-item total">
                             <span class="label">Total:</span>

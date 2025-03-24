@@ -9,16 +9,16 @@ import { CoinTransferService } from '@app/services/coin-transfer.service';
     styleUrls: ['./transfer-page.component.scss'],
 })
 export class TransferPageComponent implements OnInit, OnDestroy {
-    friends: { id: string; username: string }[] = [];
+    friends: { id: string; username: string; avatarEquipped: string; borderEquipped: string }[] = [];
     searchQuery: string = '';
-    searchResults: { id: string; username: string }[] = [];
+    searchResults: { id: string; username: string; avatarEquipped: string; borderEquipped: string }[] = [];
     searchError: string = '';
     private userDocSubscription: Unsubscribe;
     userUID: string | null = null;
 
     // New properties for tabbed interface
     currentTab: number = 0;
-    selectedRecipient: { id: string; username: string } | null = null;
+    selectedRecipient: { id: string; username: string; avatarEquipped: string; borderEquipped: string } | null = null;
     transferAmount: number = 0;
     userBalance: number = 0;
     transferError: string = '';
@@ -55,6 +55,8 @@ export class TransferPageComponent implements OnInit, OnDestroy {
                             return {
                                 id,
                                 username: friendDoc.data()?.username || 'Unknown User',
+                                avatarEquipped: friendDoc.data()?.avatarEquipped || '',
+                                borderEquipped: friendDoc.data()?.borderEquipped || '',
                             };
                         }),
                     );
@@ -90,7 +92,7 @@ export class TransferPageComponent implements OnInit, OnDestroy {
         this.searchResults = this.friends.filter((friend) => friend.username.toLowerCase().includes(searchLower));
     }
 
-    selectRecipient(user: { id: string; username: string }): void {
+    selectRecipient(user: { id: string; username: string; avatarEquipped: string; borderEquipped: string }): void {
         this.selectedRecipient = user;
     }
 
