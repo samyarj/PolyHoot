@@ -3,12 +3,12 @@ import { WsAuthGuard } from '@app/guards/auth/auth.guard';
 import { AuthenticatedSocket } from '@app/interface/authenticated-request';
 import { CoinflipManagerService } from '@app/services/coinflip-manager/coinflip-manager.service';
 import { Logger, UseGuards } from '@nestjs/common';
-import { OnGatewayConnection, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 
 @WebSocketGateway()
 @UseGuards(WsAuthGuard)
-export class CoinflipGateway implements OnGatewayInit, OnGatewayConnection {
+export class CoinflipGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     private logger: Logger = new Logger('CoinflipGateway');
 
     @WebSocketServer()
@@ -30,6 +30,10 @@ export class CoinflipGateway implements OnGatewayInit, OnGatewayConnection {
         // }
 
         // Additional logic for handling new connections can be added here
+    }
+
+    handleDisconnect(client: AuthenticatedSocket, ...args: any[]) {
+        this.logger.log(`Client disconnected: ${client.id}`);
     }
 
     @SubscribeMessage(CoinFlipEvents.SubmitChoice)
