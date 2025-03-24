@@ -43,6 +43,11 @@
                                 (click)="selectRecipient(user)"
                             >
                                 <div class="avatar-banner-container">
+                                    <app-avatar-banner
+                                        [avatarUrl]="user.avatarEquipped"
+                                        [bannerUrl]="user.borderEquipped"
+                                        class="avatar"
+                                    ></app-avatar-banner>
                                     <img class="friend-avatar" [src]="user.avatarEquipped || 'assets/images/default-avatar.png'" alt="Avatar" />
                                     <img *ngIf="user.borderEquipped" class="friend-banner" [src]="user.borderEquipped" alt="Banner" />
                                 </div>
@@ -59,8 +64,11 @@
                                 (click)="selectRecipient(friend)"
                             >
                                 <div class="avatar-banner-container">
-                                    <img class="friend-avatar" [src]="friend.avatarEquipped || 'assets/images/default-avatar.png'" alt="Avatar" />
-                                    <img *ngIf="friend.borderEquipped" class="friend-banner" [src]="friend.borderEquipped" alt="Banner" />
+                                    <app-avatar-banner
+                                        [avatarUrl]="friend.avatarEquipped"
+                                        [bannerUrl]="friend.borderEquipped"
+                                        class="avatar"
+                                    ></app-avatar-banner>
                                 </div>
                                 <span class="username">{{ friend.username }}</span>
                             </div>
