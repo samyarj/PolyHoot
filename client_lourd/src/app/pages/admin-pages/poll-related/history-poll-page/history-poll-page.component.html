@@ -1,7 +1,7 @@
 <div class="publishedPoll-page-container">
     <div class="publishedPoll-page-content">
         <div class="past-publishedPolls-container">
-            <div *ngFor="let publishedPoll of publishedPolls"class="past-publishedPoll" [ngClass]="{ active: publishedPoll === currentPoll }">
+            <div *ngFor="let publishedPoll of publishedPolls" class="past-publishedPoll" [ngClass]="{ active: publishedPoll === currentPoll }">
                 <div class="publishedPoll-info">
                     <div class="title">{{ publishedPoll.title }}</div>
                     <div class="date">Date fin :&nbsp;{{ publishedPoll.endDate }}</div>

@@ -67,8 +67,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         if (this.user && this.user.uid) {
             this.userSubscription = this.watchUser(this.user.uid).subscribe({
                 next: (userData) => {
-                    console.log('Utilisateur mis à jour:', userData);
-
                     // Filtrer les publishedPolls pour retirer ceux qui sont dans pollAnswered
                     if (userData.pollsAnswered) {
                         this.publishedPolls = this.publishedPolls.filter((poll) => poll.id && !userData.pollsAnswered?.includes(poll.id));
@@ -78,8 +76,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                             title: `${poll.title}`,
                             poll,
                         }));
-
-                        console.log('PublishedPolls mis à jour:', this.publishedPolls);
                     }
                 },
                 error: (error) => {
@@ -122,16 +118,14 @@ export class NotificationsComponent implements OnInit, OnDestroy {
             }
         });
     }
-    goToStats(){
-        this.router.navigate([AppRoute.POLLSHISTORY]);
+    goToStats(poll: PublishedPoll) {
+        this.router.navigate([AppRoute.POLLSHISTORY + poll.id]);
+        this.showNotifications = false;
     }
 
     private updateUserPollsAnswered(id: string | undefined) {
         if (this.user && this.user.uid && id) {
             this.http.patch(`${environment.serverUrl}/published-polls/${this.user.uid}/addPollsAnswered/`, { id }).subscribe({
-                next: () => {
-                    console.log('Poll ID ajouté à pollsAnswered');
-                },
                 error: (error) => {
                     console.error('Erreur lors de la mise à jour de pollsAnswered:', error);
                 },
@@ -144,7 +138,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         return new Observable((subscriber) => {
             const userDoc = doc(this.firestore, 'users', uid);
             const unsubscribe = onSnapshot(userDoc, (docSnapshot) => {
-                console.log("Y'a eu un changement");
                 if (docSnapshot.exists()) {
                     const data = docSnapshot.data() as User;
                     subscriber.next({ ...data, uid: docSnapshot.id });

@@ -15,7 +15,7 @@
                 <p *ngIf="user && user.role === 'admin'"><strong>Sondage expiré:</strong><br />{{ notification.title }}</p>
                 <br />
                 <button *ngIf="user && user.role === 'player'" (click)="openPollAnswer(notification.poll)">Répondre au sondage</button>
-                <button *ngIf="user && user.role === 'admin'" (click)="goToStats()">Voir les statistiques</button>
+                <button *ngIf="user && user.role === 'admin'" (click)="goToStats(notification.poll)">Voir les statistiques</button>
             </div>
         </li>
         <!-- Aucune notification -->

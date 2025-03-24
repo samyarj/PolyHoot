@@ -36,4 +36,12 @@ export class HistoryPublishedPollService {
     deleteAllExpiredPolls() {
         return this.http.delete<PublishedPoll[]>(this.baseUrl).pipe(catchError(this.messageHandler.handleHttpError));
     }
+    getPublishedPollById(id: string): Observable<PublishedPoll> {
+        console.log('veut obtenir le poll ', id);
+        return this.http.get<PublishedPoll>(`${this.baseUrl}/${id}`).pipe(
+            catchError((error) => {
+                return this.messageHandler.handleHttpError(error);
+            }),
+        );
+    }
 }

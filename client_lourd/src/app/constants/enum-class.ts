@@ -41,7 +41,7 @@ export enum AppRoute {
     QUESTIONBANK = '/questionBank',
     POLLS = '/polls',
     MODIFYPOLL = '/modifyPoll/',
-    POLLSHISTORY = '/polls/history',
+    POLLSHISTORY = '/polls/history/',
 }
 export enum CoinFlipGameState {
     Uninitialized = 0,

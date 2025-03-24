@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PublishedPoll } from '@app/interfaces/poll';
 import { Question } from '@app/interfaces/question';
 import { HistoryPublishedPollService } from '@app/services/poll-services/history-poll.service';
@@ -45,25 +46,38 @@ export class HistoryPollPageComponent implements OnInit, OnDestroy {
     };
 
     pieChartType: 'pie' = 'pie';
+    private routeSub: Subscription; // Nouvelle subscription pour les changements de route
     private publishedPollsSubscription: Subscription;
-    constructor(private historyPublishedPollService: HistoryPublishedPollService) {}
+    constructor(
+        private historyPublishedPollService: HistoryPublishedPollService,
+        private route: ActivatedRoute,
+        private router: Router, // Ajouter Router
+    ) {
+        console.log('CurrentPoll:', this.currentPoll?.title);
+    }
 
     ngOnInit(): void {
+        // S'abonner aux changements de paramètre de route
+
         // S'abonner aux changements dans les sondages publiés
         this.publishedPollsSubscription = this.historyPublishedPollService.watchPublishedPolls().subscribe((publishedPolls) => {
-            console.log('Dans le watchPublishedPolls du component');
             this.publishedPolls = publishedPolls.filter((poll) => poll.expired);
+
+            this.initRouteListener();
         });
     }
 
     ngOnDestroy(): void {
         // Se désabonner des observables
         if (this.publishedPollsSubscription) this.publishedPollsSubscription.unsubscribe();
+        if (this.routeSub) this.routeSub.unsubscribe(); // N'oubliez pas de désabonner
     }
 
     show(poll: PublishedPoll) {
+        console.log('rentré avec poll', poll.title, 'currentPoll', this.currentPoll?.title);
         this.currentQuestionIndex = 0;
         this.currentPoll = poll;
+        this.updateUrl(poll.id); // Mettre à jour l'URL quand on change de poll
         this.showQuestion();
     }
 
@@ -77,10 +91,9 @@ export class HistoryPollPageComponent implements OnInit, OnDestroy {
     }
 
     nextQuestion() {
-        if (this.currentQuestionIndex + 1 > this.currentPoll.questions.length - 1) {
-            return;
-        } else {
-            this.currentQuestionIndex = this.currentQuestionIndex + 1;
+        if (this.currentQuestionIndex + 1 > this.currentPoll.questions.length - 1) return;
+        else {
+            this.currentQuestionIndex++;
             this.showQuestion();
         }
     }
@@ -102,7 +115,41 @@ export class HistoryPollPageComponent implements OnInit, OnDestroy {
             };
         }
     }
-    deleteAllExpiredPolls(){
+    deleteAllExpiredPolls() {
         this.historyPublishedPollService.deleteAllExpiredPolls();
+    }
+    private updateUrl(pollId?: string): void {
+        console.log("L'url il a changé, dans updateUrl");
+        this.router.navigate(['/polls/history/', pollId], {
+            replaceUrl: true, // Empêche l'accumulation d'historique
+        });
+    }
+
+    private initRouteListener() {
+        console.log('entré dans le listener ngoninit');
+        const initialPollId = this.route.snapshot.paramMap.get('id');
+        if (!initialPollId) return;
+        console.log(initialPollId);
+        const existingPoll = this.publishedPolls.find((p) => p.id === initialPollId);
+        console.log(this.publishedPolls);
+        if (existingPoll) {
+            console.log('Bah le poll existe logique');
+            this.show(existingPoll);
+        }
+
+        this.routeSub = this.route.paramMap.subscribe((params) => {
+            console.log('LIstener actif pcq url a changé ');
+            const pollId = params.get('id');
+            if (!pollId) return;
+
+            // Vérifie si le poll est déjà chargé (même référence)
+            const pollInArray = this.publishedPolls.find((p) => p.id === pollId);
+            if (this.currentPoll === pollInArray) {
+                console.log('Les ref sont identiques');
+            } else {
+                console.log('Le poll existe');
+                if (pollInArray) this.show(pollInArray);
+            }
+        });
     }
 }
