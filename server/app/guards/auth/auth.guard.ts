@@ -1,6 +1,6 @@
 import { AuthenticatedSocket } from '@app/interface/authenticated-request';
+import { UserService } from '@app/services/auth/user.service';
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
-import { WsException } from '@nestjs/websockets';
 import * as admin from 'firebase-admin';
 
 @Injectable()
@@ -37,36 +37,21 @@ export class AuthGuard implements CanActivate {
 
 @Injectable()
 export class WsAuthGuard implements CanActivate {
+    constructor(private userService: UserService) {}
     private auth = admin.auth();
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const client = context.switchToWs().getClient<AuthenticatedSocket>();
-
-        // Get token from query or headers
-        let token = client.handshake?.query?.token || client.handshake?.headers?.authorization?.split(' ')[1];
-
-        // Ensure token is a string (handle case where it's an array)
-        if (Array.isArray(token)) {
-            token = token[0]; // Take the first element if it's an array
-        }
-
-        if (!token || typeof token !== 'string') {
-            throw new WsException('Authorization token missing or malformed.');
-        }
-
-        try {
-            // Verify Firebase token
-            const decodedToken = await this.auth.verifyIdToken(token);
-            const userRecord = await this.auth.getUser(decodedToken.uid);
-            // Attach user data to WebSocket client
+        if (this.userService.isUserInMap(client.id)) {
+            const userUid = this.userService.getUserUidFromMap(client.id);
+            const user = await this.userService.getUserByUid(userUid);
             client.user = {
-                uid: decodedToken.uid,
-                email: decodedToken.email,
-                displayName: userRecord.displayName,
+                uid: user.uid,
+                email: user.email,
+                displayName: user.username,
             };
             return true;
-        } catch (error) {
-            throw new WsException('Invalid or expired token.');
         }
+        return false;
     }
 }
