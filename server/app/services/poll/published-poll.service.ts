@@ -1,96 +1,99 @@
 /* eslint-disable no-underscore-dangle */ // Mongo utilise des attributs avec un underscore
 import { ERROR } from '@app/constants/error-messages';
-import { UpdatePublishedPollDto } from '@app/model/dto/poll/update-published-poll';
-import { PublishedPoll, PublishedPollDocument } from '@app/model/schema/poll/published-poll.schema';
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { PublishedPoll } from '@app/model/schema/poll/published-poll.schema';
+import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import * as admin from 'firebase-admin';
 
 @Injectable()
-export class PublishedPollService {
-    constructor(
-        @InjectModel(PublishedPoll.name) private publishedPollModel: Model<PublishedPollDocument>,
-        private readonly logger: Logger,
-    ) {}
+export class PublishedPollService implements OnModuleInit{
+    private firestore = admin.firestore();
+    constructor() {}
+    async createPublishedPoll(poll: PublishedPoll): Promise<PublishedPoll> {
+        const pollRef = this.firestore.collection('publishedPolls').doc(poll.id);
+        await pollRef.set(poll);
+        return poll;
+    }
 
     async getAllPublishedPolls(): Promise<PublishedPoll[]> {
-        try {
-            return await this.publishedPollModel.find().exec();
-        } catch (error) {
-            throw new NotFoundException(ERROR.POLL.LIST_FAILED_TO_LOAD);
-        }
+        const snapshot = await this.firestore.collection('publishedPolls').get();
+        return snapshot.docs.map((doc) => doc.data() as PublishedPoll);
     }
 
     async getPublishedPollById(id: string): Promise<PublishedPoll> {
-        const publishedPoll = await this.publishedPollModel.findById(id).exec();
-        if (!publishedPoll) {
+        const pollRef = this.firestore.collection('publishedPolls').doc(id);
+        const pollDoc = await pollRef.get();
+
+        if (!pollDoc.exists) {
             throw new NotFoundException(ERROR.POLL.ID_NOT_FOUND);
         }
-        return publishedPoll;
+
+        const pollData = pollDoc.data() as PublishedPoll;
+        return {
+            ...pollData,
+            endDate: pollData.endDate, // Convertir Timestamp en Date
+            publicationDate: pollData.publicationDate, // Convertir Timestamp en Date
+        };
     }
 
     async deletePublishedPollById(id: string): Promise<void> {
-        try {
-            await this.publishedPollModel.deleteOne({ _id: id }).exec();
-        } catch (error) {
+        const pollRef = this.firestore.collection('publishedPolls').doc(id);
+        const pollDoc = await pollRef.get();
+
+        if (!pollDoc.exists) {
             throw new NotFoundException(ERROR.POLL.ID_NOT_FOUND);
         }
+
+        await pollRef.delete();
     }
 
     async updatePublishedPollVotes(id: string, results: number[]): Promise<PublishedPoll> {
-        // 1. Vérifier que le sondage publié existe
-        const publishedPoll = await this.publishedPollModel.findById(id).exec();
-        if (!publishedPoll) {
+        const pollRef = this.firestore.collection('publishedPolls').doc(id);
+        const pollDoc = await pollRef.get();
+        if (!pollDoc.exists) {
+            throw new NotFoundException(ERROR.POLL.ID_NOT_FOUND);
+        }
+        const pollData = pollDoc.data() as PublishedPoll;
+        // Mettre à jour totalVotes
+        results.forEach((choiceIndex, questionIndex) => {
+            if (pollData.totalVotes[questionIndex]) {
+                pollData.totalVotes[questionIndex][choiceIndex]++;
+            }
+        });
+        // Sauvegarder les modifications
+        await pollRef.update({ totalVotes: pollData.totalVotes });
+
+        return pollData;
+    }
+    async expirePublishedPoll(id: string): Promise<PublishedPoll> {
+        const pollRef = this.firestore.collection('publishedPolls').doc(id);
+        const pollDoc = await pollRef.get();
+
+        if (!pollDoc.exists) {
             throw new NotFoundException(ERROR.POLL.ID_NOT_FOUND);
         }
 
-        // 2. Vérifier que results est valide
-        if (!results || !Array.isArray(results)) {
-            throw new BadRequestException(ERROR.POLL.INVALID_RESULTS);
-        }
+        await pollRef.update({ expired: true });
 
-        // 3. Mettre à jour totalVotes en fonction des results
-        for (let i = 0; i < results.length; i++) {
-            const questionIndex = i; // Index de la question
-            const choiceIndex = results[i]; // Index du choix sélectionné pour cette question
-
-            // Vérifier que l'index du choix est valide
-            if (choiceIndex < 0 || choiceIndex >= publishedPoll.totalVotes[questionIndex].length) {
-                throw new BadRequestException(ERROR.POLL.INVALID_CHOICE_INDEX);
-            }
-
-            // Incrémenter le vote pour le choix sélectionné
-            publishedPoll.totalVotes[questionIndex][choiceIndex]++;
-        }
-
-        // 4. Sauvegarder les modifications
-        const updatedPublishedPoll = await publishedPoll.save();
-
-        return updatedPublishedPoll;
+        const updatedPollData = pollDoc.data() as PublishedPoll;
+        return updatedPollData;
     }
-    async expirePublishedPoll(id: string): Promise<PublishedPoll> {
-        try {
-            // 1. Récupérer le PublishedPoll existant
-            const existingPublishedPoll = await this.publishedPollModel.findById(id).exec();
-    
-            if (!existingPublishedPoll) {
-                throw new NotFoundException(ERROR.POLL.ID_NOT_FOUND);
+    //Pas idéal mais meilleur endroit pour maintenant
+    onModuleInit() {
+        setInterval(() => this.checkAndUpdateExpiredStatus(), 1000); // Vérifie toutes les secondes
+    }
+
+    private async checkAndUpdateExpiredStatus(): Promise<void> {
+        const currentDate = new Date();
+        const snapshot = await this.firestore.collection('publishedPolls').get();
+
+        snapshot.forEach(async (doc) => {
+            const poll = doc.data() as PublishedPoll;
+            const pollEndDate = new Date(poll.endDate);
+
+            if (pollEndDate <= currentDate && !poll.expired) {
+                console.log(`Poll ${poll.id} has expired.`);
+                await doc.ref.update({ expired: true });
             }
-    
-            // 2. Mettre à jour l'attribut expired
-            existingPublishedPoll.expired = true;
-    
-            // 3. Sauvegarder les modifications
-            const updatedPublishedPoll = await existingPublishedPoll.save();
-    
-            return updatedPublishedPoll;
-        } catch (error) {
-            // Gérer les erreurs
-            if (error instanceof NotFoundException) {
-                throw error; // Propager l'erreur 404
-            } else {
-                throw new InternalServerErrorException(ERROR.INTERNAL_SERVER_ERROR);
-            }
-        }
+        });
     }
 }

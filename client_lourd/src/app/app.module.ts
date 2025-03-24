@@ -35,6 +35,7 @@ import { PopUpCreationComponent } from './components/general-elements/pop-up-cre
 import { HeaderGameComponent } from './components/layout/filler/header-game/header-game.component';
 import { SecondaryHeaderGameComponent } from './components/layout/filler/secondary-header-game/secondary-header-game.component';
 import { MainHeaderComponent } from './components/layout/main-header/main-header.component';
+import { NotificationsComponent } from './components/layout/notifications/notifications.component';
 import { SecondaryHeaderComponent } from './components/layout/secondary-header/secondary-header.component';
 import { SideBarComponent } from './components/layout/side-bar/side-bar.component';
 import { LootBoxComponent } from './components/loot-box/loot-box.component';
@@ -152,6 +153,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         CreatePollPageComponent,
         PollMainPageComponent,
         PollPlayerPopInComponent,
+        NotificationsComponent,
     ],
     providers: [
         AuthService,

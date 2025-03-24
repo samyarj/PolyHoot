@@ -38,7 +38,6 @@ export class PollPlayerPopInComponent {
     }
 
     nextQuestion() {
-        console.log('appelle');
         if (this.selectedChoice !== NO_SELECTION && this.currentIndex < this.poll.questions.length - 1) {
             this.currentIndex++;
             this.playerAnswer.push(this.selectedChoice);

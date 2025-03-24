@@ -849,4 +849,22 @@ export class UserService {
 
         return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
     }
+    async addPollAnswered(uid: string, pollId: string): Promise<void> {
+        const userRef = this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+
+        const data = userDoc.data();
+        if (!data) {
+            throw new Error("Les données de l'utilisateur sont indisponibles.");
+        }
+
+        let newPollsAnswered = data.pollsAnswered;
+        if (!data.pollsAnswered) newPollsAnswered = [];
+        newPollsAnswered.push(pollId);
+
+        await userRef.update({ pollsAnswered: newPollsAnswered });
+    }
 }

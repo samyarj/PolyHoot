@@ -1,6 +1,5 @@
 import { ERROR } from '@app/constants/error-messages';
 import { CreatePollDto } from '@app/model/dto/poll/create-poll.dto';
-import { CreatePublishedPollDto } from '@app/model/dto/poll/create-published-poll.dto';
 import { UpdatePollDto } from '@app/model/dto/poll/update-poll.dto';
 import { Poll } from '@app/model/schema/poll/poll';
 import { PublishedPoll } from '@app/model/schema/poll/published-poll.schema';
@@ -28,7 +27,7 @@ export class PollController {
         try {
             const polls = await this.pollService.getAllPolls();
             const publishedPolls = await this.publishedPollService.getAllPublishedPolls();
-            response.status(HttpStatus.OK).json({ polls, publishedPolls });
+            response.status(HttpStatus.OK).send();
         } catch (error) {
             if (error.status === HttpStatus.NOT_FOUND) {
                 response.status(HttpStatus.NOT_FOUND).send({ message: error.message });
@@ -44,6 +43,8 @@ export class PollController {
     })
     @Get('/:id')
     async getPollById(@Param('id') id: string, @Res() response: Response) {
+        console.log('veut obtenir le poll ', id);
+
         try {
             const poll = await this.pollService.getPollById(id);
             response.status(HttpStatus.OK).json(poll);
@@ -81,9 +82,9 @@ export class PollController {
     @Patch('/update/:id')
     async updatePoll(@Param('id') id: string, @Body() updatePollDto: UpdatePollDto, @Res() response: Response) {
         try {
-            await this.pollService.verifyAndUpdatePoll(id, updatePollDto);
+            await this.pollService.updatePoll(id, updatePollDto);
             const updatedPolls = await this.pollService.getAllPolls();
-            response.status(HttpStatus.OK).json(updatedPolls);
+            response.status(HttpStatus.OK).send();
         } catch (error) {
             if (error.status === HttpStatus.CONFLICT) {
                 response.status(HttpStatus.CONFLICT).send({ message: error.message });
@@ -96,26 +97,6 @@ export class PollController {
     }
 
     @ApiOkResponse({
-        description: 'Poll successfully deleted',
-    })
-    @ApiNotFoundResponse({
-        description: 'Poll not found',
-    })
-    @Delete('/delete/:id')
-    async deletePoll(@Param('id') id: string, @Res() response: Response) {
-        try {
-            await this.pollService.deletePollById(id);
-            const updatedPolls = await this.pollService.getAllPolls();
-            response.status(HttpStatus.OK).json(updatedPolls);
-        } catch (error) {
-            if (error.status === HttpStatus.NOT_FOUND) {
-                response.status(HttpStatus.NOT_FOUND).send({ message: error.message });
-            } else {
-                response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: ERROR.INTERNAL_SERVER_ERROR });
-            }
-        }
-    }
-    @ApiOkResponse({
         description: 'Poll published successfully',
         type: PublishedPoll,
     })
@@ -123,32 +104,57 @@ export class PollController {
         description: 'Poll not found or could not be published',
     })
     @Patch('publish')
-    @Patch('publish')
     async publishPoll(@Body() poll: Poll, @Res() response: Response) {
         try {
-            // 2. Construire le DTO de PublishedPoll
-            const createPublishedPollDto: CreatePublishedPollDto = {
+            // 1. Construire le DTO de PublishedPoll
+            const createPublishedPollDto: PublishedPoll = {
                 ...poll,
                 publicationDate: new Date().toISOString(),
                 isPublished: true,
-                totalVotes: poll.questions.map(() => []), // Initialisation des votes
+                totalVotes: poll.questions.reduce(
+                    (acc, question, questionIndex) => {
+                        acc[questionIndex.toString()] = Array(question.choices?.length).fill(0); // Initialiser les votes pour chaque choix
+                        return acc;
+                    },
+                    {} as { [questionIndex: string]: number[] },
+                ),
             };
 
-            // 3. Créer le sondage publié
-            const publishedPoll = await this.pollService.createPublishedPoll(createPublishedPollDto);
+            // 2. Créer le sondage publié dans Firestore
+            const publishedPoll = await this.publishedPollService.createPublishedPoll(createPublishedPollDto);
 
-            // 4. Supprimer l'ancien sondage
-            await this.pollService.deletePollById(poll.id);
+            // 3. Supprimer l'ancien sondage de Firestore
+            await this.deletePollById(poll.id, response);
 
-            // Récupérer la liste de sondages et celle des publiés
+            // 4. Récupérer la liste de sondages et celle des publiés
             const updatedPolls = await this.pollService.getAllPolls();
             const updatedPublishedPolls = await this.publishedPollService.getAllPublishedPolls();
 
-            // 5. Retourner le sondage publié
-            return response.status(HttpStatus.OK).json({ polls: updatedPolls, publishedPolls: updatedPublishedPolls });
+            // 5. Retourner le sondage publié et les listes mises à jour
+            return response.status(HttpStatus.OK).send();
         } catch (error) {
-            console.error(error);
-            return response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: ERROR.INTERNAL_SERVER_ERROR });
+            console.error('Erreur lors de la publication du sondage :', error);
+            return response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: 'Internal server error' });
+        }
+    }
+
+    @ApiOkResponse({
+        description: 'Poll deleted successfully',
+    })
+    @ApiNotFoundResponse({
+        description: 'Poll not found',
+    })
+    @Delete('/delete/:id')
+    async deletePollById(@Param('id') id: string, @Res() response: Response) {
+        try {
+            await this.pollService.deletePollById(id);
+            response.status(HttpStatus.OK).send();
+        } catch (error) {
+            if (error.status === HttpStatus.NOT_FOUND) {
+                response.status(HttpStatus.NOT_FOUND).send({ message: error.message });
+            } else {
+                response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: ERROR.INTERNAL_SERVER_ERROR });
+            }
         }
     }
 }

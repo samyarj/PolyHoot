@@ -1,5 +1,4 @@
-import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnDestroy, OnInit } from '@angular/core'; // Ajoutez OnDestroy et OnInit
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { backInLeftAnimation, backInRightAnimation, bounceOutAnimation, zoomInAnimation } from '@app/animations/animation';
@@ -8,7 +7,7 @@ import { AppRoute, ConfirmationMessage } from '@app/constants/enum-class';
 import { Poll, PublishedPoll } from '@app/interfaces/poll';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
 import { ConsultPollService } from '@app/services/poll-services/consult-poll.service';
-import { Observer } from 'rxjs';
+import { catchError, of, Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-consult-poll-page',
@@ -17,30 +16,10 @@ import { Observer } from 'rxjs';
     animations: [backInLeftAnimation, backInRightAnimation, zoomInAnimation, bounceOutAnimation],
 })
 export class ConsultPollPageComponent implements OnInit, OnDestroy {
-    // Implémentez OnInit et OnDestroy
     polls: Poll[] = [];
     publishedPolls: PublishedPoll[] = [];
-    private intervalId: any; // Pour stocker l'ID de l'intervalle
-
-    private pollsObserver: Partial<Observer<Poll[]>> = {
-        next: (polls: Poll[]) => {
-            this.polls = polls;
-        },
-        error: (httpErrorResponse: HttpErrorResponse) => {
-            this.messageHandlerService.popUpErrorDialog(httpErrorResponse.error.message);
-        },
-    };
-
-    private allPollsObserver: Partial<Observer<{ polls: Poll[]; publishedPolls: PublishedPoll[] }>> = {
-        next: (response: { polls: Poll[]; publishedPolls: PublishedPoll[] }) => {
-            console.log('Dans le next du getAllPolls avec ', response.publishedPolls);
-            this.polls = response.polls;
-            this.publishedPolls = response.publishedPolls.filter((poll) => !poll.expired);
-        },
-        error: (httpErrorResponse: HttpErrorResponse) => {
-            this.messageHandlerService.popUpErrorDialog(httpErrorResponse.error.message);
-        },
-    };
+    private pollsSubscription: Subscription;
+    private publishedPollsSubscription: Subscription;
 
     constructor(
         private router: Router,
@@ -50,20 +29,23 @@ export class ConsultPollPageComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
-        // Charger les sondages au démarrage
-        this.consultPollService.getAllPolls().subscribe(this.allPollsObserver);
+        // S'abonner aux changements dans les sondages
+        this.pollsSubscription = this.consultPollService.watchPolls().subscribe((polls) => {
+            console.log('Dans le watchPolls du component');
+            this.polls = polls;
+        });
 
-        // Démarrer la vérification toutes les secondes
-        this.intervalId = setInterval(() => {
-            this.checkAndUpdateExpiredStatus();
-        }, 1000); // 1000 ms = 1 seconde
+        // S'abonner aux changements dans les sondages publiés
+        this.publishedPollsSubscription = this.consultPollService.watchPublishedPolls().subscribe((publishedPolls) => {
+            console.log('Dans le watchPublishedPolls du component');
+            this.publishedPolls = publishedPolls.filter((poll) => !poll.expired);
+        });
     }
 
     ngOnDestroy(): void {
-        // Nettoyer l'intervalle lorsque le composant est détruit
-        if (this.intervalId) {
-            clearInterval(this.intervalId);
-        }
+        // Se désabonner des observables
+        if (this.pollsSubscription) this.pollsSubscription.unsubscribe();
+        if (this.publishedPollsSubscription) this.publishedPollsSubscription.unsubscribe();
     }
 
     navigate(route: string): void {
@@ -99,42 +81,33 @@ export class ConsultPollPageComponent implements OnInit, OnDestroy {
     }
 
     private deleteCallback(id: string) {
-        this.consultPollService.deletePollById(id).subscribe(this.pollsObserver);
+        this.consultPollService
+            .deletePollById(id)
+            .pipe(
+                catchError((error: any) => {
+                    console.error('Erreur lors de la suppression du sondage :', error);
+                    this.messageHandlerService.popUpErrorDialog(error.message); // Gérer l'erreur avec un popup
+                    return of(null); // Retourner un Observable vide pour continuer le flux
+                }),
+            )
+            .subscribe();
     }
 
     private publishCallback(id: string) {
         const pollToPublish = this.polls.find((poll) => poll.id === id);
         if (pollToPublish) {
-            this.consultPollService.publishPoll(pollToPublish).subscribe(this.allPollsObserver);
+            this.consultPollService
+                .publishPoll(pollToPublish)
+                .pipe(
+                    catchError((error: any) => {
+                        console.error('Erreur lors de la publication du sondage :', error);
+                        this.messageHandlerService.popUpErrorDialog(error.message); // Gérer l'erreur avec un popup
+                        return of(null); // Retourner un Observable vide pour continuer le flux
+                    }),
+                )
+                .subscribe();
         } else {
             console.error(`Sondage avec l'ID ${id} non trouvé.`);
         }
-    }
-
-    private checkAndUpdateExpiredStatus(): void {
-        const currentDate = new Date(); // Obtenir la date actuelle
-
-        this.publishedPolls.forEach((poll) => {
-            const pollEndDate = new Date(poll.endDate); // Convertir endDate en objet Date
-            // Vérifier si la date de fin est maintenant ou dans le passé
-            if (pollEndDate <= currentDate && !poll.expired) {
-                console.log('Le sondage est expiré');
-                poll.expired = true;
-                // this.publishedPolls = this.publishedPolls.map((p) => (p.id === poll.id ? poll : p));
-                this.expirePublishedPoll(poll);
-            }
-        });
-    }
-
-    private expirePublishedPoll(poll: PublishedPoll): void {
-        this.consultPollService.expirePublishedPoll(poll).subscribe({
-            next: () => {
-                // Récupérer toutes les polls mises à jour depuis le serveur
-                this.consultPollService.getAllPolls().subscribe(this.allPollsObserver);
-            },
-            error: (error) => {
-                console.error('Erreur lors de la mise à jour du sondage :', error);
-            },
-        });
     }
 }

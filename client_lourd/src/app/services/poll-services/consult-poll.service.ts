@@ -1,58 +1,73 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { collection, Firestore, onSnapshot } from '@angular/fire/firestore';
 import { Poll, PublishedPoll } from '@app/interfaces/poll';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
-import { Observable, catchError, tap } from 'rxjs';
+import { catchError, Observable, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ConsultPollService {
-    readonly baseUrl = `${environment.serverUrl}/polls`;
+    private readonly baseUrl = `${environment.serverUrl}/polls`;
+
     constructor(
         private http: HttpClient,
+        private firestore: Firestore,
         private messageHandler: MessageHandlerService,
     ) {}
 
-    getAllPolls(): Observable<{ polls: Poll[]; publishedPolls: PublishedPoll[] }> {
-        return this.http.get<{ polls: Poll[]; publishedPolls: PublishedPoll[] }>(this.baseUrl).pipe(
-            catchError((error) => {
-                return this.messageHandler.handleHttpError(error);
-            }),
-        );
+    // Surveiller les changements dans les sondages
+    watchPolls(): Observable<Poll[]> {
+        return new Observable((subscriber) => {
+            const pollsCollection = collection(this.firestore, 'polls');
+            const unsubscribe = onSnapshot(pollsCollection, (snapshot) => {
+                const polls: Poll[] = [];
+                snapshot.forEach((docSnapshot) => {
+                    const data = docSnapshot.data() as Poll;
+                    polls.push({ ...data, id: docSnapshot.id });
+                });
+                subscriber.next(polls);
+            });
+
+            // Retourne la fonction de nettoyage
+            return () => unsubscribe();
+        });
     }
 
-    getPollById(id: string): Observable<Poll> {
-        return this.http.get<Poll>(`${this.baseUrl}/${id}`).pipe(
-            tap((poll) => console.log('📡 Récupération du sondage avec ID:', id, poll)),
-            catchError((error) => {
-                console.error(`❌ Erreur lors de la récupération du sondage ${id}:`, error);
-                return this.messageHandler.handleHttpError(error);
-            }),
-        );
+    // Surveiller les changements dans les sondages publiés
+    watchPublishedPolls(): Observable<PublishedPoll[]> {
+        return new Observable((subscriber) => {
+            const publishedPollsCollection = collection(this.firestore, 'publishedPolls');
+            const unsubscribe = onSnapshot(publishedPollsCollection, (snapshot) => {
+                const publishedPolls: PublishedPoll[] = [];
+                snapshot.forEach((docSnapshot) => {
+                    const data = docSnapshot.data() as PublishedPoll;
+                    publishedPolls.push({ ...data, id: docSnapshot.id });
+                });
+                subscriber.next(publishedPolls);
+            });
+
+            // Retourne la fonction de nettoyage
+            return () => unsubscribe();
+        });
     }
 
-    deletePollById(id: string): Observable<Poll[]> {
-        return this.http.delete<Poll[]>(`${this.baseUrl}/delete/${id}`).pipe(
-            tap((polls) => console.log(`🗑️ Sondage ${id} supprimé, nouvelle liste:`, polls)),
+    // Supprimer un sondage
+    deletePollById(id: string): Observable<void> {
+        return this.http.delete<void>(`${this.baseUrl}/delete/${id}`).pipe(
+            tap(() => console.log(`🗑️ Sondage ${id} supprimé`)),
             catchError((error) => {
                 console.error(`❌ Erreur lors de la suppression du sondage ${id}:`, error);
                 return this.messageHandler.handleHttpError(error);
             }),
         );
     }
+
+    // Publier un sondage
     publishPoll(poll: Poll): Observable<{ polls: Poll[]; publishedPolls: PublishedPoll[] }> {
         return this.http.patch<{ polls: Poll[]; publishedPolls: PublishedPoll[] }>(`${this.baseUrl}/publish`, poll).pipe(
-            catchError((error) => {
-                console.error('❌ Erreur lors de la publication du sondage', error);
-                return this.messageHandler.handleHttpError(error);
-            }),
-        );
-    }
-    expirePublishedPoll(poll: Poll): Observable<PublishedPoll> {
-        console.log('Envoie au serveur cet id à expirer ', poll.id);
-        return this.http.patch<PublishedPoll>(`${environment.serverUrl}/published-polls/expire/${poll.id}`, {}).pipe(
             catchError((error) => {
                 console.error('❌ Erreur lors de la publication du sondage', error);
                 return this.messageHandler.handleHttpError(error);

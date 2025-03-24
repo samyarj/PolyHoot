@@ -1,4 +1,5 @@
 /* eslint-disable no-underscore-dangle */ // Mongo utilise des attributs avec un underscore
+import { CreateQuestionDto } from '@app/model/dto/question/create-question.dto';
 import { Question, questionSchema } from '@app/model/schema/question/question';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
@@ -40,7 +41,7 @@ export class Poll {
 
     @ApiProperty({ type: [Question], description: 'A list of questions for the poll' })
     @Prop({ type: [questionSchema], default: [] })
-    questions: Types.Array<Question>;
+    questions: CreateQuestionDto[];
 
     @ApiProperty({ required: false })
     @Prop()

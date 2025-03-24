@@ -1,8 +1,7 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { collection, Firestore, onSnapshot } from '@angular/fire/firestore';
 import { PublishedPoll } from '@app/interfaces/poll';
-import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
-import { Observable, catchError, map } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -10,26 +9,22 @@ import { environment } from 'src/environments/environment';
 })
 export class HistoryPublishedPollService {
     readonly baseUrl = `${environment.serverUrl}/published-polls`;
-    constructor(
-        private http: HttpClient,
-        private messageHandler: MessageHandlerService,
-    ) {}
+    constructor(private firestore: Firestore) {}
+    // Surveiller les changements dans les sondages publiés
+    watchPublishedPolls(): Observable<PublishedPoll[]> {
+        return new Observable((subscriber) => {
+            const publishedPollsCollection = collection(this.firestore, 'publishedPolls');
+            const unsubscribe = onSnapshot(publishedPollsCollection, (snapshot) => {
+                const publishedPolls: PublishedPoll[] = [];
+                snapshot.forEach((docSnapshot) => {
+                    const data = docSnapshot.data() as PublishedPoll;
+                    publishedPolls.push({ ...data, id: docSnapshot.id });
+                });
+                subscriber.next(publishedPolls);
+            });
 
-    getAllPublishedPolls(): Observable<PublishedPoll[]> {
-        return this.http.get<PublishedPoll[]>(this.baseUrl).pipe(
-            map((publishedPolls) => {
-                return publishedPolls;
-            }),
-            catchError(this.messageHandler.handleHttpError),
-        );
-    }
-
-    getPublishedPollById(id: string): Observable<PublishedPoll> {
-        return this.http.get<PublishedPoll>(`${this.baseUrl}/${id}`).pipe(
-            map((publishedPolls) => {
-                return publishedPolls;
-            }),
-            catchError(this.messageHandler.handleHttpError),
-        );
+            // Retourne la fonction de nettoyage
+            return () => unsubscribe();
+        });
     }
 }

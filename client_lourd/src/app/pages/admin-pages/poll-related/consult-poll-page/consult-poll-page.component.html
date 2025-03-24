@@ -8,6 +8,9 @@
                         <span id="publishedPollInfo" style="color: red;">
                             <span id="publishedPollInfo"> {{ publishedPoll.title }} Date d'expiration: {{ publishedPoll.endDate | date: 'yyyy-MM-dd HH:mm' }} Date de publication: {{ publishedPoll.publicationDate | date: 'yyyy-MM-dd HH:mm' }}</span>
                         </span>
+                        <button class="publish" mat-icon-button matTooltip="Consulter le sondage" (click)="consultPoll(publishedPoll)">
+                            <i class="fa-solid fa-clipboard-question"></i>
+                        </button>
                     </div>
                     <div class="pollContainer" *ngFor="let poll of polls; trackBy: trackByFn; let i = index" @bounceOut>
                         <span id="pollInfo"> {{ poll.title }} Date d'expiration: {{ poll.endDate | date: 'yyyy-MM-dd HH:mm' }} </span>

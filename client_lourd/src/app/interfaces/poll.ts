@@ -6,11 +6,11 @@ export interface Poll {
     questions: Question[];
     expired: boolean;
     endDate: string;
-    isPublished?: boolean;
+    isPublished: boolean;
 }
 
 export interface PublishedPoll extends Poll {
     isPublished: true;
     publicationDate: string;
-    totalVotes: number[][];
+    totalVotes: { [questionIndex: string]: number[] };
 }

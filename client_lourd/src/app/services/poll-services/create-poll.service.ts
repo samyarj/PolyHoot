@@ -24,6 +24,7 @@ export class CreatePollService {
         private questionValidationService: QuestionValidationService,
     ) {}
     getPollById(id: string): Observable<Poll> {
+        console.log('veut obtenir le poll ', id);
         return this.http.get<Poll>(`${this.baseUrl}/${id}`).pipe(
             catchError((error) => {
                 return this.messageHandler.handleHttpError(error);
