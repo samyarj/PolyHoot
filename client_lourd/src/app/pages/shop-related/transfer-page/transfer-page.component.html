@@ -6,7 +6,7 @@
                     <span class="tab-number">1</span>
                     <span class="tab-title">Choisir le destinataire</span>
                 </div>
-                <div class="tab" [class.active]="currentTab === 1" (click)="canProceedToNextTab() && currentTab === 0 ? (currentTab = 1) : null">
+                <div class="tab" [class.active]="currentTab === 1" (click)="canProceedToNextTab() && currentTab !== 1 ? (currentTab = 1) : null">
                     <span class="tab-number">2</span>
                     <span class="tab-title">Montant des coins</span>
                 </div>
@@ -34,8 +34,8 @@
                     </div>
 
                     <div class="friends-list">
+                        <h3 *ngIf="searchQuery">Résultats de la recherche</h3>
                         <div *ngIf="searchQuery" class="search-results">
-                            <h3>Résultats de la recherche</h3>
                             <div
                                 *ngFor="let user of searchResults"
                                 class="friend-item"
@@ -50,8 +50,8 @@
                             </div>
                         </div>
 
+                        <h3 *ngIf="!searchQuery">Vos amis</h3>
                         <div *ngIf="!searchQuery" class="friends">
-                            <h3>Vos amis</h3>
                             <div
                                 *ngFor="let friend of friends"
                                 class="friend-item"
@@ -67,7 +67,11 @@
                         </div>
                     </div>
                     <div class="tab-navigation" id="tab1">
-                        <button class="next-button" (click)="canProceedToNextTab() ? (currentTab = 1) : null" [disabled]="!canProceedToNextTab()">
+                        <button
+                            class="next-button custom-button"
+                            (click)="canProceedToNextTab() ? (currentTab = 1) : null"
+                            [disabled]="!canProceedToNextTab()"
+                        >
                             Suivant
                         </button>
                     </div>
@@ -98,8 +102,12 @@
                         </div>
                     </div>
                     <div class="tab-navigation">
-                        <button class="back-button" (click)="currentTab = 0">Retour</button>
-                        <button class="next-button" (click)="canProceedToNextTab() ? (currentTab = 2) : null" [disabled]="!canProceedToNextTab()">
+                        <button class="back-button custom-button-cancel" (click)="currentTab = 0">Retour</button>
+                        <button
+                            class="next-button custom-button"
+                            (click)="canProceedToNextTab() ? (currentTab = 2) : null"
+                            [disabled]="!canProceedToNextTab()"
+                        >
                             Suivant
                         </button>
                     </div>
@@ -127,8 +135,8 @@
                         </div>
                     </div>
                     <div class="tab-navigation">
-                        <button class="back-button" (click)="currentTab = 1">Retour</button>
-                        <button class="confirm-button" (click)="confirmTransfer()">Confirmer le transfert</button>
+                        <button class="back-button custom-button-cancel" (click)="currentTab = 1">Retour</button>
+                        <button class="confirm-button custom-button" (click)="confirmTransfer()">Confirmer le transfert</button>
                     </div>
                 </div>
             </div>

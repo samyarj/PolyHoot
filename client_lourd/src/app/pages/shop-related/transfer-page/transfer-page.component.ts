@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/member-ordering */
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { doc, Firestore, getDoc, onSnapshot, Unsubscribe } from '@angular/fire/firestore';
 import { AuthService } from '@app/services/auth/auth.service';
 import { CoinTransferService } from '@app/services/coin-transfer.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
     selector: 'app-transfer-page',
@@ -27,6 +29,7 @@ export class TransferPageComponent implements OnInit, OnDestroy {
         private authService: AuthService,
         private firestore: Firestore,
         private coinTransferService: CoinTransferService,
+        private toastr: ToastrService,
     ) {}
 
     ngOnInit(): void {
@@ -129,6 +132,7 @@ export class TransferPageComponent implements OnInit, OnDestroy {
                         this.selectedRecipient = null;
                         this.transferAmount = 0;
                         this.transferError = '';
+                        this.toastr.success('Vous avez effectué la transaction avec succès.');
                     } else {
                         this.transferError = response.message;
                     }
