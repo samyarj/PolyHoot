@@ -12,11 +12,36 @@
             <table class="logs-table header-table">
                 <thead>
                     <tr>
-                        <th class="col-player">Joueur</th>
-                        <th class="col-coins">Coins</th>
-                        <th class="col-wins">Victoires</th>
-                        <th class="col-status">Statut</th>
-                        <th class="col-reports">Signalements</th>
+                        <th class="col-player sortable" (click)="sort('username')">
+                            Joueur
+                            <span class="sort-icon" *ngIf="sortColumn() === 'username'">
+                                {{ sortDirection() === 'asc' ? '▲' : '▼' }}
+                            </span>
+                        </th>
+                        <th class="col-status sortable" (click)="sort('isOnline')">
+                            Statut
+                            <span class="sort-icon" *ngIf="sortColumn() === 'isOnline'">
+                                {{ sortDirection() === 'asc' ? '▲' : '▼' }}
+                            </span>
+                        </th>
+                        <th class="col-coins sortable" (click)="sort('coins')">
+                            Coins
+                            <span class="sort-icon" *ngIf="sortColumn() === 'coins'">
+                                {{ sortDirection() === 'asc' ? '▲' : '▼' }}
+                            </span>
+                        </th>
+                        <th class="col-wins sortable" (click)="sort('nWins')">
+                            Victoires
+                            <span class="sort-icon" *ngIf="sortColumn() === 'nWins'">
+                                {{ sortDirection() === 'asc' ? '▲' : '▼' }}
+                            </span>
+                        </th>
+                        <th class="col-reports sortable" (click)="sort('nbReport')">
+                            Signalements
+                            <span class="sort-icon" *ngIf="sortColumn() === 'nbReport'">
+                                {{ sortDirection() === 'asc' ? '▲' : '▼' }}
+                            </span>
+                        </th>
                         <th class="col-actions">Bannir</th>
                     </tr>
                 </thead>
@@ -56,6 +81,11 @@
                                     <span>{{ player.username }}</span>
                                 </div>
                             </td>
+                            <td class="col-status">
+                                <span class="status-badge" [class.online]="player.isOnline" [class.offline]="!player.isOnline">
+                                    {{ player.isOnline ? 'En ligne' : 'Hors ligne' }}
+                                </span>
+                            </td>
                             <td class="col-coins">
                                 <div class="coin-display">
                                     <span>{{ player.coins || 0 }}</span>
@@ -65,11 +95,6 @@
                                 <div class="wins-display">
                                     <span>{{ player.nWins || 0 }}</span>
                                 </div>
-                            </td>
-                            <td class="col-status">
-                                <span class="status-badge" [class.online]="player.isOnline" [class.offline]="!player.isOnline">
-                                    {{ player.isOnline ? 'En ligne' : 'Hors ligne' }}
-                                </span>
                             </td>
                             <td class="col-reports">{{ player.nbReport || 0 }}</td>
                             <td class="col-actions">

@@ -1,6 +1,10 @@
-import { Component, computed, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
 import { User } from '@app/interfaces/user';
 import { AdminService } from '@app/services/back-end-communication-services/admin-service/admin.service';
+
+// Add these types for sorting
+type SortColumn = 'username' | 'coins' | 'nWins' | 'isOnline' | 'nbReport' | null;
+type SortDirection = 'asc' | 'desc';
 
 @Component({
     selector: 'app-player-info-page',
@@ -13,13 +17,41 @@ export class PlayerInfoPageComponent implements OnInit, OnDestroy {
     error = signal<string | null>(null);
     searchTerm = signal<string>('');
 
+    // Default sorting: by 'isOnline' in descending order
+    sortColumn = signal<SortColumn>('isOnline');
+    sortDirection = signal<SortDirection>('desc');
+
     // Computed signals
     hasPlayers = computed(() => this.players().length > 0);
+
     filteredPlayers = computed(() => {
         const term = this.searchTerm().toLowerCase().trim();
-        if (!term) return this.players();
+        let filtered = !term ? this.players() : this.players().filter((player) => player.username.toLowerCase().includes(term));
 
-        return this.players().filter((player) => player.username.toLowerCase().includes(term));
+        const column = this.sortColumn();
+        const direction = this.sortDirection();
+
+        if (column) {
+            filtered = [...filtered].sort((a, b) => {
+                if (column === 'username') {
+                    const usernameA = a.username?.toLowerCase() || '';
+                    const usernameB = b.username?.toLowerCase() || '';
+                    return direction === 'asc' ? usernameA.localeCompare(usernameB) : usernameB.localeCompare(usernameA);
+                }
+
+                if (column === 'isOnline') {
+                    const isOnlineValueA = a.isOnline ? 1 : 0;
+                    const isOnlineValueB = b.isOnline ? 1 : 0;
+                    return direction === 'asc' ? isOnlineValueA - isOnlineValueB : isOnlineValueB - isOnlineValueA;
+                }
+
+                const valueA = a[column] || 0;
+                const valueB = b[column] || 0;
+                return direction === 'asc' ? valueA - valueB : valueB - valueA;
+            });
+        }
+
+        return filtered;
     });
 
     // Store unsubscribe function for cleanup
@@ -32,13 +64,24 @@ export class PlayerInfoPageComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        // Clean up the Firebase listener when component is destroyed
         if (this.unsubscribeFromPlayers) {
             this.unsubscribeFromPlayers();
         }
     }
 
-    // Original HTTP method (keep as fallback)
+    // Add sorting method
+    sort(column: SortColumn): void {
+        if (this.sortColumn() === column) {
+            // Toggle direction if same column
+            this.sortDirection.set(this.sortDirection() === 'asc' ? 'desc' : 'asc');
+        } else {
+            // Set new sort column and reset direction
+            this.sortColumn.set(column);
+            this.sortDirection.set('asc');
+        }
+    }
+
+    // Keep your existing methods
     loadPlayers(): void {
         this.isLoading.set(true);
         this.error.set(null);
@@ -50,7 +93,6 @@ export class PlayerInfoPageComponent implements OnInit, OnDestroy {
         });
     }
 
-    // New real-time method
     loadPlayersRealtime(): void {
         this.isLoading.set(true);
         this.error.set(null);
