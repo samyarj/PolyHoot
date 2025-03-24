@@ -57,11 +57,11 @@ export class PublishedPollController {
         description: 'Published poll not found',
     })
     @Delete('/delete/:id')
-    async deletePublishedPoll(@Param('id') id: string, @Res() response: Response) {
+    async deleteExpiredPolls(@Res() response: Response) {
         try {
-            await this.publishedPollService.deletePublishedPollById(id);
-            const updatedPublishedPolls = await this.publishedPollService.getAllPublishedPolls();
-            response.status(HttpStatus.OK).json(updatedPublishedPolls);
+            await this.publishedPollService.deleteExpiredPolls();
+            //const updatedPublishedPolls = await this.publishedPollService.getAllPublishedPolls();
+            response.status(HttpStatus.OK).send();//json(updatedPublishedPolls);
         } catch (error) {
             if (error.status === HttpStatus.NOT_FOUND) {
                 response.status(HttpStatus.NOT_FOUND).send({ message: error.message });

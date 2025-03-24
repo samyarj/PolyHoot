@@ -102,4 +102,7 @@ export class HistoryPollPageComponent implements OnInit, OnDestroy {
             };
         }
     }
+    deleteAllExpiredPolls(){
+        this.historyPublishedPollService.deleteAllExpiredPolls();
+    }
 }

@@ -20,6 +20,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     showNotifications = false;
     publishedPolls: PublishedPoll[] = [];
     notifications: { title: string; poll: PublishedPoll }[] = [];
+    user: User | null;
     private publishedPollsSubscription: Subscription;
     private userSubscription: Subscription;
 
@@ -30,7 +31,9 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         private historyPublishedPollService: HistoryPublishedPollService,
         private authService: AuthService,
         private firestore: Firestore, // Injectez Firestore
-    ) {}
+    ) {
+        this.user = this.authService.getUser();
+    }
 
     @HostListener('document:click', ['$event'])
     onDocumentClick(event: MouseEvent) {
@@ -43,17 +46,23 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         // S'abonner aux changements dans les sondages publiés
         this.publishedPollsSubscription = this.historyPublishedPollService.watchPublishedPolls().subscribe((publishedPolls) => {
-            this.publishedPolls = publishedPolls.filter((poll) => !poll.expired);
-            this.notifications = this.publishedPolls.map((poll) => ({
-                title: `Nouveau sondage disponible: ${poll.title}`,
-                poll,
-            }));
+            if (this.user?.role === 'player') {
+                this.publishedPolls = publishedPolls.filter((poll) => !poll.expired);
+                this.notifications = this.publishedPolls.map((poll) => ({
+                    title: `${poll.title}`,
+                    poll,
+                }));
+            } else if (this.user?.role === 'admin') {
+                this.publishedPolls = publishedPolls.filter((poll) => poll.expired);
+                this.notifications = this.publishedPolls.map((poll) => ({
+                    title: `${poll.title}`,
+                    poll,
+                }));
+            }
         });
 
-        // S'abonner aux changements de l'utilisateur
-        const user = this.authService.getUser();
-        if (user && user.uid) {
-            this.userSubscription = this.watchUser(user.uid).subscribe({
+        if (this.user && this.user.uid) {
+            this.userSubscription = this.watchUser(this.user.uid).subscribe({
                 next: (userData) => {
                     console.log('Utilisateur mis à jour:', userData);
 
@@ -63,7 +72,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
                         // Mettre à jour les notifications en conséquence
                         this.notifications = this.publishedPolls.map((poll) => ({
-                            title: `Nouveau sondage disponible: ${poll.title}`,
+                            title: `${poll.title}`,
                             poll,
                         }));
 
@@ -112,9 +121,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     }
 
     private updateUserPollsAnswered(id: string | undefined) {
-        const user = this.authService.getUser(); // Obtenez l'utilisateur actuel
-        if (user && user.uid && id) {
-            this.http.patch(`${environment.serverUrl}/published-polls/${user.uid}/addPollsAnswered/`, { id }).subscribe({
+        if (this.user && this.user.uid && id) {
+            this.http.patch(`${environment.serverUrl}/published-polls/${this.user.uid}/addPollsAnswered/`, { id }).subscribe({
                 next: () => {
                     console.log('Poll ID ajouté à pollsAnswered');
                 },

@@ -5,20 +5,19 @@
     <ul class="dropdown-menu" [ngClass]="{ show: showNotifications }">
         <!-- Dropdown Header -->
         <li class="dropdown-header text-center">
-          <strong>Notifications</strong>
+            <strong>Notifications</strong>
         </li>
         <hr class="dropdown-divider" />
         <!-- Liste des notifications -->
         <li *ngFor="let notification of notifications" class="notification-item">
-          <div class="notification-content">
-            <strong>{{ notification.title }}</strong>
-            <br />
-            <button (click)="openPollAnswer(notification.poll)">Répondre au sondage</button>
-          </div>
+            <div class="notification-content">
+                <p *ngIf="user && user.role === 'player'"><strong>Nouveau sondage disponible:</strong><br />{{ notification.title }}</p>
+                <p *ngIf="user && user.role === 'admin'"><strong>Sondage expiré:</strong><br />{{ notification.title }}</p>
+                <br />
+                <button *ngIf="user && user.role === 'player'" (click)="openPollAnswer(notification.poll)">Répondre au sondage</button>
+            </div>
         </li>
         <!-- Aucune notification -->
-        <li *ngIf="notifications.length === 0" class="text-center text-muted">
-          Aucune notification.
-        </li>
-      </ul>
+        <li *ngIf="notifications.length === 0" class="text-center text-muted">Aucune notification.</li>
+    </ul>
 </div>

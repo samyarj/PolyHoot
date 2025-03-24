@@ -35,15 +35,33 @@ export class PublishedPollService implements OnModuleInit{
         };
     }
 
-    async deletePublishedPollById(id: string): Promise<void> {
-        const pollRef = this.firestore.collection('publishedPolls').doc(id);
-        const pollDoc = await pollRef.get();
+    async deleteExpiredPolls(): Promise<void> {
+        try {
+            // 1. Récupérer tous les sondages expirés
+            const expiredPollsSnapshot = await this.firestore
+                .collection('publishedPolls')
+                .where('expired', '==', true)
+                .get();
 
-        if (!pollDoc.exists) {
-            throw new NotFoundException(ERROR.POLL.ID_NOT_FOUND);
+            // 2. Vérifier s'il y a des sondages à supprimer
+            if (expiredPollsSnapshot.empty) {
+                console.log('Aucun sondage expiré à supprimer.');
+                return;
+            }
+
+            // 3. Supprimer chaque sondage expiré
+            const batch = this.firestore.batch(); // Utiliser un batch pour des performances optimales
+            expiredPollsSnapshot.forEach((doc) => {
+                batch.delete(doc.ref);
+            });
+
+            // 4. Exécuter la suppression en une seule opération
+            await batch.commit();
+            console.log(`${expiredPollsSnapshot.size} sondage(s) expiré(s) supprimé(s).`);
+        } catch (error) {
+            console.error('Erreur lors de la suppression des sondages expirés:', error);
+            throw error; // Propager l'erreur pour la gestion ultérieure
         }
-
-        await pollRef.delete();
     }
 
     async updatePublishedPollVotes(id: string, results: number[]): Promise<PublishedPoll> {

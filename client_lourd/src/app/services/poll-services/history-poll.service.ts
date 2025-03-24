@@ -1,7 +1,9 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { collection, Firestore, onSnapshot } from '@angular/fire/firestore';
 import { PublishedPoll } from '@app/interfaces/poll';
-import { Observable } from 'rxjs';
+import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
+import { catchError, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -9,7 +11,11 @@ import { environment } from 'src/environments/environment';
 })
 export class HistoryPublishedPollService {
     readonly baseUrl = `${environment.serverUrl}/published-polls`;
-    constructor(private firestore: Firestore) {}
+    constructor(
+        private firestore: Firestore,
+        private http: HttpClient,
+        private messageHandler: MessageHandlerService,
+    ) {}
     // Surveiller les changements dans les sondages publiés
     watchPublishedPolls(): Observable<PublishedPoll[]> {
         return new Observable((subscriber) => {
@@ -26,5 +32,8 @@ export class HistoryPublishedPollService {
             // Retourne la fonction de nettoyage
             return () => unsubscribe();
         });
+    }
+    deleteAllExpiredPolls() {
+        return this.http.delete<PublishedPoll[]>(this.baseUrl).pipe(catchError(this.messageHandler.handleHttpError));
     }
 }
