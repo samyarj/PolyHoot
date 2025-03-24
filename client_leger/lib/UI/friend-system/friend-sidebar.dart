@@ -144,7 +144,8 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
 
   Widget _buildHeader(ColorScheme colorScheme) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+          horizontal: 8, vertical: 8), // Reduced horizontal padding
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
@@ -153,23 +154,44 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
           ),
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Gestion des amis',
-            style: TextStyle(
-              color: colorScheme.onPrimary,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+      child: LayoutBuilder(builder: (context, constraints) {
+        // Get available width
+        final availableWidth = constraints.maxWidth;
+
+        // Reserve space for the close button (48px is standard IconButton size)
+        const closeButtonWidth = 48.0;
+
+        // Calculate remaining width for the text
+        final textWidth =
+            availableWidth - closeButtonWidth - 16; // 16 for spacing
+
+        return Row(
+          mainAxisSize: MainAxisSize.max, // Use max to fill available space
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              width: textWidth > 0 ? textWidth : 0, // Avoid negative width
+              child: Text(
+                'Gestion des amis',
+                style: TextStyle(
+                  color: colorScheme.onPrimary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow:
+                    TextOverflow.ellipsis, // Truncate with ellipsis if needed
+                maxLines: 1,
+              ),
             ),
-          ),
-          IconButton(
-            icon: Icon(Icons.close, color: colorScheme.onPrimary),
-            onPressed: widget.onClose,
-          ),
-        ],
-      ),
+            IconButton(
+              icon: Icon(Icons.close, color: colorScheme.onPrimary),
+              onPressed: widget.onClose,
+              constraints: BoxConstraints.tightFor(
+                  width: closeButtonWidth, height: closeButtonWidth),
+            ),
+          ],
+        );
+      }),
     );
   }
 

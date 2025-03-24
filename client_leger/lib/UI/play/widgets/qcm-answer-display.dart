@@ -94,10 +94,8 @@ class QCMAnswerDisplay extends StatelessWidget {
   Widget _buildAnswerCell(
       String text, bool isCorrect, ColorScheme colorScheme) {
     final backgroundColor = isCorrect
-        ? const Color.fromRGBO(
-            21, 87, 36, 0.7) // Dark green for correct answers
-        : const Color.fromRGBO(
-            139, 26, 26, 0.7); // Dark red for incorrect answers
+        ? const Color.fromRGBO(76, 175, 80, 0.85)
+        : const Color.fromRGBO(244, 67, 54, 0.85);
 
     return Container(
       decoration: BoxDecoration(

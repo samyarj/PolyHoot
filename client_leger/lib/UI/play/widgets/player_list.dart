@@ -4,7 +4,7 @@ import 'package:client_leger/providers/play/game_organizer_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum SortField { name, points, status }
+enum SortField { name, points }
 
 enum SortOrder { ascending, descending }
 
@@ -27,211 +27,256 @@ class _ImprovedPlayerListState extends ConsumerState<ImprovedPlayerList> {
     // Create a copy of the player list for sorting
     final sortedPlayers = _sortPlayers(List.from(playerList));
 
-    return Column(
-      children: [
-        // Sorting controls (20% height)
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Sort field selector
-              DropdownButton<SortField>(
-                value: _sortField,
-                dropdownColor: colorScheme.primary,
-                style: TextStyle(color: colorScheme.onPrimary),
-                underline: Container(
-                  height: 2,
-                  color: colorScheme.tertiary,
-                ),
-                onChanged: (SortField? newValue) {
-                  if (newValue != null) {
-                    setState(() {
-                      _sortField = newValue;
-                    });
-                  }
-                },
-                items: <SortField>[
-                  SortField.name,
-                  SortField.points,
-                  SortField.status
-                ].map<DropdownMenuItem<SortField>>((SortField value) {
-                  return DropdownMenuItem<SortField>(
-                    value: value,
-                    child: Text(_getSortFieldName(value)),
-                  );
-                }).toList(),
-              ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Check if we have a very tight constraint
+        final isVeryConstrained = constraints.maxHeight < 100;
 
-              // Two separate buttons for sort order
-              Row(
-                mainAxisSize: MainAxisSize.min,
+        // If extremely constrained, show minimal UI
+        if (isVeryConstrained) {
+          return Center(
+            child: Text(
+              '${sortedPlayers.length} joueurs',
+              style: TextStyle(color: colorScheme.onPrimary),
+            ),
+          );
+        }
+
+        // Adjust heights based on available space
+        final double headerHeight = constraints.maxHeight * 0.15;
+        final double dividerHeight = 4;
+
+        return Column(
+          children: [
+            // Sorting controls - compact for small spaces
+            Container(
+              height: headerHeight,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Ascending button
-                  IconButton(
-                    icon: Icon(
-                      Icons.arrow_upward,
-                      color: _sortOrder == SortOrder.ascending
-                          ? colorScheme.tertiary
-                          : colorScheme.onPrimary.withOpacity(0.6),
-                      size: 20,
+                  // Sort field selector
+                  DropdownButton<SortField>(
+                    value: _sortField,
+                    dropdownColor: colorScheme.primary,
+                    style: TextStyle(color: colorScheme.onPrimary),
+                    isDense: true, // More compact dropdown
+                    iconSize: 18, // Smaller icon
+                    underline: Container(
+                      height: 1,
+                      color: colorScheme.tertiary,
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _sortOrder = SortOrder.ascending;
-                      });
+                    onChanged: (SortField? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _sortField = newValue;
+                        });
+                      }
                     },
-                    tooltip: 'Croissant',
-                    padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(minWidth: 36, minHeight: 36),
+                    items: <SortField>[
+                      SortField.name,
+                      SortField.points,
+                    ].map<DropdownMenuItem<SortField>>((SortField value) {
+                      return DropdownMenuItem<SortField>(
+                        value: value,
+                        child: Text(_getSortFieldName(value)),
+                      );
+                    }).toList(),
                   ),
 
-                  // Descending button
-                  IconButton(
-                    icon: Icon(
-                      Icons.arrow_downward,
-                      color: _sortOrder == SortOrder.descending
-                          ? colorScheme.tertiary
-                          : colorScheme.onPrimary.withOpacity(0.6),
-                      size: 20,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _sortOrder = SortOrder.descending;
-                      });
-                    },
-                    tooltip: 'Décroissant',
-                    padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(minWidth: 36, minHeight: 36),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Compact sort direction buttons
+                      IconButton(
+                        icon: Icon(
+                          Icons.arrow_upward,
+                          color: _sortOrder == SortOrder.ascending
+                              ? colorScheme.tertiary
+                              : colorScheme.onPrimary.withOpacity(0.6),
+                          size: 16, // Smaller icon size
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _sortOrder = SortOrder.ascending;
+                          });
+                        },
+                        tooltip: 'Croissant',
+                        padding: EdgeInsets.zero,
+                        constraints:
+                            BoxConstraints(minWidth: 28, minHeight: 28),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.arrow_downward,
+                          color: _sortOrder == SortOrder.descending
+                              ? colorScheme.tertiary
+                              : colorScheme.onPrimary.withOpacity(0.6),
+                          size: 16, // Smaller icon size
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _sortOrder = SortOrder.descending;
+                          });
+                        },
+                        tooltip: 'Décroissant',
+                        padding: EdgeInsets.zero,
+                        constraints:
+                            BoxConstraints(minWidth: 28, minHeight: 28),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
+            ),
 
-        // List headers
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-          child: Row(
-            children: [
-              // Avatar space
-              SizedBox(width: 40),
+            // List headers with minimal height
+            Container(
+              height: headerHeight,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+              child: Row(
+                children: [
+                  // Avatar space
+                  SizedBox(width: 32), // Smaller width for avatar space
 
-              // Name column
-              Expanded(
-                flex: 5,
-                child: Text(
-                  'Nom',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: colorScheme.onPrimary,
+                  // Name column
+                  Expanded(
+                    flex: 6,
+                    child: Text(
+                      'Nom',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12, // Smaller text
+                        color: colorScheme.onPrimary,
+                      ),
+                    ),
                   ),
-                ),
-              ),
 
-              // Points column
-              Expanded(
-                flex: 3,
-                child: Text(
-                  'Points',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: colorScheme.onPrimary,
+                  // Points column
+                  Expanded(
+                    flex: 4,
+                    child: Text(
+                      'Points',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12, // Smaller text
+                        color: colorScheme.onPrimary,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
+            ),
 
-              // Status column
-              Expanded(
-                flex: 2,
-                child: Text(
-                  'Statut',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: colorScheme.onPrimary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+            // Minimal divider
+            Container(
+              height: dividerHeight,
+              child: Divider(
+                color: colorScheme.tertiary.withOpacity(0.3),
+                thickness: 1,
+                height: dividerHeight,
               ),
-            ],
-          ),
-        ),
+            ),
 
-        // Divider
-        Divider(
-          color: colorScheme.tertiary.withOpacity(0.3),
-          thickness: 1,
-          height: 8,
-        ),
-
-        // Player list (80% height)
-        Expanded(
-          child: ListView.builder(
-            itemCount: sortedPlayers.length,
-            padding: EdgeInsets.zero,
-            itemBuilder: (context, index) {
-              final player = sortedPlayers[index];
-              return _buildPlayerListItem(player, colorScheme, index);
-            },
-          ),
-        ),
-      ],
+            // Player list using remaining space
+            Expanded(
+              child: sortedPlayers.isEmpty
+                  ? Center(
+                      child: Text(
+                        'Aucun joueur',
+                        style: TextStyle(color: colorScheme.onPrimary),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: sortedPlayers.length,
+                      padding: EdgeInsets.zero,
+                      itemExtent: 40, // Fixed height for each item
+                      itemBuilder: (context, index) {
+                        final player = sortedPlayers[index];
+                        return _buildPlayerListItem(player, colorScheme, index);
+                      },
+                    ),
+            ),
+          ],
+        );
+      },
     );
   }
 
+// Modify your _buildPlayerListItem to be more compact
   Widget _buildPlayerListItem(
       PartialPlayer player, ColorScheme colorScheme, int index) {
     final isEvenRow = index % 2 == 0;
+    final isActive = player.isInGame;
 
     return Container(
+      height: 40, // Fixed height
       color:
           isEvenRow ? colorScheme.primary.withOpacity(0.3) : Colors.transparent,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+            horizontal: 12, vertical: 4), // Reduced padding
         child: Row(
           children: [
-            // Avatar with online status
             Stack(
               children: [
-                AvatarBannerWidget(
-                  avatarUrl: player.avatarEquipped,
-                  bannerUrl: player.bannerEquipped,
-                  size: 32,
-                  avatarFit: BoxFit.cover,
+                Opacity(
+                  opacity: isActive ? 1.0 : 0.5,
+                  child: AvatarBannerWidget(
+                    avatarUrl: player.avatarEquipped,
+                    bannerUrl: player.bannerEquipped,
+                    size: 28, // Smaller avatar
+                    avatarFit: BoxFit.cover,
+                  ),
                 ),
-                if (player.isInGame)
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 8, // Smaller indicator
+                    height: 8, // Smaller indicator
+                    decoration: BoxDecoration(
+                      color: isActive ? Colors.green : Colors.grey,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: colorScheme.surface,
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                ),
+                if (player.submitted)
                   Positioned(
                     right: 0,
-                    bottom: 0,
+                    top: 0,
                     child: Container(
-                      width: 10,
-                      height: 10,
+                      width: 8, // Smaller indicator
+                      height: 8, // Smaller indicator
                       decoration: BoxDecoration(
-                        color: Colors.green,
+                        color: Colors.blue,
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: colorScheme.surface,
-                          width: 1.5,
+                          width: 1,
                         ),
                       ),
                     ),
                   ),
               ],
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 6), // Reduced spacing
 
-            // Name column
+            // Name column - greyed out if player left
             Expanded(
-              flex: 5,
+              flex: 6,
               child: Text(
                 player.name,
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
-                  color: colorScheme.onPrimary,
+                  fontSize: 12, // Smaller font
+                  color: isActive
+                      ? colorScheme.onPrimary
+                      : colorScheme.onPrimary.withOpacity(0.5),
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -239,30 +284,15 @@ class _ImprovedPlayerListState extends ConsumerState<ImprovedPlayerList> {
 
             // Points column
             Expanded(
-              flex: 3,
+              flex: 4,
               child: Text(
                 player.points.toStringAsFixed(1),
                 style: TextStyle(
-                  color: colorScheme.onPrimary,
+                  fontSize: 12, // Smaller font
+                  color: isActive
+                      ? colorScheme.onPrimary
+                      : colorScheme.onPrimary.withOpacity(0.5),
                 ),
-              ),
-            ),
-
-            // Status column (in game + submitted status)
-            Expanded(
-              flex: 2,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Show submission status icon
-                  Icon(
-                    player.submitted
-                        ? Icons.check_circle
-                        : Icons.hourglass_empty,
-                    color: player.submitted ? Colors.green : Colors.orange,
-                    size: 20,
-                  ),
-                ],
               ),
             ),
           ],
@@ -291,14 +321,6 @@ class _ImprovedPlayerListState extends ConsumerState<ImprovedPlayerList> {
           return _sortOrder == SortOrder.ascending ? comparison : -comparison;
         });
         break;
-      case SortField.status:
-        players.sort((a, b) {
-          // Sort by submission status
-          final comparison =
-              a.submitted == b.submitted ? 0 : (a.submitted ? -1 : 1);
-          return _sortOrder == SortOrder.ascending ? comparison : -comparison;
-        });
-        break;
     }
 
     return players;
@@ -310,8 +332,6 @@ class _ImprovedPlayerListState extends ConsumerState<ImprovedPlayerList> {
         return 'Nom';
       case SortField.points:
         return 'Points';
-      case SortField.status:
-        return 'Statut';
     }
   }
 }

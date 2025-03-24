@@ -78,43 +78,47 @@ class QuestionAnswerDisplay extends ConsumerWidget {
     }
 
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 36,
-            color: colorScheme.onPrimary.withOpacity(0.7),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            message,
-            style: TextStyle(
-              fontSize: 14,
-              color: colorScheme.onPrimary,
-              fontWeight: FontWeight.w500,
+      child: SingleChildScrollView(
+        // Add ScrollView to handle overflow
+        padding: EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min, // Keep this to minimize height
+          children: [
+            Icon(
+              icon,
+              size: 30, // Slightly smaller icon
+              color: colorScheme.onPrimary.withOpacity(0.7),
             ),
-            textAlign: TextAlign.center,
-          ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: TextStyle(
+                fontSize: 14,
+                color: colorScheme.onPrimary,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
 
-          // Show additional status info for QRL
-          if (state.currentQuestion.type == 'QRL' &&
-              state.pointsAfterCorrection.isNotEmpty &&
-              (state.gameStatus == GameStatus.CorrectionFinished ||
-                  state.gameStatus == GameStatus.WaitingForNextQuestion ||
-                  state.gameStatus == GameStatus.GameFinished))
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(
-                '${state.pointsAfterCorrection.length} réponses ont été corrigées',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: colorScheme.onPrimary.withOpacity(0.8),
+            // Show additional status info for QRL, with compact spacing
+            if (state.currentQuestion.type == 'QRL' &&
+                state.pointsAfterCorrection.isNotEmpty &&
+                (state.gameStatus == GameStatus.CorrectionFinished ||
+                    state.gameStatus == GameStatus.WaitingForNextQuestion ||
+                    state.gameStatus == GameStatus.GameFinished))
+              Padding(
+                padding: const EdgeInsets.only(top: 6), // Smaller padding
+                child: Text(
+                  '${state.pointsAfterCorrection.length} réponses ont été corrigées',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: colorScheme.onPrimary.withOpacity(0.8),
+                  ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

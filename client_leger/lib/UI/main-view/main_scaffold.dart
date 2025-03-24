@@ -314,18 +314,30 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
                   ),
 
                   // Animated sidebar
+                  // Replace the AnimatedContainer in your MainScaffold with this:
                   AnimatedContainer(
                     duration: Duration(milliseconds: 300),
                     width: _isSidebarVisible ? sidebarWidth : 0,
                     curve: Curves.easeInOut,
                     child: _isSidebarVisible
-                        ? _currentSidebar == SidebarContent.chat
-                            ? SideBar(user: user)
-                            : FriendSidebar(
-                                user: user,
-                                onClose: () =>
-                                    _toggleSidebar(SidebarContent.chat),
-                              )
+                        ? LayoutBuilder(
+                            builder: (context, constraints) {
+                              // Only show sidebar if there's enough width
+                              if (constraints.maxWidth < 100) {
+                                // Threshold width for rendering
+                                return Container(color: colorScheme.primary);
+                              }
+
+                              // Render the appropriate sidebar
+                              return _currentSidebar == SidebarContent.chat
+                                  ? SideBar(user: user)
+                                  : FriendSidebar(
+                                      user: user,
+                                      onClose: () =>
+                                          _toggleSidebar(SidebarContent.chat),
+                                    );
+                            },
+                          )
                         : null,
                   ),
                 ],

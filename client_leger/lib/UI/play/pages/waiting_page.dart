@@ -53,7 +53,7 @@ class WaitingPage extends ConsumerWidget {
         }
       },
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         body: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -69,57 +69,59 @@ class WaitingPage extends ConsumerWidget {
           width: double.infinity,
           height: double.infinity,
           child: SafeArea(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const SizedBox(height: 25),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 25),
 
-                // Room Code at the top (if organizer)
-                if (socketManager.isOrganizer && waitingState.gameTitle.isEmpty)
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary.withValues(alpha: 0.8),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: colorScheme.tertiary.withValues(alpha: 0.5),
-                        width: 2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
+                  // Room Code at the top (if organizer)
+                  if (socketManager.isOrganizer &&
+                      waitingState.gameTitle.isEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
                           color: colorScheme.tertiary.withValues(alpha: 0.5),
-                          blurRadius: 6,
-                          spreadRadius: 1,
-                          offset: Offset(0, 1),
+                          width: 2,
                         ),
-                      ],
-                    ),
-                    child: Text(
-                      socketManager.roomId ?? "0000",
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onPrimary,
-                        letterSpacing: 4,
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.tertiary.withValues(alpha: 0.5),
+                            blurRadius: 6,
+                            spreadRadius: 1,
+                            offset: Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        socketManager.roomId ?? "0000",
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onPrimary,
+                          letterSpacing: 4,
+                        ),
                       ),
                     ),
+
+                  const SizedBox(height: 10),
+
+                  // Players counter as animated title
+                  const AnimatedTitleWidget(
+                    title: "JOUEURS",
+                    fontSize: 40,
                   ),
 
-                const SizedBox(height: 10),
+                  const SizedBox(height: 20),
 
-                // Players counter as animated title
-                const AnimatedTitleWidget(
-                  title: "JOUEURS",
-                  fontSize: 40,
-                ),
-
-                const SizedBox(height: 20),
-
-                // Player List Container
-                Expanded(
-                  child: Container(
+                  // Player List Container - Changed from Expanded to fixed-height Container
+                  Container(
                     width: MediaQuery.of(context).size.width * 0.55,
+                    height: 250,
                     constraints: const BoxConstraints(maxHeight: 350),
                     margin: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
@@ -186,149 +188,150 @@ class WaitingPage extends ConsumerWidget {
                                 },
                               ),
                   ),
-                ),
 
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                Column(
-                  children: [
-                    Center(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 0.40,
-                        margin: const EdgeInsets.symmetric(vertical: 5),
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 10),
-                        decoration: BoxDecoration(
-                          color: colorScheme.primary.withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                              color:
-                                  colorScheme.tertiary.withValues(alpha: 0.7),
-                              width: 3),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Lock status text first
-                            if (socketManager.isOrganizer)
-                              Text(
-                                waitingState.gameLocked
-                                    ? "La partie est verrouillée"
-                                    : "Il faut verrouiller la partie et avoir au moins 1 joueur pour commencer",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: colorScheme.onPrimary,
-                                ),
-                                textAlign: TextAlign.center,
-                              )
-                            else
-                              Text(
-                                waitingState.gameLocked
-                                    ? "La partie est verrouillée"
-                                    : "En attente de l'organisateur pour démarrer la partie",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: colorScheme.onPrimary,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-
-                            const SizedBox(height: 16),
-                            if (socketManager.isOrganizer &&
-                                waitingState.gameTitle.isEmpty)
-                              // Toggle lock and start button in a row
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  // Start game button
-
-                                  ElevatedButton(
-                                    onPressed: canStartGame
-                                        ? () {
-                                            ref
-                                                .read(waitingPageProvider
-                                                    .notifier)
-                                                .startGameCountdown(5);
-                                          }
-                                        : null,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: colorScheme.primary
-                                          .withValues(alpha: 0.9),
-                                      foregroundColor: colorScheme.onPrimary,
-                                      disabledBackgroundColor: colorScheme
-                                          .primary
-                                          .withValues(alpha: 0.4),
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 12, horizontal: 16),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(40),
-                                        side: canStartGame
-                                            ? BorderSide(
-                                                color: colorScheme.tertiary,
-                                                width: 2,
-                                              )
-                                            : BorderSide.none,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      "Commencer la partie",
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: canStartGame
-                                              ? colorScheme.onPrimary
-                                              : colorScheme.onPrimary
-                                                  .withValues(alpha: 0.6)),
-                                    ),
+                  Column(
+                    children: [
+                      Center(
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * 0.40,
+                          margin: const EdgeInsets.symmetric(vertical: 5),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 10),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withValues(alpha: 0.4),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                                color:
+                                    colorScheme.tertiary.withValues(alpha: 0.7),
+                                width: 3),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Lock status text first
+                              if (socketManager.isOrganizer)
+                                Text(
+                                  waitingState.gameLocked
+                                      ? "La partie est verrouillée"
+                                      : "Il faut verrouiller la partie et avoir au moins 1 joueur pour commencer",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: colorScheme.onPrimary,
                                   ),
-                                  const SizedBox(width: 12),
+                                  textAlign: TextAlign.center,
+                                )
+                              else
+                                Text(
+                                  waitingState.gameLocked
+                                      ? "La partie est verrouillée"
+                                      : "En attente de l'organisateur pour démarrer la partie",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: colorScheme.onPrimary,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
 
-                                  // Toggle lock icon
-                                  GestureDetector(
-                                    onTap: () {
-                                      ref
-                                          .read(waitingPageProvider.notifier)
-                                          .toggleGameLock();
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.all(10),
-                                      decoration: BoxDecoration(
-                                        color: colorScheme.primary
+                              const SizedBox(height: 16),
+                              if (socketManager.isOrganizer &&
+                                  waitingState.gameTitle.isEmpty)
+                                // Toggle lock and start button in a row
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    // Start game button
+
+                                    ElevatedButton(
+                                      onPressed: canStartGame
+                                          ? () {
+                                              ref
+                                                  .read(waitingPageProvider
+                                                      .notifier)
+                                                  .startGameCountdown(5);
+                                            }
+                                          : null,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: colorScheme.primary
                                             .withValues(alpha: 0.9),
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: colorScheme.tertiary,
-                                          width: 2,
+                                        foregroundColor: colorScheme.onPrimary,
+                                        disabledBackgroundColor: colorScheme
+                                            .primary
+                                            .withValues(alpha: 0.4),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 12, horizontal: 16),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(40),
+                                          side: canStartGame
+                                              ? BorderSide(
+                                                  color: colorScheme.tertiary,
+                                                  width: 2,
+                                                )
+                                              : BorderSide.none,
                                         ),
                                       ),
-                                      child: Icon(
-                                        waitingState.gameLocked
-                                            ? Icons.lock
-                                            : Icons.lock_open,
-                                        size: 22,
-                                        color: colorScheme.onPrimary,
+                                      child: Text(
+                                        "Commencer la partie",
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: canStartGame
+                                                ? colorScheme.onPrimary
+                                                : colorScheme.onPrimary
+                                                    .withValues(alpha: 0.6)),
                                       ),
                                     ),
-                                  )
-                                ],
-                              ),
-                          ],
+                                    const SizedBox(width: 12),
+
+                                    // Toggle lock icon
+                                    GestureDetector(
+                                      onTap: () {
+                                        ref
+                                            .read(waitingPageProvider.notifier)
+                                            .toggleGameLock();
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.all(10),
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.primary
+                                              .withValues(alpha: 0.9),
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: colorScheme.tertiary,
+                                            width: 2,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          waitingState.gameLocked
+                                              ? Icons.lock
+                                              : Icons.lock_open,
+                                          size: 22,
+                                          color: colorScheme.onPrimary,
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
 
-                    // Quit button in an Align to position it at the right
-                    LeaveGameButton(
-                      text: "Quitter",
-                      onPressed: () {
-                        requestLeaveWaitingPage(context, ref);
-                      },
-                      alignRight: true,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-              ],
+                      // Quit button in an Align to position it at the right
+                      LeaveGameButton(
+                        text: "Quitter",
+                        onPressed: () {
+                          requestLeaveWaitingPage(context, ref);
+                        },
+                        alignRight: true,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
             ),
           ),
         ),
