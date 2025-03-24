@@ -4,7 +4,7 @@ import 'package:client_leger/utilities/logger.dart';
 class DailyFree {
   final LootBoxContainer lootbox;
   final bool canClaim;
-  final double hoursLeft;
+  final num hoursLeft;
   final double minutesLeft;
 
   DailyFree({
@@ -18,10 +18,10 @@ class DailyFree {
     AppLogger.i("DailyFree.fromJson: $json");
     return DailyFree(
       lootbox: LootBoxContainer.fromJson(
-        json['lootbox'] ,
+        json['lootbox'],
       ),
       canClaim: json['canClaim'] as bool? ?? false,
-      hoursLeft: (json['hoursLeft'] as num?)?.toDouble() ?? 0.0,
+      hoursLeft: json['hoursLeft'] as num,
       minutesLeft: (json['minutesLeft'] as num?)?.toDouble() ?? 0.0,
     );
   }

@@ -9,6 +9,7 @@ import { CoinFlipService } from '@app/services/luck-services/coin-flip.service';
 export class CoinFlipPageComponent {
     constructor(private coinFlipService: CoinFlipService) {
         this.coinFlipService.getState();
+        this.coinFlipService.initializeEventListeners();
     }
 
     get state() {
