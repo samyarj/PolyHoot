@@ -109,13 +109,14 @@ class FirebaseChatService {
         if (newMessages.isEmpty) return [];
 
         // Fetch user details for unique UIDs
-        final users = await _fetchUserDetails(userIds.toList());
+        final users = await fetchUserDetails(userIds.toList());
 
         // Attach user details to messages
         for (ChatMessage msg in newMessages) {
           msg.username = users[msg.uid]?.username ?? 'Unknown';
           msg.avatar =
               users[msg.uid]?.avatarEquipped ?? 'assets/default-avatar.png';
+          msg.border = users[msg.uid]?.borderEquipped;
         }
 
         newMessages.sort((ChatMessage a, ChatMessage b) =>
@@ -131,18 +132,18 @@ class FirebaseChatService {
     }
   }
 
-  Future<Map<String, user_model.User>> _fetchUserDetails(
+  Future<Map<String, user_model.PartialUser>> fetchUserDetails(
       List<String> userIds) async {
     AppLogger.d("In fetchUserDetails");
 
     try {
-      final userDetails = <String, user_model.User>{};
+      final userDetails = <String, user_model.PartialUser>{};
 
       final userFetches = userIds.map(
         (uid) async {
           final userDoc = await _usersCollection.doc(uid).get();
           if (userDoc.exists) {
-            userDetails[uid] = user_model.User.fromJson(
+            userDetails[uid] = user_model.PartialUser.fromJson(
                 userDoc.data() as Map<String, dynamic>);
           }
         },
@@ -180,13 +181,14 @@ class FirebaseChatService {
 
       final userIds = olderMessages.map((msg) => msg.uid).toSet();
 
-      final users = await _fetchUserDetails(userIds.toList());
+      final users = await fetchUserDetails(userIds.toList());
 
       // Attach user details to messages
       for (ChatMessage msg in olderMessages) {
         msg.username = users[msg.uid]?.username ?? 'Unknown';
         msg.avatar =
             users[msg.uid]?.avatarEquipped ?? 'assets/default-avatar.png';
+        msg.border = users[msg.uid]?.borderEquipped;
       }
 
       olderMessages.sort(

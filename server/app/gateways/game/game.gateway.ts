@@ -158,7 +158,7 @@ export class GameGateway {
     async handleJoinGame(@ConnectedSocket() client: AuthenticatedSocket, @MessageBody() data: { gameId: string; playerName: string }) {
         const { gameId, playerName } = data;
         const user: User = await this.userService.getUserByUid(client.user.uid);
-        const canJoinGame = this.gameManager.joinGame(gameId, playerName, client, user);
+        const canJoinGame = this.gameManager.joinGame(gameId, user.username, client, user);
         const game = this.gameManager.getGameByRoomId(gameId);
         if (canJoinGame) {
             const playersInfo = game.players.map((player) => ({

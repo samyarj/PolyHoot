@@ -1,13 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/user.dart' as user_model;
 import 'package:client_leger/utilities/logger.dart';
-import 'package:client_leger/utilities/socket_events.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -25,8 +23,28 @@ ValueNotifier<bool> isLoggedIn = ValueNotifier<bool>(false);
 
 class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
   StreamSubscription<DocumentSnapshot>? _userDocSubscription;
+  StreamSubscription<User?>? _tokenSubscription;
+  String? currentToken;
+
   AuthNotifier() : super(const AsyncValue.loading()) {
     fetchUser();
+  }
+
+  void listenToTokenChanges() {
+    _tokenSubscription?.cancel();
+    AppLogger.w("Declaring the token changes listener...");
+    _tokenSubscription =
+        FirebaseAuth.instance.idTokenChanges().listen((User? user) async {
+      if (user != null) {
+        // When the user is signed in or the token is refreshed
+        final newToken = await user.getIdToken();
+        currentToken = newToken;
+        AppLogger.w(
+            "current token has expired or user just signed in, will call initializeSocketConnection");
+        WebSocketManager.instance
+            .initializeSocketConnection(currentToken, user.uid);
+      }
+    });
   }
 
   // Fetch user from API and setup listener
@@ -48,12 +66,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
         throw Exception("Cet utilisateur est déjà connecté.");
       }
 
-      final idToken = await firebaseUser.getIdToken();
-
-      WebSocketManager.instance.initializeSocketConnection(idToken);
-
-      WebSocketManager.instance.webSocketSender(
-          ConnectEvents.IdentifyClient.value, firebaseUser.uid);
+      listenToTokenChanges(); // it will call  connect socket
 
       // Set up real-time listener for user document
       setupUserDocListener(firebaseUser.uid);
@@ -115,11 +128,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
         isLoggedIn.value = true;
         WebSocketManager.instance.playerName = user.username;
         if (userCredential.user != null) {
-          WebSocketManager.instance.initializeSocketConnection(idToken);
-
-          WebSocketManager.instance.webSocketSender(
-              "identifyMobileClient", userCredential.user!.uid);
-
+          listenToTokenChanges(); // it will call  connect socket
           setupUserDocListener(userCredential.user!.uid);
         }
       } else {
@@ -143,9 +152,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
         email: email,
         password: password,
       );
-
-      final isOnline = await auth_service.isUserOnline(email);
-      if (isOnline) throw Exception("Cet utilisateur est déjà connecté.");
 
       await fetchUser();
       isLoggedIn.value = true;
@@ -182,12 +188,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
     state = const AsyncValue.loading();
     try {
       AppLogger.d("Signing in with Google...");
-      final userCredential =
-          await auth_service.signInWithGoogle(isLogin: isLogin);
 
-      final isOnline =
-          await auth_service.isUserOnline(userCredential.user!.email!);
-      if (isOnline) throw Exception("Vous êtes déjà connecté ailleurs.");
+      await auth_service.signInWithGoogle(isLogin: isLogin);
 
       await fetchUser();
       isLoggedIn.value = true;
@@ -252,6 +254,9 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       // Cancel the Firestore listener first
       _userDocSubscription?.cancel();
       _userDocSubscription = null;
+      _tokenSubscription?.cancel();
+      _tokenSubscription = null;
+      currentToken = null;
 
       final currentUser = FirebaseAuth.instance.currentUser;
 
@@ -274,7 +279,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
 
       // Update state
       state = const AsyncValue.data(null);
-      WebSocketManager.instance.playerName = null;
+      WebSocketManager.instance.disconnectFromSocket();
       isLoggedIn.value = false;
     } catch (e, stack) {
       AppLogger.e("Logout error: $e");
@@ -287,7 +292,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       }
 
       state = const AsyncValue.data(null);
-      WebSocketManager.instance.playerName = null;
+      WebSocketManager.instance.disconnectFromSocket();
       isLoggedIn.value = false;
 
       throw Exception(getCustomError(e));
