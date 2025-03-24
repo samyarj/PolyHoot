@@ -31,7 +31,7 @@ class _ImprovedPlayerListState extends ConsumerState<ImprovedPlayerList> {
       children: [
         // Sorting controls (20% height)
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -72,7 +72,7 @@ class _ImprovedPlayerListState extends ConsumerState<ImprovedPlayerList> {
                     icon: Icon(
                       Icons.arrow_upward,
                       color: _sortOrder == SortOrder.ascending
-                          ? colorScheme.tertiary // Highlighted when active
+                          ? colorScheme.tertiary
                           : colorScheme.onPrimary.withOpacity(0.6),
                       size: 20,
                     ),
@@ -83,8 +83,7 @@ class _ImprovedPlayerListState extends ConsumerState<ImprovedPlayerList> {
                     },
                     tooltip: 'Croissant',
                     padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(
-                        minWidth: 36, minHeight: 36), // Smaller buttons
+                    constraints: BoxConstraints(minWidth: 36, minHeight: 36),
                   ),
 
                   // Descending button
@@ -92,7 +91,7 @@ class _ImprovedPlayerListState extends ConsumerState<ImprovedPlayerList> {
                     icon: Icon(
                       Icons.arrow_downward,
                       color: _sortOrder == SortOrder.descending
-                          ? colorScheme.tertiary // Highlighted when active
+                          ? colorScheme.tertiary
                           : colorScheme.onPrimary.withOpacity(0.6),
                       size: 20,
                     ),
@@ -103,8 +102,7 @@ class _ImprovedPlayerListState extends ConsumerState<ImprovedPlayerList> {
                     },
                     tooltip: 'Décroissant',
                     padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(
-                        minWidth: 36, minHeight: 36), // Smaller buttons
+                    constraints: BoxConstraints(minWidth: 36, minHeight: 36),
                   ),
                 ],
               ),
@@ -114,7 +112,7 @@ class _ImprovedPlayerListState extends ConsumerState<ImprovedPlayerList> {
 
         // List headers
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
           child: Row(
             children: [
               // Avatar space

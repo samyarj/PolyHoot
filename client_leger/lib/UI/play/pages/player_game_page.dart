@@ -59,6 +59,7 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           shouldDisconnect = false;
           resultPlayerList = playerGameNotifier.getResultPlayerList();
+          _socketManager.isPlaying = false;
           GoRouter.of(context).go('${Paths.play}/${Paths.resultsView}',
               extra: resultPlayerList);
         });

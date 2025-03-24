@@ -83,10 +83,10 @@ class QREAnswerDisplay extends StatelessWidget {
                   children: [
                     _buildRangeItem(
                         'Min', '${qreAttributes.minBound}', colorScheme),
-                    _buildRangeItem(
-                        'Max', '${qreAttributes.maxBound}', colorScheme),
                     _buildRangeItem('Tolérance', '±${qreAttributes.tolerance}',
                         colorScheme),
+                    _buildRangeItem(
+                        'Max', '${qreAttributes.maxBound}', colorScheme),
                   ],
                 ),
               ),

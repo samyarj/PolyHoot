@@ -30,6 +30,7 @@ class OrganizerGamePage extends ConsumerWidget {
       if (next.shouldNavigateToResults) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           final resultPlayerList = notifier.getResultPlayerList();
+          WebSocketManager.instance.isPlaying = false;
           context.go('${Paths.play}/${Paths.resultsView}',
               extra: resultPlayerList);
         });
