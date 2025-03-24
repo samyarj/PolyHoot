@@ -14,53 +14,56 @@ class ImprovedGameArea extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(organizerProvider.notifier);
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          // First row: Question section (points, question text, timer)
-          ImprovedQuestionSection(),
-          const SizedBox(height: 16),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            // First row: Question section (points, question text, timer)
+            ImprovedQuestionSection(),
+            const SizedBox(height: 16),
 
-          // Second row: Main content area with two panels side by side
-          Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Left panel: Player list (40% width)
-                Expanded(
-                  flex: 45,
-                  child: PlayerSection(),
-                ),
-                const SizedBox(width: 16),
+            // Second row: Main content area with two panels side by side
+            Container(
+              height: 300, // Reduced from 400 to match your screenshot better
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Left panel: Player list (40% width)
+                  Expanded(
+                    flex: 45,
+                    child: PlayerSection(),
+                  ),
+                  const SizedBox(width: 16),
 
-                // Right panel: Question content and organizer controls (60% width)
-                Expanded(
-                  flex: 55,
-                  child: QuestionContentSection(),
-                ),
-              ],
+                  // Right panel: Question content and organizer controls (60% width)
+                  Expanded(
+                    flex: 55,
+                    child: QuestionContentSection(),
+                  ),
+                ],
+              ),
             ),
-          ),
 
-          // Third row: Leave game button
-          const SizedBox(height: 16),
-          LeaveGameButton(
-            text: 'Abandonner',
-            onPressed: () async {
-              final shouldAbandon =
-                  await _showAbandonConfirmationDialog(context);
-              if (shouldAbandon) {
-                notifier.abandonGame();
-                if (context.mounted) {
-                  Navigator.of(context).pop();
+            // Third row: Leave game button
+            const SizedBox(height: 16),
+            LeaveGameButton(
+              text: 'Abandonner',
+              onPressed: () async {
+                final shouldAbandon =
+                    await _showAbandonConfirmationDialog(context);
+                if (shouldAbandon) {
+                  notifier.abandonGame();
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
                 }
-              }
-            },
-            fontSize: 18,
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-          ),
-        ],
+              },
+              fontSize: 18,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            ),
+          ],
+        ),
       ),
     );
   }
