@@ -233,6 +233,9 @@ export class Game {
     }
 
     updatePointsQRL(data: { pointsTotal: { playerName: string; points: number }[] /* answers: number[] */ }) {
+        console.log("data", data);
+        console.log("pointsTotal", data.pointsTotal);
+        console.log("list length is ", data.pointsTotal.length);
         data.pointsTotal.forEach((dataPlayer) => {
             const client = this.players.find((player) => player.name === dataPlayer.playerName);
             client.socket.emit(GameEvents.PlayerPointsUpdate, { points: dataPlayer.points, isFirst: false, exactAnswer: false });

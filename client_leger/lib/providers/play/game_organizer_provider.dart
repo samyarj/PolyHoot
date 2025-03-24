@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/classes/sound_player.dart';
@@ -205,7 +206,7 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
     );
 
     _socketManager.webSocketSender(GameEvents.CorrectionFinished.value, {
-      'pointsTotal': state.pointsAfterCorrection,
+      'pointsTotal': jsonEncode(state.pointsAfterCorrection),
     });
 
     if (state.gameInfo.currentQuestionIndex + 1 >= state.questionsLength) {
@@ -233,7 +234,7 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
       if (data is Map<String, dynamic>) {
         final answer = AnswerQRL(
           playerName: data['playerName'],
-          playerAnswer: data['playerAnswer'],
+          playerAnswer: data['playerAnswer'] ?? '',
         );
 
         final updatedAnswers = List<AnswerQRL>.from(state.answersQRL)
