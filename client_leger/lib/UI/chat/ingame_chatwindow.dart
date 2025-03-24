@@ -232,7 +232,7 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                                               message.avatar,
                                                           bannerUrl:
                                                               message.border,
-                                                          size: 60,
+                                                          size: 50,
                                                           avatarFit:
                                                               BoxFit.cover,
                                                         ),

@@ -313,7 +313,7 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                                   .avatar,
                                                               bannerUrl: message
                                                                   .border,
-                                                              size: 60,
+                                                              size: 50,
                                                               avatarFit:
                                                                   BoxFit.cover,
                                                             ),

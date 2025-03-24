@@ -63,89 +63,95 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
         ),
       ),
       padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 64),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AnimatedTitleWidget(
-            title: "PODIUM",
-            fontSize: 40,
-          ),
-          SizedBox(height: 32),
-          Container(
-            decoration: BoxDecoration(
-              color:
-                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.55),
-              borderRadius: BorderRadius.circular(30),
-              border: Border.all(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedTitleWidget(
+              title: "PODIUM",
+              fontSize: 40,
+            ),
+            SizedBox(height: 32),
+            Container(
+              decoration: BoxDecoration(
                 color: Theme.of(context)
                     .colorScheme
-                    .tertiary
-                    .withValues(alpha: 0.3), // Border color
-                width: 2, // Border width
-              ),
-              boxShadow: [
-                BoxShadow(
+                    .primary
+                    .withValues(alpha: 0.55),
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(
                   color: Theme.of(context)
                       .colorScheme
                       .tertiary
-                      .withValues(alpha: 0.3),
-                  spreadRadius: 0,
-                  blurRadius: 10,
+                      .withValues(alpha: 0.3), // Border color
+                  width: 2, // Border width
                 ),
-              ],
-            ),
-            height: 450,
-            padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32),
-            child: ListView.separated(
-              separatorBuilder: (context, index) => SizedBox(
-                height: 16,
+                boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .tertiary
+                        .withValues(alpha: 0.3),
+                    spreadRadius: 0,
+                    blurRadius: 10,
+                  ),
+                ],
               ),
-              itemCount: widget.playerList.length,
-              itemBuilder: (context, index) {
-                final player = widget.playerList[index];
-                return ResultPlayerInfo(
-                  player: player,
-                  maxPoints: maxPoints,
-                );
-              },
-            ),
-          ),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.of(context).pop();
-              },
-              child: Container(
-                margin: const EdgeInsets.only(top: 8),
-                width: 100,
-                height: 50, // Fixed height for medium button
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 8), // Padding for content
-                decoration: BoxDecoration(
-                  color:
-                      Theme.of(context).colorScheme.primary, // Background color
-                  border: Border.all(
-                    color:
-                        Theme.of(context).colorScheme.tertiary, // Border color
-                    width: 3,
-                  ),
-                  borderRadius: BorderRadius.circular(50), // Rounded corners
+              height: 450,
+              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32),
+              child: ListView.separated(
+                separatorBuilder: (context, index) => SizedBox(
+                  height: 16,
                 ),
-                alignment: Alignment.center,
-                child: Text(
-                  "Quitter", // Button text
-                  style: TextStyle(
-                    fontSize: 16,
-                    color:
-                        Theme.of(context).colorScheme.onPrimary, // Text color
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                itemCount: widget.playerList.length,
+                itemBuilder: (context, index) {
+                  final player = widget.playerList[index];
+                  return ResultPlayerInfo(
+                    player: player,
+                    maxPoints: maxPoints,
+                  );
+                },
               ),
             ),
-          ),
-        ],
+            Align(
+              alignment: Alignment.bottomRight,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(top: 8),
+                  width: 100,
+                  height: 50, // Fixed height for medium button
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8), // Padding for content
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary, // Background color
+                    border: Border.all(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .tertiary, // Border color
+                      width: 3,
+                    ),
+                    borderRadius: BorderRadius.circular(50), // Rounded corners
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    "Quitter", // Button text
+                    style: TextStyle(
+                      fontSize: 16,
+                      color:
+                          Theme.of(context).colorScheme.onPrimary, // Text color
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
