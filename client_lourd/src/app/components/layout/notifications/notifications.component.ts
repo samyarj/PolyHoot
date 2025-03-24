@@ -2,7 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Firestore, doc, onSnapshot } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { PollPlayerPopInComponent } from '@app/components/general-elements/poll-player-pop-in/poll-player-pop-in.component';
+import { AppRoute } from '@app/constants/enum-class';
 import { PublishedPoll } from '@app/interfaces/poll';
 import { User } from '@app/interfaces/user'; // Assurez-vous d'importer l'interface User
 import { AuthService } from '@app/services/auth/auth.service';
@@ -31,6 +33,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         private historyPublishedPollService: HistoryPublishedPollService,
         private authService: AuthService,
         private firestore: Firestore, // Injectez Firestore
+        private router: Router,
     ) {
         this.user = this.authService.getUser();
     }
@@ -118,6 +121,9 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                 this.toastr.warning('Complétion du sondage annulée');
             }
         });
+    }
+    goToStats(){
+        this.router.navigate([AppRoute.POLLSHISTORY]);
     }
 
     private updateUserPollsAnswered(id: string | undefined) {
