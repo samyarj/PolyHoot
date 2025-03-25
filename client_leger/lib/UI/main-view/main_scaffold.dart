@@ -2,7 +2,6 @@ import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/global/avatar_banner_widget.dart';
 import 'package:client_leger/UI/main-view/sidebar/sidebar.dart';
 import 'package:client_leger/UI/router/routes.dart';
-import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/svg-pics/svg_constants.dart';
 import 'package:client_leger/providers/user_provider.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
@@ -33,8 +32,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     });
 
     try {
-      WebSocketManager.instance.disconnectFromSocket();
-
       if (mounted) {
         isLoggedIn.value = false;
 

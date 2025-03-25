@@ -1,4 +1,5 @@
 import 'package:client_leger/UI/error/error_dialog.dart';
+import 'package:client_leger/UI/global/avatar_banner_widget.dart';
 import 'package:client_leger/backend-communication-services/chat/ingame_chat_service.dart';
 import 'package:client_leger/models/ingame_chat_messages.dart';
 import 'package:client_leger/providers/user_provider.dart';
@@ -22,8 +23,8 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
 
   @override
   void initState() {
-    _inGameChatManager
-        .setUsernameAndInitialize(ref.read(userProvider).value!.username);
+    final user = ref.read(userProvider).value!;
+    _inGameChatManager.setUserInfosAndInitialize(user.username, user.uid);
     super.initState();
   }
 
@@ -224,28 +225,49 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.start,
                                                   children: [
-                                                    Text(
-                                                      message.author,
-                                                      style: TextStyle(
-                                                          color: isUserMessage
-                                                              ? colorScheme
-                                                                  .onSecondary
-                                                              : colorScheme
-                                                                  .onSurface,
-                                                          fontSize: 18,
-                                                          fontWeight:
-                                                              FontWeight.bold),
+                                                    Row(
+                                                      children: [
+                                                        AvatarBannerWidget(
+                                                          avatarUrl:
+                                                              message.avatar,
+                                                          bannerUrl:
+                                                              message.border,
+                                                          size: 50,
+                                                          avatarFit:
+                                                              BoxFit.cover,
+                                                        ),
+                                                        SizedBox(width: 8),
+                                                        Text(
+                                                          message.author,
+                                                          style: TextStyle(
+                                                              color: isUserMessage
+                                                                  ? colorScheme
+                                                                      .onSecondary
+                                                                  : colorScheme
+                                                                      .onSurface,
+                                                              fontSize: 18,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        ),
+                                                      ],
                                                     ),
-                                                    Text(
-                                                      message.message,
-                                                      softWrap: true,
-                                                      style: TextStyle(
-                                                          color: isUserMessage
-                                                              ? colorScheme
-                                                                  .onSecondary
-                                                              : colorScheme
-                                                                  .onSurface,
-                                                          fontSize: 18),
+                                                    SizedBox(height: 8),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 8.0),
+                                                      child: Text(
+                                                        message.message,
+                                                        softWrap: true,
+                                                        style: TextStyle(
+                                                            color: isUserMessage
+                                                                ? colorScheme
+                                                                    .onSecondary
+                                                                : colorScheme
+                                                                    .onSurface,
+                                                            fontSize: 18),
+                                                      ),
                                                     ),
                                                     Align(
                                                       alignment:
