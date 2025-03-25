@@ -14,6 +14,78 @@ class FriendService {
   factory FriendService() => _instance;
   FriendService._internal();
 
+  // Send money to friend
+  Future<void> sendMoney(String friendUid, int amount) async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception("Aucun utilisateur authentifié trouvé");
+      }
+
+      // Get current user document
+      final currentUserQuery = await _firestore
+          .collection('users')
+          .where('uid', isEqualTo: currentUser.uid)
+          .get();
+
+      if (currentUserQuery.docs.isEmpty) {
+        throw Exception("Document utilisateur actuel non trouvé");
+      }
+
+      final currentUserDoc = currentUserQuery.docs.first;
+
+      // Get target user document
+      final targetUserQuery = await _firestore
+          .collection('users')
+          .where('uid', isEqualTo: friendUid)
+          .get();
+
+      if (targetUserQuery.docs.isEmpty) {
+        throw Exception("Utilisateur cible non trouvé");
+      }
+
+      final targetUserDoc = targetUserQuery.docs.first;
+
+      await _firestore.runTransaction((transaction) async {
+        // Get fresh data within transaction
+        final currentUserSnapshot =
+            await transaction.get(currentUserDoc.reference);
+        final targetUserSnapshot =
+            await transaction.get(targetUserDoc.reference);
+
+        if (!currentUserSnapshot.exists || !targetUserSnapshot.exists) {
+          throw Exception("Un ou plusieurs utilisateurs n'existent pas");
+        }
+
+        final currentUserData = currentUserSnapshot.data()!;
+        final targetUserData = targetUserSnapshot.data()!;
+
+        final currentUserCoins = currentUserData['coins'] as int? ?? 0;
+        final targetUserCoins = targetUserData['coins'] as int? ?? 0;
+
+        // Validate amount
+        if (amount <= 0) {
+          throw Exception("Le montant doit être positif");
+        }
+
+        // Check if user has enough coins
+        if (currentUserCoins < amount) {
+          throw Exception("Solde insuffisant");
+        }
+
+        // Update balances
+        transaction.update(
+            currentUserDoc.reference, {'coins': currentUserCoins - amount});
+
+        transaction.update(
+            targetUserDoc.reference, {'coins': targetUserCoins + amount});
+      });
+    } catch (e) {
+      AppLogger.e("Erreur lors de l'envoi d'argent: $e");
+      throw Exception(getCustomError(e));
+    }
+  }
+
   // Get friend requests for current user
   Stream<List<UserWithId>> getFriendRequests() {
     final currentUser = _auth.currentUser;
