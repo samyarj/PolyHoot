@@ -152,12 +152,12 @@ h2 {
 }
 
 #previous-messages::-webkit-scrollbar-thumb {
-    background: #488fd6;
+    background: var(--active-bg);
     border-radius: 12px;
 }
 
 #previous-messages::-webkit-scrollbar-track {
-    background: white;
+    background: var(--nav-bg);
     border-radius: 12px;
 }
 
