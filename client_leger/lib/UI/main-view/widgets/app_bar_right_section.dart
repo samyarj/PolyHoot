@@ -1,4 +1,5 @@
 import 'package:client_leger/UI/friend-system/friend-request-notification.dart';
+import 'package:client_leger/UI/friend-system/qr-code-widget.dart';
 import 'package:client_leger/UI/global/avatar_banner_widget.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/models/enums.dart';
@@ -71,43 +72,60 @@ class _AppBarRightSectionState extends State<AppBarRightSection> {
                         GoRouter.of(context).go(Paths.userStats);
                       } else if (value == 4) {
                         GoRouter.of(context).go(Paths.gamesLogs);
+                      } else if (value == 5) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => UserQRCodeDialog(user: user!),
+                        );
                       }
                     },
                     itemBuilder: (context) => [
                       PopupMenuItem<int>(
                         enabled: false,
-                        height: 80,
+                        height: 120,
                         padding: const EdgeInsets.symmetric(
-                            vertical: 8, horizontal: 16),
-                        child: SizedBox(
-                          width: 180,
+                            vertical: 8, horizontal: 0),
+                        child: Container(
+                          width: double.infinity,
+                          alignment: Alignment.center,
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              AvatarBannerWidget(
-                                avatarUrl: user?.avatarEquipped,
-                                bannerUrl: user?.borderEquipped,
-                                size: 68,
-                                avatarFit: BoxFit.cover,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                user?.username ?? 'Username',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: colorScheme.onSurface,
+                              Center(
+                                child: AvatarBannerWidget(
+                                  avatarUrl: user?.avatarEquipped,
+                                  bannerUrl: user?.borderEquipped,
+                                  size: 68,
+                                  avatarFit: BoxFit.cover,
                                 ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
                               ),
-                              Text(
-                                user?.email ?? 'email@example.com',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: colorScheme.onSurface.withOpacity(0.7),
+                              const SizedBox(height: 10),
+                              Container(
+                                width: double.infinity,
+                                alignment: Alignment.center,
+                                child: Text(
+                                  user?.username ?? 'Username',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.onSurface,
+                                    fontSize: 16,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
+                              ),
+                              const SizedBox(height: 4),
+                              Container(
+                                width: double.infinity,
+                                alignment: Alignment.center,
+                                child: Text(
+                                  user?.email ?? 'email@example.com',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color:
+                                        colorScheme.onSurface.withOpacity(0.7),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
                             ],
                           ),
@@ -125,34 +143,77 @@ class _AppBarRightSectionState extends State<AppBarRightSection> {
                       // Regular menu items
                       PopupMenuItem<int>(
                         value: 2,
-                        child: Text(
-                          'Modifier le profil',
-                          style: TextStyle(
-                              color: colorScheme.onSurface, fontSize: 16),
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit,
+                                color: colorScheme.tertiary, size: 20),
+                            SizedBox(width: 12),
+                            Text(
+                              'Modifier le profil',
+                              style: TextStyle(
+                                  color: colorScheme.onSurface, fontSize: 16),
+                            ),
+                          ],
                         ),
                       ),
                       PopupMenuItem<int>(
                         value: 3,
-                        child: Text(
-                          'Mes statistiques & Logs',
-                          style: TextStyle(
-                              color: colorScheme.onSurface, fontSize: 16),
+                        child: Row(
+                          children: [
+                            Icon(Icons.bar_chart,
+                                color: colorScheme.tertiary, size: 20),
+                            SizedBox(width: 12),
+                            Text(
+                              'Mes statistiques & Logs',
+                              style: TextStyle(
+                                  color: colorScheme.onSurface, fontSize: 16),
+                            ),
+                          ],
                         ),
                       ),
                       PopupMenuItem<int>(
                         value: 4,
-                        child: Text(
-                          'Historique des parties',
-                          style: TextStyle(
-                              color: colorScheme.onSurface, fontSize: 16),
+                        child: Row(
+                          children: [
+                            Icon(Icons.history,
+                                color: colorScheme.tertiary, size: 20),
+                            SizedBox(width: 12),
+                            Text(
+                              'Historique des parties',
+                              style: TextStyle(
+                                  color: colorScheme.onSurface, fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem<int>(
+                        value: 5,
+                        child: Row(
+                          children: [
+                            Icon(Icons.qr_code,
+                                color: colorScheme.tertiary, size: 20),
+                            SizedBox(width: 12),
+                            Text(
+                              'Afficher mon QR Code',
+                              style: TextStyle(
+                                  color: colorScheme.onSurface, fontSize: 16),
+                            ),
+                          ],
                         ),
                       ),
                       PopupMenuItem<int>(
                         value: 1,
-                        child: Text(
-                          'Déconnexion',
-                          style: TextStyle(
-                              color: colorScheme.onSurface, fontSize: 16),
+                        child: Row(
+                          children: [
+                            Icon(Icons.logout,
+                                color: colorScheme.error, size: 20),
+                            SizedBox(width: 12),
+                            Text(
+                              'Déconnexion',
+                              style: TextStyle(
+                                  color: colorScheme.error, fontSize: 16),
+                            ),
+                          ],
                         ),
                       ),
                     ],
