@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { collection, Firestore, onSnapshot } from '@angular/fire/firestore';
 import { PublishedPoll } from '@app/interfaces/poll';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
-import { catchError, Observable, Subject } from 'rxjs';
+import { catchError, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -11,7 +11,6 @@ import { environment } from 'src/environments/environment';
 })
 export class HistoryPublishedPollService {
     readonly baseUrl = `${environment.serverUrl}/published-polls`;
-    private deleteExpiredPollsTrigger = new Subject<void>();
     constructor(
         private firestore: Firestore,
         private http: HttpClient,
@@ -35,19 +34,7 @@ export class HistoryPublishedPollService {
         });
     }
     deleteAllExpiredPolls() {
-        console.log('called');
-        // return this.http.delete(`${this.baseUrl}/delete`).pipe(
-        //     tap(() => {
-        //         console.log('deleted');
-        //         this.deleteExpiredPollsTrigger.next();
-        //     }),
-        //     catchError(this.messageHandler.handleHttpError),
-        // );
-        return this.http.delete<PublishedPoll[]>(this.baseUrl).pipe(catchError(this.messageHandler.handleHttpError));
-    }
-
-    watchDeletedExpiredPolls(): Observable<void> {
-        return this.deleteExpiredPollsTrigger.asObservable();
+        return this.http.delete<PublishedPoll[]>(`${this.baseUrl}/delete`).pipe(catchError(this.messageHandler.handleHttpError));
     }
 
     getPublishedPollById(id: string): Observable<PublishedPoll> {

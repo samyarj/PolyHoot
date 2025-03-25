@@ -1,6 +1,6 @@
 <div class="publishedPoll-page-container">
     <div class="publishedPoll-page-content">
-        <div class="past-publishedPolls-container">
+        <div *ngIf="publishedPolls.length !== 0" class="past-publishedPolls-container">
             <div *ngFor="let publishedPoll of publishedPolls" class="past-publishedPoll" [ngClass]="{ active: publishedPoll === currentPoll }">
                 <div class="publishedPoll-info">
                     <div class="title">{{ publishedPoll.title }}</div>
@@ -8,6 +8,9 @@
                 </div>
                 <button *ngIf="publishedPoll !== currentPoll" class="custom-button-medium" (click)="show(publishedPoll)">Consulter</button>
             </div>
+        </div>
+        <div *ngIf="publishedPolls.length === 0" class="past-publishedPolls-container-empty">
+            <div>Aucun sondage dans l'historique.</div>
         </div>
         <div class="publishedPoll-big-container">
             <div *ngIf="currentPoll" class="publishedPoll-container">
@@ -76,9 +79,9 @@
             </div>
         </div>
         <button
-            (disabled)="(publishedPolls.length === 0)"
+            [disabled]="publishedPolls.length === 0 || this.wasClearHistoryClicked"
             class="custom-button-medium"
-            [ngClass]="{ 'custom-button-medium-disabled': publishedPolls.length === 0 }"
+            [ngClass]="{ 'custom-button-medium-disabled': publishedPolls.length === 0 || this.wasClearHistoryClicked }"
             (click)="deleteAllExpiredPolls()"
         >
             Supprimer l'historique des sondages

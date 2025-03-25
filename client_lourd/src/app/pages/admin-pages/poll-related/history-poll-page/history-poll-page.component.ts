@@ -26,7 +26,7 @@ export class HistoryPollPageComponent implements OnInit, OnDestroy {
         '#2E3A59', // dark indigo-blue
     ];
     math = Math;
-    currentPoll: PublishedPoll;
+    currentPoll: PublishedPoll | null = null;
     pieChartOptions: ChartConfiguration<'pie'>['options'] = {
         responsive: true,
         plugins: {
@@ -48,9 +48,10 @@ export class HistoryPollPageComponent implements OnInit, OnDestroy {
     };
 
     pieChartType: 'pie' = 'pie';
+
+    wasClearHistoryClicked: boolean = false;
     private routeSub: Subscription; // Nouvelle subscription pour les changements de route
     private publishedPollsSubscription: Subscription;
-    private deletedPollsSubscription: Subscription;
 
     constructor(
         private historyPublishedPollService: HistoryPublishedPollService,
@@ -67,16 +68,11 @@ export class HistoryPollPageComponent implements OnInit, OnDestroy {
             this.publishedPolls = publishedPolls.filter((poll) => poll.expired);
             this.initRouteListener();
         });
-
-        this.deletedPollsSubscription = this.historyPublishedPollService.watchDeletedExpiredPolls().subscribe(() => {
-            this.toastr.success("Supprimé l'historique des sondages expirés avec succès.");
-        });
     }
 
     ngOnDestroy(): void {
         // Se désabonner des observables
         if (this.publishedPollsSubscription) this.publishedPollsSubscription.unsubscribe();
-        if (this.deletedPollsSubscription) this.deletedPollsSubscription.unsubscribe();
         if (this.routeSub) this.routeSub.unsubscribe(); // N'oubliez pas de désabonner
     }
 
@@ -102,7 +98,7 @@ export class HistoryPollPageComponent implements OnInit, OnDestroy {
     }
 
     nextQuestion() {
-        if (this.currentQuestionIndex + 1 > this.currentPoll.questions.length - 1) return;
+        if (this.currentPoll && this.currentQuestionIndex + 1 > this.currentPoll.questions.length - 1) return;
         else {
             this.currentQuestionIndex++;
             this.showQuestion();
@@ -110,25 +106,34 @@ export class HistoryPollPageComponent implements OnInit, OnDestroy {
     }
 
     showQuestion() {
-        this.currentQuestion = this.currentPoll.questions[this.currentQuestionIndex];
-        if (this.currentQuestion.choices) {
-            this.labels = this.currentQuestion.choices.map((choice) => choice.text);
-            this.data = this.currentPoll.totalVotes[this.currentQuestionIndex];
-            this.pieChartData = {
-                labels: this.labels,
-                datasets: [
-                    {
-                        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-                        data: this.data,
-                        backgroundColor: this.backgroundColors,
-                    },
-                ],
-            };
-            console.log(this.data);
+        if (this.currentPoll) {
+            this.currentQuestion = this.currentPoll.questions[this.currentQuestionIndex];
+            if (this.currentQuestion.choices) {
+                this.labels = this.currentQuestion.choices.map((choice) => choice.text);
+                this.data = this.currentPoll.totalVotes[this.currentQuestionIndex];
+                this.pieChartData = {
+                    labels: this.labels,
+                    datasets: [
+                        {
+                            // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+                            data: this.data,
+                            backgroundColor: this.backgroundColors,
+                        },
+                    ],
+                };
+            }
         }
     }
     deleteAllExpiredPolls() {
-        this.historyPublishedPollService.deleteAllExpiredPolls();
+        if (!this.wasClearHistoryClicked) {
+            this.wasClearHistoryClicked = true;
+            this.historyPublishedPollService.deleteAllExpiredPolls().subscribe(() => {
+                this.toastr.success("Supprimé l'historique des sondages expirés avec succès.");
+                this.currentQuestion = null;
+                this.currentPoll = null;
+                this.wasClearHistoryClicked = false;
+            });
+        }
     }
     private updateUrl(pollId?: string): void {
         console.log("L'url il a changé, dans updateUrl");

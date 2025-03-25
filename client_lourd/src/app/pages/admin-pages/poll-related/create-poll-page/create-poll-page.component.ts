@@ -25,6 +25,7 @@ export class CreatePollPageComponent implements OnDestroy {
     submitPollButton: string = ButtonType.CREATE;
     submitQuestionButton: string = ButtonType.ADD;
     showButton: boolean = true;
+    isCreateButtonClicked: boolean = false;
     private pollObserver: Partial<Observer<Poll>> = {
         next: (poll: Poll) => {
             this.createPollService.poll = poll;
@@ -134,33 +135,37 @@ export class CreatePollPageComponent implements OnDestroy {
         return this.areQuestionChoicesTextValid() && this.validUniqueChoiceTexts() && !this.isQuestionTextEmpty();
     }
     submitPollEvent() {
-        if (this.poll.id) {
+        if (!this.isCreateButtonClicked) {
+            this.isCreateButtonClicked = true;
+            if (this.poll.id) {
+                this.createPollService
+                    .updatePoll(this.poll.id, this.poll)
+                    .pipe(
+                        tap(() => {
+                            console.log('✅ Sondage modifié, maintenant on redirige...');
+                            this.emptyPollAndRedirectCallback();
+                        }),
+                    )
+                    .subscribe(this.errorObserver);
+                return;
+            }
             this.createPollService
-                .updatePoll(this.poll.id, this.poll)
+                .createPoll(this.poll)
                 .pipe(
                     tap(() => {
-                        console.log('✅ Sondage modifié, maintenant on redirige...');
+                        console.log('✅ Sondage créé, maintenant on redirige...');
                         this.emptyPollAndRedirectCallback();
                     }),
                 )
                 .subscribe(this.errorObserver);
-            return;
         }
-        this.createPollService
-            .createPoll(this.poll)
-            .pipe(
-                tap(() => {
-                    console.log('✅ Sondage créé, maintenant on redirige...');
-                    this.emptyPollAndRedirectCallback();
-                }),
-            )
-            .subscribe(this.errorObserver);
     }
     resetAnswers() {
         this.createPollService.emptyPoll();
     }
     private emptyPollAndRedirectCallback() {
         this.resetAnswers();
+        this.isCreateButtonClicked = false;
         this.router.navigate([AppRoute.POLLS]);
     }
     private setMode(): void {

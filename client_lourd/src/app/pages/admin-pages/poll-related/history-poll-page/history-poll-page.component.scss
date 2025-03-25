@@ -124,6 +124,20 @@
             }
         }
 
+        .past-publishedPolls-container-empty {
+            position: relative;
+            background: color-mix(in srgb, var(--primary-color) 50%, transparent);
+            box-shadow: inset -5px 0 5px -5px var(--tertiary-color);
+            max-width: 35%;
+            width: 35%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--text-color);
+        }
+
         .publishedPoll-big-container {
             background: color-mix(in srgb, var(--primary-color) 50%, transparent);
             width: 65%;
