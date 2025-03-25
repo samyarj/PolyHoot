@@ -81,7 +81,7 @@
                 <div *ngIf="showFriendRequests" class="friend-requests-overlay">
                     <div class="friend-requests-content">
                         <div class="friend-requests-header">
-                            <h3>Demande d'ami</h3>
+                            <h3>Demandes d'ami</h3>
                             <button class="close-requests" (click)="toggleFriendRequests()">
                                 <i class="fa-solid fa-times"></i>
                             </button>
@@ -149,7 +149,7 @@
             <div class="friend-request">
                 <button class="friend-request-button" (click)="toggleFriendRequests()">
                     <li class="friend-request-icon">
-                        <span>Demande d'ami</span>
+                        <span>Demandes d'ami</span>
                     </li>
                     <li class="friend-request-number">
                         <span>{{ friendRequests.length || 0 }}</span>
@@ -192,18 +192,20 @@
         <div class="tab-content">
             <div class="tab-pane fade show active" id="tab1">
                 <h2>Canal de discussion global</h2>
-                <app-chat2
-                    [chatMessagesLoading]="globalChatMessagesLoading"
-                    [chatMessages]="globalChatMessages"
-                    (sendMessageToRoom)="handleSendMessage($event)"
-                    (loadOlderMessages)="loadOlderMessages()"
-                ></app-chat2>
+                <div class="app-chat2">
+                    <app-chat2
+                        [chatMessagesLoading]="globalChatMessagesLoading"
+                        [chatMessages]="globalChatMessages"
+                        (sendMessageToRoom)="handleSendMessage($event)"
+                        (loadOlderMessages)="loadOlderMessages()"
+                    ></app-chat2>
+                </div>
             </div>
             <div class="tab-pane fade" id="tab2">
                 <h2>Clavardage de partie</h2>
-                <ng-container>
+                <div class="app-chat2">
                     <app-chat></app-chat>
-                </ng-container>
+                </div>
             </div>
             <div class="tab-pane fade" id="tab3">
                 <h2>Canal : {{ selectedChannel }}</h2>
@@ -251,7 +253,7 @@
                         </div>
                     </div>
                     <div class="tab-pane fade" id="tab4-2">
-                        <h2>Canaux de discussion disponible</h2>
+                        <h2>Canaux de discussion disponibles</h2>
                         <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un canal" class="search-input" />
                         <div class="channel-list">
                             <div *ngIf="filteredChannels().length === 0" class="no-channels-message">
@@ -273,7 +275,14 @@
                 <div class="create-channel-form">
                     <form (submit)="createChannel()">
                         <input type="text" [(ngModel)]="newChannelName" name="newChannelName" placeholder="Nom du canal" required />
-                        <button type="submit">Créer</button>
+                        <button
+                            [disabled]="this.newChannelName === ''"
+                            [ngClass]="{ 'custom-button-disabled': this.newChannelName === '' }"
+                            type="submit"
+                            class="custom-button"
+                        >
+                            Créer
+                        </button>
                     </form>
                     <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
                 </div>

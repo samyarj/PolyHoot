@@ -1,37 +1,55 @@
-<!-- Chat Messages Container with Scroll Event -->
-<div #previousMessages id="previous-messages" (scroll)="onScroll()">
-    <!-- Loader when fetching messages -->
-    <div *ngIf="chatMessagesLoading" class="loading-container">
-        <div class="spinner-border text-primary" role="status"></div>
-        <div>Chat is loading...</div>
-    </div>
+<div class="main-wrapper">
+    <!-- Chat Messages Container with Scroll Event -->
+    <div #previousMessages id="previous-messages" (scroll)="onScroll()">
+        <!-- Loader when fetching messages -->
+        <div *ngIf="chatMessagesLoading" class="loading-container">
+            <div class="spinner-border text-primary" role="status"></div>
+            <div>Chat is loading...</div>
+        </div>
 
-    <!-- Chat Messages -->
-    <div
-        *ngFor="let chatmessage of chatMessages"
-        [ngClass]="{
-            systemMessage: chatmessage.username === 'System',
-            user: (user | async)?.uid === chatmessage.uid,
-            otherUser: (user | async)?.uid !== chatmessage.uid
-        }"
-        class="chat-message user otherUser"
-    >
-        <div class="chat-header">
-            <app-avatar-banner [avatarUrl]="chatmessage.avatar" [bannerUrl]="chatmessage.banner" class="chat-avatar"> </app-avatar-banner>
-            <span class="chat-username">{{ chatmessage.username }}</span>
-            <div *ngIf="(user | async)?.uid !== chatmessage.uid" class="report-button" (click)="reportUser(chatmessage.uid)" matTooltip="Signaler">
-                <i class="fa-solid fa-triangle-exclamation"></i>
+        <!-- Chat Messages -->
+        <div
+            *ngFor="let chatmessage of chatMessages"
+            [ngClass]="{
+                systemMessage: chatmessage.username === 'System',
+                user: (user | async)?.uid === chatmessage.uid,
+                otherUser: (user | async)?.uid !== chatmessage.uid
+            }"
+            class="chat-message user otherUser"
+        >
+            <div class="chat-header">
+                <app-avatar-banner [avatarUrl]="chatmessage.avatar" [bannerUrl]="chatmessage.banner" class="chat-avatar"> </app-avatar-banner>
+                <span class="chat-username">{{ chatmessage.username }}</span>
+                <div
+                    *ngIf="(user | async)?.uid !== chatmessage.uid"
+                    class="report-button"
+                    (click)="reportUser(chatmessage.uid)"
+                    matTooltip="Signaler"
+                    matTooltipClass="custom-tooltip"
+                >
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+            </div>
+            <div class="message">{{ chatmessage.message }}</div>
+            <div class="date-container">
+                <div class="time">{{ getFormattedDate(chatmessage) | date: 'HH:mm:ss' }}</div>
             </div>
         </div>
-        <div class="message">{{ chatmessage.message }}</div>
-        <div class="date-container">
-            <div class="time">{{ getFormattedDate(chatmessage) | date: 'HH:mm:ss' }}</div>
-        </div>
     </div>
-</div>
 
-<!-- Chat Input -->
-<div id="chat-message-input-div">
-    <textarea id="myTextInput" (keydown)="onKeyDown($event)" placeholder="Entrez votre message." [(ngModel)]="inputMessage"></textarea>
-    <button type="button" id="send-button" (click)="handleSendMessage()">Envoyer</button>
+    <!-- Chat Input -->
+    <div id="chat-message-input-div">
+        <textarea id="myTextInput" (keydown)="onKeyDown($event)" placeholder="Entrez votre message." [(ngModel)]="inputMessage"></textarea>
+        <button
+            type="button"
+            [disabled]="inputMessage === ''"
+            [ngClass]="{ 'custom-button-disabled': inputMessage === '' }"
+            class="custom-button"
+            id="send-button"
+            (click)="handleSendMessage()"
+        >
+            Envoyer
+        </button>
+    </div>
+    <span class="error" *ngIf="!isLengthInRange()"> Attention ! Limite de 200 caractères atteinte </span>
 </div>

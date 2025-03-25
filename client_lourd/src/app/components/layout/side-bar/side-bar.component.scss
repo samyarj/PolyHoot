@@ -104,8 +104,32 @@
     height: 70px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #ddd;
+    border: 2px solid var(--tertiary-color);
     transition: transform 0.2s ease;
+}
+
+.dropdown-menu {
+    border: 2px solid var(--tertiary-color);
+    background: color-mix(in srgb, var(--primary-color) 90%, transparent);
+    box-shadow: inset 0 0 5px var(--tertiary-color);
+    color: var(--text-color);
+
+    strong {
+        color: var(--text-color);
+    }
+
+    small {
+        color: var(--text-color) !important;
+    }
+
+    .dropdown-divider {
+        background: var(--tertiary-color);
+        color: var(--tertiary-color) !important;
+    }
+
+    .logout-container:hover {
+        text-shadow: 0 0 5px var(--tertiary-color);
+    }
 }
 
 .logout-container {
@@ -118,13 +142,14 @@
 //notification button
 .notification-container {
     padding: 20px;
+    transition: all 0.2s ease-in-out;
     button {
         background: none;
         border: none;
+        transition: all 0.2s ease-in-out;
         &:hover {
+            text-shadow: 0 0 5px var(--tertiary-color);
             transform: translateY(-2px);
-            border: var(--tertiary-color) 1px solid;
-            border-radius: 5%;
         }
     }
     i {
@@ -136,10 +161,12 @@
 
 // Social menu
 .social-menu {
-    padding-top: 25px;
+    padding-top: 15px;
     padding-left: 15px;
     padding-bottom: 15px;
     border-bottom: 1px solid var(--tertiary-color);
+    height: 13%;
+    width: 100%;
 }
 
 .social-menu-title {
@@ -185,10 +212,10 @@ ul.friend-menu {
     .add-friend-button {
         background: none;
         border: none;
+        transition: all 0.2s ease-in-out;
         &:hover {
+            text-shadow: 0 0 5px var(--tertiary-color);
             transform: translateY(-2px);
-            border: var(--tertiary-color) 1px solid;
-            border-radius: 5%;
         }
     }
     i {
@@ -203,10 +230,10 @@ ul.friend-menu {
     .friend-list-button {
         background: none;
         border: none;
+        transition: all 0.2s ease-in-out;
         &:hover {
+            text-shadow: 0 0 5px var(--tertiary-color);
             transform: translateY(-2px);
-            border: var(--tertiary-color) 1px solid;
-            border-radius: 5%;
         }
     }
     i {
@@ -229,10 +256,10 @@ div.friend-request {
         align-items: center;
         justify-content: space-between;
         width: 100%;
+        transition: all 0.2s ease-in-out;
         &:hover {
+            text-shadow: 0 0 5px var(--tertiary-color);
             transform: translateY(-2px);
-            border: var(--tertiary-color) 1px solid;
-            border-radius: 5%;
         }
     }
 
@@ -265,9 +292,56 @@ div.friend-request {
 
 //chat configuration
 .chat-menu {
-    padding-top: 25px;
-    padding-left: 15px;
-    padding-bottom: 15px;
+    padding-top: 15px;
+    padding-bottom: 10px;
+    height: calc(87% - 100px);
+    width: 100%;
+
+    > .tab-content {
+        position: relative;
+        width: 100%;
+        height: calc(100% - 44px - 1.5rem);
+        padding-left: 15px;
+        padding-right: 15px;
+
+        > .tab-pane {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            > .tab-content {
+                position: relative;
+                width: 100%;
+                height: calc(100% - 44px - 1.5rem);
+
+                > .tab-pane {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+
+                    > h2 {
+                        width: 100%;
+                        text-align: center;
+                        margin: 0px;
+                        font-size: 20px;
+                    }
+                    > .app-chat2 {
+                        position: relative;
+                        width: 100%;
+                        height: calc(100% - 32px);
+                    }
+                }
+            }
+            > h2 {
+                margin: 0px;
+                font-size: 20px;
+            }
+            > .app-chat2 {
+                position: relative;
+                width: 100%;
+                height: calc(100% - 32px);
+            }
+        }
+    }
 }
 
 .chat-menu-title {
@@ -276,6 +350,8 @@ div.friend-request {
     font-weight: bold;
     font-size: 1.5rem;
     flex-grow: 1;
+    width: 100%;
+    height: 44px;
 }
 
 img.my-channels-icon {
@@ -290,6 +366,10 @@ img.global-channels-icon {
 
 .nav-tabs {
     border-bottom: 2px solid var(--active-bg);
+    width: 100%;
+    height: 44px;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 .nav-link {
@@ -299,12 +379,12 @@ img.global-channels-icon {
     padding: 10px 15px;
 
     &:hover {
-        border-color: var(--active-bg);
+        text-shadow: 0 0 3px var(--tertiary-color);
         transform: translateY(-2px);
     }
 
     &.active {
-        background-color: var(--active-bg);
+        background-color: color-mix(in srgb, var(--active-bg) 50%, transparent);
         border: var(--active-bg) 2px solid;
         color: var(--tertiary-color);
     }
@@ -331,23 +411,7 @@ img.global-channels-icon {
 #tab4-1 {
     color: var(--tertiary-color);
     font-style: italic;
-    max-height: 450px;
-    overflow-y: auto;
-    padding: 20px;
-
-    &::-webkit-scrollbar {
-        width: 13px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background: var(--active-bg);
-        border-radius: 12px;
-    }
-
-    &::-webkit-scrollbar-track {
-        background: var(--nav-bg);
-        border-radius: 12px;
-    }
+    padding: 15px;
 
     input {
         width: 100%;
@@ -370,7 +434,22 @@ img.global-channels-icon {
         flex-direction: column;
         gap: 10px;
         padding: 10px 0;
+        overflow-y: auto;
+        height: 80%;
 
+        &::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: var(--active-bg);
+            border-radius: 12px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: var(--nav-bg);
+            border-radius: 12px;
+        }
         .my-channels {
             display: flex;
             align-items: center;
@@ -387,6 +466,10 @@ img.global-channels-icon {
                 background-color: var(--tertiary-color);
                 color: var(--primary-color);
                 transform: translateY(-2px);
+
+                button {
+                    color: var(--primary-color) !important;
+                }
             }
 
             .channel-buttons {
@@ -417,23 +500,7 @@ img.global-channels-icon {
 #tab4-2 {
     color: var(--tertiary-color);
     font-style: italic;
-    max-height: 450px;
-    overflow-y: auto;
-    padding: 20px;
-
-    &::-webkit-scrollbar {
-        width: 13px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background: var(--active-bg);
-        border-radius: 12px;
-    }
-
-    &::-webkit-scrollbar-track {
-        background: var(--nav-bg);
-        border-radius: 12px;
-    }
+    padding: 14px;
 
     input {
         width: 100%;
@@ -456,7 +523,22 @@ img.global-channels-icon {
         flex-direction: column;
         gap: 10px;
         padding: 10px 0;
+        height: 80%;
+        overflow-y: auto;
 
+        &::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: var(--active-bg);
+            border-radius: 12px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: var(--nav-bg);
+            border-radius: 12px;
+        }
         .join-channels {
             display: flex;
             align-items: center;
@@ -473,6 +555,9 @@ img.global-channels-icon {
                 background-color: var(--tertiary-color);
                 color: var(--primary-color);
                 transform: translateY(-2px);
+                button {
+                    color: var(--primary-color) !important;
+                }
             }
 
             button {
@@ -554,17 +639,12 @@ img.global-channels-icon {
     button {
         padding: 0.8rem 1.5rem;
         font-size: 1rem;
-        background-color: var(--tertiary-color);
-        color: var(--primary-color);
-        border: none;
         border-radius: 30px;
-        cursor: pointer;
         transition: all 0.3s ease;
         width: 50%;
 
         &:hover {
             transform: translateY(-2px);
-            background-color: var(--secondary-color);
         }
 
         &:disabled {
