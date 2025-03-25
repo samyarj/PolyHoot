@@ -17,7 +17,7 @@
         class="chat-message user otherUser"
     >
         <div class="chat-header">
-            <img [src]="chatmessage.avatar" alt="avatar" class="chat-avatar" />
+            <app-avatar-banner [avatarUrl]="chatmessage.avatar" [bannerUrl]="chatmessage.banner" class="chat-avatar"> </app-avatar-banner>
             <span class="chat-username">{{ chatmessage.username }}</span>
             <div *ngIf="(user | async)?.uid !== chatmessage.uid" class="report-button" (click)="reportUser(chatmessage.uid)" matTooltip="Signaler">
                 <i class="fa-solid fa-triangle-exclamation"></i>

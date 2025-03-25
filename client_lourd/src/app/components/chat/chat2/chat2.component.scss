@@ -202,10 +202,31 @@ div.time {
 .chat-avatar {
     width: 30px;
     height: 30px;
-    border-radius: 50%;
-    object-fit: cover;
     margin-right: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    ::ng-deep {
+        .avatar-banner-container {
+            width: 30px;
+            height: 30px;
+            position: relative;
+        }
+        .avatar-img {
+            width: 98%;
+            height: 98%;
+            border-radius: 50%;
+        }
+        .banner-img {
+            width: 110%;
+            height: 110%;
+            top: -5%;
+            left: -5%;
+        }
+        .banner-img-sidali {
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+        }
+    }
 }
 
 .chat-username {
