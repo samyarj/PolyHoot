@@ -84,6 +84,10 @@ export class ChatService implements OnDestroy {
             this.roomLeftSubscription.unsubscribe();
         }
 
+        // Remove old event listeners
+        this.socketClientService.socket.off(ChatEvents.MessageAdded);
+        this.socketClientService.socket.off(ChatEvents.RoomLeft);
+
         // Subscribe to new messages
         const messageAddedHandler = (newMessage: ChatMessage) => {
             this.allChatMessages.push(newMessage);
