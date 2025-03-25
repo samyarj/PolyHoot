@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthController } from './controllers/auth/auth.controller';
 import { ChatChannelsController } from './controllers/chat-channels/chat-channels.controller';
+import { CoinTransferController } from './controllers/coin-transfer.controller';
 import { FriendSystemController } from './controllers/friend-system.controller';
 import { HistoryController } from './controllers/history/history.controller';
 import { InventoryController } from './controllers/inventory.controller';
@@ -96,6 +97,7 @@ import { ShopService } from './services/shop.service';
         PollController,
         PublishedPollController,
         ReportController,
+        CoinTransferController,
     ],
 })
 export class AppModule {}

@@ -895,4 +895,49 @@ export class UserService {
 
         return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
     }
+
+    async transferCoins(senderId: string, recipientId: string, amount: number): Promise<{ success: boolean; message: string }> {
+        try {
+            // First, check if sender has enough coins
+            const senderRef = this.firestore.collection('users').doc(senderId);
+            const senderDoc = await senderRef.get();
+
+            if (!senderDoc.exists) {
+                return { success: false, message: "L'expéditeur n'existe pas" };
+            }
+
+            const senderCoins = senderDoc.data()?.coins || 0;
+            if (senderCoins < amount) {
+                return { success: false, message: "Vous n'avez pas assez de coins" };
+            }
+
+            // Check if recipient exists
+            const recipientRef = this.firestore.collection('users').doc(recipientId);
+            const recipientDoc = await recipientRef.get();
+
+            if (!recipientDoc.exists) {
+                return { success: false, message: "Le destinataire n'existe pas" };
+            }
+
+            // Use a transaction to ensure atomicity
+            await this.firestore.runTransaction(async (transaction) => {
+                // Update sender's balance
+                const senderSuccess = await this.updateUserCoins(senderId, -amount);
+                if (!senderSuccess) {
+                    throw new Error("Échec de la mise à jour du solde de l'expéditeur");
+                }
+
+                // Update recipient's balance
+                const recipientSuccess = await this.updateUserCoins(recipientId, amount);
+                if (!recipientSuccess) {
+                    throw new Error('Échec de la mise à jour du solde du destinataire');
+                }
+            });
+
+            return { success: true, message: 'Transfert effectué avec succès' };
+        } catch (error) {
+            console.error('Error during coin transfer:', error);
+            return { success: false, message: 'Une erreur est survenue lors du transfert' };
+        }
+    }
 }
