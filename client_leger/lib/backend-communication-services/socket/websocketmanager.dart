@@ -1,5 +1,6 @@
 import 'package:client_leger/backend-communication-services/environment.dart';
 import 'package:client_leger/utilities/logger.dart';
+import 'package:client_leger/utilities/socket_events.dart';
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -39,7 +40,7 @@ final class WebSocketManager {
     return socket != null && socket!.connected;
   }
 
-  initializeSocketConnection(String? token) {
+  initializeSocketConnection(String? token, String? userUid) {
     if (!isSocketAlive() && token != null) {
       try {
         socket = IO.io(
@@ -47,10 +48,12 @@ final class WebSocketManager {
           IO.OptionBuilder()
               .setTransports(['websocket']).setQuery({'token': token}).build(),
         );
-        socket?.connect();
         socket?.onConnect((_) {
-          AppLogger.i("WebSocket connected");
+          AppLogger.w("WebSocket connected, will send identify client now");
+          webSocketSender(ConnectEvents.IdentifyClient.value,
+              userUid); // pour s'assurer que les appels soient fait séquentiellement
         });
+        socket?.connect();
       } catch (e) {
         AppLogger.e('$e');
       }
@@ -58,10 +61,14 @@ final class WebSocketManager {
   }
 
   disconnectFromSocket() {
+    socket?.onDisconnect((_) => AppLogger.w("WebSocket disconnected"));
     socket?.disconnect();
+    socket?.off('connect');
+    socket?.off('disconnect');
     roomId = null;
     isOrganizer = false;
-    socket?.onDisconnect((_) => AppLogger.i("WebSocket disconnected"));
+    playerName = null;
+    currentRoomIdNotifier.value = null;
   }
 
   void webSocketReceiver(String eventName, Function(dynamic) onEvent) {

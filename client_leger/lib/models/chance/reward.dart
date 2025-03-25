@@ -22,4 +22,13 @@ class Reward {
       value: json['value'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type.value,
+      'rarity': rarity.value,
+      'odds': odds,
+      'value': value,
+    };
+  }
 }

@@ -29,13 +29,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
+final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _playShellNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter router = GoRouter(
   refreshListenable: user_provider.isLoggedIn,
   initialLocation: Paths.play,
-  navigatorKey: _rootNavigatorKey,
+  navigatorKey: rootNavigatorKey,
   debugLogDiagnostics: true,
   routes: [
     GoRoute(
@@ -51,7 +51,7 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const PasswordResetPage(),
     ),
     StatefulShellRoute.indexedStack(
-      parentNavigatorKey: _rootNavigatorKey,
+      parentNavigatorKey: rootNavigatorKey,
       builder: (context, state, statefulNavigationShell) {
         return MainScaffold(statefulNavigationShell: statefulNavigationShell);
       },

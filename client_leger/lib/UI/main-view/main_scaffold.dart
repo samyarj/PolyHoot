@@ -76,8 +76,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
     });
 
     try {
-      WebSocketManager.instance.disconnectFromSocket();
-
       if (mounted) {
         isLoggedIn.value = false;
 

@@ -61,7 +61,17 @@ export class CoinFlipService {
         );
     }
 
+    removeEventListeners() {
+        this.socketService.socket.off(CoinFlipEvents.StartGame);
+        this.socketService.socket.off(CoinFlipEvents.PreFlippingPhase);
+        this.socketService.socket.off(CoinFlipEvents.FlippingPhase);
+        this.socketService.socket.off(CoinFlipEvents.Results);
+        this.socketService.socket.off(CoinFlipEvents.SendPlayerList);
+        this.socketService.socket.off(CoinFlipEvents.BetTimeCountdown);
+    }
+
     initializeEventListeners() {
+        this.removeEventListeners();
         this.socketService.on(CoinFlipEvents.StartGame, () => {
             this.resetAttributes();
         });

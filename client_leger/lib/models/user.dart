@@ -101,3 +101,37 @@ class User {
     );
   }
 }
+
+class PartialUser {
+  // partial user for the chats (to save space)
+  final String uid;
+  final String? username;
+  final String? avatarEquipped;
+  final String? borderEquipped;
+
+  PartialUser(
+      {required this.uid,
+      this.avatarEquipped,
+      this.borderEquipped,
+      this.username});
+
+  // Factory constructor to create a PartialUser from a full User map
+  factory PartialUser.fromJson(Map<String, dynamic> data) {
+    return PartialUser(
+      uid: data['uid'],
+      avatarEquipped: data['avatarEquipped'],
+      borderEquipped: data['borderEquipped'],
+      username: data['username'],
+    );
+  }
+
+  // Convert to Map (for Firestore or JSON serialization)
+  Map<String, dynamic> toMap() {
+    return {
+      'uid': uid,
+      'avatarEquipped': avatarEquipped,
+      'borderEquipped': borderEquipped,
+      'username': username,
+    };
+  }
+}
