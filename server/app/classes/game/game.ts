@@ -186,7 +186,6 @@ export class Game {
     getReward(isWinner: boolean): Reward {
         if (isWinner) {
             const result = Math.random(); // 50% chance to get coins, 50% to get border
-            console.log(result);
             if (result < 0.15) {
                 return {
                     type: RewardType.Border,
@@ -233,9 +232,6 @@ export class Game {
     }
 
     updatePointsQRL(data: { pointsTotal: { playerName: string; points: number }[] /* answers: number[] */ }) {
-        console.log("data", data);
-        console.log("pointsTotal", data.pointsTotal);
-        console.log("list length is ", data.pointsTotal.length);
         data.pointsTotal.forEach((dataPlayer) => {
             const client = this.players.find((player) => player.name === dataPlayer.playerName);
             client.socket.emit(GameEvents.PlayerPointsUpdate, { points: dataPlayer.points, isFirst: false, exactAnswer: false });
