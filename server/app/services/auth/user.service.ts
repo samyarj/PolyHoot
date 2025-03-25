@@ -423,7 +423,7 @@ export class UserService {
     }
 
     // eslint-disable-next-line complexity
-    private mapUserFromFirestore(userRecord: UserCredential['user'] | admin.auth.UserRecord, userDoc: admin.firestore.DocumentData): User {
+    mapUserFromFirestore(userRecord: UserCredential['user'] | admin.auth.UserRecord, userDoc: admin.firestore.DocumentData): User {
         const isAdminUserRecord = (user: unknown): user is admin.auth.UserRecord => {
             return typeof user === 'object' && user !== null && 'uid' in user && 'displayName' in user;
         };
@@ -453,7 +453,6 @@ export class UserService {
                 nQuestions: 0,
                 nGoodAnswers: 0,
                 rightAnswerPercentage: 0,
-                timeSpent: 0,
             },
             nWins: userDoc.nWins || 0,
             nGames: userDoc.nGames || 0,
@@ -676,7 +675,7 @@ export class UserService {
         await userRef.update({ nWins: currentWins + 1 });
     }
 
-    async updateStats(uid: string, newStats: { nQuestions?: number; nGoodAnswers?: number; timeSpent?: number }): Promise<void> {
+    async updateStats(uid: string, newStats: { nQuestions?: number; nGoodAnswers?: number }): Promise<void> {
         const userRef = this.firestore.collection('users').doc(uid);
         const userDoc = await userRef.get();
         if (!userDoc.exists) {
@@ -687,13 +686,11 @@ export class UserService {
             nQuestions: 0,
             nGoodAnswers: 0,
             rightAnswerPercentage: 0,
-            timeSpent: 0,
         };
 
         const updatedStats = {
             nQuestions: (currentStats.nQuestions || 0) + (newStats.nQuestions || 0),
             nGoodAnswers: (currentStats.nGoodAnswers || 0) + (newStats.nGoodAnswers || 0),
-            timeSpent: (currentStats.timeSpent || 0) + (newStats.timeSpent || 0),
         };
 
         // Calculate the new percentage
@@ -840,6 +837,53 @@ export class UserService {
         return false;
     }
 
+    async getAllPlayers(): Promise<User[]> {
+        try {
+            const usersRef = this.firestore.collection('users');
+            const querySnapshot = await usersRef.where('role', '==', 'player').get();
+
+            if (querySnapshot.empty) {
+                return [];
+            }
+
+            const players: User[] = [];
+
+            for (const doc of querySnapshot.docs) {
+                try {
+                    const userData = doc.data();
+                    const userRecord = await this.adminAuth.getUser(doc.id);
+                    players.push(this.mapUserFromFirestore(userRecord, userData)); //? use simplified user?
+                } catch (userError) {
+                    this.logger.warn(`Skipping user ${doc.id}: ${userError.message}`);
+                }
+            }
+
+            return players;
+        } catch (error) {
+            this.logger.error('Failed to get all players:', error);
+            throw new Error('Failed to retrieve players.');
+        }
+    }
+
+    async adminBanPlayer(playerId: string, unbanDate: Date): Promise<void> {
+        const userRef = this.firestore.collection('users').doc(playerId);
+
+        await this.firestore.runTransaction(async (transaction) => {
+            const userDoc = await transaction.get(userRef);
+
+            if (!userDoc.exists) {
+                throw new Error('User does not exist.');
+            }
+
+            const currentNbBan = userDoc.data().nbBan || 0;
+
+            transaction.update(userRef, {
+                unBanDate: unbanDate,
+                nbBan: currentNbBan + 1,
+            });
+        });
+    }
+
     formatTimestamp(date: Date): string {
         const pad = (n: number) => n.toString().padStart(2, '0');
         const day = pad(date.getDate());
@@ -850,5 +894,50 @@ export class UserService {
         const seconds = pad(date.getSeconds());
 
         return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+    }
+
+    async transferCoins(senderId: string, recipientId: string, amount: number): Promise<{ success: boolean; message: string }> {
+        try {
+            // First, check if sender has enough coins
+            const senderRef = this.firestore.collection('users').doc(senderId);
+            const senderDoc = await senderRef.get();
+
+            if (!senderDoc.exists) {
+                return { success: false, message: "L'expéditeur n'existe pas" };
+            }
+
+            const senderCoins = senderDoc.data()?.coins || 0;
+            if (senderCoins < amount) {
+                return { success: false, message: "Vous n'avez pas assez de coins" };
+            }
+
+            // Check if recipient exists
+            const recipientRef = this.firestore.collection('users').doc(recipientId);
+            const recipientDoc = await recipientRef.get();
+
+            if (!recipientDoc.exists) {
+                return { success: false, message: "Le destinataire n'existe pas" };
+            }
+
+            // Use a transaction to ensure atomicity
+            await this.firestore.runTransaction(async (transaction) => {
+                // Update sender's balance
+                const senderSuccess = await this.updateUserCoins(senderId, -amount);
+                if (!senderSuccess) {
+                    throw new Error("Échec de la mise à jour du solde de l'expéditeur");
+                }
+
+                // Update recipient's balance
+                const recipientSuccess = await this.updateUserCoins(recipientId, amount);
+                if (!recipientSuccess) {
+                    throw new Error('Échec de la mise à jour du solde du destinataire');
+                }
+            });
+
+            return { success: true, message: 'Transfert effectué avec succès' };
+        } catch (error) {
+            console.error('Error during coin transfer:', error);
+            return { success: false, message: 'Une erreur est survenue lors du transfert' };
+        }
     }
 }

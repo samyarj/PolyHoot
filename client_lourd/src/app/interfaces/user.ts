@@ -43,7 +43,6 @@ export interface User {
         nQuestions?: number; // Total number of questions answered
         nGoodAnswers?: number; // Number of correct answers
         rightAnswerPercentage?: number; // Percentage of correct answers
-        timeSpent?: number; // Total time spent playing (in seconds)
     };
     nWins?: number; // Number of wins
     nGames?: number; // Number of games played

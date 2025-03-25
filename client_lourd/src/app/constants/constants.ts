@@ -14,6 +14,8 @@ export const MAX_CHAR = 200;
 export const TIME_TO_NEXT_ANSWER = 3000;
 export const TIMER_VALUE = 5000;
 export const NOT_FOUND = -1;
+export const MILLISECONDS_PER_MINUTE = 60000;
+
 export const BUFFER_TIME = 4000;
 export const EMPTY_STRING = '';
 export const ID = 'id';

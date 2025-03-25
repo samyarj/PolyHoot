@@ -272,9 +272,6 @@ export class GameGateway {
                 for (const player of game.players) {
                     const playerSocket = player.socket as AuthenticatedSocket;
                     if (playerSocket?.user?.uid) {
-                        await this.userService.updateStats(playerSocket.user.uid, {
-                            timeSpent: game.timer.timerValue,
-                        });
                         await this.userService.updateGameLog(playerSocket.user.uid, {
                             gameName: game.quiz.title,
                             endTime: this.userService.formatTimestamp(new Date()),
