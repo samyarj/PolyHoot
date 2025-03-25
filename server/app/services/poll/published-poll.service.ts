@@ -75,7 +75,7 @@ export class PublishedPollService implements OnModuleInit {
 
         return pollData;
     }
-    async expirePublishedPoll(id: string): Promise<PublishedPoll> {
+    /* async expirePublishedPoll(id: string): Promise<PublishedPoll> {
         const pollRef = this.firestore.collection('publishedPolls').doc(id);
         const pollDoc = await pollRef.get();
 
@@ -87,7 +87,7 @@ export class PublishedPollService implements OnModuleInit {
 
         const updatedPollData = pollDoc.data() as PublishedPoll;
         return updatedPollData;
-    }
+    } */
     //Pas idéal mais meilleur endroit pour maintenant
     onModuleInit() {
         setInterval(() => this.checkAndUpdateExpiredStatus(), 1000); // Vérifie toutes les secondes
@@ -96,7 +96,6 @@ export class PublishedPollService implements OnModuleInit {
     private async checkAndUpdateExpiredStatus(): Promise<void> {
         const currentDate = new Date();
         const snapshot = await this.firestore.collection('publishedPolls').get();
-
         snapshot.forEach(async (doc) => {
             const poll = doc.data() as PublishedPoll;
             const pollEndDate = new Date(poll.endDate);

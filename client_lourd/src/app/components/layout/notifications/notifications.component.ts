@@ -129,7 +129,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                     this.toastr.error('Ce sondage a expiré pendant que vous répondiez');
                     return;
                 }
-                this.toastr.success('Sondage complété, voir la console pour les réponses retournées !');
+                this.toastr.success('Sondage complété!');
                 this.http.patch<PublishedPoll[]>(`${environment.serverUrl}/published-polls/${poll.id}`, result).subscribe({
                     next: () => {
                         this.updateUserPollsAnswered(poll.id);
