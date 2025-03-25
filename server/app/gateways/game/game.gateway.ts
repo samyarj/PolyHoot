@@ -131,8 +131,9 @@ export class GameGateway {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         const playerName = game.players.find((player) => player.socket === client).name;
+        const safeAnswer = playerAnswer ?? '';
         if (game.timer.timerValue > 0) {
-            game.organizer.socket.emit(GameEvents.QRLAnswerSubmitted, { playerName, playerAnswer });
+            game.organizer.socket.emit(GameEvents.QRLAnswerSubmitted, { playerName, playerAnswer: safeAnswer });
         } else {
             game.organizer.socket.emit(GameEvents.QRLAnswerSubmitted, { playerName, playerAnswer: '' });
         }
@@ -261,7 +262,6 @@ export class GameGateway {
                 // Find the winner's socket to get their user ID
                 const winnerSocket = game.players.find((p) => p.name === winner.name)?.socket as AuthenticatedSocket;
                 if (winnerSocket?.user?.uid) {
-                    console.log('Incrementing wins for user:', winnerSocket.user.uid);
                     await this.userService.incrementWins(winnerSocket.user.uid);
                     await this.userService.updateGameLog(winnerSocket.user.uid, {
                         result: 'win',

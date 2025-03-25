@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/classes/sound_player.dart';
@@ -206,7 +205,7 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
     );
 
     _socketManager.webSocketSender(GameEvents.CorrectionFinished.value, {
-      'pointsTotal': jsonEncode(state.pointsAfterCorrection),
+      'pointsTotal': state.pointsAfterCorrection,
     });
 
     if (state.gameInfo.currentQuestionIndex + 1 >= state.questionsLength) {
@@ -234,7 +233,7 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
       if (data is Map<String, dynamic>) {
         final answer = AnswerQRL(
           playerName: data['playerName'],
-          playerAnswer: data['playerAnswer'] ?? '',
+          playerAnswer: data['playerAnswer'],
         );
 
         final updatedAnswers = List<AnswerQRL>.from(state.answersQRL)
@@ -244,25 +243,14 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
 
         state = state.copyWith(answersQRL: updatedAnswers);
         AppLogger.i("QRL Answer received from: ${answer.playerName}");
-      } else if (data is List && data.isEmpty) {
-        // If we receive an empty array, proceed to next question
-        nextQuestion();
-        AppLogger.i(
-            "Received empty answers array, proceeding to next question");
+      } else {
+        AppLogger.e("Invalid QRL Answer data received");
       }
     });
   }
 
   void _handleEveryoneSubmitted() {
     _socketManager.webSocketReceiver(GameEvents.EveryoneSubmitted.value, (_) {
-      // Check if there are any answers to grade
-      if (state.answersQRL.isEmpty) {
-        // If no answers, proceed to next question
-        nextQuestion();
-        AppLogger.i("No answers to grade, proceeding to next question");
-        return;
-      }
-
       final updatedGameInfo = GameInfo(
         time: 0,
         currentQuestionIndex: state.gameInfo.currentQuestionIndex,
