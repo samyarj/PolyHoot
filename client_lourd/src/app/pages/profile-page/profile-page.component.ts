@@ -1,3 +1,4 @@
+/* eslint-disable max-params */
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { Auth, updateProfile } from '@angular/fire/auth';
@@ -51,6 +52,7 @@ export class ProfilePageComponent implements OnInit {
     totalGamesPlayed: number = 0;
     gamesWon: number = 0;
     averageCorrectAnswers: number = 0;
+    totalGameTime: number = 0;
     averageTimePerGame: string = '0:00';
     totalActions: number = 0;
     lastLogin: string = 'N/A';
@@ -72,13 +74,21 @@ export class ProfilePageComponent implements OnInit {
 
     ngOnInit() {
         this.loadDefaultAvatars();
-        this.loadUserProfile();
         this.loadLogs();
     }
+
     loadLogs() {
         const user = this.authService.getUser();
         this.logs = user?.cxnLogs ?? [];
         this.gameLogs = user?.gameLogs ?? [];
+        for (const log of this.gameLogs) {
+            let gameTime = 0;
+            if (log.endTime && log.startTime) {
+                gameTime = this.diffDates(this.parseTimestamp(log.endTime), this.parseTimestamp(log.startTime));
+            }
+            this.totalGameTime += gameTime;
+        }
+        this.loadUserProfile();
     }
 
     getActionDisplay(action: 'connect' | 'disconnect'): string {
@@ -93,6 +103,7 @@ export class ProfilePageComponent implements OnInit {
         return result === 'win' ? 'Gagné' : 'Perdu';
     }
 
+    // Modified loadUserProfile method to calculate averageTimePerGame correctly
     loadUserProfile() {
         const user = this.authService.getUser();
         if (user) {
@@ -105,9 +116,9 @@ export class ProfilePageComponent implements OnInit {
             this.gamesWon = user.nWins || 0;
             this.averageCorrectAnswers = user.stats?.rightAnswerPercentage || 0;
 
-            // Calculate average time per game if we have both total time and games played
-            if (user.stats?.timeSpent && user.nGames) {
-                const averageSeconds = Math.floor(user.stats.timeSpent / user.nGames);
+            // Calculate average time
+            if (this.totalGamesPlayed > 0 && this.totalGameTime > 0) {
+                const averageSeconds = Math.floor(this.totalGameTime / this.totalGamesPlayed);
                 const minutes = Math.floor(averageSeconds / SECONDS_IN_MINUTE);
                 const seconds = averageSeconds % SECONDS_IN_MINUTE;
                 this.averageTimePerGame = `${minutes}:${seconds.toString().padStart(2, '0')}`;
@@ -257,5 +268,26 @@ export class ProfilePageComponent implements OnInit {
                 console.error('Error loading default avatars:', error);
             },
         });
+    }
+
+    private parseTimestamp(timestamp: string): Date {
+        // Split the string into date and time parts
+        const [datePart, timePart] = timestamp.split(' ');
+        if (!datePart || !timePart) {
+            throw new Error('Invalid timestamp format');
+        }
+
+        // Split the date part into day, month, and year
+        const [day, month, year] = datePart.split('/').map(Number);
+        // Split the time part into hours, minutes, and seconds
+        const [hours, minutes, seconds] = timePart.split(':').map(Number);
+
+        // Create a new Date object (note: month is 0-indexed in JS Date)
+        return new Date(year, month - 1, day, hours, minutes, seconds);
+    }
+
+    private diffDates(date1: Date, date2: Date): number {
+        // Calculate the absolute difference in milliseconds and convert to seconds
+        return Math.floor(Math.abs(date2.getTime() - date1.getTime()) / 1000);
     }
 }

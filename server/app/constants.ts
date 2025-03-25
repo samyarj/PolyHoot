@@ -1,4 +1,5 @@
 export const SEED_1 = 1000;
+export const BAN_DURATION_MS = 15 * 60 * 1000; // 15 minutes in milliseconds
 export const SEED_2 = 9000;
 export const TIME_FOR_QRL = 60;
 export const BONUS_MULTIPLIER = 1.2;
@@ -42,7 +43,6 @@ export const emptyUser = {
         nQuestions: 0,
         nGoodAnswers: 0,
         rightAnswerPercentage: 0,
-        timeSpent: 0,
     },
     nWins: 0,
     nGames: 0,
