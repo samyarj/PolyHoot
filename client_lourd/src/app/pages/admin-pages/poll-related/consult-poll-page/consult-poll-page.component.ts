@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { backInLeftAnimation, backInRightAnimation, bounceOutAnimation, zoomInAnimation } from '@app/animations/animation';
-import { PollPlayerPopInComponent } from '@app/components/general-elements/poll-player-pop-in/poll-player-pop-in.component';
+import { PollAdminPopInComponent } from '@app/components/general-elements/poll-related/poll-admin-pop-in/poll-admin-pop-in.component';
 import { AppRoute, ConfirmationMessage } from '@app/constants/enum-class';
 import { Poll, PublishedPoll } from '@app/interfaces/poll';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
@@ -31,12 +31,21 @@ export class ConsultPollPageComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         // S'abonner aux changements dans les sondages
         this.pollsSubscription = this.consultPollService.watchPolls().subscribe((polls) => {
+            console.log(polls);
             this.polls = polls;
         });
 
         // S'abonner aux changements dans les sondages publiés
         this.publishedPollsSubscription = this.consultPollService.watchPublishedPolls().subscribe((publishedPolls) => {
-            this.publishedPolls = publishedPolls.filter((poll) => !poll.expired);
+            this.publishedPolls = publishedPolls
+                .filter((poll) => !poll.expired)
+                .sort((a, b) => {
+                    // Convertir les dates en timestamps pour comparaison
+                    const dateA = new Date(a.endDate!).getTime();
+                    const dateB = new Date(b.endDate!).getTime();
+                    return dateA - dateB; // Tri ascendant (plus petite date en premier)
+                });
+            console.log(this.publishedPolls);
         });
     }
 
@@ -51,10 +60,10 @@ export class ConsultPollPageComponent implements OnInit, OnDestroy {
     }
 
     consultPoll(poll: Poll) {
-        this.dialog.open(PollPlayerPopInComponent, {
+        this.dialog.open(PollAdminPopInComponent, {
             backdropClass: 'quiz-info-popup',
             panelClass: 'custom-container',
-            data: { poll, isAdmin: true },
+            data: { poll, parentComponent: this },
         });
     }
 
@@ -72,26 +81,7 @@ export class ConsultPollPageComponent implements OnInit, OnDestroy {
         }
     }
 
-    publish(id: string | undefined) {
-        if (id) {
-            this.messageHandlerService.confirmationDialog(ConfirmationMessage.PublishPoll, () => this.publishCallback(id));
-        }
-    }
-
-    private deleteCallback(id: string) {
-        this.consultPollService
-            .deletePollById(id)
-            .pipe(
-                catchError((error: any) => {
-                    console.error('Erreur lors de la suppression du sondage :', error);
-                    this.messageHandlerService.popUpErrorDialog(error.message); // Gérer l'erreur avec un popup
-                    return of(null); // Retourner un Observable vide pour continuer le flux
-                }),
-            )
-            .subscribe();
-    }
-
-    private publishCallback(id: string) {
+    publishCallback(id?: string) {
         const pollToPublish = this.polls.find((poll) => poll.id === id);
         if (pollToPublish) {
             this.consultPollService
@@ -107,5 +97,17 @@ export class ConsultPollPageComponent implements OnInit, OnDestroy {
         } else {
             console.error(`Sondage avec l'ID ${id} non trouvé.`);
         }
+    }
+    private deleteCallback(id: string) {
+        this.consultPollService
+            .deletePollById(id)
+            .pipe(
+                catchError((error: any) => {
+                    console.error('Erreur lors de la suppression du sondage :', error);
+                    this.messageHandlerService.popUpErrorDialog(error.message); // Gérer l'erreur avec un popup
+                    return of(null); // Retourner un Observable vide pour continuer le flux
+                }),
+            )
+            .subscribe();
     }
 }

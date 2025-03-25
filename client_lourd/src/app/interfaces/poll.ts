@@ -5,7 +5,7 @@ export interface Poll {
     description: string;
     questions: Question[];
     expired: boolean;
-    endDate: string;
+    endDate?: string;
     isPublished: boolean;
 }
 

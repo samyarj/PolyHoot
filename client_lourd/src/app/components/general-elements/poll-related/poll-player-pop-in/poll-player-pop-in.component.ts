@@ -27,9 +27,9 @@ export class PollPlayerPopInComponent {
     // eslint-disable-next-line max-params
     constructor(
         public dialogRef: MatDialogRef<PollPlayerPopInComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: { poll: Poll; isAdmin: boolean }, // private dialog: MatDialog,
+        @Inject(MAT_DIALOG_DATA) public data: Poll, // private dialog: MatDialog,
     ) {
-        this.poll = data.poll;
+        this.poll = data;
     }
 
     startPoll() {
@@ -38,6 +38,7 @@ export class PollPlayerPopInComponent {
     }
 
     nextQuestion() {
+        console.log('appelle');
         if (this.selectedChoice !== NO_SELECTION && this.currentIndex < this.poll.questions.length - 1) {
             this.currentIndex++;
             this.playerAnswer.push(this.selectedChoice);

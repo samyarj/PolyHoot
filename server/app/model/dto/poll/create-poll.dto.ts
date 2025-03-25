@@ -1,7 +1,7 @@
 import { CreateQuestionDto } from '@app/model/dto/question/create-question.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsNotEmpty, IsNotEmptyObject, IsOptional, IsPositive, ValidateNested } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, ValidateNested } from 'class-validator';
 
 export class CreatePollDto {
     @ApiProperty({ description: 'The title of the poll' })
@@ -17,9 +17,9 @@ export class CreatePollDto {
     expired: boolean;
 
     @ApiProperty()
-    @IsNotEmpty()
-    endDate: string;
-
+    @IsOptional()
+    endDate?: string;
+    
     @ApiProperty()
     @IsOptional()
     isPublished?: boolean;

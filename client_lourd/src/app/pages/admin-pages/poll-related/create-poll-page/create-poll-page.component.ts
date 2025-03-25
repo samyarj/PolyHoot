@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpErrorResponse } from '@angular/common/http';
-import { AfterViewInit, Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { addQuestionAnimation, deleteQuestionAnimation, pollFormAnimation, questionFormAnimation } from '@app/animations/animation';
 import { EMPTY_STRING, MAX_CHOICES } from '@app/constants/constants';
@@ -21,14 +21,13 @@ import { Observer, tap } from 'rxjs';
     styleUrls: ['./create-poll-page.component.scss'],
     animations: [addQuestionAnimation, deleteQuestionAnimation, questionFormAnimation, pollFormAnimation],
 })
-export class CreatePollPageComponent implements AfterViewInit, OnDestroy {
+export class CreatePollPageComponent implements OnDestroy {
     submitPollButton: string = ButtonType.CREATE;
     submitQuestionButton: string = ButtonType.ADD;
     showButton: boolean = true;
     private pollObserver: Partial<Observer<Poll>> = {
         next: (poll: Poll) => {
             this.createPollService.poll = poll;
-            this.poll.endDate = poll.endDate.slice(0, 16);
         },
         error: (httpErrorResponse: HttpErrorResponse) => {
             this.messageHandlerService.popUpErrorDialog(httpErrorResponse.error.message);
@@ -62,10 +61,6 @@ export class CreatePollPageComponent implements AfterViewInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.resetAnswers();
-    }
-
-    ngAfterViewInit(): void {
-        this.setMinDate();
     }
 
     drop(event: CdkDragDrop<QuestionChoice[]>) {
@@ -116,15 +111,6 @@ export class CreatePollPageComponent implements AfterViewInit, OnDestroy {
     isQuestionTextEmpty() {
         return this.validationService.isStringEmpty(this.question.text);
     }
-    isDateValid(): boolean {
-        if (!this.poll.endDate) {
-            return false;
-        }
-        const selectedDate = new Date(this.poll.endDate);
-        const now = new Date();
-        now.setSeconds(0, 0);
-        return selectedDate >= now;
-    }
 
     deleteAnswer(index: number): void {
         this.createPollService.deleteAnswer(index);
@@ -142,13 +128,7 @@ export class CreatePollPageComponent implements AfterViewInit, OnDestroy {
     }
 
     validatePoll(): boolean {
-        return (
-            this.isDateValid() &&
-            !this.isPollTitleEmpty() &&
-            !this.isDescriptionEmpty() &&
-            Array.isArray(this.poll.questions) &&
-            this.poll.questions.length >= 1
-        );
+        return !this.isPollTitleEmpty() && !this.isDescriptionEmpty() && Array.isArray(this.poll.questions) && this.poll.questions.length >= 1;
     }
     validQuestion(): boolean {
         return this.areQuestionChoicesTextValid() && this.validUniqueChoiceTexts() && !this.isQuestionTextEmpty();
@@ -182,29 +162,6 @@ export class CreatePollPageComponent implements AfterViewInit, OnDestroy {
     private emptyPollAndRedirectCallback() {
         this.resetAnswers();
         this.router.navigate([AppRoute.POLLS]);
-    }
-    private setMinDate(): void {
-        const dateTimeInput = document.querySelector<HTMLInputElement>('#dateTimePicker');
-
-        if (dateTimeInput) {
-            const updateMinDateTime = () => {
-                const now = new Date();
-                now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // Ajustement fuseau horaire
-
-                const minDateTime = now.toISOString().slice(0, 16); // Format YYYY-MM-DDTHH:MM
-                dateTimeInput.setAttribute('min', minDateTime);
-
-                // Vérifier si la valeur sélectionnée est devenue invalide
-                const selectedDateTime = new Date(dateTimeInput.value);
-                if (selectedDateTime < now) {
-                    dateTimeInput.value = minDateTime; // Réinitialiser si la valeur devient invalide
-                }
-            };
-
-            // Mettre à jour immédiatement et ensuite toutes les secondes
-            updateMinDateTime();
-            setInterval(updateMinDateTime, 1000);
-        }
     }
     private setMode(): void {
         const pollId = this.route.snapshot.params.id;

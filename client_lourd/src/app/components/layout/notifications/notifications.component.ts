@@ -3,7 +3,7 @@ import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Firestore, doc, onSnapshot } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { PollPlayerPopInComponent } from '@app/components/general-elements/poll-player-pop-in/poll-player-pop-in.component';
+import { PollPlayerPopInComponent } from '@app/components/general-elements/poll-related/poll-player-pop-in/poll-player-pop-in.component';
 import { AppRoute } from '@app/constants/enum-class';
 import { PublishedPoll } from '@app/interfaces/poll';
 import { User } from '@app/interfaces/user'; // Assurez-vous d'importer l'interface User
@@ -99,7 +99,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         const dialogRef = this.dialog.open(PollPlayerPopInComponent, {
             backdropClass: 'quiz-info-popup',
             panelClass: 'custom-container',
-            data: { poll, isAdmin: false },
+            data: poll,
         });
 
         dialogRef.afterClosed().subscribe((result) => {

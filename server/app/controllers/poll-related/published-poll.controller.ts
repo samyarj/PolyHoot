@@ -80,8 +80,6 @@ export class PublishedPollController {
     async updatePublishedPollVotes(@Param('id') id: string, @Body() results: number[], @Res() response: Response) {
         try {
             const updatedPublishedPoll = await this.publishedPollService.updatePublishedPollVotes(id, results);
-            const testSiUpdatedAvecResultats = await this.publishedPollService.getPublishedPollById(id);
-            console.log(testSiUpdatedAvecResultats);
             response.status(HttpStatus.OK).json(updatedPublishedPoll);
         } catch (error) {
             if (error.status === HttpStatus.NOT_FOUND) {

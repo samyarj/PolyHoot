@@ -57,12 +57,9 @@ export class HistoryPollPageComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        // S'abonner aux changements de paramètre de route
-
         // S'abonner aux changements dans les sondages publiés
         this.publishedPollsSubscription = this.historyPublishedPollService.watchPublishedPolls().subscribe((publishedPolls) => {
             this.publishedPolls = publishedPolls.filter((poll) => poll.expired);
-
             this.initRouteListener();
         });
     }

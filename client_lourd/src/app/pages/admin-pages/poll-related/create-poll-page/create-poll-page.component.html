@@ -39,10 +39,7 @@
                         </div>
                     </div>
                 </form>
-                <div>
-                    <input type="datetime-local" name="endDate" #endDate="ngModel" id="dateTimePicker" [(ngModel)]="poll.endDate" required />
-                </div>
-                <small class="text-danger" *ngIf="!isDateValid()">Date invalide</small>
+
                 <form class="form-question-container" #questionForm="ngForm" (ngSubmit)="addQuestion()">
                     <div class="question-info-section">
                         <div class="form-group question-text">
@@ -108,7 +105,12 @@
                     </div>
                     <div class="submit-section">
                         <button *ngIf="showButton" type="button" class="btn btn-dark custom-width" (click)="resetAnswers()">Tout effacer</button>
-                        <button *ngIf="showButton" type="submit" class="btn custom-button custom-width" [disabled]="!questionForm.valid || !validQuestion()">
+                        <button
+                            *ngIf="showButton"
+                            type="submit"
+                            class="btn custom-button custom-width"
+                            [disabled]="!questionForm.valid || !validQuestion()"
+                        >
                             {{ submitQuestionButton }}
                         </button>
                     </div>

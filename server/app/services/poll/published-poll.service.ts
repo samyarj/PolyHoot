@@ -5,7 +5,7 @@ import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 
 @Injectable()
-export class PublishedPollService implements OnModuleInit{
+export class PublishedPollService implements OnModuleInit {
     private firestore = admin.firestore();
     constructor() {}
     async createPublishedPoll(poll: PublishedPoll): Promise<PublishedPoll> {
@@ -28,20 +28,13 @@ export class PublishedPollService implements OnModuleInit{
         }
 
         const pollData = pollDoc.data() as PublishedPoll;
-        return {
-            ...pollData,
-            endDate: pollData.endDate, // Convertir Timestamp en Date
-            publicationDate: pollData.publicationDate, // Convertir Timestamp en Date
-        };
+        return pollData;
     }
 
     async deleteExpiredPolls(): Promise<void> {
         try {
             // 1. Récupérer tous les sondages expirés
-            const expiredPollsSnapshot = await this.firestore
-                .collection('publishedPolls')
-                .where('expired', '==', true)
-                .get();
+            const expiredPollsSnapshot = await this.firestore.collection('publishedPolls').where('expired', '==', true).get();
 
             // 2. Vérifier s'il y a des sondages à supprimer
             if (expiredPollsSnapshot.empty) {

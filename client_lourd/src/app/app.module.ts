@@ -30,7 +30,8 @@ import { AvatarBannerComponent } from './components/general-elements/avatar-bann
 import { ConfirmationDialogComponent } from './components/general-elements/confirmation-dialog/confirmation-dialog.component';
 import { ErrorDialogComponent } from './components/general-elements/error-dialog/error-dialog.component';
 import { LootBoxWinDialogComponent } from './components/general-elements/lootbox-win-dialog/lootbox-win-dialog.component';
-import { PollPlayerPopInComponent } from './components/general-elements/poll-player-pop-in/poll-player-pop-in.component';
+import { PollPlayerPopInComponent } from './components/general-elements/poll-related/poll-player-pop-in/poll-player-pop-in.component';
+import { PollAdminPopInComponent } from './components/general-elements/poll-related/poll-admin-pop-in/poll-admin-pop-in.component';
 import { PopUpCreationComponent } from './components/general-elements/pop-up-creation/pop-up-creation.component';
 import { HeaderGameComponent } from './components/layout/filler/header-game/header-game.component';
 import { SecondaryHeaderGameComponent } from './components/layout/filler/secondary-header-game/secondary-header-game.component';
@@ -153,6 +154,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         CreatePollPageComponent,
         PollMainPageComponent,
         PollPlayerPopInComponent,
+        PollAdminPopInComponent,
         NotificationsComponent,
     ],
     providers: [

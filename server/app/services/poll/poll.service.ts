@@ -57,7 +57,6 @@ export class PollService {
             title: updatePollDto.title,
             description: updatePollDto.description,
             expired: updatePollDto.expired,
-            endDate: updatePollDto.endDate,
             isPublished: updatePollDto.isPublished,
             questions: updatePollDto.questions.map((question) => ({
                 ...question,

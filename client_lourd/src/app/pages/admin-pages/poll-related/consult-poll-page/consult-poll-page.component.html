@@ -13,21 +13,12 @@
                         </button>
                     </div>
                     <div class="pollContainer" *ngFor="let poll of polls; trackBy: trackByFn; let i = index" @bounceOut>
-                        <span id="pollInfo"> {{ poll.title }} Date d'expiration: {{ poll.endDate | date: 'yyyy-MM-dd HH:mm' }} </span>
+                        <span id="pollInfo"> {{ poll.title }}</span>
                         <button *ngIf="!poll.isPublished" id="delete" mat-icon-button (click)="delete(poll.id)" matTooltip="Supprimer">
                             <mat-icon [ngStyle]="{ color: 'white' }">delete</mat-icon>
                         </button>
                         <button *ngIf="!poll.isPublished" id="edit" mat-icon-button (click)="goToEdit(poll.id)" matTooltip="Modifier">
                             <mat-icon [ngStyle]="{ color: 'white' }">edit_square</mat-icon>
-                        </button>
-                        <button
-                            *ngIf="!poll.isPublished"
-                            class="publish"
-                            mat-icon-button
-                            (click)="publish(poll.id)"
-                            matTooltip="Publier le sondage pour tous les utilisateurs"
-                        >
-                            <mat-icon [ngStyle]="{ color: 'white' }">publication</mat-icon>
                         </button>
                         <button class="publish" mat-icon-button matTooltip="Consulter le sondage" (click)="consultPoll(poll)">
                             <i class="fa-solid fa-clipboard-question"></i>
