@@ -59,7 +59,7 @@ export class PublishedPollController {
     @ApiNotFoundResponse({
         description: 'Published poll not found',
     })
-    @Delete('/delete/:id')
+    @Delete('delete')
     async deleteExpiredPolls(@Res() response: Response) {
         try {
             await this.publishedPollService.deleteExpiredPolls();
