@@ -36,20 +36,10 @@
                             <div class="question-title-content">{{ currentQuestion?.text }}</div>
                             <div class="divider"></div>
                         </div>
-                        <div class="pie-chart">
+                        <div *ngIf="getMaxValue() !== 0" class="pie-chart">
                             <canvas baseChart [data]="pieChartData" [options]="pieChartOptions" [type]="pieChartType"> </canvas>
                         </div>
-                        <!-- <div class="legend two-choices">
-                            <div>Choix</div>
-                            <div>Choix</div>
-                        </div> -->
-
-                        <!-- <div class="legend three-choices">
-                            <div>Choix</div>
-                            <div>Choix</div>
-                            <div>Choix</div>
-                        </div> -->
-
+                        <div *ngIf="getMaxValue() === 0" class="pie-chart">Aucune réponse à cette question.</div>
                         <div
                             class="legend four-choices"
                             [ngClass]="{
@@ -85,5 +75,13 @@
                 </div>
             </div>
         </div>
+        <button
+            (disabled)="(publishedPolls.length === 0)"
+            class="custom-button-medium"
+            [ngClass]="{ 'custom-button-medium-disabled': publishedPolls.length === 0 }"
+            (click)="deleteAllExpiredPolls()"
+        >
+            Supprimer l'historique des sondages
+        </button>
     </div>
 </div>

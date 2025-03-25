@@ -5,6 +5,7 @@ import { PublishedPoll } from '@app/interfaces/poll';
 import { Question } from '@app/interfaces/question';
 import { HistoryPublishedPollService } from '@app/services/poll-services/history-poll.service';
 import { ChartConfiguration, ChartData } from 'chart.js';
+import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -24,6 +25,7 @@ export class HistoryPollPageComponent implements OnInit, OnDestroy {
         '#505050', // dark slate
         '#2E3A59', // dark indigo-blue
     ];
+    math = Math;
     currentPoll: PublishedPoll;
     pieChartOptions: ChartConfiguration<'pie'>['options'] = {
         responsive: true,
@@ -48,10 +50,13 @@ export class HistoryPollPageComponent implements OnInit, OnDestroy {
     pieChartType: 'pie' = 'pie';
     private routeSub: Subscription; // Nouvelle subscription pour les changements de route
     private publishedPollsSubscription: Subscription;
+    private deletedPollsSubscription: Subscription;
+
     constructor(
         private historyPublishedPollService: HistoryPublishedPollService,
         private route: ActivatedRoute,
         private router: Router, // Ajouter Router
+        private toastr: ToastrService,
     ) {
         console.log('CurrentPoll:', this.currentPoll?.title);
     }
@@ -62,12 +67,21 @@ export class HistoryPollPageComponent implements OnInit, OnDestroy {
             this.publishedPolls = publishedPolls.filter((poll) => poll.expired);
             this.initRouteListener();
         });
+
+        this.deletedPollsSubscription = this.historyPublishedPollService.watchDeletedExpiredPolls().subscribe(() => {
+            this.toastr.success("Supprimé l'historique des sondages expirés avec succès.");
+        });
     }
 
     ngOnDestroy(): void {
         // Se désabonner des observables
         if (this.publishedPollsSubscription) this.publishedPollsSubscription.unsubscribe();
+        if (this.deletedPollsSubscription) this.deletedPollsSubscription.unsubscribe();
         if (this.routeSub) this.routeSub.unsubscribe(); // N'oubliez pas de désabonner
+    }
+
+    getMaxValue(): number {
+        return Math.max(...this.data);
     }
 
     show(poll: PublishedPoll) {
@@ -110,6 +124,7 @@ export class HistoryPollPageComponent implements OnInit, OnDestroy {
                     },
                 ],
             };
+            console.log(this.data);
         }
     }
     deleteAllExpiredPolls() {

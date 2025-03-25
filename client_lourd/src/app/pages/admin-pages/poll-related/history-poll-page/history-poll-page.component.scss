@@ -14,7 +14,12 @@
         color: var(--text-color);
         display: flex;
         flex-direction: row;
-
+        > button {
+            position: absolute;
+            top: 20px; /* Add some padding from the top */
+            right: 20px; /* Add some padding from the right */
+            z-index: 999; /* To ensure it's above other content */
+        }
         .past-publishedPolls-container {
             position: relative;
             background: color-mix(in srgb, var(--primary-color) 50%, transparent);
