@@ -162,6 +162,10 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
     });
 
     _socketManager.webSocketReceiver(TimerEvents.End.value, (time) {
+      if (!state.playerInfo.submitted &&
+          state.currentQuestion.type == QuestionType.QRL.name) {
+        sendAnswerForCorrection(state.answer);
+      }
       state = state.copyWith(time: time);
     });
 

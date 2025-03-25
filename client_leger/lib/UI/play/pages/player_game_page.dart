@@ -211,8 +211,10 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
                     style: TextStyle(fontSize: 20)),
               SizedBox(height: 16),
             ],
-            buildFeedbackMessage(playerGameState.choiceFeedback,
-                playerGameState.currentQuestion),
+            buildFeedbackMessage(
+                playerGameState.choiceFeedback,
+                playerGameState.currentQuestion,
+                playerGameState.playerInfo.submitted),
             ElevatedButton(
               onPressed: playerGameState.playerInfo.submitted ||
                       playerGameState.time == 0
