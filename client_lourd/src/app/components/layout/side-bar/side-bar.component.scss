@@ -372,6 +372,16 @@ img.global-channels-icon {
     padding-right: 15px;
 }
 
+#tab4 {
+    .nav-tabs {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        > * {
+            width: 50%;
+        }
+    }
+}
 .nav-link {
     color: var(--tertiary-color);
     border: 2px solid transparent;
@@ -392,6 +402,7 @@ img.global-channels-icon {
         background-color: color-mix(in srgb, var(--active-bg) 50%, transparent);
         border: var(--active-bg) 2px solid;
         color: var(--tertiary-color);
+        text-shadow: 0 0 3px var(--tertiary-color);
     }
 }
 
