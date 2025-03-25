@@ -1,9 +1,12 @@
 /* eslint-disable complexity */
 import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationDialogComponent } from '@app/components/general-elements/confirmation-dialog/confirmation-dialog.component';
 import { User } from '@app/interfaces/user';
 import { AdminService } from '@app/services/back-end-communication-services/admin-service/admin.service';
 import { ToastrService } from 'ngx-toastr';
-// Add these types for sorting
+import { MILLISECONDS_PER_MINUTE } from 'src/app/constants/constants';
+
 type SortColumn = 'username' | 'coins' | 'nWins' | 'isOnline' | 'nbReport' | 'banned' | null;
 type SortDirection = 'asc' | 'desc';
 
@@ -18,11 +21,9 @@ export class PlayerInfoPageComponent implements OnInit, OnDestroy {
     error = signal<string | null>(null);
     searchTerm = signal<string>('');
 
-    // Default sorting: by 'isOnline' in descending order
     sortColumn = signal<SortColumn>('isOnline');
     sortDirection = signal<SortDirection>('desc');
 
-    // Computed signals
     hasPlayers = computed(() => this.players().length > 0);
 
     filteredPlayers = computed(() => {
@@ -69,12 +70,12 @@ export class PlayerInfoPageComponent implements OnInit, OnDestroy {
         return filtered;
     });
 
-    // Store unsubscribe function for cleanup
     private unsubscribeFromPlayers: (() => void) | null = null;
 
     constructor(
         private adminService: AdminService,
         private toastr: ToastrService,
+        private dialog: MatDialog,
     ) {}
 
     ngOnInit(): void {
@@ -90,17 +91,13 @@ export class PlayerInfoPageComponent implements OnInit, OnDestroy {
     // Add sorting method
     sort(column: SortColumn): void {
         if (this.sortColumn() === column) {
-            // Toggle direction if same column
             this.sortDirection.set(this.sortDirection() === 'asc' ? 'desc' : 'asc');
         } else {
-            // Set new sort column and reset direction
             this.sortColumn.set(column);
-            // Default username to ascending (A-Z), but all other columns to descending (high-to-low)
             this.sortDirection.set(column === 'username' ? 'asc' : 'desc');
         }
     }
 
-    // Keep your existing methods
     loadPlayers(): void {
         this.isLoading.set(true);
         this.error.set(null);
@@ -117,7 +114,6 @@ export class PlayerInfoPageComponent implements OnInit, OnDestroy {
         this.error.set(null);
 
         try {
-            // Clean up existing subscription if any
             if (this.unsubscribeFromPlayers) {
                 this.unsubscribeFromPlayers();
             }
@@ -143,23 +139,32 @@ export class PlayerInfoPageComponent implements OnInit, OnDestroy {
     }
 
     adminBanPlayer(playerId: string): void {
-        // find player by id
         const player = this.players().find((p) => p.uid === playerId);
-        this.adminService.adminBanPlayer(playerId).subscribe({
-            next: () => {
-                this.toastr.success(`${player?.username} has been banned for 15 minutes.`);
-            },
-            error: (err) => {
-                this.toastr.error(`Failed to ban ${player?.username}. Error: ${err.message}`);
-            },
+
+        const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+            width: '400px',
+            panelClass: 'custom-container',
+            data: `Êtes-vous sûr de vouloir bannir ${player?.username} ?`,
+        });
+
+        dialogRef.afterClosed().subscribe((confirmed) => {
+            if (confirmed) {
+                // Proceed with banning the player
+                this.adminService.adminBanPlayer(playerId).subscribe({
+                    next: () => {
+                        this.toastr.success(`${player?.username} a été banni pour 15 minutes.`);
+                    },
+                    error: (err) => {
+                        this.toastr.error(`Échec du bannissement de ${player?.username}. Erreur : ${err.message}`);
+                    },
+                });
+            }
         });
     }
 
-    // Add these methods to the PlayerInfoPageComponent class
     isBanned(player: User): boolean {
         if (!player.unBanDate) return false;
 
-        // Convert Firestore Timestamp to Date if needed
         const unbanDate =
             player.unBanDate instanceof Date
                 ? player.unBanDate
@@ -183,7 +188,7 @@ export class PlayerInfoPageComponent implements OnInit, OnDestroy {
 
         // Calculate minutes left
         const now = new Date();
-        const minutesLeft = Math.ceil((unbanDate.getTime() - now.getTime()) / (60 * 1000));
+        const minutesLeft = Math.ceil((unbanDate.getTime() - now.getTime()) / MILLISECONDS_PER_MINUTE);
 
         if (minutesLeft <= 0) return 'Débloqué';
 
@@ -191,9 +196,8 @@ export class PlayerInfoPageComponent implements OnInit, OnDestroy {
     }
 
     private getUnbanDate(player: User): Date {
-        if (!player.unBanDate) return new Date(0); // Default to epoch time if no unban date
+        if (!player.unBanDate) return new Date(0);
 
-        // Convert Firestore Timestamp to Date if needed
         return player.unBanDate instanceof Date
             ? player.unBanDate
             : (player.unBanDate as any).toDate
