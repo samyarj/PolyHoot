@@ -121,10 +121,16 @@
     button {
         background: none;
         border: none;
+        &:hover {
+            transform: translateY(-2px);
+            border: var(--tertiary-color) 1px solid;
+            border-radius: 5%;
+        }
     }
     i {
         color: var(--tertiary-color);
         font-size: 2rem;
+        padding: 10px 10px;
     }
 }
 
@@ -167,19 +173,28 @@ ul.friend-menu {
         font-size: var(--navbar-font-size);
         justify-content: center;
         align-items: center;
-        padding: 10px 10px; // Adds internal spacing
     }
 }
 
 // add friend configuration
 .add-friend {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    width: 100%;
     .add-friend-button {
         background: none;
         border: none;
+        &:hover {
+            transform: translateY(-2px);
+            border: var(--tertiary-color) 1px solid;
+            border-radius: 5%;
+        }
     }
     i {
         color: var(--tertiary-color);
         font-size: 1.3rem;
+        padding: 10px 10px;
     }
 }
 
@@ -188,10 +203,16 @@ ul.friend-menu {
     .friend-list-button {
         background: none;
         border: none;
+        &:hover {
+            transform: translateY(-2px);
+            border: var(--tertiary-color) 1px solid;
+            border-radius: 5%;
+        }
     }
     i {
         color: var(--tertiary-color);
         font-size: 1.3rem;
+        padding: 10px 10px;
     }
 }
 
@@ -201,9 +222,6 @@ div.friend-request {
     align-items: center;
     list-style: none;
     width: 100%;
-    border: var(--tertiary-color) 1px solid;
-    border-radius: 5%;
-
     .friend-request-button {
         background: none;
         border: none;
@@ -211,6 +229,11 @@ div.friend-request {
         align-items: center;
         justify-content: space-between;
         width: 100%;
+        &:hover {
+            transform: translateY(-2px);
+            border: var(--tertiary-color) 1px solid;
+            border-radius: 5%;
+        }
     }
 
     li {
