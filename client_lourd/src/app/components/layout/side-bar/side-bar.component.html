@@ -64,6 +64,11 @@
                         </div>
                         <div class="search-results" *ngIf="searchResults.length > 0">
                             <div *ngFor="let user of searchResults" class="search-result-item">
+                                <app-avatar-banner
+                                    [avatarUrl]="user.avatarEquipped"
+                                    [bannerUrl]="user.borderEquipped"
+                                    class="search-result-avatar"
+                                ></app-avatar-banner>
                                 <span class="username">{{ user.username }}</span>
                                 <button class="send-request-btn" (click)="sendFriendRequest(user.id, user.username)">
                                     <i class="fa-solid fa-user-plus"></i>
@@ -84,6 +89,11 @@
                         <div class="friend-requests-list">
                             <div *ngIf="friendRequests.length === 0" class="no-requests">Aucune demande d'ami</div>
                             <div *ngFor="let friend of friendRequests" class="friend-request-item">
+                                <app-avatar-banner
+                                    [avatarUrl]="friend.avatarEquipped"
+                                    [bannerUrl]="friend.borderEquipped"
+                                    class="friend-request-avatar"
+                                ></app-avatar-banner>
                                 <span>{{ friend.username }}</span>
                                 <div class="friend-request-actions">
                                     <button class="accept-btn" (click)="acceptFriendRequest(friend.id)">
@@ -114,7 +124,20 @@
                         <div *ngIf="friends.length === 0" class="no-friends">Vous n'avez pas encore d'amis</div>
                         <ul *ngIf="friends.length > 0" class="friends-list">
                             <li *ngFor="let friend of friends" class="friend-item">
-                                <span class="friend-name">{{ friend.username }}</span>
+                                <div class="friend-avatar-container">
+                                    <app-avatar-banner
+                                        [avatarUrl]="friend.avatarEquipped"
+                                        [bannerUrl]="friend.borderEquipped"
+                                        class="friend-list-avatar"
+                                    ></app-avatar-banner>
+                                    <div class="status-indicator" [ngClass]="{ online: friend.isOnline, offline: !friend.isOnline }"></div>
+                                </div>
+                                <div class="friend-info">
+                                    <span class="friend-name">{{ friend.username }}</span>
+                                    <span class="status-text" [ngClass]="{ online: friend.isOnline, offline: !friend.isOnline }">
+                                        {{ friend.isOnline ? 'En ligne' : 'Hors ligne' }}
+                                    </span>
+                                </div>
                                 <button class="remove-friend-button" [disabled]="!userUID" (click)="userUID && removeFriend(userUID, friend.id)">
                                     <i class="fa-solid fa-user-minus"></i>
                                 </button>

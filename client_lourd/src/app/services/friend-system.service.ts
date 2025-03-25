@@ -94,7 +94,10 @@ export class FriendSystemService {
         return firstValueFrom(this.http.get<string[]>(`${this.apiUrl}/${userId}/friend-requests`, { headers }));
     }
 
-    searchUsers(searchTerm: string, currentUserId: string): Observable<{ id: string; username: string }[]> {
+    searchUsers(
+        searchTerm: string,
+        currentUserId: string,
+    ): Observable<{ id: string; username: string; avatarEquipped?: string; borderEquipped?: string }[]> {
         return new Observable((subscriber) => {
             if (!searchTerm.trim()) {
                 subscriber.next([]);
@@ -138,6 +141,8 @@ export class FriendSystemService {
                                         id: doc.id,
                                         username: doc.data()['username'],
                                         role: doc.data()['role'] || 'player',
+                                        avatarEquipped: doc.data()['avatarEquipped'] || '',
+                                        borderEquipped: doc.data()['borderEquipped'] || '',
                                     }))
                                     .filter(
                                         (user) =>
@@ -146,7 +151,12 @@ export class FriendSystemService {
                                             !pendingRequestsIds.includes(user.id) && // Exclude users with pending requests
                                             !(currentUserRole === 'player' && user.role === 'admin'), // Exclude admins if current user is player
                                     )
-                                    .map(({ id, username }) => ({ id, username })); // Remove role from final result
+                                    .map(({ id, username, avatarEquipped, borderEquipped }) => ({
+                                        id,
+                                        username,
+                                        avatarEquipped,
+                                        borderEquipped,
+                                    }));
 
                                 subscriber.next(results);
                             },

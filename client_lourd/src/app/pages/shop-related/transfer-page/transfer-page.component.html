@@ -1,5 +1,153 @@
 <div class="page-wrapper">
     <div class="content-wrapper">
-        <p>transfer-page works!</p>
+        <div class="transfer-container">
+            <div class="tabs-container">
+                <div class="tab" [class.active]="currentTab === 0" (click)="currentTab = 0">
+                    <span class="tab-number">1</span>
+                    <span class="tab-title">Choisir le destinataire</span>
+                </div>
+                <div class="tab" [class.active]="currentTab === 1" (click)="canProceedToNextTab() && currentTab !== 1 ? (currentTab = 1) : null">
+                    <span class="tab-number">2</span>
+                    <span class="tab-title">Montant des coins</span>
+                </div>
+                <div class="tab" [class.active]="currentTab === 2" (click)="canProceedToNextTab() && currentTab === 1 ? (currentTab = 2) : null">
+                    <span class="tab-number">3</span>
+                    <span class="tab-title">Finaliser</span>
+                </div>
+            </div>
+
+            <div class="content-container">
+                <!-- Tab 1: Choose recipient -->
+                <div *ngIf="currentTab === 0" class="tab-content">
+                    <h2>Choisir le destinataire</h2>
+                    <div class="search-container">
+                        <input
+                            type="text"
+                            [(ngModel)]="searchQuery"
+                            (input)="onSearchInputChange($event)"
+                            placeholder="Recherche d'ami ..."
+                            class="search-input"
+                        />
+                        <div *ngIf="searchError" class="error-message">
+                            {{ searchError }}
+                        </div>
+                    </div>
+
+                    <div class="friends-list">
+                        <h3 *ngIf="searchQuery">Résultats de la recherche</h3>
+                        <div *ngIf="searchQuery" class="search-results">
+                            <div
+                                *ngFor="let user of searchResults"
+                                class="friend-item"
+                                [class.selected]="selectedRecipient?.id === user.id"
+                                (click)="selectRecipient(user)"
+                            >
+                                <div class="avatar-banner-container">
+                                    <app-avatar-banner
+                                        [avatarUrl]="user.avatarEquipped"
+                                        [bannerUrl]="user.borderEquipped"
+                                        class="avatar"
+                                    ></app-avatar-banner>
+                                    <img class="friend-avatar" [src]="user.avatarEquipped || 'assets/images/default-avatar.png'" alt="Avatar" />
+                                    <img *ngIf="user.borderEquipped" class="friend-banner" [src]="user.borderEquipped" alt="Banner" />
+                                </div>
+                                <span class="username">{{ user.username }}</span>
+                            </div>
+                        </div>
+
+                        <h3 *ngIf="!searchQuery">Vos amis</h3>
+                        <div *ngIf="!searchQuery" class="friends">
+                            <div
+                                *ngFor="let friend of friends"
+                                class="friend-item"
+                                [class.selected]="selectedRecipient?.id === friend.id"
+                                (click)="selectRecipient(friend)"
+                            >
+                                <div class="avatar-banner-container">
+                                    <app-avatar-banner
+                                        [avatarUrl]="friend.avatarEquipped"
+                                        [bannerUrl]="friend.borderEquipped"
+                                        class="avatar"
+                                    ></app-avatar-banner>
+                                </div>
+                                <span class="username">{{ friend.username }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-navigation" id="tab1">
+                        <button
+                            class="next-button custom-button"
+                            (click)="canProceedToNextTab() ? (currentTab = 1) : null"
+                            [disabled]="!canProceedToNextTab()"
+                        >
+                            Suivant
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Amount -->
+                <div *ngIf="currentTab === 1" class="tab-content">
+                    <h2>Montant des coins</h2>
+                    <div class="amount-container">
+                        <div class="recipient-info" *ngIf="selectedRecipient">
+                            <h3>Destinataire sélectionné:</h3>
+                            <p>{{ selectedRecipient.username }}</p>
+                        </div>
+                        <div class="amount-input-container">
+                            <input
+                                type="number"
+                                [(ngModel)]="transferAmount"
+                                (input)="validateAmount($event)"
+                                placeholder="Entrez le montant"
+                                class="amount-input"
+                                min="1"
+                                step="1"
+                            />
+                            <span class="coins-label">coins</span>
+                        </div>
+                        <div class="balance-info">
+                            <p>Solde disponible: {{ userBalance }} coins</p>
+                        </div>
+                    </div>
+                    <div class="tab-navigation">
+                        <button class="back-button custom-button-cancel" (click)="currentTab = 0">Retour</button>
+                        <button
+                            class="next-button custom-button"
+                            (click)="canProceedToNextTab() ? (currentTab = 2) : null"
+                            [disabled]="!canProceedToNextTab()"
+                        >
+                            Suivant
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Finalize -->
+                <div *ngIf="currentTab === 2" class="tab-content">
+                    <h2>Finaliser la transaction</h2>
+                    <div class="transaction-summary">
+                        <div class="summary-item">
+                            <span class="label">Destinataire:</span>
+                            <span class="value">{{ selectedRecipient?.username }}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Montant:</span>
+                            <span class="value">{{ transferAmount }} coins</span>
+                        </div>
+                        <div class="summary-item" id="amount-after-transfer">
+                            <span class="label">Solde après transfert:</span>
+                            <span class="value">{{ userBalance - transferAmount }} coins</span>
+                        </div>
+                        <div class="summary-item total">
+                            <span class="label">Total:</span>
+                            <span class="value">{{ transferAmount }} coins</span>
+                        </div>
+                    </div>
+                    <div class="tab-navigation">
+                        <button class="back-button custom-button-cancel" (click)="currentTab = 1">Retour</button>
+                        <button class="confirm-button custom-button" (click)="confirmTransfer()">Confirmer le transfert</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
