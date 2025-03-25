@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
-import { Firestore, doc, onSnapshot } from '@angular/fire/firestore';
+import { doc, Firestore, onSnapshot } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { PollPlayerPopInComponent } from '@app/components/general-elements/poll-related/poll-player-pop-in/poll-player-pop-in.component';
@@ -10,7 +10,7 @@ import { User } from '@app/interfaces/user'; // Assurez-vous d'importer l'interf
 import { AuthService } from '@app/services/auth/auth.service';
 import { HistoryPublishedPollService } from '@app/services/poll-services/history-poll.service';
 import { ToastrService } from 'ngx-toastr';
-import { Observable, Subscription } from 'rxjs';
+import { filter, map, Observable, Subject, Subscription, take, takeUntil } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -25,6 +25,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     user: User | null;
     private publishedPollsSubscription: Subscription;
     private userSubscription: Subscription;
+    private destroy$ = new Subject<void>();
 
     constructor(
         private dialog: MatDialog,
@@ -89,6 +90,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         // Se désabonner des observables
         if (this.publishedPollsSubscription) this.publishedPollsSubscription.unsubscribe();
         if (this.userSubscription) this.userSubscription.unsubscribe();
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     toggleNotifications() {
@@ -99,11 +102,33 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         const dialogRef = this.dialog.open(PollPlayerPopInComponent, {
             backdropClass: 'quiz-info-popup',
             panelClass: 'custom-container',
-            data: poll,
+            data: {
+                poll,
+                pollStatus$: this.historyPublishedPollService.watchPublishedPolls().pipe(
+                    map((polls) => polls.find((p) => p.id === poll.id)),
+                    takeUntil(this.destroy$),
+                ),
+            },
         });
+        // Surveiller l'expiration du sondage
+        this.historyPublishedPollService
+            .watchPublishedPolls()
+            .pipe(
+                takeUntil(this.destroy$),
+                map((polls) => polls.find((p) => p.id === poll.id)),
+                filter((currentPoll) => currentPoll?.expired === true),
+                take(1),
+            )
+            .subscribe(() => {
+                dialogRef.close();
+            });
 
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
+                if (result === 'expired') {
+                    this.toastr.error('Ce sondage a expiré pendant que vous répondiez');
+                    return;
+                }
                 this.toastr.success('Sondage complété, voir la console pour les réponses retournées !');
                 this.http.patch<PublishedPoll[]>(`${environment.serverUrl}/published-polls/${poll.id}`, result).subscribe({
                     next: () => {

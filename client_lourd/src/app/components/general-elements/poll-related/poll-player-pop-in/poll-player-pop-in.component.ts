@@ -1,7 +1,8 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Poll } from '@app/interfaces/poll';
+import { Poll, PublishedPoll } from '@app/interfaces/poll';
 import { Question } from '@app/interfaces/question';
+import { Observable, Subject, takeUntil } from 'rxjs';
 
 enum PollState {
     NotStarted = 'not_started',
@@ -15,7 +16,7 @@ const NO_SELECTION = -1;
     templateUrl: './poll-player-pop-in.component.html',
     styleUrls: ['./poll-player-pop-in.component.scss'],
 })
-export class PollPlayerPopInComponent {
+export class PollPlayerPopInComponent implements OnInit, OnDestroy {
     state: PollState = PollState.NotStarted;
     currentQuestion: Question;
     currentIndex: number = 0;
@@ -24,14 +25,29 @@ export class PollPlayerPopInComponent {
     poll: Poll;
     isQuizValid: boolean = false;
     playerAnswer: number[] = [];
+    private destroy$ = new Subject<void>();
     // eslint-disable-next-line max-params
     constructor(
         public dialogRef: MatDialogRef<PollPlayerPopInComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: Poll, // private dialog: MatDialog,
+        @Inject(MAT_DIALOG_DATA)
+        public data: {
+            poll: PublishedPoll;
+            pollStatus$: Observable<PublishedPoll | undefined>;
+        },
     ) {
-        this.poll = data;
+        this.poll = data.poll;
     }
-
+    ngOnInit(): void {
+        this.data.pollStatus$.pipe(takeUntil(this.destroy$)).subscribe((currentPoll) => {
+            if (currentPoll?.expired) {
+                this.dialogRef.close('expired');
+            }
+        });
+    }
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
     startPoll() {
         this.currentQuestion = this.poll.questions[this.currentIndex];
         this.state = PollState.Started;
