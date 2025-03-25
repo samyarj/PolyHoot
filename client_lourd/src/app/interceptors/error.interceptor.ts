@@ -1,27 +1,55 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Auth } from '@angular/fire/auth';
 import { AuthService } from '@app/services/auth/auth.service';
 import { ToastrService } from 'ngx-toastr';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { from, Observable, throwError } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
     constructor(
         private toastr: ToastrService,
         private authService: AuthService,
+        private auth: Auth, // Add Firebase Auth service
     ) {}
 
     intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-        return next.handle(req).pipe(catchError((error: HttpErrorResponse) => this.handleError(error)));
+        // Skip authentication for these endpoints
+        const skipAuthUrls = ['/login', '/signup', '/check-email', '/check-username'];
+
+        // Don't add token if request already has it or is a public endpoint
+        if (req.headers.has('Authorization') || skipAuthUrls.some((url) => req.url.includes(url))) {
+            return next.handle(req).pipe(catchError((error: HttpErrorResponse) => this.handleError(error)));
+        }
+
+        // Get current firebase user
+        const firebaseUser = this.auth.currentUser;
+        if (!firebaseUser) {
+            return next.handle(req).pipe(catchError((error: HttpErrorResponse) => this.handleError(error)));
+        }
+
+        // Add token to the request and handle errors
+        return from(firebaseUser.getIdToken()).pipe(
+            switchMap((token) => {
+                // Clone the request with Authorization header
+                const authReq = req.clone({
+                    setHeaders: {
+                        ['Authorization']: `Bearer ${token}`,
+                    },
+                });
+                return next.handle(authReq);
+            }),
+            catchError((error: HttpErrorResponse) => this.handleError(error)),
+        );
     }
 
     private handleError(error: HttpErrorResponse): Observable<never> {
         if (error.error instanceof ErrorEvent) {
             // Client-side or network error
             console.error('Erreur coté client:', error.error.message);
-            this.toastr.error('Une erreur réseau est survenue. Veuillez réessayer.", "Erreur réseau');
+            this.toastr.error('Une erreur réseau est survenue. Veuillez réessayer.', 'Erreur réseau');
         } else {
             // Backend error
             console.error('Erreur Back-end:', error);
