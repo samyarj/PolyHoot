@@ -29,6 +29,7 @@ import { environment } from 'src/environments/environment';
 })
 export class AuthService {
     private readonly baseUrl = `${environment.serverUrl}/users`;
+    private readonly MILLISECONDS_PER_MINUTE = 60 * 1000;
     private userBS: BehaviorSubject<User | null> = new BehaviorSubject<User | null>(null);
     private googleProvider = new GoogleAuthProvider();
     private loadingTokenBS = new BehaviorSubject<boolean>(false);
@@ -61,12 +62,7 @@ export class AuthService {
                     this.reportService.getReportState(user.uid).subscribe({
                         next: (value: { message: string; isBanned: boolean }) => {
                             if (value.isBanned) {
-                                this.reportService.banInfo(value.message);
-                                this.loadingTokenBS.next(false);
-                                this.tokenBS.next(null);
-                                this.userBS.next(null);
-                                this.socketClientService.disconnect();
-                                this.logout();
+                                this.enforceBan(value.message);
                             }
                         },
                     });
@@ -347,6 +343,10 @@ export class AuthService {
                             (docSnapshot) => {
                                 if (docSnapshot.exists()) {
                                     const userData = docSnapshot.data() as User;
+
+                                    // Check if user is banned (unBanDate is in the future)
+                                    if (this.checkAndHandleBan(userData)) return;
+
                                     if (!this.clientIsIdentified) {
                                         this.socketClientService.send(ConnectEvents.IdentifyClient, firebaseUser.uid);
                                         this.clientIsIdentified = true;
@@ -397,6 +397,10 @@ export class AuthService {
                 (docSnapshot) => {
                     if (docSnapshot.exists()) {
                         const userData = docSnapshot.data() as User;
+
+                        // Check if user is banned (unBanDate is in the future)
+                        if (this.checkAndHandleBan(userData)) return;
+
                         if (!this.clientIsIdentified) {
                             this.socketClientService.send(ConnectEvents.IdentifyClient, firebaseUser.uid);
                             this.clientIsIdentified = true;
@@ -494,5 +498,41 @@ export class AuthService {
 
     private updateUserProfile(user: FirebaseUser, profileData: Partial<Pick<FirebaseUser, 'displayName' | 'photoURL'>>): Observable<void> {
         return from(updateProfile(user, profileData));
+    }
+
+    private convertToDate(dateValue: any): Date {
+        if (typeof dateValue === 'object' && dateValue !== null && 'toDate' in dateValue && typeof dateValue.toDate === 'function') {
+            return dateValue.toDate();
+        }
+        return new Date(dateValue);
+    }
+
+    /**
+     * Checks if user is banned and handles the ban enforcement
+     * @returns true if user is banned, false otherwise
+     */
+    private checkAndHandleBan(userData: User): boolean {
+        if (!userData.unBanDate) return false;
+
+        const unBanDate = this.convertToDate(userData.unBanDate);
+        const now = new Date();
+
+        if (unBanDate > now) {
+            const minutesLeft = Math.ceil((unBanDate.getTime() - now.getTime()) / this.MILLISECONDS_PER_MINUTE);
+            const message = `Vous êtes banni pendant les prochaines ${minutesLeft} minutes`;
+            this.enforceBan(message);
+            return true;
+        }
+
+        return false;
+    }
+
+    private enforceBan(message: string): void {
+        this.reportService.banInfo(message);
+        this.loadingTokenBS.next(false);
+        this.tokenBS.next(null);
+        this.userBS.next(null);
+        this.socketClientService.disconnect();
+        this.logout();
     }
 }

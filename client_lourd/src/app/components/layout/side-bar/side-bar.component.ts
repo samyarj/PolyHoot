@@ -23,7 +23,14 @@ export class SideBarComponent implements OnInit, OnDestroy {
     selectedChannelMessagesLoading: boolean = true;
     user$: Observable<User | null>;
     userUID: string | null = null;
-    friendRequests: { id: string; username: string }[] = [];
+    friendRequests: { id: string; username: string; avatarEquipped?: string; borderEquipped?: string }[] = [];
+    private globalMessagesSubscription: Subscription;
+    private selectedChannelMessagesSubscription: Unsubscribe;
+    private channelsSubscription: Subscription;
+    private userSubscription: Subscription;
+    private friendRequestsSubscription: Subscription;
+    private userDocSubscription: Unsubscribe;
+    private lastMessageDate: FieldPath;
     isFetchingOlderMessages: boolean = false;
     channels: ChatChannel[] = [];
     joinedChannels: string[] = [];
@@ -36,16 +43,10 @@ export class SideBarComponent implements OnInit, OnDestroy {
     showFriendRequests: boolean = false;
     showFriendList: boolean = false;
     searchError: string = '';
-    friends: { id: string; username: string }[] = [];
-    searchResults: { id: string; username: string }[] = [];
-    private globalMessagesSubscription: Subscription;
-    private selectedChannelMessagesSubscription: Unsubscribe;
-    private channelsSubscription: Subscription;
-    private userSubscription: Subscription;
-    private friendRequestsSubscription: Subscription;
-    private userDocSubscription: Unsubscribe;
-    private lastMessageDate: FieldPath;
+    friends: { id: string; username: string; avatarEquipped?: string; borderEquipped?: string; isOnline?: boolean }[] = [];
+    searchResults: { id: string; username: string; avatarEquipped?: string; borderEquipped?: string; isOnline?: boolean }[] = [];
     private searchSubscription: Subscription;
+    private onlineStatusSubscription: { [key: string]: () => void } = {};
 
     constructor(
         private authService: AuthService,
@@ -87,6 +88,82 @@ export class SideBarComponent implements OnInit, OnDestroy {
         });
     }
 
+    private setupRealtimeUserUpdates(uid: string) {
+        // Clean up previous subscription if it exists
+        if (this.userDocSubscription) {
+            this.userDocSubscription();
+        }
+
+        const userRef = doc(this.firestore, 'users', uid);
+        this.userDocSubscription = onSnapshot(userRef, async (docSnapshot) => {
+            if (docSnapshot.exists()) {
+                const userData = docSnapshot.data();
+
+                // Update friend requests in real-time
+                if (userData.friendRequests) {
+                    const friendRequestsData = await Promise.all(
+                        userData.friendRequests.map(async (id: string) => {
+                            const friendDoc = await getDoc(doc(this.firestore, 'users', id));
+                            const friendData = friendDoc.data();
+                            return {
+                                id,
+                                username: friendData?.username || 'Unknown User',
+                                avatarEquipped: friendData?.avatarEquipped,
+                                borderEquipped: friendData?.borderEquipped,
+                            };
+                        }),
+                    );
+                    this.friendRequests = friendRequestsData;
+                } else {
+                    this.friendRequests = [];
+                }
+
+                // Update friends list in real-time
+                if (userData.friends) {
+                    const friendsData = await Promise.all(
+                        userData.friends.map(async (id: string) => {
+                            const friendDoc = await getDoc(doc(this.firestore, 'users', id));
+                            const friendData = friendDoc.data();
+                            return {
+                                id,
+                                username: friendData?.username || 'Unknown User',
+                                avatarEquipped: friendData?.avatarEquipped,
+                                borderEquipped: friendData?.borderEquipped,
+                                isOnline: friendData?.isOnline || false,
+                            };
+                        }),
+                    );
+                    this.friends = friendsData;
+
+                    // Set up online status listeners for each friend
+                    this.setupOnlineStatusListeners(friendsData.map((friend) => friend.id));
+                } else {
+                    this.friends = [];
+                }
+            }
+        });
+    }
+
+    private setupOnlineStatusListeners(friendIds: string[]) {
+        // Clean up existing listeners
+        Object.values(this.onlineStatusSubscription).forEach((unsubscribe) => unsubscribe());
+        this.onlineStatusSubscription = {};
+
+        // Set up new listeners for each friend
+        friendIds.forEach((friendId) => {
+            const userRef = doc(this.firestore, 'users', friendId);
+            this.onlineStatusSubscription[friendId] = onSnapshot(userRef, (docSnapshot) => {
+                if (docSnapshot.exists()) {
+                    const userData = docSnapshot.data();
+                    const isOnline = userData.isOnline || false;
+
+                    // Update the friend's online status in the friends array
+                    this.friends = this.friends.map((friend) => (friend.id === friendId ? { ...friend, isOnline } : friend));
+                }
+            });
+        });
+    }
+
     ngOnDestroy(): void {
         // Unsubscribe from messages observable to avoid memory leaks
         if (this.globalMessagesSubscription) {
@@ -110,6 +187,9 @@ export class SideBarComponent implements OnInit, OnDestroy {
         if (this.searchSubscription) {
             this.searchSubscription.unsubscribe();
         }
+
+        // Clean up online status listeners
+        Object.values(this.onlineStatusSubscription).forEach((unsubscribe) => unsubscribe());
     }
 
     logout(): void {
@@ -372,51 +452,6 @@ export class SideBarComponent implements OnInit, OnDestroy {
         }
     }
 
-    private setupRealtimeUserUpdates(uid: string) {
-        // Clean up previous subscription if it exists
-        if (this.userDocSubscription) {
-            this.userDocSubscription();
-        }
-
-        const userRef = doc(this.firestore, 'users', uid);
-        this.userDocSubscription = onSnapshot(userRef, async (docSnapshot) => {
-            if (docSnapshot.exists()) {
-                const userData = docSnapshot.data();
-
-                // Update friend requests in real-time
-                if (userData.friendRequests) {
-                    const friendRequestsData = await Promise.all(
-                        userData.friendRequests.map(async (id: string) => {
-                            const friendDoc = await getDoc(doc(this.firestore, 'users', id));
-                            return {
-                                id,
-                                username: friendDoc.data()?.username || 'Unknown User',
-                            };
-                        }),
-                    );
-                    this.friendRequests = friendRequestsData;
-                } else {
-                    this.friendRequests = [];
-                }
-
-                // Update friends list in real-time
-                if (userData.friends) {
-                    const friendsData = await Promise.all(
-                        userData.friends.map(async (id: string) => {
-                            const friendDoc = await getDoc(doc(this.firestore, 'users', id));
-                            return {
-                                id,
-                                username: friendDoc.data()?.username || 'Unknown User',
-                            };
-                        }),
-                    );
-                    this.friends = friendsData;
-                } else {
-                    this.friends = [];
-                }
-            }
-        });
-    }
     private subscribeToGlobalMessages(): void {
         // Unsubscribe from previous global messages observable to avoid memory leaks
         if (this.globalMessagesSubscription) {

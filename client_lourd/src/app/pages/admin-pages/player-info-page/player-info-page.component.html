@@ -1,3 +1,131 @@
 <div class="player-info-container">
-    <div class="player-info-content">Page de consultation de liste de joueurs. Mettre ton contenu ici.</div>
+    <div class="player-info-content">
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="Rechercher un joueur..." [value]="searchTerm()" (input)="updateSearch($event)" />
+                <button class="clear-search-btn" title="Effacer" (click)="clearSearch()" [class.hidden]="!searchTerm()">✕</button>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="logs-table header-table">
+                <thead>
+                    <tr>
+                        <th class="col-player sortable" (click)="sort('username')">
+                            Joueur
+                            <span class="sort-icon" *ngIf="sortColumn() === 'username'">
+                                {{ sortDirection() === 'asc' ? '▲' : '▼' }}
+                            </span>
+                        </th>
+                        <th class="col-status sortable" (click)="sort('isOnline')">
+                            Statut
+                            <span class="sort-icon" *ngIf="sortColumn() === 'isOnline'">
+                                {{ sortDirection() === 'asc' ? '▼' : '▲' }}
+                            </span>
+                        </th>
+                        <th class="col-coins sortable" (click)="sort('coins')">
+                            Coins
+                            <span class="sort-icon" *ngIf="sortColumn() === 'coins'">
+                                {{ sortDirection() === 'asc' ? '▼' : '▲' }}
+                            </span>
+                        </th>
+                        <th class="col-wins sortable" (click)="sort('nWins')">
+                            Victoires
+                            <span class="sort-icon" *ngIf="sortColumn() === 'nWins'">
+                                {{ sortDirection() === 'asc' ? '▼' : '▲' }}
+                            </span>
+                        </th>
+                        <th class="col-reports sortable" (click)="sort('nbReport')">
+                            Signalements
+                            <span class="sort-icon" *ngIf="sortColumn() === 'nbReport'">
+                                {{ sortDirection() === 'asc' ? '▼' : '▲' }}
+                            </span>
+                        </th>
+                        <th class="col-actions sortable" (click)="sort('banned')">
+                            Bannir
+                            <span class="sort-icon" *ngIf="sortColumn() === 'banned'">
+                                {{ sortDirection() === 'asc' ? '▲' : '▼' }}
+                            </span>
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+
+            <!-- Loading indicator -->
+            <div *ngIf="isLoading()" class="loading-container">
+                <div class="loading-spinner">
+                    <div class="spinner-circle"></div>
+                    <span class="loading-text">Chargement...</span>
+                </div>
+            </div>
+
+            <!-- Error message -->
+            <div *ngIf="error()" class="error-container">
+                <div class="error-message">{{ error() }}</div>
+                <button class="retry-btn" (click)="loadPlayers()">Réessayer</button>
+            </div>
+
+            <!-- Table body with dynamic data -->
+            <div *ngIf="!isLoading() && !error()" class="table-body-container">
+                <table class="logs-table body-table">
+                    <tbody>
+                        <tr *ngFor="let player of filteredPlayers()">
+                            <td class="col-player">
+                                <div class="player-info">
+                                    <!-- Default avatar with initials when no avatar is equipped -->
+                                    <div *ngIf="!player.avatarEquipped" class="player-avatar">
+                                        {{ player.username.substring(0, 2).toUpperCase() }}
+                                    </div>
+
+                                    <!-- Wrap the avatar-banner in a container div -->
+                                    <div *ngIf="player.avatarEquipped" class="avatar-wrapper">
+                                        <app-avatar-banner
+                                            [avatarUrl]="player.avatarEquipped"
+                                            [bannerUrl]="player.borderEquipped"
+                                            class="player-avatar-img"
+                                        >
+                                        </app-avatar-banner>
+                                    </div>
+
+                                    <span>{{ player.username }}</span>
+                                </div>
+                            </td>
+                            <td class="col-status">
+                                <span class="status-badge" [class.online]="player.isOnline" [class.offline]="!player.isOnline">
+                                    {{ player.isOnline ? 'En ligne' : 'Hors ligne' }}
+                                </span>
+                            </td>
+                            <td class="col-coins">
+                                <div class="coin-display">
+                                    <span>{{ player.coins || 0 }}</span>
+                                </div>
+                            </td>
+                            <td class="col-wins">
+                                <div class="wins-display">
+                                    <span>{{ player.nWins || 0 }}</span>
+                                </div>
+                            </td>
+                            <td class="col-reports">{{ player.nbReport || 0 }}</td>
+                            <td class="col-actions">
+                                <button *ngIf="!isBanned(player)" class="action-btn ban-btn" title="Bannir" (click)="adminBanPlayer(player.uid)">
+                                    <span>🚫</span>
+                                </button>
+                                <span *ngIf="isBanned(player)" class="ban-timer" title="Utilisateur banni">
+                                    {{ formatUnbanDate(player) }}
+                                </span>
+                            </td>
+                        </tr>
+
+                        <!-- Show message when no players are found -->
+                        <tr *ngIf="filteredPlayers().length === 0">
+                            <td colspan="6" class="no-players-message">
+                                {{ players().length === 0 ? 'Aucun joueur trouvé' : 'Aucun joueur ne correspond à votre recherche' }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>

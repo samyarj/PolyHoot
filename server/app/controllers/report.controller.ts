@@ -1,10 +1,10 @@
+import { BAN_DURATION_MS } from '@app/constants';
 import { AuthGuard } from '@app/guards/auth/auth.guard';
 import { AuthenticatedRequest } from '@app/interface/authenticated-request';
 import { UserService } from '@app/services/auth/user.service';
 import { Body, Controller, HttpStatus, Logger, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiInternalServerErrorResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-
 @ApiTags('Report')
 @Controller('report')
 export class ReportController {
@@ -42,5 +42,14 @@ export class ReportController {
 
             response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
         }
+    }
+
+    @ApiOkResponse({ description: 'Player banned successfully by admin' })
+    @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+    @Post('/ban-player')
+    async adminBanPlayer(@Body() { playerId }: { playerId: string }) {
+        const unbanDate = new Date(Date.now() + BAN_DURATION_MS);
+        await this.userService.adminBanPlayer(playerId, unbanDate);
+        return { message: `Player ${playerId} banned until ${unbanDate}` };
     }
 }
