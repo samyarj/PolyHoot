@@ -1,4 +1,4 @@
-import { AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MAX_CHAR } from '@app/constants/constants';
 import { AuthService } from '@app/services/auth/auth.service';
 import { ChatEvents } from '@app/services/chat-services/chat-events';
@@ -15,6 +15,15 @@ import { Observer, Subscription } from 'rxjs';
 })
 export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
     @ViewChild('previousMessages') private previousMessagesContainer: ElementRef;
+    @Input() parentAction!: () => void; // Function passed from the parent
+
+    // Trigger the function when needed (e.g., on some event)
+    triggerParentAction() {
+        if (this.parentAction) {
+            this.parentAction(); // This will call the parent's function
+        }
+    }
+
     inputMessage = '';
     containerHasChanged: boolean = false;
     chatMessages: ChatMessage[] = [];
@@ -114,6 +123,9 @@ export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
     ngOnDestroy(): void {
         if (this.messagesSubscription) this.messagesSubscription.unsubscribe();
         if (this.chatEventsSubscription) this.chatEventsSubscription.unsubscribe();
+        console.log('Child component destroyed!');
+        // Emit the event when the component is destroyed
+        this.triggerParentAction();
     }
 
     isLengthInRange() {

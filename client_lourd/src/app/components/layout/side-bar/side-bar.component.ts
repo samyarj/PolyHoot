@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { doc, FieldPath, Firestore, getDoc, onSnapshot, Unsubscribe } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { FirebaseChatMessage } from '@app/interfaces/chat-message';
@@ -54,8 +54,9 @@ export class SideBarComponent implements OnInit, OnDestroy {
     gameChatMessages: ChatMessage[] = [];
     private gameChatSubscription: Subscription;
     private chatEventsSubscription: Subscription;
-    private isGameChatInitialized: boolean = false;
-
+    isGameChatInitialized: boolean = false;
+    @ViewChild('tab1Link') tab1Link: any;
+    activeTab: number = 1;
     constructor(
         private authService: AuthService,
         private router: Router,
@@ -72,10 +73,22 @@ export class SideBarComponent implements OnInit, OnDestroy {
         return this.headerService.isGameRelatedRoute;
     }
 
+    setActiveTab(tab: number) {
+        this.activeTab = tab;
+    }
+
+    handleChildAction() {
+        console.log('Action executed in the parent component!');
+        if (this.activeTab === 2) this.tab1Link.nativeElement.click();
+    }
+
+    getBoundHandleChildAction() {
+        return this.handleChildAction.bind(this); // Bind to the parent's context
+    }
+
     ngOnInit(): void {
         // Subscribe to live chat messages for the global chat
         this.subscribeToGlobalMessages();
-
         // Subscribe to chat channels
         this.channelsSubscription = this.firebaseChatService.fetchAllChannels().subscribe({
             next: (channels) => {

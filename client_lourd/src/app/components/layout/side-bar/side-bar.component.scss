@@ -377,10 +377,15 @@ img.global-channels-icon {
     border: 2px solid transparent;
     transition: all 0.3s ease;
     padding: 10px 15px;
+    transition:
+        width 0.25s ease-in-out,
+        transform 0.25s ease-in-out,
+        border 0.25s ease-in-out,
+        text-shadow 0.25s ease-in-out;
 
     &:hover {
         text-shadow: 0 0 3px var(--tertiary-color);
-        transform: translateY(-2px);
+        transform: translateY(-1px);
     }
 
     &.active {
