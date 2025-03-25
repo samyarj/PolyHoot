@@ -6,6 +6,7 @@ dotenv.config({ path: '../../../.env' });
 @Injectable()
 export class QuickReplyService {
     private groq: any;
+    private conversationContexts: Map<string, { role: string; content: string }[]> = new Map(); // Store contexts for multiple channels
 
     constructor() {
         const apiKey = process.env.GROQ_API_KEY;
@@ -15,13 +16,13 @@ export class QuickReplyService {
         this.groq = new Groq({ apiKey });
     }
 
-    async generateQuickReplies(user: string, context: string): Promise<string[]> {
-        try {
-            const chatCompletion = await this.groq.chat.completions.create({
-                messages: [
-                    {
-                        role: 'system',
-                        content: `You are a quick reply generator for a chat application. Your client is a user in that chat.
+    private initializeContext(channelId: string) {
+        if (!this.conversationContexts.has(channelId)) {
+            // Initialize the conversation context with the system prompt for the channel
+            this.conversationContexts.set(channelId, [
+                {
+                    role: 'system',
+                    content: `You are a quick reply generator for a chat application. Your client is a user in that chat.
 Input Requirements:
 1. The user will provide their name.
 2. The user will describe the context of the conversation, including who said what and any relevant emotions or tones (e.g., happy, frustrated, casual).
@@ -39,14 +40,30 @@ Expected Output:
 {
   "quick_replies": ["Hello! 👋", "Nice to meet you! 😊", "How are you? 🤔"]
 }`,
-                    },
-                    {
-                        role: 'user',
-                        content: `1. I am user: ${user}
+                },
+            ]);
+        }
+    }
+
+    async generateQuickReplies(channelId: string, user: string, message: string): Promise<string[]> {
+        try {
+            // Initialize the context for the channel if it doesn't exist
+            this.initializeContext(channelId);
+
+            // Get the conversation context for the channel
+            const context = this.conversationContexts.get(channelId);
+
+            // Add the user's message to the conversation context
+            context?.push({
+                role: 'user',
+                content: `1. I am user: ${user}
 2. Here is the context:
-${context}`,
-                    },
-                ],
+${message}`,
+            });
+
+            // Send the conversation context to the LLM
+            const chatCompletion = await this.groq.chat.completions.create({
+                messages: context,
                 model: 'mistral-saba-24b',
                 temperature: 1,
                 max_completion_tokens: 1024,
@@ -57,10 +74,27 @@ ${context}`,
 
             const response = chatCompletion.choices[0]?.message?.content;
             const parsedResponse = JSON.parse(response);
+
+            // Add the assistant's reply to the conversation context
+            context?.push({
+                role: 'assistant',
+                content: response,
+            });
+
             return parsedResponse.quick_replies;
         } catch (error) {
             console.error('Error generating quick replies:', error);
             throw new Error('Failed to generate quick replies');
+        }
+    }
+
+    resetConversationContext(channelId: string) {
+        // Reset the context for a specific channel
+        if (this.conversationContexts.has(channelId)) {
+            const context = this.conversationContexts.get(channelId);
+            if (context) {
+                this.conversationContexts.set(channelId, context.slice(0, 1)); // Keep only the system prompt
+            }
         }
     }
 }
