@@ -25,7 +25,7 @@ export class SideBarComponent implements OnInit, OnDestroy {
     selectedChannelMessagesLoading: boolean = true;
     user$: Observable<User | null>;
     userUID: string | null = null;
-    friendRequests: { id: string; username: string }[] = [];
+    friendRequests: { id: string; username: string; avatarEquipped?: string; borderEquipped?: string }[] = [];
     private globalMessagesSubscription: Subscription;
     private selectedChannelMessagesSubscription: Unsubscribe;
     private channelsSubscription: Subscription;
@@ -46,9 +46,10 @@ export class SideBarComponent implements OnInit, OnDestroy {
     showFriendRequests: boolean = false;
     showFriendList: boolean = false;
     searchError: string = '';
-    friends: { id: string; username: string }[] = [];
-    searchResults: { id: string; username: string }[] = [];
+    friends: { id: string; username: string; avatarEquipped?: string; borderEquipped?: string; isOnline?: boolean }[] = [];
+    searchResults: { id: string; username: string; avatarEquipped?: string; borderEquipped?: string; isOnline?: boolean }[] = [];
     private searchSubscription: Subscription;
+    private onlineStatusSubscription: { [key: string]: () => void } = {};
 
     gameChatMessages: ChatMessage[] = [];
     private gameChatSubscription: Subscription;
@@ -134,9 +135,12 @@ export class SideBarComponent implements OnInit, OnDestroy {
                     const friendRequestsData = await Promise.all(
                         userData.friendRequests.map(async (id: string) => {
                             const friendDoc = await getDoc(doc(this.firestore, 'users', id));
+                            const friendData = friendDoc.data();
                             return {
                                 id,
-                                username: friendDoc.data()?.username || 'Unknown User',
+                                username: friendData?.username || 'Unknown User',
+                                avatarEquipped: friendData?.avatarEquipped,
+                                borderEquipped: friendData?.borderEquipped,
                             };
                         }),
                     );
@@ -150,17 +154,44 @@ export class SideBarComponent implements OnInit, OnDestroy {
                     const friendsData = await Promise.all(
                         userData.friends.map(async (id: string) => {
                             const friendDoc = await getDoc(doc(this.firestore, 'users', id));
+                            const friendData = friendDoc.data();
                             return {
                                 id,
-                                username: friendDoc.data()?.username || 'Unknown User',
+                                username: friendData?.username || 'Unknown User',
+                                avatarEquipped: friendData?.avatarEquipped,
+                                borderEquipped: friendData?.borderEquipped,
+                                isOnline: friendData?.isOnline || false,
                             };
                         }),
                     );
                     this.friends = friendsData;
+
+                    // Set up online status listeners for each friend
+                    this.setupOnlineStatusListeners(friendsData.map((friend) => friend.id));
                 } else {
                     this.friends = [];
                 }
             }
+        });
+    }
+
+    private setupOnlineStatusListeners(friendIds: string[]) {
+        // Clean up existing listeners
+        Object.values(this.onlineStatusSubscription).forEach((unsubscribe) => unsubscribe());
+        this.onlineStatusSubscription = {};
+
+        // Set up new listeners for each friend
+        friendIds.forEach((friendId) => {
+            const userRef = doc(this.firestore, 'users', friendId);
+            this.onlineStatusSubscription[friendId] = onSnapshot(userRef, (docSnapshot) => {
+                if (docSnapshot.exists()) {
+                    const userData = docSnapshot.data();
+                    const isOnline = userData.isOnline || false;
+
+                    // Update the friend's online status in the friends array
+                    this.friends = this.friends.map((friend) => (friend.id === friendId ? { ...friend, isOnline } : friend));
+                }
+            });
         });
     }
 
@@ -193,6 +224,9 @@ export class SideBarComponent implements OnInit, OnDestroy {
         if (this.chatEventsSubscription) {
             this.chatEventsSubscription.unsubscribe();
         }
+
+        // Clean up online status listeners
+        Object.values(this.onlineStatusSubscription).forEach((unsubscribe) => unsubscribe());
     }
 
     logout(): void {
