@@ -265,6 +265,28 @@ img.global-channels-icon {
     height: 20px;
 }
 
+.nav-tabs {
+    border-bottom: 2px solid var(--active-bg);
+}
+
+.nav-link {
+    color: var(--tertiary-color);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    padding: 10px 15px;
+
+    &:hover {
+        border-color: var(--active-bg);
+        transform: translateY(-2px);
+    }
+
+    &.active {
+        background-color: var(--active-bg);
+        border: var(--active-bg) 2px solid;
+        color: var(--tertiary-color);
+    }
+}
+
 #tab1 {
     color: var(--tertiary-color);
     font-style: italic;
@@ -286,63 +308,181 @@ img.global-channels-icon {
 #tab4-1 {
     color: var(--tertiary-color);
     font-style: italic;
-    max-height: 450px; // Set the maximum height for the list
-    overflow-y: auto; // Enable vertical scrolling
+    max-height: 450px;
+    overflow-y: auto;
+    padding: 20px;
+
+    &::-webkit-scrollbar {
+        width: 13px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--active-bg);
+        border-radius: 12px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: var(--nav-bg);
+        border-radius: 12px;
+    }
+
     input {
-        width: 98%;
+        width: 100%;
+        padding: 0.8rem;
         border: 1px solid var(--tertiary-color);
-        border-radius: 5px;
+        border-radius: 30px;
+        font-size: 1rem;
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        margin-bottom: 1rem;
+
+        &:focus {
+            outline: none;
+            border-color: var(--tertiary-color);
+        }
+    }
+
+    .channel-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px 0;
+
+        .my-channels {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            border: 2px solid var(--secondary-color);
+            border-radius: 30px;
+            color: var(--tertiary-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+            &:hover {
+                background-color: var(--tertiary-color);
+                color: var(--primary-color);
+                transform: translateY(-2px);
+            }
+
+            .channel-buttons {
+                display: flex;
+                gap: 10px;
+
+                button {
+                    background: none;
+                    border: none;
+                    color: var(--tertiary-color);
+                    font-size: 1rem;
+                    padding: 5px 10px;
+                    border-radius: 20px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+
+                    &:hover {
+                        background-color: var(--secondary-color);
+                        color: var(--primary-color);
+                        transform: translateY(-2px);
+                    }
+                }
+            }
+        }
     }
 }
+
 #tab4-2 {
     color: var(--tertiary-color);
     font-style: italic;
-    max-height: 450px; // Set the maximum height for the list
-    overflow-y: auto; // Enable vertical scrolling
+    max-height: 450px;
+    overflow-y: auto;
+    padding: 20px;
+
+    &::-webkit-scrollbar {
+        width: 13px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--active-bg);
+        border-radius: 12px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: var(--nav-bg);
+        border-radius: 12px;
+    }
+
     input {
-        width: 98%;
+        width: 100%;
+        padding: 0.8rem;
         border: 1px solid var(--tertiary-color);
-        border-radius: 5px;
-    }
-}
-.my-channels,
-.join-channels {
-    display: flex;
-    visibility: visible;
-    list-style: none;
-    justify-content: space-between;
-    color: var(--tertiary-color);
-    padding: 10px; // Add some padding for better hover effect
-    cursor: pointer; // Change cursor to pointer to indicate clickable items
-    width: 100%;
-    transition:
-        background-color 0.3s,
-        color 0.3s; // Smooth transition for hover effect
-    box-sizing: border-box;
+        border-radius: 30px;
+        font-size: 1rem;
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        margin-bottom: 1rem;
 
-    &:hover {
-        background-color: var(--secondary-color); // Change background color on hover
-        color: var(--primary-color); // Change text color on hover
+        &:focus {
+            outline: none;
+            border-color: var(--tertiary-color);
+        }
     }
-}
-.channel-list {
-    list-style: none;
-    color: var(--tertiary-color);
-    width: 100%;
-}
 
-// Nested tabs container
-.nested-tabs-container {
-    display: flex;
-    flex-direction: column;
+    .channel-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px 0;
+
+        .join-channels {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            border: 2px solid var(--secondary-color);
+            border-radius: 30px;
+            color: var(--tertiary-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+            &:hover {
+                background-color: var(--tertiary-color);
+                color: var(--primary-color);
+                transform: translateY(-2px);
+            }
+
+            button {
+                background: none;
+                border: none;
+                color: var(--tertiary-color);
+                font-size: 1rem;
+                padding: 5px 10px;
+                border-radius: 20px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+
+                &:hover {
+                    background-color: var(--secondary-color);
+                    color: var(--primary-color);
+                    transform: translateY(-2px);
+                }
+            }
+        }
+    }
 }
 
 .no-channels-message {
-    p {
-        padding-top: 15px;
-        color: var(--tertiary-color);
-    }
+    text-align: center;
+    padding: 20px;
+    color: var(--tertiary-color);
+    font-style: italic;
+    background-color: var(--primary-color);
+    border-radius: 30px;
+    margin: 10px 0;
+    border: 2px solid var(--secondary-color);
 }
+
 .delete-channel-button,
 .leave-channel-button {
     background: none;
@@ -361,28 +501,60 @@ img.global-channels-icon {
     .create-channel-form {
         display: flex;
         flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        padding: 20px;
     }
     form {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        width: 100%;
+        max-width: 400px;
     }
     input {
-        width: 98%;
-        padding: 10px;
-        margin: 10px 0;
+        width: 100%;
+        padding: 0.8rem;
         border: 1px solid var(--tertiary-color);
-        border-radius: 5px;
+        border-radius: 30px;
+        font-size: 1rem;
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        margin-bottom: 1rem;
+
+        &:focus {
+            outline: none;
+            border-color: var(--tertiary-color);
+        }
     }
     button {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
         background-color: var(--tertiary-color);
         color: var(--primary-color);
-        padding: 10px 20px;
         border: none;
-        border-radius: 5px;
+        border-radius: 30px;
         cursor: pointer;
+        transition: all 0.3s ease;
         width: 50%;
+
+        &:hover {
+            transform: translateY(-2px);
+            background-color: var(--secondary-color);
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+    }
+    .error-message {
+        color: #dc3545;
+        text-align: center;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
     }
 }
 
