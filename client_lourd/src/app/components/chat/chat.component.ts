@@ -5,6 +5,7 @@ import { ChatEvents } from '@app/services/chat-services/chat-events';
 import { ChatService } from '@app/services/chat-services/chat.service';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
 import { ChatMessage } from '@common/chat-message';
+import { ToastrService } from 'ngx-toastr';
 import { Observer, Subscription } from 'rxjs';
 
 @Component({
@@ -17,6 +18,7 @@ export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
     inputMessage = '';
     containerHasChanged: boolean = false;
     chatMessages: ChatMessage[] = [];
+    chatMessagesLoading: boolean = false;
     messagesObserver: Partial<Observer<ChatMessage[]>> = {
         next: (newChatMessages: ChatMessage[]) => {
             this.chatMessages = newChatMessages;
@@ -30,6 +32,7 @@ export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
         private chatService: ChatService,
         private messageHandlerService: MessageHandlerService,
         private authService: AuthService,
+        private toastr: ToastrService,
     ) {}
 
     get user() {
@@ -70,6 +73,10 @@ export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
         }
     }
 
+    onScroll() {
+        // Implement scroll handling if needed
+    }
+
     sendMessageToRoom() {
         if (this.isLengthInRange() && this.isNotEmpty()) {
             const hasBeenSent: boolean = this.chatService.sendMessageToRoom(this.inputMessage);
@@ -78,6 +85,30 @@ export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
                 this.messageHandlerService.popUpErrorDialog('Vous ne pouvez pas envoyer de message sans être dans une partie');
             }
         }
+    }
+
+    reportUser(uid: string) {
+        this.authService
+            .getReportService()
+            .reportPlayer(uid)
+            .subscribe({
+                next: (value: boolean | null) => {
+                    switch (value) {
+                        case true: {
+                            this.toastr.success('Merci pour votre contribution à la bonne atmosphère du jeu. Le joueur est signalé.');
+                            break;
+                        }
+                        case false: {
+                            this.toastr.info('Vous avez déjà signalé cet utilisateur.');
+                            break;
+                        }
+                        case null: {
+                            this.toastr.info('Vous ne pouvez pas signaler un administrateur.');
+                            break;
+                        }
+                    }
+                },
+            });
     }
 
     ngOnDestroy(): void {

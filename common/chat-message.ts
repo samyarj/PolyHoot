@@ -3,4 +3,6 @@ export interface ChatMessage {
     author: string;
     date?: Date;
     uid?: string;
+    avatar?: string;
+    banner?: string;
 }
