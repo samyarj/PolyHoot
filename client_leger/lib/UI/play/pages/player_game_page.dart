@@ -65,7 +65,6 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
               extra: resultPlayerList);
         });
       } else if (next.organizerDisconnected == true) {
-        AppLogger.w("ORGANIZER DISCONNECTED");
         showToast(context, "L'organisateur a quitté la partie.");
         _socketManager.isPlaying = false;
         GoRouter.of(context).go(Paths.play);
@@ -87,9 +86,9 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
           ),
         ),
         padding: const EdgeInsets.all(16),
-        height: 670,
+        // height: 670,
         child: Container(
-          height: 670,
+          // height: 670,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(30),
             border: Border.all(
@@ -102,7 +101,6 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // question area
               QuestionArea(
                 paused: playerGameState.gamePaused,
                 time: playerGameState.time,
@@ -112,34 +110,115 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
                 isWaitingForQuestion:
                     playerGameState.playerInfo.waitingForQuestion,
               ),
-              SizedBox(height: 32),
+
+              SizedBox(height: 16),
+
+              // QCM
               if (playerGameState.currentQuestion.type == QuestionType.QCM.name)
-                ...playerGameState.currentQuestion.choices!
-                    .asMap()
-                    .entries
-                    .map((entry) {
-                  int choiceIndex = entry.key;
-                  final choice = entry.value;
-                  return ListTile(
-                    title: Text(choice.text,
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: playerGameState.realShowAnswers
-                                ? (choice.isCorrect!
-                                    ? Colors.green
-                                    : Colors.red)
-                                : colorScheme.onSurface)),
-                    leading: Checkbox(
-                      value: playerGameState
-                          .playerInfo.choiceSelected[choiceIndex],
-                      onChanged: (value) {
-                        setState(() {
-                          playerGameNotifier.selectChoice(choiceIndex);
-                        });
-                      },
+                Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withAlpha(125),
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(
+                      color: colorScheme.tertiary
+                          .withValues(alpha: 0.3), // Border color
+                      width: 2, // Border width
                     ),
-                  );
-                }),
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: Column(
+                    children: [
+                      buildFeedbackMessage(
+                          playerGameState.choiceFeedback,
+                          playerGameState.currentQuestion,
+                          playerGameState.playerInfo.submitted),
+                      SizedBox(height: 6),
+                      Container(
+                        decoration: BoxDecoration(
+                          color:
+                              colorScheme.tertiary.withAlpha(38), // 15% opacity
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        padding: const EdgeInsets.all(15),
+                        child: GridView.count(
+                          shrinkWrap: true,
+                          crossAxisCount: 2,
+                          childAspectRatio: 6,
+                          mainAxisSpacing: 4,
+                          crossAxisSpacing: 4,
+                          children: [
+                            ...playerGameState.currentQuestion.choices!
+                                .asMap()
+                                .entries
+                                .map((entry) {
+                              int choiceIndex = entry.key;
+                              final choice = entry.value;
+                              final isSelected = playerGameState
+                                  .playerInfo.choiceSelected[choiceIndex];
+
+                              return GestureDetector(
+                                onTap: () => setState(() {
+                                  playerGameNotifier.selectChoice(choiceIndex);
+                                }),
+                                child: Container(
+                                  // width: 50,
+                                  // height: 50,
+                                  decoration: BoxDecoration(
+                                    color: playerGameState.realShowAnswers
+                                        ? (choice.isCorrect!
+                                            ? Colors.green
+                                            : Colors.red)
+                                        : isSelected
+                                            ? colorScheme.tertiary
+                                            : colorScheme.primary.withAlpha(
+                                                153), // 153 is approximately 60% opacity
+                                    borderRadius: getBorderRadius(choiceIndex),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 8),
+                                  alignment: Alignment.center,
+                                  child: SingleChildScrollView(
+                                    child: Text(
+                                      choice.text,
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          color: isSelected
+                                              ? colorScheme.primary
+                                              : colorScheme.onPrimary),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: isSubmissionDisabled(playerGameState)
+                            ? null
+                            : () {
+                                playerGameNotifier.finalizeAnswer();
+                                if (playerGameState.currentQuestion.type ==
+                                    QuestionType.QRL.name) {
+                                  playerGameNotifier.sendAnswerForCorrection(
+                                      _QRLanswerController.text);
+                                  _QRLanswerController.clear();
+                                }
+                              },
+                        style: isSubmissionDisabled(playerGameState)
+                            ? null
+                            : getButtonStyle(context),
+                        child: Text(
+                          "Soumettre",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Theme.of(context).colorScheme.tertiary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
               // QRL container
               if (playerGameState.currentQuestion.type == QuestionType.QRL.name)
@@ -266,29 +345,30 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
               //     playerGameState.currentQuestion,
               //     playerGameState.playerInfo.submitted),
               SizedBox(height: 4),
-              ElevatedButton(
-                onPressed: isSubmissionDisabled(playerGameState)
-                    ? null
-                    : () {
-                        playerGameNotifier.finalizeAnswer();
-                        if (playerGameState.currentQuestion.type ==
-                            QuestionType.QRL.name) {
-                          playerGameNotifier.sendAnswerForCorrection(
-                              _QRLanswerController.text);
-                          _QRLanswerController.clear();
-                        }
-                      },
-                style: isSubmissionDisabled(playerGameState)
-                    ? null
-                    : getButtonStyle(context),
-                child: Text(
-                  "Soumettre",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Theme.of(context).colorScheme.tertiary,
+              if (playerGameState.currentQuestion.type != QuestionType.QCM.name)
+                ElevatedButton(
+                  onPressed: isSubmissionDisabled(playerGameState)
+                      ? null
+                      : () {
+                          playerGameNotifier.finalizeAnswer();
+                          if (playerGameState.currentQuestion.type ==
+                              QuestionType.QRL.name) {
+                            playerGameNotifier.sendAnswerForCorrection(
+                                _QRLanswerController.text);
+                            _QRLanswerController.clear();
+                          }
+                        },
+                  style: isSubmissionDisabled(playerGameState)
+                      ? null
+                      : getButtonStyle(context),
+                  child: Text(
+                    "Soumettre",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).colorScheme.tertiary,
+                    ),
                   ),
                 ),
-              ),
               Align(
                 alignment: Alignment.bottomRight,
                 child: ElevatedButton(
@@ -334,4 +414,23 @@ bool isSubmissionDisabled(GamePlayerState playerGameState) {
       playerGameState.choiceFeedback == ChoiceFeedback.AwaitingCorrection ||
       playerGameState.choiceFeedback == ChoiceFeedback.Incorrect ||
       playerGameState.realShowAnswers;
+}
+
+BorderRadius getBorderRadius(int index) {
+  if (index == 0) {
+    return BorderRadius.only(
+      topLeft: Radius.circular(30),
+    );
+  } else if (index == 1) {
+    return BorderRadius.only(
+      topRight: Radius.circular(30),
+    );
+  } else if (index == 2) {
+    return BorderRadius.only(
+      bottomLeft: Radius.circular(30),
+    );
+  }
+  return BorderRadius.only(
+    bottomRight: Radius.circular(30),
+  );
 }
