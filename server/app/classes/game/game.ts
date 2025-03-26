@@ -186,7 +186,6 @@ export class Game {
     getReward(isWinner: boolean): Reward {
         if (isWinner) {
             const result = Math.random(); // 50% chance to get coins, 50% to get border
-            console.log(result);
             if (result < 0.15) {
                 return {
                     type: RewardType.Border,

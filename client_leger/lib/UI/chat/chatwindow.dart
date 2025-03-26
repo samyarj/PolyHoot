@@ -318,10 +318,12 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                                   BoxFit.cover,
                                                             ),
                                                             SizedBox(width: 8),
-                                                            Text(
-                                                              message.username ??
-                                                                  "Unknown",
-                                                              style: TextStyle(
+                                                            Expanded(
+                                                              child: Text(
+                                                                message.username ??
+                                                                    "Unknown",
+                                                                style:
+                                                                    TextStyle(
                                                                   color: isUserMessage
                                                                       ? colorScheme
                                                                           .onSecondary
@@ -330,7 +332,14 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                                   fontSize: 18,
                                                                   fontWeight:
                                                                       FontWeight
-                                                                          .bold),
+                                                                          .bold,
+                                                                ),
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis, // Prevents text overflow
+                                                                softWrap:
+                                                                    false, // Keeps text in one line
+                                                              ),
                                                             ),
                                                           ],
                                                         ),

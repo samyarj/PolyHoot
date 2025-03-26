@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:client_leger/backend-communication-services/environment.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
+import 'package:client_leger/models/enums.dart';
 import 'package:client_leger/models/shop/shop-item-model.dart';
 import 'package:client_leger/providers/user_provider.dart';
-import 'package:client_leger/utilities/enums.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_riverpod/flutter_riverpod.dart';

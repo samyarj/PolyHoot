@@ -29,60 +29,75 @@ class PreviewSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final size = MediaQuery.of(context).size;
-    final previewSize = size.width * 0.20;
+
+    // Adjust preview size based on available height
+    final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+    final previewSize = isKeyboardVisible
+        ? size.width * 0.12 // Smaller when keyboard is visible
+        : size.width * 0.20;
 
     return Padding(
       padding: const EdgeInsets.all(20.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // Preview container
-          Container(
-            width: previewSize,
-            height: previewSize,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(previewSize),
-              boxShadow: [
-                BoxShadow(
-                  color: colorScheme.tertiary.withOpacity(0.3),
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                  //inset: true,
-                ),
-              ],
+      // Make the column scrollable to handle overflow
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min, // Don't force expansion
+          children: [
+            // Preview container
+            Container(
+              width: previewSize,
+              height: previewSize,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(previewSize),
+                boxShadow: [
+                  BoxShadow(
+                    color: colorScheme.tertiary.withOpacity(0.3),
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: _buildPreviewContent(context),
             ),
-            child: _buildPreviewContent(context),
-          ),
 
-          // Message when nothing is selected
-          if (!canEquip && !waitingForServerEquip)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Text(
-                'Veuillez sélectionner un avatar, une bordure d\'avatar ou bien un thème pour la prévoir avant de l\'équiper.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: colorScheme.onPrimary,
+            const SizedBox(height: 16), // Consistent spacing
+
+            // Message when nothing is selected
+            if (!canEquip && !waitingForServerEquip)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Text(
+                  'Veuillez sélectionner un avatar, une bordure d\'avatar ou bien un thème pour la prévoir avant de l\'équiper.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: colorScheme.onPrimary,
+                    fontSize: isKeyboardVisible
+                        ? 12
+                        : 14, // Smaller text when keyboard is visible
+                  ),
                 ),
               ),
-            ),
 
-          // Message when waiting for server
-          if (!canEquip && waitingForServerEquip)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Text(
-                'En attente de synchronisation des données avec le serveur.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: colorScheme.onPrimary,
+            // Message when waiting for server
+            if (!canEquip && waitingForServerEquip)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Text(
+                  'En attente de synchronisation des données avec le serveur.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: colorScheme.onPrimary,
+                    fontSize: isKeyboardVisible ? 12 : 14,
+                  ),
                 ),
               ),
-            ),
 
-          // Equip button
-          _buildEquipButton(context),
-        ],
+            const SizedBox(height: 16), // Consistent spacing
+
+            // Equip button
+            _buildEquipButton(context, isKeyboardVisible),
+          ],
+        ),
       ),
     );
   }
@@ -100,7 +115,7 @@ class PreviewSection extends StatelessWidget {
     }
   }
 
-  Widget _buildEquipButton(BuildContext context) {
+  Widget _buildEquipButton(BuildContext context, bool isKeyboardVisible) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return ElevatedButton(
@@ -108,7 +123,9 @@ class PreviewSection extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
-        minimumSize: const Size(200, 50),
+        // Adjust button size when keyboard is visible
+        minimumSize:
+            isKeyboardVisible ? const Size(150, 40) : const Size(200, 50),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(25),
           side: BorderSide(
@@ -121,8 +138,8 @@ class PreviewSection extends StatelessWidget {
       ),
       child: Text(
         !canEquip ? 'En attente de choix' : 'Équiper',
-        style: const TextStyle(
-          fontSize: 16,
+        style: TextStyle(
+          fontSize: isKeyboardVisible ? 14 : 16,
           fontWeight: FontWeight.bold,
         ),
       ),

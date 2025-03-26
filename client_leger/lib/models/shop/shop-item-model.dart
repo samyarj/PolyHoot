@@ -1,4 +1,4 @@
-import 'package:client_leger/utilities/enums.dart';
+import 'package:client_leger/models/enums.dart';
 
 class ShopItem {
   final String name;

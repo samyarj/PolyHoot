@@ -12,8 +12,8 @@ class AvatarBannerWidget extends StatelessWidget {
     this.avatarUrl,
     this.bannerUrl,
     this.size = 100.0,
-    this.avatarFit = BoxFit.cover,
-    this.bannerFit = BoxFit.cover,
+    this.avatarFit = BoxFit.contain, // Changed from cover to contain
+    this.bannerFit = BoxFit.contain, // Changed from cover to contain
   }) : super(key: key);
 
   @override
@@ -42,6 +42,8 @@ class AvatarBannerWidget extends StatelessWidget {
         height: avatarSize,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
+          color: colorScheme.primary
+              .withOpacity(0.1), // Light background to see image bounds
           image: DecorationImage(
             image: NetworkImage(avatarUrl!),
             fit: avatarFit,
@@ -109,8 +111,8 @@ class TappableAvatarBanner extends StatelessWidget {
     this.bannerUrl,
     this.size = 100.0,
     this.onTap,
-    this.avatarFit = BoxFit.cover,
-    this.bannerFit = BoxFit.cover,
+    this.avatarFit = BoxFit.contain, // Changed from cover to contain
+    this.bannerFit = BoxFit.contain, // Changed from cover to contain
   }) : super(key: key);
 
   @override
