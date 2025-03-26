@@ -1,9 +1,12 @@
+import 'package:client_leger/UI/admin/admin-home-page.dart';
+import 'package:client_leger/UI/admin/admin-users-page.dart';
 import 'package:client_leger/UI/coins/coins_page.dart';
 import 'package:client_leger/UI/equipped/equipped_page.dart';
 import 'package:client_leger/UI/forgot-password/password_reset_page.dart';
 import 'package:client_leger/UI/inventory/inventory_page.dart';
 import 'package:client_leger/UI/login/login_page.dart';
 import 'package:client_leger/UI/luck/luck_page.dart';
+import 'package:client_leger/UI/main-view/admin-scaffold.dart';
 import 'package:client_leger/UI/main-view/main_scaffold.dart';
 import 'package:client_leger/UI/play/pages/creategamepage.dart';
 import 'package:client_leger/UI/play/pages/join_game.dart';
@@ -31,6 +34,7 @@ import 'package:go_router/go_router.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _playShellNavigatorKey = GlobalKey<NavigatorState>();
+final _adminShellNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter router = GoRouter(
   refreshListenable: user_provider.isLoggedIn,
@@ -50,6 +54,8 @@ final GoRouter router = GoRouter(
       path: Paths.passwordReset,
       builder: (context, state) => const PasswordResetPage(),
     ),
+
+    // User routes inside MainScaffold
     StatefulShellRoute.indexedStack(
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state, statefulNavigationShell) {
@@ -168,6 +174,29 @@ final GoRouter router = GoRouter(
         ),
       ],
     ),
+
+    // Admin routes inside AdminScaffold
+    StatefulShellRoute.indexedStack(
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state, statefulNavigationShell) {
+        return AdminScaffold(statefulNavigationShell: statefulNavigationShell);
+      },
+      branches: [
+        StatefulShellBranch(
+          navigatorKey: _adminShellNavigatorKey,
+          routes: [
+            GoRoute(
+              path: Paths.adminHome,
+              builder: (context, state) => const AdminHomePage(),
+            ),
+            GoRoute(
+              path: Paths.adminUsers,
+              builder: (context, state) => const AdminUsersPage(),
+            ),
+          ],
+        ),
+      ],
+    ),
   ],
   redirect: (BuildContext context, GoRouterState state) async {
     final bool loggedIn = FirebaseAuth.instance.currentUser != null &&
@@ -178,10 +207,39 @@ final GoRouter router = GoRouter(
         state.matchedLocation == Paths.passwordReset;
 
     AppLogger.d(
-        "IN REDIRECT loggedIn = $loggedIn and loggingIn = $loggingIn  and isLoggedIn = ${user_provider.isLoggedIn.value} and state.matchedlocation = ${state.matchedLocation}");
+        "IN REDIRECT loggedIn = $loggedIn and loggingIn = $loggingIn and isLoggedIn = ${user_provider.isLoggedIn.value} and state.matchedlocation = ${state.matchedLocation}");
 
     if (!loggedIn && !loggingIn) return Paths.logIn;
-    if (loggedIn && loggingIn) return Paths.play;
+
+    if (loggedIn) {
+      // Get the current user
+      final containerRef = ProviderScope.containerOf(context);
+      final currentUserState = containerRef.read(user_provider.userProvider);
+
+      final isAdmin = currentUserState.value?.role == 'admin';
+
+      // Check if admin is trying to access normal user routes or vice versa
+      final isAdminRoute = state.matchedLocation.startsWith(Paths.adminHome) ||
+          state.matchedLocation.startsWith(Paths.adminUsers);
+
+      if (loggingIn) {
+        // Redirect to appropriate home after login
+        return isAdmin ? Paths.adminHome : Paths.play;
+      }
+
+      // If admin trying to access user routes, redirect to admin home
+      if (isAdmin &&
+          !isAdminRoute &&
+          !state.matchedLocation.startsWith('/admin')) {
+        return Paths.adminHome;
+      }
+
+      // If user trying to access admin routes, redirect to user home
+      if (!isAdmin && isAdminRoute) {
+        return Paths.play;
+      }
+    }
+
     return null;
   },
 );
