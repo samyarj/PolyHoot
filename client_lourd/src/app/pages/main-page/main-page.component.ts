@@ -87,7 +87,7 @@ export class MainPageComponent implements AfterViewInit, AfterViewChecked, OnDes
         } else if (length === 2) {
             return 40; // Half width for two elements
         } else {
-            return 35; // Default width for three elements
+            return 30; // Default width for three elements
         }
     }
 
@@ -97,7 +97,7 @@ export class MainPageComponent implements AfterViewInit, AfterViewChecked, OnDes
         } else if (length === 2) {
             return 50; // Height for two elements
         } else {
-            return 37; // Default height for three elements
+            return 30; // Default height for three elements
         }
     }
 

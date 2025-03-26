@@ -1,28 +1,67 @@
 <div class="poll-page-container">
     <div class="poll-page-content">
-        <div id="outerContainer">
-            <div class="outerPollContainer" @zoomIn>
-                <h1>Sondages</h1>
-                <div id="innerContainer">
-                    <div class="pollPublishedContainer" *ngFor="let publishedPoll of publishedPolls; trackBy: trackByFn; let i = index" @bounceOut>
-                        <span id="publishedPollInfo" style="color: red;">
-                            <span id="publishedPollInfo"> {{ publishedPoll.title }} Date d'expiration: {{ publishedPoll.endDate | date: 'yyyy-MM-dd HH:mm' }} Date de publication: {{ publishedPoll.publicationDate | date: 'yyyy-MM-dd HH:mm' }}</span>
-                        </span>
-                        <button class="publish" mat-icon-button matTooltip="Consulter le sondage" (click)="consultPoll(publishedPoll)">
-                            <i class="fa-solid fa-clipboard-question"></i>
-                        </button>
+        <div class="poll-tab-container">
+            <div class="tabs-container">
+                <div class="tab" [class.active]="currentTab === 0" (click)="currentTab = 0">
+                    <span class="tab-title">Sondages créés</span>
+                </div>
+                <div class="tab" [class.active]="currentTab === 1" (click)="currentTab = 1">
+                    <span class="tab-title">Sondages publiés</span>
+                </div>
+            </div>
+
+            <div class="content-container">
+                <!-- Tab 1: Created Polls -->
+                <div *ngIf="currentTab === 0" class="tab-content">
+                    <h2>Sondages créés</h2>
+                    <div class="outerPollContainer">
+                        <div *ngIf="polls.length === 0" class="no-polls-message">Aucun sondage n'a été créé pour le moment.</div>
+                        <div *ngFor="let poll of polls" class="poll-item">
+                            <div class="poll-title"><span class="label">Titre :</span> {{ poll.title }}</div>
+                            <div class="poll-description">
+                                <span class="label">Description :</span><span>{{ poll.description }}</span>
+                            </div>
+                            <div class="poll-actions">
+                                <button *ngIf="!poll.isPublished" (click)="goToEdit(poll.id)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button *ngIf="!poll.isPublished" (click)="delete(poll.id)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <button (click)="consultPoll(poll)">
+                                    <i class="fa-solid fa-clipboard-question"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="pollContainer" *ngFor="let poll of polls; trackBy: trackByFn; let i = index" @bounceOut>
-                        <span id="pollInfo"> {{ poll.title }}</span>
-                        <button *ngIf="!poll.isPublished" id="delete" mat-icon-button (click)="delete(poll.id)" matTooltip="Supprimer">
-                            <mat-icon [ngStyle]="{ color: 'white' }">delete</mat-icon>
-                        </button>
-                        <button *ngIf="!poll.isPublished" id="edit" mat-icon-button (click)="goToEdit(poll.id)" matTooltip="Modifier">
-                            <mat-icon [ngStyle]="{ color: 'white' }">edit_square</mat-icon>
-                        </button>
-                        <button class="publish" mat-icon-button matTooltip="Consulter le sondage" (click)="consultPoll(poll)">
-                            <i class="fa-solid fa-clipboard-question"></i>
-                        </button>
+                </div>
+
+                <!-- Tab 2: Published Polls -->
+                <div *ngIf="currentTab === 1" class="tab-content">
+                    <h2>Sondages publiés</h2>
+                    <div class="outerPublishedPollContainer">
+                        <div *ngIf="publishedPolls.length === 0" class="no-polls-message">Aucun sondage n'a été publié pour le moment.</div>
+                        <div *ngFor="let poll of publishedPolls" class="poll-published-item">
+                            <div class="poll-title"><span class="label">Titre :</span> {{ poll.title }}</div>
+                            <!-- <div class="poll-description">
+                                    <span class="label">Description :</span><span>{{ poll.description }}</span>
+                                </div> -->
+                            <div class="poll-dates">
+                                <div class="date-item">
+                                    <span class="label">Date d'expiration :</span>
+                                    <span>{{ poll.endDate | date: 'yyyy-MM-dd HH:mm' }}</span>
+                                </div>
+                                <div class="date-item">
+                                    <span class="label">Date de publication :</span>
+                                    <span>{{ poll.publicationDate | date: 'yyyy-MM-dd HH:mm' }}</span>
+                                </div>
+                            </div>
+                            <div class="poll-actions">
+                                <button (click)="consultPoll(poll)">
+                                    <i class="fa-solid fa-clipboard-question"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -14,11 +14,17 @@
                                 placeholder="Entrez le titre du sondage"
                                 name="title"
                                 required
+                                maxlength="30"
                                 #title="ngModel"
                             />
-                            <small class="text-danger" *ngIf="isPollTitleEmpty()"> Il faut un titre.</small>
+                            <small class="text-danger">
+                                <ng-container *ngIf="isPollTitleEmpty()"> Il faut un titre.</ng-container>
+                                <ng-container *ngIf="title.errors?.maxlength"> Le titre ne devrait pas avoir plus de 30 caractères. </ng-container>
+                            </small>
                         </div>
-                        <div class="form-group" id="description">
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
                             <label for="description-input">Description du sondage:</label>
                             <input
                                 type="text"
@@ -91,7 +97,6 @@
                                 </small>
                             </div>
                         </div>
-                        <div *ngIf="question.choices">{{ question.choices.length }}</div>
                         <button
                             class="btn btn-secondary btn-sm"
                             type="button"
@@ -104,13 +109,8 @@
                         <div *ngIf="!questionForm.valid || !areQuestionChoicesTextValid()" class="text-danger">*Tous les champs sont requis.</div>
                     </div>
                     <div class="submit-section">
-                        <button *ngIf="showButton" type="button" class="btn btn-dark custom-width" (click)="resetAnswers()">Tout effacer</button>
-                        <button
-                            *ngIf="showButton"
-                            type="submit"
-                            class="btn custom-button custom-width"
-                            [disabled]="!questionForm.valid || !validQuestion()"
-                        >
+                        <button *ngIf="showButton" type="button" class="custom-button-cancel-medium" (click)="resetAnswers()">Tout effacer</button>
+                        <button *ngIf="showButton" type="submit" class="custom-button-medium" [disabled]="!questionForm.valid || !validQuestion()">
                             {{ submitQuestionButton }}
                         </button>
                     </div>
@@ -134,14 +134,19 @@
                         </span>
                     </li>
                 </ul>
-                <div *ngIf="poll.questions.length > 0" class="btn btn-dark add-question-icon">
+                <div *ngIf="poll.questions.length > 0" class="custom-button-medium add-question-icon">
                     <i class="fas fa-plus-circle" (click)="addQuestion()"></i>
                 </div>
             </div>
         </div>
         <div class="submit-poll-section">
-            <button (click)="emptyPollAndRedirect()" class="btn btn-danger custom-width">Annuler</button>
-            <button class="btn btn-primary custom-width" [disabled]="!pollForm.valid || !validatePoll()" (click)="submitPollEvent()">
+            <button (click)="emptyPollAndRedirect()" class="custom-button-cancel-medium">Annuler</button>
+            <button
+                class="custom-button-medium"
+                [ngClass]="{ 'custom-button-disabled-medium': !pollForm.valid || !validatePoll() }"
+                [disabled]="!pollForm.valid || !validatePoll()"
+                (click)="submitPollEvent()"
+            >
                 {{ submitPollButton }}
             </button>
         </div>

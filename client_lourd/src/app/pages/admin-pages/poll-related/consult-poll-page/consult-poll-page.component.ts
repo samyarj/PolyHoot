@@ -16,6 +16,7 @@ import { catchError, of, Subscription } from 'rxjs';
     animations: [backInLeftAnimation, backInRightAnimation, zoomInAnimation, bounceOutAnimation],
 })
 export class ConsultPollPageComponent implements OnInit, OnDestroy {
+    currentTab = 0;
     polls: Poll[] = [];
     publishedPolls: PublishedPoll[] = [];
     private pollsSubscription: Subscription;

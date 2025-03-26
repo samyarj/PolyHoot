@@ -129,7 +129,13 @@ export class CreatePollPageComponent implements OnDestroy {
     }
 
     validatePoll(): boolean {
-        return !this.isPollTitleEmpty() && !this.isDescriptionEmpty() && Array.isArray(this.poll.questions) && this.poll.questions.length >= 1;
+        return (
+            !this.isPollTitleEmpty() &&
+            !this.isDescriptionEmpty() &&
+            Array.isArray(this.poll.questions) &&
+            this.poll.questions.length >= 1 &&
+            this.poll.title.length <= 30
+        );
     }
     validQuestion(): boolean {
         return this.areQuestionChoicesTextValid() && this.validUniqueChoiceTexts() && !this.isQuestionTextEmpty();
