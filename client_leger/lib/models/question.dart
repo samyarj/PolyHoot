@@ -5,6 +5,7 @@ class Question {
   String? id;
   String type;
   String text;
+  String? image;
   int points;
   List<QuestionChoice>? choices;
   String? lastModified;
@@ -15,6 +16,7 @@ class Question {
     required this.type,
     required this.text,
     required this.points,
+    this.image,
     this.choices,
     this.lastModified,
     this.qreAttributes,
@@ -31,6 +33,7 @@ class Question {
               .map((choice) => QuestionChoice.fromJson(choice))
               .toList()
           : null,
+      image: json['image'],
       lastModified: json['lastModified'],
       qreAttributes: json['qreAttributes'] != null
           ? QreAttributes.fromJson(json['qreAttributes'])
@@ -43,6 +46,7 @@ class Question {
       'id': id,
       'type': type,
       'text': text,
+      'image': image,
       'points': points,
       'choices': choices?.map((choice) => choice.toJson()).toList(),
       'lastModified': lastModified,

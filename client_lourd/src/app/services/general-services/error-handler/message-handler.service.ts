@@ -29,7 +29,7 @@ export class MessageHandlerService {
         return throwError(() => error);
     }
 
-    confirmationDialog(messageToShow: string, callback: () => void) {
+    confirmationDialog(messageToShow: string, confirmCallback: () => void, cancelCallback?: () => void) {
         const dialogRef = this.matdialog.open(ConfirmationDialogComponent, {
             width: WIDTH_SIZE,
             panelClass: 'custom-container',
@@ -38,7 +38,9 @@ export class MessageHandlerService {
 
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
-                callback();
+                confirmCallback();
+            } else if (cancelCallback) {
+                cancelCallback();
             }
         });
     }

@@ -243,6 +243,8 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
 
         state = state.copyWith(answersQRL: updatedAnswers);
         AppLogger.i("QRL Answer received from: ${answer.playerName}");
+      } else {
+        AppLogger.e("Invalid QRL Answer data received");
       }
     });
   }
@@ -282,6 +284,8 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
             isInGame: isInGame,
             submitted: false,
             points: updatedPlayerList[playerIndex].points,
+            avatarEquipped: updatedPlayerList[playerIndex].avatarEquipped,
+            bannerEquipped: updatedPlayerList[playerIndex].bannerEquipped,
           );
         }
 
@@ -319,6 +323,8 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
             name: playerName,
             submitted: updatedPlayerList[playerIndex].submitted,
             isInGame: updatedPlayerList[playerIndex].isInGame,
+            avatarEquipped: updatedPlayerList[playerIndex].avatarEquipped,
+            bannerEquipped: updatedPlayerList[playerIndex].bannerEquipped,
             points: points,
           );
 
@@ -335,10 +341,12 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
         bool allPlayersLeft = state.allPlayersLeft;
         final List<PartialPlayer> playerList = data.map((player) {
           return PartialPlayer(
-            name: player['name'],
-            isInGame: player['isInGame'],
+            name: player['name'] ?? '', // Add null check
+            isInGame: player['isInGame'] ?? false, // Add null check
             points: player['points'] ?? 0,
             submitted: player['submitted'] ?? false,
+            avatarEquipped: player['equippedAvatar'] ?? '', // Add null check
+            bannerEquipped: player['equippedBanner'] ?? '', // Add null check
           );
         }).toList();
 

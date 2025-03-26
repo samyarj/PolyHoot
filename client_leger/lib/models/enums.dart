@@ -69,3 +69,11 @@ enum RewardRarity {
   final String value;
   const RewardRarity(this.value);
 }
+
+enum ItemType {
+  avatar,
+  banner,
+  theme,
+}
+
+enum SidebarContent { chat, friends }

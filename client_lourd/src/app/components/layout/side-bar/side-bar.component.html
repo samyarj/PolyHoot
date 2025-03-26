@@ -1,6 +1,6 @@
 <!-- User Menu -->
-<aside class="main-aside">
-    <div class="user-menu dropdown" [ngClass]="{ game: isOnGamePage }" *ngIf="user$ | async as user">
+<aside class="main-aside" *ngIf="user$ | async as user">
+    <div class="user-menu dropdown" [ngClass]="{ game: isOnGamePage }">
         <!-- User Avatar (Trigger) -->
         <div class="avatar-container dropdown">
             <!-- <img [src]="user.avatarEquipped" alt="User Avatar" class="avatar dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" /> -->
@@ -24,20 +24,16 @@
                     </div>
                 </li>
                 <hr class="dropdown-divider" />
-                <li class="logout-container">
-                    <a (click)="logout()">Déconnexion <i class="fa-solid fa-right-from-bracket"></i></a>
+                <li class="logout-container" (click)="logout()">
+                    <a>Déconnexion <i class="fa-solid fa-right-from-bracket"></i></a>
                 </li>
             </ul>
         </div>
-        <div class="notification-container">
-            <button class="notification-button">
-                <i class="fa-solid fa-bell"></i>
-            </button>
-        </div>
+        <app-notifications></app-notifications>
     </div>
 
     <!--social menu -->
-    <div class="social-menu">
+    <div *ngIf="user.role !== 'admin'" class="social-menu">
         <span class="social-menu-title">SOCIAL</span>
         <div class="social-menu-content">
             <ul class="friend-menu">
@@ -160,7 +156,7 @@
     </div>
 
     <!-- chat menu -->
-    <div class="chat-menu">
+    <div class="chat-menu" [ngClass]="{ admin: user.role === 'admin' }">
         <span class="chat-menu-title">CLAVARDAGE</span>
         <ul class="nav nav-tabs">
             <li class="nav-item">

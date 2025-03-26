@@ -1,6 +1,6 @@
 import 'package:client_leger/UI/global/item_widget.dart';
 import 'package:client_leger/UI/shop/widgets/empty-message.dart';
-import 'package:client_leger/utilities/enums.dart';
+import 'package:client_leger/models/enums.dart';
 import 'package:flutter/material.dart';
 
 enum GridLayout {
