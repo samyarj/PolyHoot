@@ -1,7 +1,6 @@
 import 'dart:convert';
-
-import 'package:client_leger/backend-communication-services/environment.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
+import 'package:client_leger/environment_config.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/providers/theme_provider.dart';
 import 'package:client_leger/providers/user_provider.dart';
@@ -57,7 +56,7 @@ final inventoryServiceProvider =
 
 class InventoryServiceNotifier extends StateNotifier<InventoryState> {
   final Ref _ref;
-  final String baseUrl = '${Environment.serverUrl}/inventory';
+  final String baseUrl = '${EnvironmentConfig.serverUrl}/inventory';
 
   // Initialize with default state
   InventoryServiceNotifier(this._ref)

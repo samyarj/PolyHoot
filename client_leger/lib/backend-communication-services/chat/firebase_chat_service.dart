@@ -1,5 +1,5 @@
-import 'package:client_leger/backend-communication-services/environment.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
+import 'package:client_leger/environment_config.dart';
 import 'package:client_leger/models/chat_channels.dart';
 import 'package:client_leger/models/chat_message.dart';
 import 'package:client_leger/models/user.dart' as user_model;
@@ -237,7 +237,7 @@ class FirebaseChatService {
   }
 
   Future<void> deleteChannel(String channelName) async {
-    final url = "${Environment.serverUrl}/chat-channels/$channelName";
+    final url = "${EnvironmentConfig.serverUrl}/chat-channels/$channelName";
 
     try {
       final response = await http.delete(Uri.parse(url));

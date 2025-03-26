@@ -1,4 +1,4 @@
-import 'package:client_leger/backend-communication-services/environment.dart';
+import 'package:client_leger/environment_config.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:client_leger/utilities/socket_events.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +17,7 @@ final class WebSocketManager {
   IO.Socket? socket;
 
   String _fetchBaseUrl() {
-    return Environment.serverUrlSocket;
+    return EnvironmentConfig.serverUrlSocket;
   }
 
   void setRoomId(String newRoomId) {

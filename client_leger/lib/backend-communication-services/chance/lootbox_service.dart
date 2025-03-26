@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:client_leger/backend-communication-services/environment.dart';
+import 'package:client_leger/environment_config.dart';
 import 'package:client_leger/models/chance/dailyfree.dart';
 import 'package:client_leger/models/chance/lootbox_container.dart';
 import 'package:client_leger/models/chance/reward.dart';
@@ -9,8 +9,8 @@ import 'package:http/http.dart' as http;
 
 class LootboxService {
   LootboxService._privateConstructor()
-      : baseUrl = Environment.serverUrl,
-        lootboxUrl = "${Environment.serverUrl}/loot" {
+      : baseUrl = EnvironmentConfig.serverUrl,
+        lootboxUrl = "${EnvironmentConfig.serverUrl}/loot" {
     AppLogger.i("LootboxService created");
   }
 
