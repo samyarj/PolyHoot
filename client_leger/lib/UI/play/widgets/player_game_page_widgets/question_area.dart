@@ -145,34 +145,58 @@ class QuestionArea extends StatelessWidget {
 
               // current question
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: colorScheme.secondary.withAlpha(51),
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.all(16),
-                    child: isWaitingForQuestion
-                        ? Text(
-                            "La prochaine question commence dans $time seconde${time == 1 ? '' : 's'}.",
-                            style: TextStyle(
-                                color: colorScheme.onSurface, fontSize: 16),
-                          )
-                        : ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxHeight: 80,
-                            ),
-                            child: SingleChildScrollView(
-                              child: Text(
-                                currentQuestion.text,
-                                style: TextStyle(fontSize: 16),
-                                softWrap: true,
-                              ),
-                            ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 32),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: colorScheme.secondary.withAlpha(51),
+                            borderRadius: BorderRadius.circular(30),
                           ),
-                  ),
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.all(16),
+                          child: isWaitingForQuestion
+                              ? Text(
+                                  "La prochaine question commence dans $time seconde${time == 1 ? '' : 's'}.",
+                                  style: TextStyle(
+                                      color: colorScheme.onSurface,
+                                      fontSize: 16),
+                                )
+                              : ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxHeight: 80,
+                                  ),
+                                  child: SingleChildScrollView(
+                                    child: Text(
+                                      currentQuestion.text,
+                                      style: TextStyle(fontSize: 16),
+                                      softWrap: true,
+                                    ),
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                    if (currentQuestion.image != null)
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 4),
+                          child: Image.network(
+                            currentQuestion.image!,
+                            width: 100, // Set the desired width
+                            height: 100, // Set the desired height
+                            fit: BoxFit
+                                .scaleDown, // Adjust the image to fit within the dimensions
+                            alignment: Alignment.center,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
 
