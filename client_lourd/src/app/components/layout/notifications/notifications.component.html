@@ -7,23 +7,25 @@
         <div class="dropdown-header text-center">
             <strong>Notifications</strong>
         </div>
-        <hr class="dropdown-divider" />
+        <!-- <hr class="dropdown-divider" /> -->
         <!-- Liste des notifications -->
-        <div *ngFor="let notification of notifications" class="notification-item">
-            <div class="notification-content">
-                <div class="notification-text">
-                    <p *ngIf="user && user.role === 'player'"><strong>Nouveau sondage disponible:</strong><br />{{ notification.title }}</p>
-                    <p *ngIf="user && user.role === 'admin'"><strong>Sondage expiré:</strong><br />{{ notification.title }}</p>
+        <div *ngIf="notifications.length !== 0" class="notifications-container">
+            <div *ngFor="let notification of notifications" class="notification-item">
+                <div class="notification-content">
+                    <div class="notification-text">
+                        <p *ngIf="user && user.role === 'player'"><strong>Nouveau sondage disponible:</strong><br />{{ notification.title }}</p>
+                        <p *ngIf="user && user.role === 'admin'"><strong>Sondage expiré:</strong><br />{{ notification.title }}</p>
+                    </div>
+                    <button *ngIf="user && user.role === 'player'" class="custom-button-medium" (click)="openPollAnswer(notification.poll)">
+                        <i class="fa-solid fa-square-poll-horizontal"></i>
+                    </button>
+                    <button *ngIf="user && user.role === 'admin'" class="custom-button-medium" (click)="goToStats(notification.poll)">
+                        <i class="fa-solid fa-square-poll-vertical"></i>
+                    </button>
                 </div>
-                <button *ngIf="user && user.role === 'player'" class="custom-button-medium" (click)="openPollAnswer(notification.poll)">
-                    Répondre au sondage
-                </button>
-                <button *ngIf="user && user.role === 'admin'" class="custom-button-medium" (click)="goToStats(notification.poll)">
-                    Voir les statistiques
-                </button>
             </div>
         </div>
         <!-- Aucune notification -->
-        <div *ngIf="notifications.length === 0" class="text-center text-muted">Aucune notification.</div>
+        <div *ngIf="notifications.length === 0" class="text-center no-notif">Aucune notification.</div>
     </div>
 </div>
