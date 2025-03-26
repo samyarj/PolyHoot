@@ -64,6 +64,7 @@ export class PublishedPollService implements OnModuleInit {
             throw new NotFoundException(ERROR.POLL.ID_NOT_FOUND);
         }
         const pollData = pollDoc.data() as PublishedPoll;
+        if (pollData.expired) return; //Vérif pour mina
         // Mettre à jour totalVotes
         results.forEach((choiceIndex, questionIndex) => {
             if (pollData.totalVotes[questionIndex]) {
