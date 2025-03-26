@@ -98,7 +98,9 @@
                             [ngClass]="questionChoice.isCorrect ? 'correct-choice' : 'incorrect-choice'"
                             class="multiple-choice"
                         >
-                            {{ questionChoice.text }}
+                            <p>
+                                {{ questionChoice.text }}
+                            </p>
                         </div>
                     </div>
                     <div *ngIf="question.type === 'QRE' && question.qreAttributes" class="qre-content">

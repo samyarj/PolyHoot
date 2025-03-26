@@ -1,6 +1,6 @@
 <!-- User Menu -->
-<aside class="main-aside">
-    <div class="user-menu dropdown" [ngClass]="{ game: isOnGamePage }" *ngIf="user$ | async as user">
+<aside class="main-aside" *ngIf="user$ | async as user">
+    <div class="user-menu dropdown" [ngClass]="{ game: isOnGamePage }">
         <!-- User Avatar (Trigger) -->
         <div class="avatar-container dropdown">
             <!-- <img [src]="user.avatarEquipped" alt="User Avatar" class="avatar dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" /> -->
@@ -24,20 +24,16 @@
                     </div>
                 </li>
                 <hr class="dropdown-divider" />
-                <li class="logout-container">
-                    <a (click)="logout()">Déconnexion <i class="fa-solid fa-right-from-bracket"></i></a>
+                <li class="logout-container" (click)="logout()">
+                    <a>Déconnexion <i class="fa-solid fa-right-from-bracket"></i></a>
                 </li>
             </ul>
         </div>
-        <div class="notification-container">
-            <button class="notification-button">
-                <i class="fa-solid fa-bell"></i>
-            </button>
-        </div>
+        <app-notifications></app-notifications>
     </div>
 
     <!--social menu -->
-    <div class="social-menu">
+    <div *ngIf="user.role !== 'admin'" class="social-menu">
         <span class="social-menu-title">SOCIAL</span>
         <div class="social-menu-content">
             <ul class="friend-menu">
@@ -81,7 +77,7 @@
                 <div *ngIf="showFriendRequests" class="friend-requests-overlay">
                     <div class="friend-requests-content">
                         <div class="friend-requests-header">
-                            <h3>Demande d'ami</h3>
+                            <h3>Demandes d'ami</h3>
                             <button class="close-requests" (click)="toggleFriendRequests()">
                                 <i class="fa-solid fa-times"></i>
                             </button>
@@ -149,7 +145,7 @@
             <div class="friend-request">
                 <button class="friend-request-button" (click)="toggleFriendRequests()">
                     <li class="friend-request-icon">
-                        <span>Demande d'ami</span>
+                        <span>Demandes d'ami</span>
                     </li>
                     <li class="friend-request-number">
                         <span>{{ friendRequests.length || 0 }}</span>
@@ -160,31 +156,31 @@
     </div>
 
     <!-- chat menu -->
-    <div class="chat-menu">
+    <div class="chat-menu" [ngClass]="{ admin: user.role === 'admin' }">
         <span class="chat-menu-title">CLAVARDAGE</span>
         <ul class="nav nav-tabs">
             <li class="nav-item">
-                <a class="nav-link active" data-bs-toggle="tab" href="#tab1" title="Canal de discussion global">
+                <a #tab1Link class="nav-link active" data-bs-toggle="tab" href="#tab1" title="Canal de discussion global" (click)="setActiveTab(1)">
                     <i class="fa-solid fa-globe"></i>
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#tab2" title="Clavardage de partie">
+            <li class="nav-item" *ngIf="isOnGamePage">
+                <a class="nav-link" data-bs-toggle="tab" href="#tab2" title="Clavardage de partie" (click)="setActiveTab(2)">
                     <i class="fa-solid fa-gamepad"></i>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#tab3" title="Canal de discussion actuel">
+                <a class="nav-link" data-bs-toggle="tab" href="#tab3" title="Canal de discussion actuel" (click)="setActiveTab(3)">
                     <i class="fa-solid fa-comments"></i>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#tab4" title="Mes canaux de discussion">
+                <a class="nav-link" data-bs-toggle="tab" href="#tab4" title="Mes canaux de discussion" (click)="setActiveTab(4)">
                     <i class="fa-solid fa-table-list"></i>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#tab5" title="Créer un canal de discussion">
+                <a class="nav-link" data-bs-toggle="tab" href="#tab5" title="Créer un canal de discussion" (click)="setActiveTab(5)">
                     <i class="fa-solid fa-plus"></i>
                 </a>
             </li>
@@ -192,21 +188,20 @@
         <div class="tab-content">
             <div class="tab-pane fade show active" id="tab1">
                 <h2>Canal de discussion global</h2>
-                <app-chat2
-                    [chatMessagesLoading]="globalChatMessagesLoading"
-                    [chatMessages]="globalChatMessages"
-                    (sendMessageToRoom)="handleSendMessage($event)"
-                    (loadOlderMessages)="loadOlderMessages()"
-                ></app-chat2>
+                <div class="app-chat2">
+                    <app-chat2
+                        [chatMessagesLoading]="globalChatMessagesLoading"
+                        [chatMessages]="globalChatMessages"
+                        (sendMessageToRoom)="handleSendMessage($event)"
+                        (loadOlderMessages)="loadOlderMessages()"
+                    ></app-chat2>
+                </div>
             </div>
-            <div class="tab-pane fade" id="tab2">
+            <div class="tab-pane fade" id="tab2" *ngIf="isOnGamePage">
                 <h2>Clavardage de partie</h2>
-                <ng-container>
-                    <app-chat></app-chat>
-                </ng-container>
-                <ng-template #notInGame>
-                    <p>Cette fonctionnalité est uniquement disponible lorsque vous êtes en jeu.</p>
-                </ng-template>
+                <div class="app-chat2">
+                    <app-chat [parentAction]="getBoundHandleChildAction()"></app-chat>
+                </div>
             </div>
             <div class="tab-pane fade" id="tab3">
                 <h2>Canal : {{ selectedChannel }}</h2>
@@ -254,7 +249,7 @@
                         </div>
                     </div>
                     <div class="tab-pane fade" id="tab4-2">
-                        <h2>Canaux de discussion disponible</h2>
+                        <h2>Canaux de discussion disponibles</h2>
                         <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un canal" class="search-input" />
                         <div class="channel-list">
                             <div *ngIf="filteredChannels().length === 0" class="no-channels-message">
@@ -276,7 +271,14 @@
                 <div class="create-channel-form">
                     <form (submit)="createChannel()">
                         <input type="text" [(ngModel)]="newChannelName" name="newChannelName" placeholder="Nom du canal" required />
-                        <button type="submit">Créer</button>
+                        <button
+                            [disabled]="this.newChannelName === ''"
+                            [ngClass]="{ 'custom-button-disabled': this.newChannelName === '' }"
+                            type="submit"
+                            class="custom-button"
+                        >
+                            Créer
+                        </button>
                     </form>
                     <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
                 </div>

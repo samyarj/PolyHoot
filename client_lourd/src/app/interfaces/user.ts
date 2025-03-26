@@ -49,4 +49,5 @@ export interface User {
     isOnline?: boolean; // Online status
     pity?: number; // Pity counter
     nextDailyFree?: Timestamp; // Next date where user can get daily free
+    pollsAnswered?: string[];
 }

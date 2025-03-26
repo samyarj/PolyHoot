@@ -636,6 +636,15 @@
             text-align: center;
             justify-content: center;
             overflow-y: auto;
+
+            > p {
+                width: 100%;
+                height: 100%;
+                align-content: center;
+                text-align: center;
+                margin: 0px;
+            }
+
             &.correct-choice {
                 background: #4dff67 !important;
                 font-weight: 500 !important;

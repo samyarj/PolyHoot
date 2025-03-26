@@ -48,6 +48,7 @@ export const questionFormAnimation = trigger('questionFormAnimation', [
 ]);
 
 export const gameFormAnimation = trigger('gameFormAnimation', [transition(':enter', useAnimation(bounceIn), { params: { timing: DEFAULT_TIMING } })]);
+export const pollFormAnimation = trigger('pollFormAnimation', [transition(':enter', useAnimation(bounceIn), { params: { timing: DEFAULT_TIMING } })]);
 
 export const playerJoinAnimation = trigger('popIn', [
     transition(':enter', [

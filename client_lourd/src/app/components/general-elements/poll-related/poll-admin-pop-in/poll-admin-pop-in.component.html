@@ -1,0 +1,31 @@
+<div class="popin-container">
+    <div class="popin-header">
+        <div class="poll-title">{{ poll.title }}</div>
+        <button class="close-button" (click)="onClose()">X</button>
+    </div>
+    <div class="popin-content">
+        <div class="poll-description">
+            <strong>Description:&nbsp;</strong>
+            {{ poll.description }}
+        </div>
+        <div class="poll-questions">
+            <strong>Questions:</strong>
+            <ol class="questions-list">
+                <li class="question-list-element" *ngFor="let question of poll.questions">
+                    <span>{{ question.text + ' : ' + question.type }}</span>
+                </li>
+            </ol>
+        </div>
+    </div>
+    <div *ngIf="!poll.isPublished" class="publish-section">
+        <input type="datetime-local" name="endDate" #endDate="ngModel" id="dateTimePicker" [(ngModel)]="poll.endDate" required />
+        <button
+            (click)="onPublish()"
+            class="custom-button-big"
+            [ngClass]="{ 'custom-button-big-disabled': !isDateValid() }"
+            [disabled]="!isDateValid()"
+        >
+            Publier
+        </button>
+    </div>
+</div>

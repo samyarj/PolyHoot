@@ -1,13 +1,17 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+/* eslint-disable max-lines */
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { doc, FieldPath, Firestore, getDoc, onSnapshot, Unsubscribe } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { FirebaseChatMessage } from '@app/interfaces/chat-message';
 import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
 import { ChatChannel, chatChannelFromJson } from '@app/services/chat-services/chat-channels';
+import { ChatEvents } from '@app/services/chat-services/chat-events';
+import { ChatService } from '@app/services/chat-services/chat.service';
 import { FirebaseChatService } from '@app/services/chat-services/firebase/firebase-chat.service';
 import { FriendSystemService } from '@app/services/friend-system.service';
 import { HeaderNavigationService } from '@app/services/ui-services/header-navigation.service';
+import { ChatMessage } from '@common/chat-message';
 import { Observable, Subscription } from 'rxjs';
 
 @Component({
@@ -37,7 +41,6 @@ export class SideBarComponent implements OnInit, OnDestroy {
     selectedChannel: string | null = null;
     searchTerm: string = '';
     errorMessage: string = '';
-
     showSearchInput: boolean = false;
     searchQuery: string = '';
     showFriendRequests: boolean = false;
@@ -48,6 +51,12 @@ export class SideBarComponent implements OnInit, OnDestroy {
     private searchSubscription: Subscription;
     private onlineStatusSubscription: { [key: string]: () => void } = {};
 
+    gameChatMessages: ChatMessage[] = [];
+    private gameChatSubscription: Subscription;
+    private chatEventsSubscription: Subscription;
+    isGameChatInitialized: boolean = false;
+    @ViewChild('tab1Link') tab1Link: any;
+    activeTab: number = 1;
     constructor(
         private authService: AuthService,
         private router: Router,
@@ -55,6 +64,7 @@ export class SideBarComponent implements OnInit, OnDestroy {
         private headerService: HeaderNavigationService,
         private friendSystemService: FriendSystemService,
         private firestore: Firestore,
+        private chatService: ChatService,
     ) {
         this.user$ = this.authService.user$;
     }
@@ -63,10 +73,22 @@ export class SideBarComponent implements OnInit, OnDestroy {
         return this.headerService.isGameRelatedRoute;
     }
 
+    setActiveTab(tab: number) {
+        this.activeTab = tab;
+    }
+
+    handleChildAction() {
+        console.log('Action executed in the parent component!');
+        if (this.activeTab === 2) this.tab1Link.nativeElement.click();
+    }
+
+    getBoundHandleChildAction() {
+        return this.handleChildAction.bind(this); // Bind to the parent's context
+    }
+
     ngOnInit(): void {
         // Subscribe to live chat messages for the global chat
         this.subscribeToGlobalMessages();
-
         // Subscribe to chat channels
         this.channelsSubscription = this.firebaseChatService.fetchAllChannels().subscribe({
             next: (channels) => {
@@ -86,6 +108,28 @@ export class SideBarComponent implements OnInit, OnDestroy {
                 this.setupRealtimeUserUpdates(user.uid);
             }
         });
+
+        // Subscribe to game chat messages
+        this.gameChatSubscription = this.chatService.allChatMessagesObservable.subscribe({
+            next: (messages) => {
+                this.gameChatMessages = messages;
+            },
+            error: (err) => {
+                console.error('Error while fetching game chat messages:', err);
+            },
+        });
+
+        // Subscribe to chat events to handle game chat clearing
+        this.chatEventsSubscription = this.chatService.chatEvents$.subscribe((event) => {
+            if (event.event === ChatEvents.RoomLeft) {
+                this.cleanupGameChat();
+            }
+        });
+
+        // Initialize game chat if we're on a game page
+        if (this.isOnGamePage) {
+            this.initializeGameChat();
+        }
     }
 
     private setupRealtimeUserUpdates(uid: string) {
@@ -186,6 +230,12 @@ export class SideBarComponent implements OnInit, OnDestroy {
         }
         if (this.searchSubscription) {
             this.searchSubscription.unsubscribe();
+        }
+        if (this.gameChatSubscription) {
+            this.gameChatSubscription.unsubscribe();
+        }
+        if (this.chatEventsSubscription) {
+            this.chatEventsSubscription.unsubscribe();
         }
 
         // Clean up online status listeners
@@ -507,6 +557,31 @@ export class SideBarComponent implements OnInit, OnDestroy {
             await this.friendSystemService.cancelFriendRequest(friendId, this.userUID);
         } catch (error) {
             console.error("Erreur lors du refu de la demande d'ami:", error);
+        }
+    }
+
+    private initializeGameChat(): void {
+        if (!this.isGameChatInitialized) {
+            if (!this.chatService.isInitialized) {
+                this.chatService.configureChatSocketFeatures();
+                this.chatService.getHistory();
+            } else {
+                this.chatService.retrieveRoomIdChat();
+            }
+            this.isGameChatInitialized = true;
+        }
+    }
+
+    private cleanupGameChat(): void {
+        if (this.isGameChatInitialized) {
+            this.gameChatMessages = [];
+            this.isGameChatInitialized = false;
+        }
+    }
+
+    async handleSendMessageToGame(message: string): Promise<void> {
+        if (this.isOnGamePage) {
+            this.chatService.sendMessageToRoom(message);
         }
     }
 }
