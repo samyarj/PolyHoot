@@ -45,6 +45,27 @@ Expected Output:
         }
     }
 
+    private validateQuickRepliesSchema(response: any): boolean {
+        try {
+            // Ensure the response is a valid JSON object
+            if (typeof response === 'string') {
+                response = JSON.parse(response);
+            }
+
+            // Validate the structure of the JSON object
+            return (
+                response &&
+                typeof response === 'object' &&
+                Array.isArray(response.quick_replies) &&
+                response.quick_replies.length === 3 &&
+                response.quick_replies.every((reply) => typeof reply === 'string')
+            );
+        } catch (error) {
+            console.error('Invalid JSON format:', error);
+            return false;
+        }
+    }
+
     async generateQuickReplies(
         channelId: string,
         user: string,
@@ -87,16 +108,23 @@ ${message}`;
             const response = chatCompletion.choices[0]?.message?.content;
             const parsedResponse = JSON.parse(response);
 
-            // Add the assistant's reply to the conversation context
-            context?.push({
-                role: 'assistant',
-                content: response,
-            });
+            // Validate the schema of the parsed response
+            if (this.validateQuickRepliesSchema(parsedResponse)) {
+                // Add the assistant's reply to the conversation context
+                context?.push({
+                    role: 'assistant',
+                    content: response,
+                });
 
-            return parsedResponse.quick_replies;
+                return parsedResponse.quick_replies;
+            } else {
+                // Return the default output if the schema is invalid
+                return ['Hello! 👋', 'Nice to meet you! 😊', 'How are you? 🤔'];
+            }
         } catch (error) {
             console.error('Error generating quick replies:', error);
-            throw new Error('Failed to generate quick replies');
+            // Return the default output in case of an error
+            return ['Hello! 👋', 'Nice to meet you! 😊', 'How are you? 🤔'];
         }
     }
 
