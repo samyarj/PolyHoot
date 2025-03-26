@@ -5,12 +5,12 @@ export interface Poll {
     description: string;
     questions: Question[];
     expired: boolean;
-    endDate: Date;
-    isPublished?: boolean;
+    endDate?: string;
+    isPublished: boolean;
 }
 
 export interface PublishedPoll extends Poll {
     isPublished: true;
-    publicationDate: Date;
-    totalVotes: number[][];
+    publicationDate: string;
+    totalVotes: { [questionIndex: string]: number[] };
 }

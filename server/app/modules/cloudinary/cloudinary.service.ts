@@ -6,9 +6,9 @@ import { Multer } from 'multer';
 @Injectable()
 export class CloudinaryService {
     async uploadImage(file: Multer.File): Promise<UploadApiResponse | UploadApiErrorResponse> {
-        // Check file size limit (1 MB = 1,000,000 bytes)
-        if (file.size > 1000000) {
-            throw new Error('File size exceeds 1 MB');
+        // Check file size limit (10 MB = 10,000,000 bytes)
+        if (file.size > 10000000) {
+            throw new Error('File size exceeds 10 MB');
         }
         // Verify file is an image
         if (!file.mimetype.startsWith('image')) {

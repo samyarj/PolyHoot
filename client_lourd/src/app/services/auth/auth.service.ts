@@ -177,7 +177,7 @@ export class AuthService {
         }
         if (currentUser) {
             const userDocRef = doc(this.firestore, `users/${currentUser.uid}`);
-
+            console.log(`Setting isOnline to false for connected user at ${new Date()}`);
             from(updateDoc(userDocRef, { isOnline: false }))
                 .pipe(
                     handleErrorsGlobally(this.injector),

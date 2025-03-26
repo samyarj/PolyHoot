@@ -1,17 +1,30 @@
-<div class="poll-page-container">
-    <div class="poll-page-content">
-        <div class="past-polls-container">
-            <div *ngFor="let poll of polls" class="past-poll" [ngClass]="{ active: poll === currentPoll }">
-                <div class="poll-info">
-                    <div class="title">{{ poll.title }}</div>
-                    <div class="date">Date fin :&nbsp;{{ poll.endDate }}</div>
+<div class="publishedPoll-page-container">
+    <div class="publishedPoll-page-content">
+        <div *ngIf="publishedPolls.length !== 0" class="past-publishedPolls-container">
+            <div class="publishedPolls-container">
+                <div *ngFor="let publishedPoll of publishedPolls" class="past-publishedPoll" [ngClass]="{ active: publishedPoll === currentPoll }">
+                    <div class="publishedPoll-info">
+                        <div class="title">{{ publishedPoll.title }}</div>
+                        <div class="date">Date fin :&nbsp;{{ publishedPoll.endDate }}</div>
+                    </div>
+                    <button *ngIf="publishedPoll !== currentPoll" class="custom-button-medium" (click)="show(publishedPoll)">Consulter</button>
                 </div>
-                <button *ngIf="poll !== currentPoll" class="custom-button-medium" (click)="show(poll)">Consulter</button>
             </div>
+            <button
+                [disabled]="publishedPolls.length === 0 || this.wasClearHistoryClicked"
+                class="custom-button-medium"
+                [ngClass]="{ 'custom-button-medium-disabled': publishedPolls.length === 0 || this.wasClearHistoryClicked }"
+                (click)="deleteAllExpiredPolls()"
+            >
+                Supprimer l'historique des sondages
+            </button>
         </div>
-        <div class="poll-big-container">
-            <div *ngIf="currentPoll" class="poll-container">
-                <div class="poll-info">
+        <div *ngIf="publishedPolls.length === 0" class="past-publishedPolls-container-empty">
+            <div>Aucun sondage dans l'historique.</div>
+        </div>
+        <div class="publishedPoll-big-container">
+            <div *ngIf="currentPoll" class="publishedPoll-container">
+                <div class="publishedPoll-info">
                     <div class="title">
                         <div class="title-content">{{ currentPoll.title }}</div>
                         <div class="date">Date fin :&nbsp;{{ currentPoll.endDate }}</div>
@@ -36,20 +49,10 @@
                             <div class="question-title-content">{{ currentQuestion?.text }}</div>
                             <div class="divider"></div>
                         </div>
-                        <div class="pie-chart">
+                        <div *ngIf="getMaxValue() !== 0" class="pie-chart">
                             <canvas baseChart [data]="pieChartData" [options]="pieChartOptions" [type]="pieChartType"> </canvas>
                         </div>
-                        <!-- <div class="legend two-choices">
-                            <div>Choix</div>
-                            <div>Choix</div>
-                        </div> -->
-
-                        <!-- <div class="legend three-choices">
-                            <div>Choix</div>
-                            <div>Choix</div>
-                            <div>Choix</div>
-                        </div> -->
-
+                        <div *ngIf="getMaxValue() === 0" class="pie-chart">Aucune réponse à cette question.</div>
                         <div
                             class="legend four-choices"
                             [ngClass]="{
@@ -79,7 +82,7 @@
                 </div>
             </div>
 
-            <div *ngIf="!currentPoll" class="poll-container">
+            <div *ngIf="!currentPoll" class="publishedPoll-container">
                 <div style="display: flex; justify-content: center; align-items: center; height: 100%; width: 100%; text-align: center">
                     Aucun sondage sélectionné
                 </div>

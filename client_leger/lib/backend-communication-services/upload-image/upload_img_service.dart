@@ -5,8 +5,11 @@ import 'package:client_leger/backend-communication-services/environment.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart' as path_provider;
 
 class UploadImgService {
   static final UploadImgService _instance = UploadImgService._internal();
@@ -18,6 +21,78 @@ class UploadImgService {
   UploadImgService._internal();
 
   final String baseUrl = '${Environment.serverUrl}/upload-img';
+
+  // Maximum file size in bytes (10 MB)
+  static const int MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+  // Validates if file size is within limits
+  Future<bool> validateImageSize(File file) async {
+    final int fileSize = await file.length();
+    return fileSize <= MAX_FILE_SIZE;
+  }
+
+  // Compressed image file with appropriate settings
+  Future<File?> compressImage(File file) async {
+    // Get file extension
+    final String fileName = file.path.split('/').last;
+    final String extension = fileName.split('.').last.toLowerCase();
+
+    // Get directory for temporary files
+    final dir = await path_provider.getTemporaryDirectory();
+    final targetPath =
+        p.join(dir.path, '${DateTime.now().millisecondsSinceEpoch}.$extension');
+
+    // Compress with appropriate format based on extension
+    CompressFormat format = CompressFormat.jpeg;
+    if (extension == 'png') {
+      format = CompressFormat.png;
+    }
+
+    try {
+      // Only compress if the file is larger than a certain threshold
+      final int fileSize = await file.length();
+      final int compressionThreshold = 5 * 1024 * 1024; // 5 MB
+
+      // Higher quality compression for better image fidelity
+      final int quality = fileSize > compressionThreshold ? 85 : 95;
+
+      final result = await FlutterImageCompress.compressAndGetFile(
+        file.path,
+        targetPath,
+        quality: quality, // Increased quality
+        format: format,
+      );
+
+      return result != null ? File(result.path) : null;
+    } catch (e) {
+      AppLogger.e('Error compressing image: ${e.toString()}');
+      return null;
+    }
+  }
+
+  // Process and upload image - combines validation, compression and upload
+  Future<Map<String, dynamic>> processAndUploadImage(
+      File file, String context) async {
+    // First validate file size
+    if (!await validateImageSize(file)) {
+      throw Exception('Image size exceeds the maximum limit of 10 MB');
+    }
+
+    // Try to compress the image
+    File? compressedFile = await compressImage(file);
+
+    // Use compressed file if available, otherwise use original
+    final fileToUpload = compressedFile ?? file;
+
+    // Check size once more after compression
+    if (!await validateImageSize(fileToUpload)) {
+      throw Exception(
+          'Image size exceeds the maximum limit of 10 MB even after compression');
+    }
+
+    // Upload the (possibly compressed) file
+    return await uploadImage(fileToUpload, context);
+  }
 
   Future<Map<String, dynamic>> uploadImage(File file, String context) async {
     try {
@@ -51,6 +126,7 @@ class UploadImgService {
       final multipartFile = await http.MultipartFile.fromPath(
           'image', file.path,
           contentType: MediaType.parse(mimeType));
+
       request.files.add(multipartFile);
 
       // Send the request
@@ -64,7 +140,9 @@ class UploadImgService {
           'avatarUrl': parsedResponse['avatarUrl']
         };
       } else {
-        throw Exception(parsedResponse['message'] ?? 'Failed to upload image');
+        throw Exception(parsedResponse['error'] ??
+            parsedResponse['message'] ??
+            'Failed to upload image');
       }
     } catch (e) {
       AppLogger.e('Error uploading image: ${e.toString()}');

@@ -1,0 +1,200 @@
+.popin-container {
+    position: relative;
+    padding: 30px;
+    border-radius: 10px;
+    background: var(--primary-color);
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border: 2px solid var(--tertiary-color);
+    border-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+    width: 80vw;
+    max-width: 1200px;
+    max-height: 800px;
+
+    .popin-header {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        color: var(--text-color);
+        position: relative;
+        height: 10%;
+        margin-bottom: 1rem;
+
+        .poll-title {
+            position: absolute;
+            left: 50%;
+            font-size: 1.5rem;
+            transform: translateX(-50%);
+            font-weight: bolder;
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        .close-button {
+            border-radius: 30px;
+            border: 2px solid var(--tertiary-color);
+            background: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: var(--text-color);
+            justify-self: end;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+
+            &:hover {
+                background: color-mix(in srgb, var(--tertiary-color) 20%, transparent);
+            }
+        }
+    }
+
+    .popin-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+        position: relative;
+        height: 85%;
+        border-radius: 30px;
+        box-shadow: 0px 0px 10px color-mix(in srgb, var(--tertiary-color) 80%, transparent);
+        padding: 20px;
+        overflow-y: auto;
+
+        &::-webkit-scrollbar {
+            width: 8px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: color-mix(in srgb, var(--primary-color) 20%, transparent);
+            border-radius: 4px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: var(--tertiary-color);
+            border-radius: 4px;
+            border: 2px solid color-mix(in srgb, var(--primary-color) 20%, transparent);
+            margin-top: 30px;
+            margin-bottom: 30px;
+            &:hover {
+                background: var(--secondary-color);
+            }
+        }
+
+        .poll-description {
+            width: 100%;
+            padding: 20px;
+            color: var(--text-color);
+            font-size: 1.2rem;
+            margin-bottom: 1.2rem;
+            background: color-mix(in srgb, var(--primary-color) 20%, transparent);
+            border-radius: 15px;
+            border: 2px solid var(--tertiary-color);
+        }
+
+        .poll-questions {
+            width: 100%;
+            padding: 20px;
+            height: 80%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            color: var(--text-color);
+
+            strong {
+                font-size: 1.2rem;
+                color: var(--text-color);
+            }
+
+            .questions-list {
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+                color: var(--text-color);
+                margin: 0;
+                padding: 0;
+                list-style-type: none;
+
+                li {
+                    background: color-mix(in srgb, var(--primary-color) 20%, transparent);
+                    border: 2px solid var(--tertiary-color);
+                    border-radius: 15px;
+                    padding: 1rem;
+                    margin: 0;
+                }
+            }
+        }
+    }
+}
+
+.close-button:hover {
+    background: var(--secondary-color);
+    color: var(--primary-color);
+    border: 2px solid var(--tertiary-color);
+}
+
+.close-button:hover {
+    background: var(--secondary-color) !important;
+    color: var(--primary-color) !important;
+    border: 2px solid var(--tertiary-color) !important;
+}
+
+.publish-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 20px;
+    width: 100%;
+}
+
+#dateTimePicker {
+    width: 50%;
+    padding: 20px;
+    margin: 20px 0;
+    background: color-mix(in srgb, var(--primary-color) 20%, transparent);
+    border: 2px solid var(--tertiary-color);
+    border-radius: 15px;
+    color: var(--text-color);
+    font-size: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+
+    &:hover {
+        background: color-mix(in srgb, var(--primary-color) 30%, transparent);
+        transform: translateY(-2px);
+        box-shadow: 0px 0px 10px color-mix(in srgb, var(--tertiary-color) 40%, transparent);
+    }
+
+    &::-webkit-calendar-picker-indicator {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        cursor: pointer;
+        opacity: 0;
+    }
+
+    input {
+        width: 100%;
+        padding: 0.5rem;
+        border: none;
+        background: transparent;
+        color: var(--text-color);
+        font-size: 1rem;
+        cursor: pointer;
+        pointer-events: none;
+    }
+}

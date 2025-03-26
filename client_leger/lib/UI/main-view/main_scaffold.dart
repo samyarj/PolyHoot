@@ -99,6 +99,11 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
   void _toggleSidebar(SidebarContent content) {
     setState(() {
       _currentSidebar = content;
+
+      if (!_isSidebarVisible) {
+        _isSidebarVisible = true;
+        _animationController.forward();
+      }
     });
   }
 

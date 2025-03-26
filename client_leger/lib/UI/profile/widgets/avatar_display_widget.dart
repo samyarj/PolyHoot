@@ -11,6 +11,7 @@ class AvatarDisplayWidget extends StatelessWidget {
   final Function() onEquipAvatar;
   final Function() onUploadImage;
   final Function() onEditIconPressed;
+  final bool isUploading;
 
   const AvatarDisplayWidget({
     Key? key,
@@ -20,6 +21,7 @@ class AvatarDisplayWidget extends StatelessWidget {
     required this.onEquipAvatar,
     required this.onUploadImage,
     required this.onEditIconPressed,
+    required this.isUploading,
   }) : super(key: key);
 
   AvatarSelectionType get selectionType {
@@ -115,35 +117,67 @@ class AvatarDisplayWidget extends StatelessWidget {
         const SizedBox(height: 24),
 
         // Action button (Apply or Upload based on selection type)
+        // Replace the Action button section with this code:
+
+// Action button (Apply or Upload based on selection type)
         if (selectionType != AvatarSelectionType.none)
           SizedBox(
             width: 140,
             height: 36, // Smaller button height
             child: ElevatedButton(
-              onPressed: selectionType == AvatarSelectionType.predefined
-                  ? onEquipAvatar
-                  : onUploadImage,
+              onPressed: isUploading
+                  ? null
+                  : (selectionType == AvatarSelectionType.predefined
+                      ? onEquipAvatar
+                      : onUploadImage),
               style: ElevatedButton.styleFrom(
                 backgroundColor: colorScheme.surface,
                 foregroundColor: colorScheme.onSurface,
+                disabledBackgroundColor: colorScheme.surface.withOpacity(0.7),
+                disabledForegroundColor: colorScheme.onSurface.withOpacity(0.5),
                 padding: EdgeInsets.zero,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                   side: BorderSide(
-                    color: colorScheme.tertiary.withValues(alpha: 0.8),
-                    width: 2, // Set your desired border width
+                    color: isUploading
+                        ? colorScheme.tertiary.withValues(alpha: 0.4)
+                        : colorScheme.tertiary.withValues(alpha: 0.8),
+                    width: 2,
                   ),
                 ),
               ),
-              child: Text(
-                selectionType == AvatarSelectionType.predefined
-                    ? "Appliquer"
-                    : "Téléverser",
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              child: isUploading && selectionType == AvatarSelectionType.file
+                  ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Text(
+                          "Envoi...",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Text(
+                      selectionType == AvatarSelectionType.predefined
+                          ? "Appliquer"
+                          : "Téléverser",
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ),
       ],

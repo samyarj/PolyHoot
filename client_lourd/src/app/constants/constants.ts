@@ -56,19 +56,14 @@ export const NAV_PLAYER_INFO: NavItem[] = [
         description: 'Testez vos connaissances en joignant ou créant une partie!',
         screenshots: [
             {
-                image: 'joinGame.png',
+                image: 'player/player-joinGame.png',
                 route: '/game-home/joinGame',
                 buttonDescription: 'Joindre une partie',
             },
             {
-                image: 'create.png',
+                image: 'player/player-createGame.png',
                 route: '/game-home/create',
                 buttonDescription: 'Créer une partie',
-            },
-            {
-                image: '',
-                route: '/game-home/lobby-list',
-                buttonDescription: 'Voir les parties',
             },
         ],
     },
@@ -77,17 +72,17 @@ export const NAV_PLAYER_INFO: NavItem[] = [
         description: 'Tentez votre chance dans la section chance!',
         screenshots: [
             {
-                image: 'dailyFree.png',
+                image: 'player/player-luck-daily.png',
                 route: '/luck/dailyFree',
                 buttonDescription: 'Prix Quotidien',
             },
             {
-                image: 'lootBox.png',
+                image: 'player/player-luck-lootbox.png',
                 route: '/luck/lootBox',
                 buttonDescription: 'Ouvrir une LootBox',
             },
             {
-                image: 'coinFlip.png',
+                image: 'player/player-luck-coinflip.png',
                 route: '/luck/coinFlip',
                 buttonDescription: 'Jouer au coin flip',
             },
@@ -98,17 +93,17 @@ export const NAV_PLAYER_INFO: NavItem[] = [
         description: 'Gérez et créez des quiz pour les utilisateurs!',
         screenshots: [
             {
-                image: 'quizList.png',
+                image: 'player/player-manage-quiz.png',
                 route: '/quiz-question-management/quizList',
                 buttonDescription: 'Gérer les quiz',
             },
             {
-                image: 'createQuiz.png',
+                image: 'player/player-manage-create.png',
                 route: '/quiz-question-management/createQuiz',
                 buttonDescription: 'Créer un quiz',
             },
             {
-                image: 'questionBank.png',
+                image: 'player/player-manage-bank.png',
                 route: '/quiz-question-management/questionBank',
                 buttonDescription: 'Gérer les questions',
             },
@@ -119,7 +114,7 @@ export const NAV_PLAYER_INFO: NavItem[] = [
         description: 'Gérez votre inventaire et vos objets!',
         screenshots: [
             {
-                image: 'inventory.png',
+                image: 'player/player-inventory.png',
                 route: '/inventory',
                 buttonDescription: "Voir l'inventaire",
             },
@@ -130,12 +125,12 @@ export const NAV_PLAYER_INFO: NavItem[] = [
         description: 'Achetez des objets dans notre boutique!',
         screenshots: [
             {
-                image: 'shop.png',
+                image: 'player/player-shop.png',
                 route: '/shop-home/shop',
                 buttonDescription: 'Voir la boutique',
             },
             {
-                image: '',
+                image: 'player/player-transfer.png',
                 route: '/shop-home/transfer',
                 buttonDescription: 'Transférer des coins',
             },
@@ -146,7 +141,7 @@ export const NAV_PLAYER_INFO: NavItem[] = [
         description: 'Gérez votre profil et vos paramètres!',
         screenshots: [
             {
-                image: '',
+                image: 'player/player-profile.png',
                 route: '/profile',
                 buttonDescription: 'Voir le profil',
             },
@@ -160,7 +155,7 @@ export const NAV_ADMIN_INFO: NavItem[] = [
         description: 'Observez les joueurs et leurs informations!',
         screenshots: [
             {
-                image: 'playerInfo.png',
+                image: 'admin/admin-player-page.png',
                 route: 'playerInfo',
                 buttonDescription: 'Consultez les joueurs',
             },
@@ -171,12 +166,12 @@ export const NAV_ADMIN_INFO: NavItem[] = [
         description: 'Créez, gérez et consultez des sondages pour les utilisateurs!',
         screenshots: [
             {
-                image: 'pollList.png',
+                image: 'admin/admin-poll-consult.png',
                 route: '/polls/consult',
                 buttonDescription: 'Voir les sondages',
             },
-            { image: 'createPoll.png', route: '/polls/create', buttonDescription: 'Créer un sondage' },
-            { image: 'createPoll.png', route: '/polls/history', buttonDescription: 'Historique des sondages' },
+            { image: 'admin/admin-poll-create.png', route: '/polls/create', buttonDescription: 'Créer un sondage' },
+            { image: 'admin/admin-poll-history.png', route: '/polls/history', buttonDescription: 'Historique des sondages' },
         ],
     },
 ];

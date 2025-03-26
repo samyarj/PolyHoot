@@ -105,14 +105,14 @@ export class WaitingPageService {
     }
 
     private handleJoinGameSuccess() {
-        this.socketService.on<{
-            playersInfo: {
+        this.socketService.on<
+            {
                 name: string;
                 avatar: string;
                 banner: string;
-            }[];
-            roomId: string;
-        }>(JoinEvents.JoinSuccess, ({ playersInfo }) => {
+            }[]
+        >(JoinEvents.JoinSuccess, (playersInfo) => {
+            console.log(playersInfo);
             this.players = playersInfo;
             this.isPlayersListEmpty = false;
         });
