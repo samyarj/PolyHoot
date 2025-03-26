@@ -7,10 +7,10 @@ export class QuickReplyController {
 
     @Post('generate')
     async generateQuickReplies(
-        @Body('channelId') channelId: string,
-        @Body('user') user: string,
-        @Body('message') message: string,
-        @Body('gameContext') gameContext?: string, // for game chat
+        @Body('channelId') channelId: string, // if "global" or roomid if chat is not a in a channel
+        @Body('user') user: string, // the user that the quick reply is generated for
+        @Body('message') message: string, // all conversation history in a particular chat
+        @Body('gameContext') gameContext?: string, // for game chat only- add rankings for players & validity of the current question
     ) {
         try {
             const quickReplies = await this.quickReplyService.generateQuickReplies(channelId, user, message, gameContext);
