@@ -164,7 +164,7 @@ export class JoinGameService {
                 banner: string;
             }[];
             roomId: string;
-        }>(JoinEvents.JoinSuccess, ({ roomId }) => {
+        }>(JoinEvents.PlayerJoined, ({ roomId }) => {
             this.lobbys = this.lobbys.map((lobby) => (lobby.roomId === roomId ? { ...lobby, nbPlayers: lobby.nbPlayers + 1 } : lobby));
             this.lobbysSource.next(this.lobbys);
         });

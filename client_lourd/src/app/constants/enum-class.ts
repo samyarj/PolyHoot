@@ -116,6 +116,7 @@ export enum JoinEvents {
     CanJoin = 'canJoinGame',
     JoinSuccess = 'onJoinGameSuccess',
     LobbyCreated = 'lobbyCreated',
+    PlayerJoined = 'playerjoined',
 }
 
 export enum JoinErrors {
