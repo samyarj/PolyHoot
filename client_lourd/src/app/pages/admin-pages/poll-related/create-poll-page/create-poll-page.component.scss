@@ -49,7 +49,7 @@ $modified-primary-color: #00115aaa;
 .forms-container {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 0.5rem;
     width: 70%;
     padding-right: 20px;
 }
@@ -102,8 +102,46 @@ $modified-primary-color: #00115aaa;
 
 .poll-info {
     width: 90%;
-    display: flex;
-    flex-direction: column;
+    margin: 0 auto;
+
+    .row {
+        display: flex;
+        gap: 20px;
+        margin: 0;
+    }
+
+    .col-md-6 {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.5rem;
+            border: 2px solid var(--tertiary-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+
+            &:focus {
+                outline: none;
+                border-color: var(--secondary-color);
+            }
+        }
+
+        small {
+            display: block;
+            margin-top: 0.25rem;
+        }
+    }
 }
 
 .question-list-container {
@@ -198,7 +236,7 @@ label {
 }
 
 .submit-poll-section {
-    margin-top: 4rem;
+    margin-top: 1rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -213,10 +251,7 @@ label {
     background: var(--primary-color);
     border-radius: 1rem;
     padding: 1rem;
-    // padding-right: 1.5rem;
-    // padding-left: 1.5rem;
-    // padding-bottom: 1.5rem;
-    margin-top: 0.5rem;
+    // margin-top: 0.5rem;
     display: flex;
     flex-direction: column;
     height: 70vh;
@@ -225,7 +260,7 @@ label {
 }
 
 .question-info-section {
-    margin-bottom: 1.5rem;
+    // margin-bottom: 1.5rem;
     flex-shrink: 0;
 }
 
