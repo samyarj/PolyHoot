@@ -11,6 +11,7 @@ import 'package:client_leger/UI/friend-system/qr-scanner-widget.dart';
 import 'package:client_leger/UI/friend-system/send_money_dialog.dart';
 import 'package:client_leger/UI/friend-system/sidebar_header.dart';
 import 'package:client_leger/backend-communication-services/firend-system/friend-service.dart';
+import 'package:client_leger/models/enums.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:flutter/material.dart';
@@ -327,6 +328,7 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => QRScannerScreen(
+          mode: QRScannerMode.friendRequest,
           onClose: () => Navigator.of(context).pop(),
         ),
       ),

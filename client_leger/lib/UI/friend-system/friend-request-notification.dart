@@ -1,9 +1,10 @@
-import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/global/avatar_banner_widget.dart';
 import 'package:client_leger/backend-communication-services/firend-system/friend-service.dart';
 import 'package:client_leger/providers/user_provider.dart';
+import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:toastification/toastification.dart';
 
 class FriendRequestNotification extends ConsumerStatefulWidget {
   final bool isActive;
@@ -343,6 +344,11 @@ class _FriendRequestNotificationState
                                                                             .user
                                                                             .uid);
                                                                   });
+                                                                  showToast(
+                                                                      context,
+                                                                      'Demande d\'ami acceptée',
+                                                                      type: ToastificationType
+                                                                          .success);
 
                                                                   // If overlay is still open, update its state
                                                                   if (_overlayEntry !=
@@ -361,9 +367,12 @@ class _FriendRequestNotificationState
                                                                 } catch (e) {
                                                                   if (!mounted)
                                                                     return;
-                                                                  showErrorDialog(
+                                                                  showToast(
                                                                       context,
-                                                                      e.toString());
+                                                                      e
+                                                                          .toString(),
+                                                                      type: ToastificationType
+                                                                          .error);
                                                                 } finally {
                                                                   if (mounted) {
                                                                     setState(
@@ -403,7 +412,6 @@ class _FriendRequestNotificationState
                                                               ),
                                                               onPressed:
                                                                   () async {
-                                                                // Mark as processing in the overlay state
                                                                 setOverlayState(
                                                                     () {
                                                                   _processingRequests
@@ -412,7 +420,6 @@ class _FriendRequestNotificationState
                                                                           .uid);
                                                                 });
 
-                                                                // Update our own state
                                                                 setState(() {
                                                                   _processingRequests
                                                                       .add(request
@@ -421,7 +428,6 @@ class _FriendRequestNotificationState
                                                                 });
 
                                                                 try {
-                                                                  // Call the service method directly
                                                                   await _friendService
                                                                       .rejectFriendRequest(request
                                                                           .user
@@ -434,11 +440,13 @@ class _FriendRequestNotificationState
                                                                             .user
                                                                             .uid);
                                                                   });
-
-                                                                  // If overlay is still open, update its state
+                                                                  showToast(
+                                                                      context,
+                                                                      'Demande d\'ami refusée',
+                                                                      type: ToastificationType
+                                                                          .success);
                                                                   setOverlayState(
                                                                       () {
-                                                                    // Update the UI in the overlay by removing this request
                                                                     currentRequests.removeWhere((req) =>
                                                                         req.user
                                                                             .uid ==
@@ -449,9 +457,12 @@ class _FriendRequestNotificationState
                                                                 } catch (e) {
                                                                   if (!mounted)
                                                                     return;
-                                                                  showErrorDialog(
+                                                                  showToast(
                                                                       context,
-                                                                      e.toString());
+                                                                      e
+                                                                          .toString(),
+                                                                      type: ToastificationType
+                                                                          .error);
                                                                 } finally {
                                                                   if (mounted) {
                                                                     setState(
@@ -461,7 +472,6 @@ class _FriendRequestNotificationState
                                                                           .uid);
                                                                     });
 
-                                                                    // If overlay is still open, update its state
                                                                     if (_overlayEntry !=
                                                                         null) {
                                                                       setOverlayState(

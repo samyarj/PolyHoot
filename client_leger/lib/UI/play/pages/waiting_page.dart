@@ -1,4 +1,5 @@
 import 'package:client_leger/UI/global/header_title.dart';
+import 'package:client_leger/UI/play/widgets/game-qr-code-dialog.dart';
 import 'package:client_leger/UI/play/widgets/leave_game_button.dart';
 import 'package:client_leger/UI/play/widgets/player_info.dart';
 import 'package:client_leger/UI/router/routes.dart';
@@ -76,36 +77,87 @@ class WaitingPage extends ConsumerWidget {
                   const SizedBox(height: 25),
 
                   // Room Code at the top (if organizer)
+                  // Inside the WaitingPage build method where the room ID is displayed
+// Replace the existing Room Code container with this:
+
                   if (socketManager.isOrganizer &&
                       waitingState.gameTitle.isEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary.withValues(alpha: 0.8),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: colorScheme.tertiary.withValues(alpha: 0.5),
-                          width: 2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: colorScheme.tertiary.withValues(alpha: 0.5),
-                            blurRadius: 6,
-                            spreadRadius: 1,
-                            offset: Offset(0, 1),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withValues(alpha: 0.8),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color:
+                                  colorScheme.tertiary.withValues(alpha: 0.5),
+                              width: 2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color:
+                                    colorScheme.tertiary.withValues(alpha: 0.5),
+                                blurRadius: 6,
+                                spreadRadius: 1,
+                                offset: Offset(0, 1),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: Text(
-                        socketManager.roomId ?? "0000",
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onPrimary,
-                          letterSpacing: 4,
+                          child: Text(
+                            socketManager.roomId ?? "0000",
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onPrimary,
+                              letterSpacing: 4,
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 10),
+                        GestureDetector(
+                          onTap: () {
+                            // Show the QR code dialog
+                            showDialog(
+                              context: context,
+                              builder: (context) => GameQRCodeDialog(
+                                roomId: socketManager.roomId ?? "0000",
+                                gameTitle: waitingState.playersInfo.isNotEmpty
+                                    ? "Salle de ${socketManager.playerName}"
+                                    : "Salle d'attente",
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: colorScheme.primary.withValues(alpha: 0.8),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color:
+                                    colorScheme.tertiary.withValues(alpha: 0.5),
+                                width: 2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: colorScheme.tertiary
+                                      .withValues(alpha: 0.5),
+                                  blurRadius: 6,
+                                  spreadRadius: 1,
+                                  offset: Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.qr_code,
+                              color: colorScheme.onPrimary,
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
 
                   const SizedBox(height: 10),

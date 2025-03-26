@@ -3,22 +3,30 @@ import 'dart:convert';
 import 'package:client_leger/UI/confirmation/confirmation_dialog.dart';
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/backend-communication-services/firend-system/friend-service.dart';
+import 'package:client_leger/models/enums.dart';
+import 'package:client_leger/providers/play/join_game_provider.dart';
 import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:toastification/toastification.dart';
 
-class QRScannerScreen extends StatefulWidget {
+class QRScannerScreen extends ConsumerStatefulWidget {
   final VoidCallback onClose;
+  final QRScannerMode mode;
 
-  const QRScannerScreen({Key? key, required this.onClose}) : super(key: key);
+  const QRScannerScreen({
+    Key? key,
+    required this.onClose,
+    required this.mode,
+  }) : super(key: key);
 
   @override
-  _QRScannerScreenState createState() => _QRScannerScreenState();
+  ConsumerState<QRScannerScreen> createState() => _QRScannerScreenState();
 }
 
-class _QRScannerScreenState extends State<QRScannerScreen> {
+class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
   final FriendService _friendService = FriendService();
   final MobileScannerController _controller = MobileScannerController();
   bool _hasPermission = false;
@@ -93,66 +101,13 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       // Décoder les données du QR code
       final jsonData = jsonDecode(data);
 
-      if (jsonData['type'] == 'friend-request' && jsonData['uid'] != null) {
-        final username = jsonData['username'];
-        final uid = jsonData['uid'];
-
-        // Afficher le dialogue de confirmation
-        final result = await showConfirmationDialog(
-          context,
-          'Voulez-vous envoyer une demande d\'ami à $username?',
-          null,
-          null,
-          showResult: true,
-        );
-
-        if (result == true) {
-          try {
-            await _friendService.sendFriendRequest(uid);
-            if (mounted) {
-              showToast(
-                context,
-                'Demande d\'ami envoyée à $username avec succès',
-                type: ToastificationType.success,
-              );
-              // Fermer l'écran scanner après envoi de la demande
-              widget.onClose();
-            }
-          } catch (e) {
-            if (mounted) {
-              showErrorDialog(context, e.toString());
-              // Redémarrer le scanner après erreur
-              _controller.start();
-              setState(() {
-                _isProcessing = false;
-                _hasProcessedCode = false;
-              });
-            }
-          }
-        } else {
-          // Si l'utilisateur annule, redémarrer le scanner
-          if (mounted) {
-            _controller.start();
-            setState(() {
-              _isProcessing = false;
-              _hasProcessedCode = false;
-            });
-          }
-        }
-      } else {
-        // Code QR invalide
-        if (mounted) {
-          showToast(
-            context,
-            'QR code invalide. Veuillez scanner un code d\'ami valide.',
-            type: ToastificationType.error,
-          );
-          _controller.start();
-          setState(() {
-            _isProcessing = false;
-            _hasProcessedCode = false;
-          });
-        }
+      switch (widget.mode) {
+        case QRScannerMode.friendRequest:
+          await _processFriendRequestQR(jsonData);
+          break;
+        case QRScannerMode.joinGame:
+          await _processJoinGameQR(jsonData);
+          break;
       }
     } catch (e) {
       // Erreur lors du décodage du QR code
@@ -168,6 +123,148 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           _hasProcessedCode = false;
         });
       }
+    }
+  }
+
+  Future<void> _processFriendRequestQR(Map<String, dynamic> jsonData) async {
+    if (jsonData['type'] == 'friend-request' && jsonData['uid'] != null) {
+      final username = jsonData['username'];
+      final uid = jsonData['uid'];
+
+      // Afficher le dialogue de confirmation
+      final result = await showConfirmationDialog(
+        context,
+        'Voulez-vous envoyer une demande d\'ami à $username?',
+        null,
+        null,
+        showResult: true,
+      );
+
+      if (result == true) {
+        try {
+          await _friendService.sendFriendRequest(uid);
+          if (mounted) {
+            showToast(
+              context,
+              'Demande d\'ami envoyée à $username avec succès',
+              type: ToastificationType.success,
+            );
+            // Fermer l'écran scanner après envoi de la demande
+            widget.onClose();
+          }
+        } catch (e) {
+          if (mounted) {
+            showErrorDialog(context, e.toString());
+            // Redémarrer le scanner après erreur
+            _controller.start();
+            setState(() {
+              _isProcessing = false;
+              _hasProcessedCode = false;
+            });
+          }
+        }
+      } else {
+        // Si l'utilisateur annule, redémarrer le scanner
+        if (mounted) {
+          _controller.start();
+          setState(() {
+            _isProcessing = false;
+            _hasProcessedCode = false;
+          });
+        }
+      }
+    } else {
+      // Code QR invalide
+      if (mounted) {
+        showToast(
+          context,
+          'QR code invalide. Veuillez scanner un code d\'ami valide.',
+          type: ToastificationType.error,
+        );
+        _controller.start();
+        setState(() {
+          _isProcessing = false;
+          _hasProcessedCode = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _processJoinGameQR(Map<String, dynamic> jsonData) async {
+    if (jsonData['type'] == 'join-game' &&
+        jsonData['roomId'] != null &&
+        jsonData['gameName'] != null) {
+      final String roomId = jsonData['roomId'];
+      final String gameName = jsonData['gameName'];
+
+      // Afficher le dialogue de confirmation
+      final result = await showConfirmationDialog(
+        context,
+        'Voulez-vous rejoindre la partie "$gameName"?',
+        null,
+        null,
+        showResult: true,
+      );
+
+      if (result == true) {
+        try {
+          // Access the joinGameProvider to validate and join the game
+          final joinNotifier = ref.read(joinGameProvider.notifier);
+          joinNotifier.validGameId(roomId);
+
+          if (mounted) {
+            showToast(
+              context,
+              'Tentative de connexion à la partie "$gameName"...',
+              type: ToastificationType.info,
+            );
+            // Fermer l'écran scanner après l'envoi de la demande
+            widget.onClose();
+          }
+        } catch (e) {
+          if (mounted) {
+            showErrorDialog(context, e.toString());
+            // Redémarrer le scanner après erreur
+            _controller.start();
+            setState(() {
+              _isProcessing = false;
+              _hasProcessedCode = false;
+            });
+          }
+        }
+      } else {
+        // Si l'utilisateur annule, redémarrer le scanner
+        if (mounted) {
+          _controller.start();
+          setState(() {
+            _isProcessing = false;
+            _hasProcessedCode = false;
+          });
+        }
+      }
+    } else {
+      // Code QR invalide
+      if (mounted) {
+        showToast(
+          context,
+          'QR code invalide. Veuillez scanner un code de partie valide.',
+          type: ToastificationType.error,
+        );
+        _controller.start();
+        setState(() {
+          _isProcessing = false;
+          _hasProcessedCode = false;
+        });
+      }
+    }
+  }
+
+  String _getScannerTitle() {
+    switch (widget.mode) {
+      case QRScannerMode.friendRequest:
+        return 'Scanner le QR code d\'un ami';
+      case QRScannerMode.joinGame:
+        return 'Scanner le QR code d\'une partie';
     }
   }
 
@@ -207,7 +304,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Text(
-                  'Pour scanner les QR codes d\'amis, veuillez autoriser l\'accès à la caméra',
+                  'Pour scanner les QR codes, veuillez autoriser l\'accès à la caméra',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
@@ -239,7 +336,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         backgroundColor: Colors.transparent,
         iconTheme: IconThemeData(color: Colors.white),
         title: Text(
-          'Scanner le QR code d\'un ami',
+          _getScannerTitle(),
           style: TextStyle(color: Colors.white),
         ),
         leading: IconButton(

@@ -1,10 +1,13 @@
 import 'dart:ui';
 
+import 'package:client_leger/UI/friend-system/qr-scanner-widget.dart';
 import 'package:client_leger/UI/global/header_title.dart';
 import 'package:client_leger/UI/play/widgets/game_creation_popup.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
+import 'package:client_leger/models/enums.dart';
 import 'package:client_leger/providers/play/join_game_provider.dart';
+import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,6 +31,19 @@ class _JoinGameState extends ConsumerState<JoinGame> {
     super.dispose();
   }
 
+  void _openQRScanner() {
+    if (!mounted) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => QRScannerScreen(
+          onClose: () => Navigator.of(context).pop(),
+          mode: QRScannerMode.joinGame,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final joinState = ref.watch(joinGameProvider);
@@ -45,7 +61,7 @@ class _JoinGameState extends ConsumerState<JoinGame> {
       if (next.popUpMessage.isNotEmpty &&
           (previous == null || previous.popUpMessage != next.popUpMessage)) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          _showToast(context, next.popUpMessage);
+          showToast(context, next.popUpMessage, type: ToastificationType.error);
         });
       }
     });
@@ -373,7 +389,7 @@ class _JoinGameState extends ConsumerState<JoinGame> {
 
                     // Room Code Input
                     Container(
-                      width: MediaQuery.of(context).size.width * 0.33,
+                      width: MediaQuery.of(context).size.width * 0.38,
                       decoration: BoxDecoration(
                         color: colorScheme.surface.withValues(alpha: 0.7),
                         borderRadius: BorderRadius.circular(30),
@@ -452,8 +468,9 @@ class _JoinGameState extends ConsumerState<JoinGame> {
                                               false;
                                           if (_roomIdController.text.length !=
                                               4) {
-                                            _showToast(context,
-                                                "Le code doit comporter 4 chiffres.");
+                                            showToast(context,
+                                                "Le code doit comporter 4 chiffres.",
+                                                type: ToastificationType.error);
                                             return;
                                           }
                                           joinNotifier.validGameId(
@@ -510,6 +527,26 @@ class _JoinGameState extends ConsumerState<JoinGame> {
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
+                                ),
+                                Container(
+                                  margin: EdgeInsets.only(left: 10),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.primary,
+                                    borderRadius: BorderRadius.circular(40),
+                                    border: Border.all(
+                                      color: colorScheme.tertiary,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: IconButton(
+                                    icon: Icon(Icons.qr_code_scanner,
+                                        color: colorScheme.onPrimary),
+                                    tooltip: 'Scanner QR code',
+                                    onPressed: _openQRScanner,
+                                    style: IconButton.styleFrom(
+                                      padding: EdgeInsets.all(12),
+                                    ),
+                                  ),
                                 )
                               ],
                             ),
@@ -536,18 +573,6 @@ class _JoinGameState extends ConsumerState<JoinGame> {
           ),
         ],
       ),
-    );
-  }
-
-  void _showToast(BuildContext context, String message) {
-    toastification.show(
-      context: context,
-      title: Text(message),
-      type: ToastificationType.error,
-      autoCloseDuration: const Duration(seconds: 3),
-      alignment: Alignment.topCenter,
-      style: ToastificationStyle.flatColored,
-      showIcon: true,
     );
   }
 }
