@@ -1,23 +1,50 @@
-<div class="info">
-    <h2>{{ name }}</h2>
-    <mat-icon id="chatBubble" color="white" title="clavardage">forum</mat-icon>
-</div>
-<div #previousMessages id="previous-messages">
-    <div
-        *ngFor="let chatmessage of chatMessages"
-        [ngClass]="{
-            user: name === chatmessage.author,
-            systemMessage: chatmessage.author === 'System',
-            otherUser: name !== chatmessage.author
-        }"
-    >
-        <div class="message">{{ chatmessage.author + ' : ' + chatmessage.message }}</div>
-        <div class="spacer"></div>
-        <div class="time">{{ chatmessage.date | date: "HH'h'mm" }}</div>
+<div class="main-wrapper">
+    <div #previousMessages id="previous-messages" (scroll)="onScroll()">
+        <div *ngIf="chatMessagesLoading" class="loading-container">
+            <div class="spinner-border text-primary" role="status"></div>
+            <div>Chat is loading...</div>
+        </div>
+
+        <div
+            *ngFor="let chatmessage of chatMessages"
+            [ngClass]="{
+                systemMessage: chatmessage.author === 'System',
+                user: (user | async)?.username === chatmessage.author,
+                otherUser: (user | async)?.username !== chatmessage.author
+            }"
+            class="chat-message user otherUser"
+        >
+            <div class="chat-header">
+                <app-avatar-banner [avatarUrl]="chatmessage.avatar" [bannerUrl]="chatmessage.banner" class="chat-avatar"> </app-avatar-banner>
+                <span class="chat-username">{{ chatmessage.author }}</span>
+                <div
+                    *ngIf="(user | async)?.username !== chatmessage.author && chatmessage.uid"
+                    class="report-button"
+                    (click)="reportUser(chatmessage.uid)"
+                    matTooltip="Signaler"
+                    matTooltipClass="custom-tooltip"
+                >
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+            </div>
+            <div class="message">{{ chatmessage.message }}</div>
+            <div class="date-container">
+                <div class="time">{{ chatmessage.date | date: 'HH:mm:ss' }}</div>
+            </div>
+        </div>
     </div>
+    <div id="chat-message-input-div">
+        <textarea id="myTextInput" (keydown)="onKeyDown($event)" placeholder="Entrez votre message." [(ngModel)]="inputMessage"></textarea>
+        <button
+            type="button"
+            [disabled]="inputMessage === ''"
+            [ngClass]="{ 'custom-button-disabled': inputMessage === '' }"
+            class="custom-button"
+            id="send-button"
+            (click)="sendMessageToRoom()"
+        >
+            Envoyer
+        </button>
+    </div>
+    <span class="error" *ngIf="!isLengthInRange()"> Attention ! Limite de 200 caractères atteinte </span>
 </div>
-<div id="chat-message-input-div">
-    <textarea id="myTextInput" (keydown)="onKeyDown($event)" placeholder="Entrez votre message." [(ngModel)]="inputMessage"></textarea>
-    <button type="button" id="send-button" (click)="sendMessageToRoom()">Envoyer</button>
-</div>
-<span class="error" *ngIf="!isLengthInRange()"> Attention ! Limite de 200 caractères atteinte </span>

@@ -23,6 +23,7 @@ export class JoinGameService {
     user$: Observable<User | null>;
     private username: string;
     private socketService: SocketClientService;
+    private hasJoinedGame: boolean = false; // Add this variable
 
     constructor(
         private router: Router,
@@ -56,9 +57,15 @@ export class JoinGameService {
         this.canAccessGame = false;
         this.wrongGameId = false;
     }
+
     getAllLobbys() {
         this.socketService.send(GameEvents.GetCurrentGames);
     }
+
+    hasJoined(): boolean {
+        return this.hasJoinedGame;
+    }
+
     private handleLobbys() {
         this.handleLobbyCreation();
         this.handleLobbyDeletion();
@@ -66,6 +73,7 @@ export class JoinGameService {
         this.handleLockedLobby();
         this.handleUpdateLobby();
     }
+
     private handleIdValidation() {
         this.handleValidId();
         this.handleInvalidId();
@@ -109,6 +117,7 @@ export class JoinGameService {
             this.socketService.roomId = data.gameId;
             this.socketService.playerName = data.playerName;
             this.socketService.isOrganizer = false;
+            this.hasJoinedGame = true; // Set to true when join game is successful
             this.redirectToPage('/waiting');
         });
     }
@@ -164,7 +173,7 @@ export class JoinGameService {
                 banner: string;
             }[];
             roomId: string;
-        }>(JoinEvents.JoinSuccess, ({ roomId }) => {
+        }>(JoinEvents.PlayerJoined, ({ roomId }) => {
             this.lobbys = this.lobbys.map((lobby) => (lobby.roomId === roomId ? { ...lobby, nbPlayers: lobby.nbPlayers + 1 } : lobby));
             this.lobbysSource.next(this.lobbys);
         });

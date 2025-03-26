@@ -103,6 +103,7 @@ export class FirebaseChatService {
                     username: users[msg.uid]?.username || 'Inconnu',
                     avatar:
                         users[msg.uid]?.avatarEquipped || 'https://res.cloudinary.com/dtu6fkkm9/image/upload/v1737478954/default-avatar_qcaycl.jpg',
+                    banner: users[msg.uid]?.borderEquipped,
                 }));
 
                 // 🔥 Ensure messages are sorted correctly using `Timestamp`
@@ -156,6 +157,7 @@ export class FirebaseChatService {
                     ...msg,
                     username: users[msg.uid]?.username || 'Unknown',
                     avatar: users[msg.uid]?.avatarEquipped || 'assets/default-avatar.png',
+                    banner: users[msg.uid]?.borderEquipped,
                 }));
 
                 // 🔥 **Ensure messages are always in ascending order**
@@ -183,7 +185,11 @@ export class FirebaseChatService {
             const userDocRef = doc(this.usersCollection, uid).withConverter({
                 fromFirestore: (snap) => {
                     const data = snap.data();
-                    return { username: data?.username, avatarEquipped: data?.avatarEquipped };
+                    return {
+                        username: data?.username,
+                        avatarEquipped: data?.avatarEquipped,
+                        borderEquipped: data?.borderEquipped,
+                    };
                 },
                 toFirestore: () => ({}),
             });
@@ -304,7 +310,7 @@ export class FirebaseChatService {
 
             // Delete all documents in the messages subcollection
             const messagesSnapshot = await getDocs(messagesCollectionRef);
-            const deletePromises = messagesSnapshot.docs.map((doc) => deleteDoc(doc.ref));
+            const deletePromises = messagesSnapshot.docs.map(async (doc) => deleteDoc(doc.ref));
             await Promise.all(deletePromises);
 
             // Remove the channel from the joinedChannels field of all users

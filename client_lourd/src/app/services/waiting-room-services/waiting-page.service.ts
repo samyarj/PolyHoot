@@ -111,8 +111,8 @@ export class WaitingPageService {
                 avatar: string;
                 banner: string;
             }[];
-            roomId: string;
         }>(JoinEvents.JoinSuccess, ({ playersInfo }) => {
+            console.log(playersInfo);
             this.players = playersInfo;
             this.isPlayersListEmpty = false;
         });

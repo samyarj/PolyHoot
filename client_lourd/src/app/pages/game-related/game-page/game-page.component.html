@@ -80,7 +80,7 @@
                             [ngClass]="this.showAnswers ? (choice.isCorrect ? 'correct-choice' : 'incorrect-choice') : 'hide-choice-truth'"
                             class="multiple-choice"
                         >
-                            Choix {{ choiceIndex + 1 }}: {{ choice.text }}
+                            <p>Choix {{ choiceIndex + 1 }}: {{ choice.text }}</p>
                         </div>
                     </div>
                     <textarea
