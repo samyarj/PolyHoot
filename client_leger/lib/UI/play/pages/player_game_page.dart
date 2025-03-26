@@ -86,9 +86,7 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
           ),
         ),
         padding: const EdgeInsets.all(16),
-        // height: 670,
         child: Container(
-          // height: 670,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(30),
             border: Border.all(
@@ -161,8 +159,6 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
                                   playerGameNotifier.selectChoice(choiceIndex);
                                 }),
                                 child: Container(
-                                  // width: 50,
-                                  // height: 50,
                                   decoration: BoxDecoration(
                                     color: playerGameState.realShowAnswers
                                         ? (choice.isCorrect!
@@ -296,56 +292,143 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
                   playerGameState.currentQuestion.qreAttributes != null) ...[
                 Container(
                   decoration: BoxDecoration(
+                    color: colorScheme.primary.withAlpha(125),
                     borderRadius: BorderRadius.circular(30),
-                    color: Colors.blue,
+                    border: Border.all(
+                      color: colorScheme.tertiary
+                          .withValues(alpha: 0.3), // Border color
+                      width: 2, // Border width
+                    ),
                   ),
-                  child: NumberPicker(
-                    value: playerGameState.qreAnswer,
-                    minValue:
-                        playerGameState.currentQuestion.qreAttributes!.minBound,
-                    maxValue:
-                        playerGameState.currentQuestion.qreAttributes!.maxBound,
-                    axis: Axis.vertical,
-                    onChanged: playerGameState.playerInfo.submitted ||
-                            playerGameState.time == 0
-                        ? (value) {}
-                        : (value) {
-                            setState(() {
-                              playerGameNotifier.setQreAnswer(value);
-                            });
-                          },
-                    textStyle: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimary,
-                        fontSize: 18),
-                    selectedTextStyle: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontSize: 34),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      buildFeedbackMessage(
+                          playerGameState.choiceFeedback,
+                          playerGameState.currentQuestion,
+                          playerGameState.playerInfo.submitted),
+                      SizedBox(height: 6),
+                      Container(
+                        decoration: BoxDecoration(
+                          color:
+                              colorScheme.tertiary.withAlpha(38), // 15% opacity
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        padding: const EdgeInsets.only(
+                          top: 6,
+                          bottom: 4,
+                          left: 4,
+                          right: 4,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            playerGameState.realShowAnswers
+                                ? Text(
+                                    'Bonne réponse: ${playerGameState.currentQuestion.qreAttributes!.goodAnswer}',
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
+                                  )
+                                : Text(
+                                    "Sélectionnez une valeur entre ${playerGameState.currentQuestion.qreAttributes!.minBound} et ${playerGameState.currentQuestion.qreAttributes!.maxBound}",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                            SizedBox(height: 8),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(30),
+                                color: colorScheme.secondary.withAlpha(51),
+                              ),
+                              child: NumberPicker(
+                                value: playerGameState.qreAnswer,
+                                minValue: playerGameState
+                                    .currentQuestion.qreAttributes!.minBound,
+                                maxValue: playerGameState
+                                    .currentQuestion.qreAttributes!.maxBound,
+                                axis: Axis.horizontal,
+                                onChanged:
+                                    playerGameState.playerInfo.submitted ||
+                                            playerGameState.time == 0
+                                        ? (value) {}
+                                        : (value) {
+                                            setState(() {
+                                              playerGameNotifier
+                                                  .setQreAnswer(value);
+                                            });
+                                          },
+                                textStyle: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.tertiary,
+                                    fontSize: 18),
+                                selectedTextStyle: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    fontSize: 34),
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Expanded(
+                                  child: getBorneContainer(
+                                      'Borne minimale: ${playerGameState.currentQuestion.qreAttributes!.minBound}',
+                                      colorScheme,
+                                      0),
+                                ),
+                                SizedBox(width: 4),
+                                Expanded(
+                                  child: getBorneContainer(
+                                      'Marge de tolérance: ${playerGameState.currentQuestion.qreAttributes!.tolerance}',
+                                      colorScheme,
+                                      1),
+                                ),
+                                SizedBox(width: 4),
+                                Expanded(
+                                  child: getBorneContainer(
+                                      'Borne maximale: ${playerGameState.currentQuestion.qreAttributes!.maxBound}',
+                                      colorScheme,
+                                      2),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: isSubmissionDisabled(playerGameState)
+                            ? null
+                            : () {
+                                playerGameNotifier.finalizeAnswer();
+                                if (playerGameState.currentQuestion.type ==
+                                    QuestionType.QRL.name) {
+                                  playerGameNotifier.sendAnswerForCorrection(
+                                      _QRLanswerController.text);
+                                  _QRLanswerController.clear();
+                                }
+                              },
+                        style: isSubmissionDisabled(playerGameState)
+                            ? null
+                            : getButtonStyle(context),
+                        child: Text(
+                          "Soumettre",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Theme.of(context).colorScheme.tertiary,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: 16),
-                Text(
-                    'Borne minimale: ${playerGameState.currentQuestion.qreAttributes!.minBound}',
-                    style: TextStyle(fontSize: 16)),
-                Text(
-                    'Borne maximale: ${playerGameState.currentQuestion.qreAttributes!.maxBound}',
-                    style: TextStyle(fontSize: 16)),
-                Text('Votre réponse: ${playerGameState.qreAnswer}',
-                    style: TextStyle(fontSize: 16)),
-                Text(
-                    'Marge de tolérance: ${playerGameState.currentQuestion.qreAttributes!.tolerance}',
-                    style: TextStyle(fontSize: 16)),
-                if (playerGameState.realShowAnswers)
-                  Text(
-                      'Bonne réponse: ${playerGameState.currentQuestion.qreAttributes!.goodAnswer}',
-                      style: TextStyle(fontSize: 16)),
-                SizedBox(height: 16),
               ],
-              // buildFeedbackMessage(
-              //     playerGameState.choiceFeedback,
-              //     playerGameState.currentQuestion,
-              //     playerGameState.playerInfo.submitted),
               SizedBox(height: 4),
-              if (playerGameState.currentQuestion.type != QuestionType.QCM.name)
+              if (playerGameState.currentQuestion.type !=
+                      QuestionType.QCM.name &&
+                  playerGameState.currentQuestion.type != QuestionType.QRE.name)
                 ElevatedButton(
                   onPressed: isSubmissionDisabled(playerGameState)
                       ? null
@@ -432,5 +515,30 @@ BorderRadius getBorderRadius(int index) {
   }
   return BorderRadius.only(
     bottomRight: Radius.circular(30),
+  );
+}
+
+Container getBorneContainer(String text, ColorScheme colorScheme, int index) {
+  return Container(
+    // width: 302,
+    decoration: BoxDecoration(
+      color: colorScheme.primary
+          .withAlpha(153), // 153 is approximately 60% opacity
+      borderRadius: index == 0
+          ? BorderRadius.only(
+              bottomLeft: Radius.circular(30),
+            )
+          : index == 1
+              ? null
+              : BorderRadius.only(
+                  bottomRight: Radius.circular(30),
+                ),
+    ),
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    alignment: Alignment.center,
+    child: Text(
+      text,
+      style: TextStyle(color: colorScheme.onSurface, fontSize: 16),
+    ),
   );
 }
