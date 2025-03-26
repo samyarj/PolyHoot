@@ -7,7 +7,7 @@ export class CreatePublishedPollDto extends CreatePollDto {
     @ApiProperty({ description: 'The publication date of the poll' })
     @IsNotEmpty()
     @IsDateString()
-    publicationDate: Date;
+    publicationDate: string;
 
     @ApiProperty({ description: 'Total votes for each question' })
     @IsArray()

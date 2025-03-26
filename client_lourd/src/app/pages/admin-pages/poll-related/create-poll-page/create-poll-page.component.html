@@ -2,7 +2,7 @@
     <div class="poll-page-content">
         <div class="container">
             <div class="forms-container">
-                <form class="row mt-2 game-info" #gameForm="ngForm" @gameFormAnimation>
+                <form class="row mt-2 poll-info" #pollForm="ngForm" @pollFormAnimation>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="title">Titre du sondage:</label>
@@ -39,6 +39,7 @@
                         </div>
                     </div>
                 </form>
+
                 <form class="form-question-container" #questionForm="ngForm" (ngSubmit)="addQuestion()">
                     <div class="question-info-section">
                         <div class="form-group question-text">
@@ -53,7 +54,7 @@
                                 #text="ngModel"
                                 required
                             />
-                            <small class="text-danger" *ngIf="isQuestionTextValid()">Entrez votre question</small>
+                            <small class="text-danger" *ngIf="isQuestionTextEmpty()">Entrez votre question</small>
                         </div>
                     </div>
 
@@ -90,7 +91,7 @@
                                 </small>
                             </div>
                         </div>
-                        <div *ngIf="question.choices"> {{question.choices.length}}</div>
+                        <div *ngIf="question.choices">{{ question.choices.length }}</div>
                         <button
                             class="btn btn-secondary btn-sm"
                             type="button"
@@ -104,13 +105,18 @@
                     </div>
                     <div class="submit-section">
                         <button *ngIf="showButton" type="button" class="btn btn-dark custom-width" (click)="resetAnswers()">Tout effacer</button>
-                        <button *ngIf="showButton" type="submit" class="btn custom-button custom-width" [disabled]="!questionForm.valid">
+                        <button
+                            *ngIf="showButton"
+                            type="submit"
+                            class="btn custom-button custom-width"
+                            [disabled]="!questionForm.valid || !validQuestion()"
+                        >
                             {{ submitQuestionButton }}
                         </button>
                     </div>
                 </form>
             </div>
-            <div class="created-question-container" @gameFormAnimation>
+            <div class="created-question-container" @pollFormAnimation>
                 <h2>Questions</h2>
                 <ul class="question-list-container" cdkDropList (cdkDropListDropped)="onDrop($event)">
                     <li
@@ -133,9 +139,9 @@
                 </div>
             </div>
         </div>
-        <div class="submit-game-section">
+        <div class="submit-poll-section">
             <button (click)="emptyPollAndRedirect()" class="btn btn-danger custom-width">Annuler</button>
-            <button class="btn btn-primary custom-width" [disabled]="!gameForm.valid || !validatePoll()" (click)="submitPollEvent()">
+            <button class="btn btn-primary custom-width" [disabled]="!pollForm.valid || !validatePoll()" (click)="submitPollEvent()">
                 {{ submitPollButton }}
             </button>
         </div>
