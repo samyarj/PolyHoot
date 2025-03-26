@@ -21,6 +21,7 @@ export class JoinGameService {
     lobbysSource: Subject<Lobby[]>;
     lobbysObservable: Observable<Lobby[]>;
     user$: Observable<User | null>;
+    private areSocketsInitialized: boolean = false;
     private username: string;
     private socketService: SocketClientService;
     private hasJoinedGame: boolean = false; // Add this variable
@@ -33,9 +34,6 @@ export class JoinGameService {
         this.socketService = this.authService.getSocketService();
         this.lobbysSource = new Subject<Lobby[]>();
         this.lobbysObservable = this.lobbysSource.asObservable();
-        this.handleLobbys();
-        this.handleJoinGame();
-        this.handleIdValidation();
         this.user$ = this.authService.user$;
         this.user$.subscribe((user) => {
             if (user) {
@@ -66,6 +64,22 @@ export class JoinGameService {
         return this.hasJoinedGame;
     }
 
+    setUpSockets() {
+        if (!this.areSocketsInitialized) {
+            this.handleLobbys();
+            this.handleJoinGame();
+            this.handleIdValidation();
+            this.areSocketsInitialized = true;
+        }
+    }
+
+    clearSockets() {
+        this.removeLobbys();
+        this.removeIdValidation();
+        this.removeJoinGame();
+        this.areSocketsInitialized = false;
+    }
+
     private handleLobbys() {
         this.handleLobbyCreation();
         this.handleLobbyDeletion();
@@ -74,10 +88,24 @@ export class JoinGameService {
         this.handleUpdateLobby();
     }
 
+    private removeLobbys() {
+        this.removeLobbyCreation();
+        this.removeLobbyDeletion();
+        this.removeDisplayActiveLobbys();
+        this.removeLockedLobby();
+        this.removeUpdateLobby();
+    }
+
     private handleIdValidation() {
         this.handleValidId();
         this.handleInvalidId();
         this.handleRoomLocked();
+    }
+
+    private removeIdValidation() {
+        this.removeValidId();
+        this.removeInvalidId();
+        this.removeRoomLocked();
     }
 
     private handleJoinGame() {
@@ -85,6 +113,13 @@ export class JoinGameService {
         this.handleBannedName();
         this.handleCantJoinGame();
         this.handleRoomLocked();
+    }
+
+    private removeJoinGame() {
+        this.removeCanJoinGame();
+        this.removeBannedName();
+        this.removeCantJoinGame();
+        this.removeRoomLocked();
     }
 
     private handleValidId() {
@@ -96,6 +131,10 @@ export class JoinGameService {
         });
     }
 
+    private removeValidId() {
+        this.socketService.socket.off(JoinEvents.ValidId);
+    }
+
     private handleInvalidId() {
         this.socketService.on(JoinErrors.InvalidId, () => {
             this.canAccessGame = false;
@@ -104,12 +143,20 @@ export class JoinGameService {
         });
     }
 
+    private removeInvalidId() {
+        this.socketService.socket.off(JoinErrors.InvalidId);
+    }
+
     private handleRoomLocked() {
         this.socketService.on(JoinErrors.RoomLocked, () => {
             this.canAccessGame = false;
             this.popUpMessage = "La partie est verrouillée. Veuillez demander l'accès à l'organisateur ou essayez un différent code.";
             this.showPopUp();
         });
+    }
+
+    private removeRoomLocked() {
+        this.socketService.socket.off(JoinErrors.RoomLocked);
     }
 
     private handleCanJoinGame() {
@@ -122,6 +169,10 @@ export class JoinGameService {
         });
     }
 
+    private removeCanJoinGame() {
+        this.socketService.socket.off(JoinEvents.CanJoin);
+    }
+
     private handleBannedName() {
         this.socketService.on(JoinErrors.BannedName, () => {
             this.popUpMessage = 'Vous avez été banni de cette partie, vous ne pouvez pas la rejoindre.';
@@ -129,11 +180,19 @@ export class JoinGameService {
         });
     }
 
+    private removeBannedName() {
+        this.socketService.socket.off(JoinErrors.BannedName);
+    }
+
     private handleCantJoinGame() {
         this.socketService.on(JoinErrors.Generic, () => {
             this.popUpMessage = 'Une erreur fait en sorte que vous ne pouvez pas joindre la partie';
             this.showPopUp();
         });
+    }
+
+    private removeCantJoinGame() {
+        this.socketService.socket.off(JoinErrors.Generic);
     }
 
     private handleLobbyCreation() {
@@ -144,11 +203,19 @@ export class JoinGameService {
         });
     }
 
+    private removeLobbyCreation() {
+        this.socketService.socket.off(JoinEvents.LobbyCreated);
+    }
+
     private handleLobbyDeletion() {
         this.socketService.on(GameEvents.End, (roomId: string) => {
             this.lobbys = this.lobbys.filter((lobby) => lobby.roomId !== roomId);
             this.lobbysSource.next(this.lobbys);
         });
+    }
+
+    private removeLobbyDeletion() {
+        this.socketService.socket.off(GameEvents.End);
     }
 
     private displayActiveLobbys() {
@@ -158,11 +225,19 @@ export class JoinGameService {
         });
     }
 
+    private removeDisplayActiveLobbys() {
+        this.socketService.socket.off(GameEvents.GetCurrentGames);
+    }
+
     private handleLockedLobby() {
         this.socketService.on<{ isLocked: boolean; roomId: string }>(GameEvents.AlertLockToggled, ({ isLocked, roomId }) => {
             this.lobbys = this.lobbys.map((lobby) => (lobby.roomId === roomId ? { ...lobby, isLocked } : lobby));
             this.lobbysSource.next(this.lobbys);
         });
+    }
+
+    private removeLockedLobby() {
+        this.socketService.socket.off(GameEvents.AlertLockToggled);
     }
 
     private handleUpdateLobby() {
@@ -175,6 +250,11 @@ export class JoinGameService {
             this.lobbys = this.lobbys.map((lobby) => (lobby.roomId === roomId ? { ...lobby, nbPlayers: lobby.nbPlayers - 1 } : lobby));
             this.lobbysSource.next(this.lobbys);
         });
+    }
+
+    private removeUpdateLobby() {
+        this.socketService.socket.off(JoinEvents.PlayerJoined);
+        this.socketService.socket.off(GameEvents.PlayerLeft);
     }
 
     private showPopUp() {

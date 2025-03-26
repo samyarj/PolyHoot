@@ -1,8 +1,13 @@
 <div class="page-wrapper" *ngIf="!time; else gameCountDown">
     <div class="main-wrapper">
         <div class="body-section">
-            <div *ngIf="isOrganizer" class="room-board-container">
-                <p>{{ roomId }}</p>
+            <div *ngIf="isOrganizer" class="header-container">
+                <div class="room-board-container">
+                    <p>{{ roomId }}</p>
+                </div>
+                <div class="qrcode">
+                    <i class="fa-solid fa-qrcode"></i>
+                </div>
             </div>
             <div [ngClass]="{ 'game-view': !isOrganizer }" class="players-section">
                 <div class="content-title">Joueurs</div>

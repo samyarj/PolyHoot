@@ -23,11 +23,14 @@ export class JoinGamePageComponent implements OnDestroy, OnInit {
             this.lobbys = lobbys;
         },
     };
+
     private lobbysSubscription: Subscription;
     constructor(
         private joinGameService: JoinGameService,
         private dialog: MatDialog,
-    ) {}
+    ) {
+        this.joinGameService.setUpSockets();
+    }
 
     get popUpMessage() {
         return this.joinGameService.popUpMessage;
@@ -48,6 +51,7 @@ export class JoinGamePageComponent implements OnDestroy, OnInit {
     }
 
     ngOnDestroy() {
+        this.joinGameService.clearSockets();
         this.joinGameService.resetService();
         if (this.lobbysSubscription) this.lobbysSubscription.unsubscribe();
     }

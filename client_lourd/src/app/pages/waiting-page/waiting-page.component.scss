@@ -302,13 +302,26 @@
     background-color: #ffffff;
 }
 
-.room-board-container {
+.header-container {
+    height: 5rem;
+    width: 16rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
     margin-top: 15px;
+    gap: 2rem;
+
+    .qrcode {
+        font-size: 1.5rem;
+        color: var(--text-color);
+        text-shadow: 0 0 5px var(--tertiary-color);
+    }
+}
+.room-board-container {
     position: relative;
     height: 5rem;
     width: 12rem;
-    max-height: 20%;
-    max-width: 25%;
     padding: 1rem;
     display: flex;
     background: color-mix(in srgb, var(--primary-color) 50%, transparent);

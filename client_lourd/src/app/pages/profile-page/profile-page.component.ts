@@ -1,6 +1,6 @@
 /* eslint-disable max-params */
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Auth, updateProfile } from '@angular/fire/auth';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH, USERNAME_REGEX } from '@app/constants/constants';
@@ -8,6 +8,7 @@ import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
 import { UploadImgService } from '@app/services/upload-img.service';
 import { ToastrService } from 'ngx-toastr';
+import { Subject, takeUntil } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
@@ -31,7 +32,7 @@ interface CnxLogEntry {
     templateUrl: './profile-page.component.html',
     styleUrls: ['./profile-page.component.scss'],
 })
-export class ProfilePageComponent implements OnInit {
+export class ProfilePageComponent implements OnInit, OnDestroy {
     selectedFile: File | null = null;
     defaultAvatars: string[] = [];
     selectedAvatar: string | null = null;
@@ -43,6 +44,7 @@ export class ProfilePageComponent implements OnInit {
     math = Math;
     gameLogs: GameLogEntry[];
     logs: CnxLogEntry[];
+    private destroy$ = new Subject<void>();
     // Constants for username validation
     readonly usernamePattern: string = USERNAME_REGEX.source;
     readonly maxUsernameLength: number = USERNAME_MAX_LENGTH;
@@ -75,6 +77,11 @@ export class ProfilePageComponent implements OnInit {
     ngOnInit() {
         this.loadDefaultAvatars();
         this.loadLogs();
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     loadLogs() {
@@ -205,17 +212,20 @@ export class ProfilePageComponent implements OnInit {
             return;
         }
 
-        this.uploadImgService.uploadImage(this.selectedFile, 'avatar').subscribe({
-            next: () => {
-                this.toastr.success('Image téléversée avec succès');
-                this.selectedFile = null;
-                const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-                if (fileInput) fileInput.value = '';
-            },
-            error: (error) => {
-                this.toastr.error(`Erreur : ${error.message}`);
-            },
-        });
+        this.uploadImgService
+            .uploadImage(this.selectedFile, 'avatar')
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: () => {
+                    this.toastr.success('Image téléversée avec succès');
+                    this.selectedFile = null;
+                    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+                    if (fileInput) fileInput.value = '';
+                },
+                error: (error) => {
+                    this.toastr.error(`Erreur : ${error.message}`);
+                },
+            });
     }
 
     selectAvatar(avatarUrl: string) {
@@ -225,16 +235,19 @@ export class ProfilePageComponent implements OnInit {
 
     equipSelectedAvatar() {
         if (this.selectedAvatar) {
-            this.uploadImgService.updateSelectedDefaultAvatar(this.selectedAvatar).subscribe({
-                next: () => {
-                    this.toastr.success('Avatar mis à jour avec succès !');
-                    this.selectedAvatar = null;
-                },
-                error: (error) => {
-                    this.toastr.error(`Erreur lors de l'équipement de l'avatar : ${error.message}`);
-                    this.selectedAvatar = null;
-                },
-            });
+            this.uploadImgService
+                .updateSelectedDefaultAvatar(this.selectedAvatar)
+                .pipe(takeUntil(this.destroy$))
+                .subscribe({
+                    next: () => {
+                        this.toastr.success('Avatar mis à jour avec succès !');
+                        this.selectedAvatar = null;
+                    },
+                    error: (error) => {
+                        this.toastr.error(`Erreur lors de l'équipement de l'avatar : ${error.message}`);
+                        this.selectedAvatar = null;
+                    },
+                });
         }
     }
 
@@ -260,14 +273,17 @@ export class ProfilePageComponent implements OnInit {
     }
 
     private loadDefaultAvatars() {
-        this.uploadImgService.getDefaultAvatars().subscribe({
-            next: (response) => {
-                this.defaultAvatars = response.avatars;
-            },
-            error: (error) => {
-                console.error('Error loading default avatars:', error);
-            },
-        });
+        this.uploadImgService
+            .getDefaultAvatars()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (response) => {
+                    this.defaultAvatars = response.avatars;
+                },
+                error: (error) => {
+                    console.error('Error loading default avatars:', error);
+                },
+            });
     }
 
     private parseTimestamp(timestamp: string): Date {
@@ -288,6 +304,7 @@ export class ProfilePageComponent implements OnInit {
 
     private diffDates(date1: Date, date2: Date): number {
         // Calculate the absolute difference in milliseconds and convert to seconds
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         return Math.floor(Math.abs(date2.getTime() - date1.getTime()) / 1000);
     }
 }
