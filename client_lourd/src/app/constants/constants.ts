@@ -130,7 +130,7 @@ export const NAV_PLAYER_INFO: NavItem[] = [
                 buttonDescription: 'Voir la boutique',
             },
             {
-                image: 'player/player-transfer',
+                image: 'player/player-transfer.png',
                 route: '/shop-home/transfer',
                 buttonDescription: 'Transférer des coins',
             },
@@ -141,7 +141,7 @@ export const NAV_PLAYER_INFO: NavItem[] = [
         description: 'Gérez votre profil et vos paramètres!',
         screenshots: [
             {
-                image: 'player/player-profile',
+                image: 'player/player-profile.png',
                 route: '/profile',
                 buttonDescription: 'Voir le profil',
             },
@@ -155,7 +155,7 @@ export const NAV_ADMIN_INFO: NavItem[] = [
         description: 'Observez les joueurs et leurs informations!',
         screenshots: [
             {
-                image: 'admin/admin-player-page',
+                image: 'admin/admin-player-page.png',
                 route: 'playerInfo',
                 buttonDescription: 'Consultez les joueurs',
             },
@@ -166,12 +166,12 @@ export const NAV_ADMIN_INFO: NavItem[] = [
         description: 'Créez, gérez et consultez des sondages pour les utilisateurs!',
         screenshots: [
             {
-                image: 'admin/admin-poll-consult',
+                image: 'admin/admin-poll-consult.png',
                 route: '/polls/consult',
                 buttonDescription: 'Voir les sondages',
             },
-            { image: 'admin/admin-poll-create', route: '/polls/create', buttonDescription: 'Créer un sondage' },
-            { image: 'admin/admin-poll-history', route: '/polls/history', buttonDescription: 'Historique des sondages' },
+            { image: 'admin/admin-poll-create.png', route: '/polls/create', buttonDescription: 'Créer un sondage' },
+            { image: 'admin/admin-poll-history.png', route: '/polls/history', buttonDescription: 'Historique des sondages' },
         ],
     },
 ];
