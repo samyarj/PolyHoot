@@ -86,9 +86,11 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
     });
 
     _socketManager.webSocketReceiver(JoinEvents.JoinSuccess.value, (data) {
-      if (data is Map<String, dynamic> && data.containsKey('playersInfo')) {
-        AppLogger.i("JoinSuccess event received with data: $data");
-        final List<PlayerDetails> updatedPlayers = (data['playersInfo'] as List)
+      AppLogger.i("JoinSuccess event received with data: $data");
+
+      if (data is List) {
+        // La donnée reçue est directement la liste de joueurs
+        final List<PlayerDetails> updatedPlayers = data
             .map((player) =>
                 PlayerDetails.fromJson(player as Map<String, dynamic>))
             .toList();
@@ -96,7 +98,8 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
         state = state.copyWith(playersInfo: updatedPlayers);
         AppLogger.i("Players updated: ${state.playersInfo}");
       } else {
-        AppLogger.w("Invalid or missing data for JoinSuccess event.");
+        AppLogger.w(
+            "Invalid data format for JoinSuccess event: expected List, got ${data.runtimeType}");
       }
     });
 

@@ -110,16 +110,19 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
           "Lobby lock toggled: Room ${data['roomId']} → Locked: ${data['isLocked']}");
     });
 
-    _socketManager.webSocketReceiver(JoinEvents.JoinSuccess.value, (data) {
+    _socketManager.webSocketReceiver(JoinEvents.PlayerJoined.value, (data) {
+      final String roomId = data as String;
+
       state = state.copyWith(
         lobbys: state.lobbys.map((lobby) {
-          return lobby.roomId == data['roomId']
+          return lobby.roomId == roomId
               ? lobby.copyWith(nbPlayers: lobby.nbPlayers + 1)
               : lobby;
         }).toList(),
       );
+
       AppLogger.i(
-          "Player joined room: ${data['roomId']} (Total: ${state.lobbys.firstWhere((l) => l.roomId == data['roomId']).nbPlayers} players)");
+          "Player joined room: $roomId (Total: ${state.lobbys.firstWhere((l) => l.roomId == roomId).nbPlayers} players)");
     });
 
     _socketManager.webSocketReceiver(GameEvents.PlayerLeft.value, (data) {
@@ -212,7 +215,7 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
     _socketManager.socket?.off(GameEvents.End.value);
     _socketManager.socket?.off(GameEvents.GetCurrentGames.value);
     _socketManager.socket?.off(GameEvents.AlertLockToggled.value);
-    _socketManager.socket?.off(JoinEvents.JoinSuccess.value);
+    _socketManager.socket?.off(JoinEvents.PlayerJoined.value);
     _socketManager.socket?.off(GameEvents.PlayerLeft.value);
     _socketManager.socket?.off(JoinErrors.InvalidId.value);
     _socketManager.socket?.off(JoinErrors.RoomLocked.value);

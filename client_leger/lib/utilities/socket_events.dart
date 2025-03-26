@@ -85,6 +85,7 @@ enum JoinEvents {
   Join('joinGame'),
   CanJoin('canJoinGame'),
   JoinSuccess('onJoinGameSuccess'),
+  PlayerJoined('playerjoined'),
   LobbyCreated('lobbyCreated');
 
   final String value;
