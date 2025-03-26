@@ -14,9 +14,13 @@
                                 placeholder="Entrez le titre du sondage"
                                 name="title"
                                 required
+                                maxlength="30"
                                 #title="ngModel"
                             />
                             <small class="text-danger" *ngIf="isPollTitleEmpty()"> Il faut un titre.</small>
+                            <small class="text-danger" *ngIf="title.errors?.['maxlength']">
+                                Le titre ne devrait pas avoir plus de 30 caractères.
+                            </small>
                         </div>
                         <div class="form-group" id="description">
                             <label for="description-input">Description du sondage:</label>
