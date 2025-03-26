@@ -27,20 +27,93 @@
     position: absolute;
     right: 0;
     top: 100%;
-    background: white;
-    border: 1px solid #ddd;
+    background: var(--primary-color);
+    border: 1px solid var(--tertiary-color);
     border-radius: 4px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 10px;
-    min-width: 200px;
+    width: 100%;
+    min-width: 380px;
     z-index: 1000;
+    max-height: 50vh;
+    overflow-y: auto;
+    cursor: default;
+
+    &::-webkit-scrollbar {
+        width: 7px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--active-bg);
+        border-radius: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: var(--nav-bg);
+        border-radius: 6px;
+    }
 }
 
 .notification-item {
     padding: 8px 0;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--tertiary-color);
+    color: var(--tertiary-color);
+    cursor: default;
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    .notification-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+
+        .notification-text {
+            flex: 1;
+            min-width: 0;
+            p {
+                margin: 0;
+                padding: 5px 0;
+                cursor: default;
+                word-wrap: break-word;
+                white-space: normal;
+                line-height: 1.4;
+            }
+        }
+
+        .custom-button-medium {
+            min-width: 160px;
+            max-width: 160px;
+            border: 2px solid var(--tertiary-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            text-align: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                background: linear-gradient(0deg, var(--secondary-color) 0%, var(--primary-color) 47.5%);
+                border-color: var(--secondary-color);
+            }
+        }
+    }
 }
 
-.notification-item:last-child {
-    border-bottom: none;
+.dropdown-header {
+    color: var(--tertiary-color);
+    font-size: 1.2rem;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--tertiary-color);
+    margin-bottom: 10px;
+    cursor: default;
+}
+
+.dropdown-divider {
+    border-color: var(--tertiary-color);
+    margin: 10px 0;
 }

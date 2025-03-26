@@ -2,23 +2,28 @@
     <button class="notification-button" (click)="toggleNotifications()">
         <i class="fa-solid fa-bell"></i>
     </button>
-    <ul class="dropdown-menu" [ngClass]="{ show: showNotifications }">
+    <div class="dropdown-menu" [ngClass]="{ show: showNotifications }">
         <!-- Dropdown Header -->
-        <li class="dropdown-header text-center">
+        <div class="dropdown-header text-center">
             <strong>Notifications</strong>
-        </li>
+        </div>
         <hr class="dropdown-divider" />
         <!-- Liste des notifications -->
-        <li *ngFor="let notification of notifications" class="notification-item">
+        <div *ngFor="let notification of notifications" class="notification-item">
             <div class="notification-content">
-                <p *ngIf="user && user.role === 'player'"><strong>Nouveau sondage disponible:</strong><br />{{ notification.title }}</p>
-                <p *ngIf="user && user.role === 'admin'"><strong>Sondage expiré:</strong><br />{{ notification.title }}</p>
-                <br />
-                <button *ngIf="user && user.role === 'player'" (click)="openPollAnswer(notification.poll)">Répondre au sondage</button>
-                <button *ngIf="user && user.role === 'admin'" (click)="goToStats(notification.poll)">Voir les statistiques</button>
+                <div class="notification-text">
+                    <p *ngIf="user && user.role === 'player'"><strong>Nouveau sondage disponible:</strong><br />{{ notification.title }}</p>
+                    <p *ngIf="user && user.role === 'admin'"><strong>Sondage expiré:</strong><br />{{ notification.title }}</p>
+                </div>
+                <button *ngIf="user && user.role === 'player'" class="custom-button-medium" (click)="openPollAnswer(notification.poll)">
+                    Répondre au sondage
+                </button>
+                <button *ngIf="user && user.role === 'admin'" class="custom-button-medium" (click)="goToStats(notification.poll)">
+                    Voir les statistiques
+                </button>
             </div>
-        </li>
+        </div>
         <!-- Aucune notification -->
-        <li *ngIf="notifications.length === 0" class="text-center text-muted">Aucune notification.</li>
-    </ul>
+        <div *ngIf="notifications.length === 0" class="text-center text-muted">Aucune notification.</div>
+    </div>
 </div>
