@@ -162,6 +162,10 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
     });
 
     _socketManager.webSocketReceiver(TimerEvents.End.value, (time) {
+      if (!state.playerInfo.submitted &&
+          state.currentQuestion.type == QuestionType.QRL.name) {
+        sendAnswerForCorrection(state.answer);
+      }
       state = state.copyWith(time: time);
     });
 
@@ -230,10 +234,10 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
     _socketManager.webSocketReceiver(DisconnectEvents.OrganizerHasLeft.value,
         (_) {
       alertSoundPlayer.stop();
-      state = state.copyWith(organizerDisconnected: true);
-      _socketManager.removeRoomId();
       AppLogger.i(
           "Organizer has left the game + we removed roomId from socket manager");
+      state = state.copyWith(organizerDisconnected: true);
+      _socketManager.removeRoomId();
     });
   }
 
@@ -278,6 +282,7 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
       gamePaused: false,
       finalAnswer: false,
       realShowAnswers: false,
+      organizerDisconnected: false,
       playerInfo: state.playerInfo.copyWith(
         userFirst: false,
         waitingForQuestion: false,

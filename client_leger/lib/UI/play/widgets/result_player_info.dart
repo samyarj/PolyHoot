@@ -103,8 +103,8 @@ class ResultPlayerInfo extends StatelessWidget {
                     ),
                     // The actual content you want inside the circular frame
                     Container(
-                      width: 60,
-                      height: 60,
+                      width: 50,
+                      height: 50,
                       decoration: getDecoration(player.reward!.rarity),
                     ),
                   ],

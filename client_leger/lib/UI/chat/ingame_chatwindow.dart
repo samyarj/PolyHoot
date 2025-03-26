@@ -226,29 +226,41 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                     Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
                                                       children: [
-                                                        AvatarBannerWidget(
-                                                          avatarUrl:
-                                                              message.avatar,
-                                                          bannerUrl:
-                                                              message.border,
-                                                          size: 50,
-                                                          avatarFit:
-                                                              BoxFit.cover,
+                                                        SizedBox(
+                                                          width: 50,
+                                                          child:
+                                                              AvatarBannerWidget(
+                                                            avatarUrl:
+                                                                message.avatar,
+                                                            bannerUrl:
+                                                                message.border,
+                                                            size: 50,
+                                                            avatarFit:
+                                                                BoxFit.cover,
+                                                          ),
                                                         ),
                                                         SizedBox(width: 8),
-                                                        Text(
-                                                          message.author,
-                                                          style: TextStyle(
-                                                              color: isUserMessage
-                                                                  ? colorScheme
-                                                                      .onSecondary
-                                                                  : colorScheme
-                                                                      .onSurface,
-                                                              fontSize: 18,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
+                                                        Expanded(
+                                                          child: Text(
+                                                            message.author,
+                                                            style: TextStyle(
+                                                                color: isUserMessage
+                                                                    ? colorScheme
+                                                                        .onSecondary
+                                                                    : colorScheme
+                                                                        .onSurface,
+                                                                fontSize: 18,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                            overflow: TextOverflow
+                                                                .ellipsis, // Prevents text overflow
+                                                            softWrap:
+                                                                false, // Keeps text in one line
+                                                          ),
                                                         ),
                                                       ],
                                                     ),
