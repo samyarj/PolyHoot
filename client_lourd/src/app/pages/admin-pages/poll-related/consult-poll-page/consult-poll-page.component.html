@@ -14,25 +14,23 @@
                 <!-- Tab 1: Created Polls -->
                 <div *ngIf="currentTab === 0" class="tab-content">
                     <h2>Sondages créés</h2>
-                    <div class="polls-list">
-                        <div class="outerPollContainer">
-                            <div *ngIf="polls.length === 0" class="no-polls-message">Aucun sondage n'a été créé pour le moment.</div>
-                            <div *ngFor="let poll of polls" class="poll-item">
-                                <div class="poll-title"><span class="label">Titre :</span> {{ poll.title }}</div>
-                                <div class="poll-description">
-                                    <span class="label">Description :</span><span>{{ poll.description }}</span>
-                                </div>
-                                <div class="poll-actions">
-                                    <button *ngIf="!poll.isPublished" (click)="goToEdit(poll.id)">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button *ngIf="!poll.isPublished" (click)="delete(poll.id)">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                    <button (click)="consultPoll(poll)">
-                                        <i class="fa-solid fa-clipboard-question"></i>
-                                    </button>
-                                </div>
+                    <div class="outerPollContainer">
+                        <div *ngIf="polls.length === 0" class="no-polls-message">Aucun sondage n'a été créé pour le moment.</div>
+                        <div *ngFor="let poll of polls" class="poll-item">
+                            <div class="poll-title"><span class="label">Titre :</span> {{ poll.title }}</div>
+                            <div class="poll-description">
+                                <span class="label">Description :</span><span>{{ poll.description }}</span>
+                            </div>
+                            <div class="poll-actions">
+                                <button *ngIf="!poll.isPublished" (click)="goToEdit(poll.id)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button *ngIf="!poll.isPublished" (click)="delete(poll.id)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <button (click)="consultPoll(poll)">
+                                    <i class="fa-solid fa-clipboard-question"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -41,29 +39,27 @@
                 <!-- Tab 2: Published Polls -->
                 <div *ngIf="currentTab === 1" class="tab-content">
                     <h2>Sondages publiés</h2>
-                    <div class="polls-list">
-                        <div class="outerPublishedPollContainer">
-                            <div *ngIf="publishedPolls.length === 0" class="no-polls-message">Aucun sondage n'a été publié pour le moment.</div>
-                            <div *ngFor="let poll of publishedPolls" class="poll-published-item">
-                                <div class="poll-title"><span class="label">Titre :</span> {{ poll.title }}</div>
-                                <!-- <div class="poll-description">
+                    <div class="outerPublishedPollContainer">
+                        <div *ngIf="publishedPolls.length === 0" class="no-polls-message">Aucun sondage n'a été publié pour le moment.</div>
+                        <div *ngFor="let poll of publishedPolls" class="poll-published-item">
+                            <div class="poll-title"><span class="label">Titre :</span> {{ poll.title }}</div>
+                            <!-- <div class="poll-description">
                                     <span class="label">Description :</span><span>{{ poll.description }}</span>
                                 </div> -->
-                                <div class="poll-dates">
-                                    <div class="date-item">
-                                        <span class="label">Date d'expiration :</span>
-                                        <span>{{ poll.endDate | date: 'yyyy-MM-dd HH:mm' }}</span>
-                                    </div>
-                                    <div class="date-item">
-                                        <span class="label">Date de publication :</span>
-                                        <span>{{ poll.publicationDate | date: 'yyyy-MM-dd HH:mm' }}</span>
-                                    </div>
+                            <div class="poll-dates">
+                                <div class="date-item">
+                                    <span class="label">Date d'expiration :</span>
+                                    <span>{{ poll.endDate | date: 'yyyy-MM-dd HH:mm' }}</span>
                                 </div>
-                                <div class="poll-actions">
-                                    <button (click)="consultPoll(poll)">
-                                        <i class="fa-solid fa-clipboard-question"></i>
-                                    </button>
+                                <div class="date-item">
+                                    <span class="label">Date de publication :</span>
+                                    <span>{{ poll.publicationDate | date: 'yyyy-MM-dd HH:mm' }}</span>
                                 </div>
+                            </div>
+                            <div class="poll-actions">
+                                <button (click)="consultPoll(poll)">
+                                    <i class="fa-solid fa-clipboard-question"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
