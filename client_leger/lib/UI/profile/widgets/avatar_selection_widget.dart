@@ -14,6 +14,7 @@ class AvatarSelectionWidget extends StatelessWidget {
   final Function() onPickImage;
   final Function() onTakePhoto;
   final Function() onUploadImage;
+  final bool isUploading;
 
   const AvatarSelectionWidget({
     Key? key,
@@ -26,6 +27,7 @@ class AvatarSelectionWidget extends StatelessWidget {
     required this.onPickImage,
     required this.onTakePhoto,
     required this.onUploadImage,
+    required this.isUploading,
   }) : super(key: key);
 
   @override
@@ -73,6 +75,7 @@ class AvatarSelectionWidget extends StatelessWidget {
                   onEquipAvatar: onEquipAvatar,
                   onUploadImage: onUploadImage,
                   onEditIconPressed: () => _showAvatarOptionsDialog(context),
+                  isUploading: isUploading,
                 ),
               ),
             ],

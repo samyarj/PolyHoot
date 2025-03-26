@@ -77,3 +77,8 @@ enum ItemType {
 }
 
 enum SidebarContent { chat, friends }
+
+enum QRScannerMode {
+  friendRequest,
+  joinGame,
+}
