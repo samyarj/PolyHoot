@@ -156,7 +156,7 @@ export class UserService {
             if (!userDoc.exists) {
                 throw new Error("L'utilisateur n'existe pas.");
             }
-
+            console.log(`Setting isOnline to false for connected user at ${new Date()}`);
             const updateData: any = {
                 isOnline: false,
             };

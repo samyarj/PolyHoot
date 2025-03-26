@@ -4,10 +4,10 @@
         <div class="quizContainer" *ngFor="let quiz of quizzes; trackBy: trackByFn; let i = index" @bounceOut>
             <span id="quizInfo"> {{ quiz.title + ' modifié le : ' + (quiz.lastModification | date: 'yyyy-MM-dd HH:mm:ss') }} </span> <br />
             <div class="buttonSection">
-                <button id="delete" mat-icon-button (click)="delete(quiz.id)" matTooltip="Supprimer">
+                <button id="delete" mat-icon-button (click)="delete(quiz.id)" matTooltip="Supprimer" matTooltipClass="custom-tooltip">
                     <i class="fa-solid fa-trash"></i>
                 </button>
-                <button id="edit" mat-icon-button (click)="goToEdit(quiz.id)" matTooltip="Modifier">
+                <button id="edit" mat-icon-button (click)="goToEdit(quiz.id)" matTooltip="Modifier" matTooltipClass="custom-tooltip">
                     <i class="fa-solid fa-pen-to-square"></i>
                 </button>
                 <button
@@ -16,6 +16,7 @@
                     (click)="toggleVisibility(quiz.id)"
                     *ngIf="quiz.visibility; else notVisible"
                     matTooltip="Cacher le jeu dans la page de création de partie"
+                    matTooltipClass="custom-tooltip"
                 >
                     <i class="fa-solid fa-eye"></i>
                 </button>
@@ -25,6 +26,7 @@
                         mat-icon-button
                         (click)="toggleVisibility(quiz.id)"
                         matTooltip="Afficher le jeu dans la page de création de partie"
+                        matTooltipClass="custom-tooltip"
                     >
                         <i class="fa-solid fa-eye-slash"></i>
                     </button>
