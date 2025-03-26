@@ -6,7 +6,6 @@ dotenv.config({ path: '../../../.env' });
 @Injectable()
 export class QuickReplyService {
     private groq: any;
-    private conversationContexts: Map<string, { role: string; content: string }[]> = new Map(); // Store contexts for multiple channels
 
     constructor() {
         const apiKey = process.env.GROQ_API_KEY;
@@ -16,43 +15,38 @@ export class QuickReplyService {
         this.groq = new Groq({ apiKey });
     }
 
-    private initializeContext(channelId: string) {
-        if (!this.conversationContexts.has(channelId)) {
-            // Initialize the conversation context with the system prompt for the channel
-            this.conversationContexts.set(channelId, [
-                {
-                    role: 'system',
-                    content: `You are a quick reply generator for a chat application. Your client is a user in that chat.
+    private initializeContext(): { role: string; content: string }[] {
+        // Return the system prompt as the initial context
+        return [
+            {
+                role: 'system',
+                content: `You are a quick reply generator for a chat application. Your client is a user in that chat.
 Input Requirements:
 1. The user will provide their name.
 2. The user will describe the context of the conversation, including who said what and any relevant emotions or tones (e.g., happy, frustrated, casual).
 
 Expected Output:
-1. Generate 3 quick replies consisting of 1-3 words and 1 emoji that are contextually appropriate.
+1. Generate 3 quick replies consisting of 1-3 words that are contextually appropriate.
 2. Ensure the replies reflect the tone of the conversation.
 3. Aim for responses that are engaging and relevant to the conversation.
 4. If the context suggests multiple emotions, provide a variety of responses to choose from.
-5. Your output must follow this JSON format, and it should never contain any strings.
+5. Your output must follow this JSON format:
 {
-  "quick_replies": ["answer1 😊", "answer2 👍", "answer3 🤔"]
+  "quick_replies": ["answer1", "answer2", "answer3"]
 }
-6. If you are not sure what to do, give this default output
+6. If you are not sure what to do, give this default output:
 {
-  "quick_replies": ["Hello! 👋", "Nice to meet you! 😊", "How are you? 🤔"]
+  "quick_replies": ["Hello!", "Nice to meet you!", "How are you?"]
 }`,
-                },
-            ]);
-        }
+            },
+        ];
     }
 
     private validateQuickRepliesSchema(response: any): boolean {
         try {
-            // Ensure the response is a valid JSON object
             if (typeof response === 'string') {
                 response = JSON.parse(response);
             }
-
-            // Validate the structure of the JSON object
             return (
                 response &&
                 typeof response === 'object' &&
@@ -73,23 +67,19 @@ Expected Output:
         gameContext?: string, // for game chat
     ): Promise<string[]> {
         try {
-            // Initialize the context for the channel if it doesn't exist
-            this.initializeContext(channelId);
-
-            // Get the conversation context for the channel
-            const context = this.conversationContexts.get(channelId);
+            // Initialize the context
+            const context = this.initializeContext();
 
             // Add the user's message to the conversation context
             let userContent = `1. I am user: ${user}
 2. Here is the context:
 ${message}`;
 
-            // Include game context if provided
             if (gameContext) {
                 userContent += `\n3. Game context: ${gameContext}`;
             }
 
-            context?.push({
+            context.push({
                 role: 'user',
                 content: userContent,
             });
@@ -108,33 +98,14 @@ ${message}`;
             const response = chatCompletion.choices[0]?.message?.content;
             const parsedResponse = JSON.parse(response);
 
-            // Validate the schema of the parsed response
             if (this.validateQuickRepliesSchema(parsedResponse)) {
-                // Add the assistant's reply to the conversation context
-                context?.push({
-                    role: 'assistant',
-                    content: response,
-                });
-
                 return parsedResponse.quick_replies;
             } else {
-                // Return the default output if the schema is invalid
-                return ['Hello! 👋', 'Nice to meet you! 😊', 'How are you? 🤔'];
+                return ['Hello!', 'Nice to meet you!', 'How are you?'];
             }
         } catch (error) {
             console.error('Error generating quick replies:', error);
-            // Return the default output in case of an error
-            return ['Hello! 👋', 'Nice to meet you! 😊', 'How are you? 🤔'];
-        }
-    }
-
-    resetConversationContext(channelId: string) {
-        // Reset the context for a specific channel
-        if (this.conversationContexts.has(channelId)) {
-            const context = this.conversationContexts.get(channelId);
-            if (context) {
-                this.conversationContexts.set(channelId, context.slice(0, 1)); // Keep only the system prompt
-            }
+            return ['Hello!', 'Nice to meet you!', 'How are you?'];
         }
     }
 }
