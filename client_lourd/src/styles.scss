@@ -31,6 +31,14 @@
     background: color-mix(in srgb, var(--primary-color) 50%, transparent);
 }
 
+.custom-tooltip > * {
+    color: var(--text-color) !important;
+    background-color: var(--primary-color) !important;
+    border: 2px solid var(--tertiary-color) !important;
+    border-radius: 10px;
+    font-size: 15px;
+}
+
 // Rare Backdrop
 .backdrop-dialog-rare {
     width: 50%;
@@ -199,7 +207,7 @@
     --text-color: #101010;
 
     // Header colors
-    --nav-bg: #ffffff;
+    --nav-bg: #c8c8c8;
     --hover-bg: rgba(0, 0, 0, 0.2);
     --active-bg: rgba(0, 0, 0, 0.4);
 }
