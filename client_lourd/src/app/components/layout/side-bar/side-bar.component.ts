@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { doc, FieldPath, Firestore, getDoc, onSnapshot, Unsubscribe } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
@@ -40,7 +41,6 @@ export class SideBarComponent implements OnInit, OnDestroy {
     selectedChannel: string | null = null;
     searchTerm: string = '';
     errorMessage: string = '';
-
     showSearchInput: boolean = false;
     searchQuery: string = '';
     showFriendRequests: boolean = false;

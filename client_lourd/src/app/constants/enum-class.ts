@@ -40,6 +40,8 @@ export enum AppRoute {
     JOINGAME = '/join-game',
     QUESTIONBANK = '/questionBank',
     POLLS = '/polls',
+    MODIFYPOLL = '/modifyPoll/',
+    POLLSHISTORY = '/polls/history/',
 }
 export enum CoinFlipGameState {
     Uninitialized = 0,
@@ -152,12 +154,14 @@ export enum ConfirmationMessage {
     AbandonGame = 'Êtes-vous sûr de vouloir quitter la partie?',
     DeleteQuestion = 'Êtes-vous sûr de vouloir supprimer cette question?',
     DeleteGame = 'Êtes-vous sûr de vouloir supprimer ce jeu-questionnaire?',
+    DeletePoll = 'Êtes-vous sûr de vouloir supprimer ce sondage?',
     CleanHistory = "Êtes-vous sûr de vouloir supprimer l'historique?",
     CancelQuizCreation = 'Êtes-vous sûr de vouloir annuler la création du jeu-questionnaire ?',
     CancelQuizModification = 'Êtes-vous sûr de vouloir annuler la modification du jeu-questionnaire ?',
     CancelPollCreation = 'Êtes-vous sûr de vouloir annuler la création du sondage ?',
     CancelPollModification = 'Êtes-vous sûr de vouloir annuler la modification du sondage ?',
     BanPlayer = 'Êtes-vous sûr de vouloir bannir ce joueur ?',
+    PublishPoll = 'Êtes-vous sûr de vouloir publier ce sondage ?',
 }
 
 export enum GameStatus {

@@ -37,15 +37,15 @@
             </div>
         </div>
     </div>
-    <button *ngIf="state === 'not_started' && !this.data.isAdmin" class="custom-button-big" (click)="startPoll()">Débuter</button>
+    <button *ngIf="state === 'not_started'" class="custom-button-big" (click)="startPoll()">Débuter</button>
     <button
         [disabled]="this.selectedChoice === -1"
-        *ngIf="state === 'started' && !this.data.isAdmin"
+        *ngIf="state === 'started'"
         class="custom-button-big"
         [ngClass]="{ 'custom-button-big-disabled': this.selectedChoice === -1 }"
         (click)="nextQuestion()"
     >
         Prochaine question
     </button>
-    <button *ngIf="state === 'finished' && !this.data.isAdmin" class="custom-button-big" (click)="onSubmit()">Soumettre vos réponses</button>
+    <button *ngIf="state === 'finished'" class="custom-button-big" (click)="onSubmit()">Soumettre vos réponses</button>
 </div>

@@ -1,4 +1,4 @@
-/* eslint-disable no-underscore-dangle */ // Mongo utilise des attributs avec un underscore
+/* /* eslint-disable no-underscore-dangle */ // Mongo utilise des attributs avec un underscore
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { Document } from 'mongoose';
@@ -20,11 +20,11 @@ export type PublishedPollDocument = PublishedPoll & Document;
 export class PublishedPoll extends Poll {
     @ApiProperty({ description: 'The publication date of the poll' })
     @Prop({ required: true })
-    publicationDate: Date;
+    publicationDate: string;
 
     @ApiProperty({ description: 'Total votes for each question' })
     @Prop({ type: [[Number]], default: [] })
-    totalVotes: number[][];
+    totalVotes: { [questionIndex: string]: number[] };
 }
 
 export const publishedPollSchema = SchemaFactory.createForClass(PublishedPoll);
