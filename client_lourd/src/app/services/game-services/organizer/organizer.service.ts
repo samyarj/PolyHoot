@@ -120,7 +120,7 @@ export class OrganizerService {
 
     abandonGame() {
         this.messageHandlerService.confirmationDialog(ConfirmationMessage.AbandonGame, () => {
-            this.router.navigate([AppRoute.CREATE]);
+            this.router.navigate(['/game-home/create']);
             this.alertSoundPlayer.stop();
         });
     }
@@ -188,7 +188,7 @@ export class OrganizerService {
     private handlePlayerList() {
         this.socketHandlerService.on(GameEvents.SendPlayerList, (playerList: PartialPlayer[]) => {
             if (playerList.length === 0) {
-                this.router.navigate([AppRoute.CREATE]);
+                this.router.navigate(['/game-home/create']);
                 this.messageHandlerService.popUpErrorDialog('Les joueurs ont tous quitté la partie!');
                 this.signalUserDisconnect();
                 return;
@@ -278,7 +278,7 @@ export class OrganizerService {
 
     private handleGameEnded() {
         this.socketHandlerService.on(ConnectEvents.AllPlayersLeft, () => {
-            this.router.navigate([AppRoute.CREATE]);
+            this.router.navigate(['/game-home/create']);
             this.messageHandlerService.popUpErrorDialog('Les joueurs ont tous quitté la partie!');
             this.alertSoundPlayer.stop();
         });

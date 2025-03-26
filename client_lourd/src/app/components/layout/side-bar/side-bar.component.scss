@@ -104,8 +104,32 @@
     height: 70px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #ddd;
+    border: 2px solid var(--tertiary-color);
     transition: transform 0.2s ease;
+}
+
+.dropdown-menu {
+    border: 2px solid var(--tertiary-color);
+    background: color-mix(in srgb, var(--primary-color) 90%, transparent);
+    box-shadow: inset 0 0 5px var(--tertiary-color);
+    color: var(--text-color);
+
+    strong {
+        color: var(--text-color);
+    }
+
+    small {
+        color: var(--text-color) !important;
+    }
+
+    .dropdown-divider {
+        background: var(--tertiary-color);
+        color: var(--tertiary-color) !important;
+    }
+
+    .logout-container:hover {
+        text-shadow: 0 0 5px var(--tertiary-color);
+    }
 }
 
 .logout-container {
@@ -115,12 +139,34 @@
     justify-content: space-around;
 }
 
+//notification button
+.notification-container {
+    padding: 20px;
+    transition: all 0.2s ease-in-out;
+    button {
+        background: none;
+        border: none;
+        transition: all 0.2s ease-in-out;
+        &:hover {
+            text-shadow: 0 0 5px var(--tertiary-color);
+            transform: translateY(-2px);
+        }
+    }
+    i {
+        color: var(--tertiary-color);
+        font-size: 2rem;
+        padding: 10px 10px;
+    }
+}
+
 // Social menu
 .social-menu {
-    padding-top: 25px;
+    padding-top: 15px;
     padding-left: 15px;
     padding-bottom: 15px;
     border-bottom: 1px solid var(--tertiary-color);
+    height: 13%;
+    width: 100%;
 }
 
 .social-menu-title {
@@ -154,19 +200,28 @@ ul.friend-menu {
         font-size: var(--navbar-font-size);
         justify-content: center;
         align-items: center;
-        padding: 10px 10px; // Adds internal spacing
     }
 }
 
 // add friend configuration
 .add-friend {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    width: 100%;
     .add-friend-button {
         background: none;
         border: none;
+        transition: all 0.2s ease-in-out;
+        &:hover {
+            text-shadow: 0 0 5px var(--tertiary-color);
+            transform: translateY(-2px);
+        }
     }
     i {
         color: var(--tertiary-color);
         font-size: 1.3rem;
+        padding: 10px 10px;
     }
 }
 
@@ -175,10 +230,16 @@ ul.friend-menu {
     .friend-list-button {
         background: none;
         border: none;
+        transition: all 0.2s ease-in-out;
+        &:hover {
+            text-shadow: 0 0 5px var(--tertiary-color);
+            transform: translateY(-2px);
+        }
     }
     i {
         color: var(--tertiary-color);
         font-size: 1.3rem;
+        padding: 10px 10px;
     }
 }
 
@@ -188,9 +249,6 @@ div.friend-request {
     align-items: center;
     list-style: none;
     width: 100%;
-    border: var(--tertiary-color) 1px solid;
-    border-radius: 5%;
-
     .friend-request-button {
         background: none;
         border: none;
@@ -198,6 +256,11 @@ div.friend-request {
         align-items: center;
         justify-content: space-between;
         width: 100%;
+        transition: all 0.2s ease-in-out;
+        &:hover {
+            text-shadow: 0 0 5px var(--tertiary-color);
+            transform: translateY(-2px);
+        }
     }
 
     li {
@@ -229,9 +292,56 @@ div.friend-request {
 
 //chat configuration
 .chat-menu {
-    padding-top: 25px;
-    padding-left: 15px;
-    padding-bottom: 15px;
+    padding-top: 15px;
+    padding-bottom: 10px;
+    height: calc(87% - 100px);
+    width: 100%;
+
+    > .tab-content {
+        position: relative;
+        width: 100%;
+        height: calc(100% - 44px - 1.5rem);
+        padding-left: 15px;
+        padding-right: 15px;
+
+        > .tab-pane {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            > .tab-content {
+                position: relative;
+                width: 100%;
+                height: calc(100% - 44px - 1.5rem);
+
+                > .tab-pane {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+
+                    > h2 {
+                        width: 100%;
+                        text-align: center;
+                        margin: 0px;
+                        font-size: 20px;
+                    }
+                    > .app-chat2 {
+                        position: relative;
+                        width: 100%;
+                        height: calc(100% - 32px);
+                    }
+                }
+            }
+            > h2 {
+                margin: 0px;
+                font-size: 20px;
+            }
+            > .app-chat2 {
+                position: relative;
+                width: 100%;
+                height: calc(100% - 32px);
+            }
+        }
+    }
 }
 
 .chat-menu-title {
@@ -240,6 +350,8 @@ div.friend-request {
     font-weight: bold;
     font-size: 1.5rem;
     flex-grow: 1;
+    width: 100%;
+    height: 44px;
 }
 
 img.my-channels-icon {
@@ -250,6 +362,48 @@ img.my-channels-icon {
 img.global-channels-icon {
     width: 15px;
     height: 20px;
+}
+
+.nav-tabs {
+    border-bottom: 2px solid var(--active-bg);
+    width: 100%;
+    height: 44px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+#tab4 {
+    .nav-tabs {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        > * {
+            width: 50%;
+        }
+    }
+}
+.nav-link {
+    color: var(--tertiary-color);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    padding: 10px 15px;
+    transition:
+        width 0.25s ease-in-out,
+        transform 0.25s ease-in-out,
+        border 0.25s ease-in-out,
+        text-shadow 0.25s ease-in-out;
+
+    &:hover {
+        text-shadow: 0 0 3px var(--tertiary-color);
+        transform: translateY(-1px);
+    }
+
+    &.active {
+        background-color: color-mix(in srgb, var(--active-bg) 50%, transparent);
+        border: var(--active-bg) 2px solid;
+        color: var(--tertiary-color);
+        text-shadow: 0 0 3px var(--tertiary-color);
+    }
 }
 
 #tab1 {
@@ -273,63 +427,186 @@ img.global-channels-icon {
 #tab4-1 {
     color: var(--tertiary-color);
     font-style: italic;
-    max-height: 450px; // Set the maximum height for the list
-    overflow-y: auto; // Enable vertical scrolling
+    padding: 15px;
+
     input {
-        width: 98%;
+        width: 100%;
+        padding: 0.8rem;
         border: 1px solid var(--tertiary-color);
-        border-radius: 5px;
+        border-radius: 30px;
+        font-size: 1rem;
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        margin-bottom: 1rem;
+
+        &:focus {
+            outline: none;
+            border-color: var(--tertiary-color);
+        }
+    }
+
+    .channel-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px 0;
+        overflow-y: auto;
+        height: 80%;
+
+        &::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: var(--active-bg);
+            border-radius: 12px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: var(--nav-bg);
+            border-radius: 12px;
+        }
+        .my-channels {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            border: 2px solid var(--secondary-color);
+            border-radius: 30px;
+            color: var(--tertiary-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+            &:hover {
+                background-color: var(--tertiary-color);
+                color: var(--primary-color);
+                transform: translateY(-2px);
+
+                button {
+                    color: var(--primary-color) !important;
+                }
+            }
+
+            .channel-buttons {
+                display: flex;
+                gap: 10px;
+
+                button {
+                    background: none;
+                    border: none;
+                    color: var(--tertiary-color);
+                    font-size: 1rem;
+                    padding: 5px 10px;
+                    border-radius: 20px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+
+                    &:hover {
+                        background-color: var(--secondary-color);
+                        color: var(--primary-color);
+                        transform: translateY(-2px);
+                    }
+                }
+            }
+        }
     }
 }
+
 #tab4-2 {
     color: var(--tertiary-color);
     font-style: italic;
-    max-height: 450px; // Set the maximum height for the list
-    overflow-y: auto; // Enable vertical scrolling
+    padding: 14px;
+
     input {
-        width: 98%;
+        width: 100%;
+        padding: 0.8rem;
         border: 1px solid var(--tertiary-color);
-        border-radius: 5px;
-    }
-}
-.my-channels,
-.join-channels {
-    display: flex;
-    visibility: visible;
-    list-style: none;
-    justify-content: space-between;
-    color: var(--tertiary-color);
-    padding: 10px; // Add some padding for better hover effect
-    cursor: pointer; // Change cursor to pointer to indicate clickable items
-    width: 100%;
-    transition:
-        background-color 0.3s,
-        color 0.3s; // Smooth transition for hover effect
-    box-sizing: border-box;
+        border-radius: 30px;
+        font-size: 1rem;
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        margin-bottom: 1rem;
 
-    &:hover {
-        background-color: var(--secondary-color); // Change background color on hover
-        color: var(--primary-color); // Change text color on hover
+        &:focus {
+            outline: none;
+            border-color: var(--tertiary-color);
+        }
     }
-}
-.channel-list {
-    list-style: none;
-    color: var(--tertiary-color);
-    width: 100%;
-}
 
-// Nested tabs container
-.nested-tabs-container {
-    display: flex;
-    flex-direction: column;
+    .channel-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px 0;
+        height: 80%;
+        overflow-y: auto;
+
+        &::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: var(--active-bg);
+            border-radius: 12px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: var(--nav-bg);
+            border-radius: 12px;
+        }
+        .join-channels {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            border: 2px solid var(--secondary-color);
+            border-radius: 30px;
+            color: var(--tertiary-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+            &:hover {
+                background-color: var(--tertiary-color);
+                color: var(--primary-color);
+                transform: translateY(-2px);
+                button {
+                    color: var(--primary-color) !important;
+                }
+            }
+
+            button {
+                background: none;
+                border: none;
+                color: var(--tertiary-color);
+                font-size: 1rem;
+                padding: 5px 10px;
+                border-radius: 20px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+
+                &:hover {
+                    background-color: var(--secondary-color);
+                    color: var(--primary-color);
+                    transform: translateY(-2px);
+                }
+            }
+        }
+    }
 }
 
 .no-channels-message {
-    p {
-        padding-top: 15px;
-        color: var(--tertiary-color);
-    }
+    text-align: center;
+    padding: 20px;
+    color: var(--tertiary-color);
+    font-style: italic;
+    background-color: var(--primary-color);
+    border-radius: 30px;
+    margin: 10px 0;
+    border: 2px solid var(--secondary-color);
 }
+
 .delete-channel-button,
 .leave-channel-button {
     background: none;
@@ -348,28 +625,55 @@ img.global-channels-icon {
     .create-channel-form {
         display: flex;
         flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        padding: 20px;
     }
     form {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        width: 100%;
+        max-width: 400px;
     }
     input {
-        width: 98%;
-        padding: 10px;
-        margin: 10px 0;
+        width: 100%;
+        padding: 0.8rem;
         border: 1px solid var(--tertiary-color);
-        border-radius: 5px;
+        border-radius: 30px;
+        font-size: 1rem;
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        margin-bottom: 1rem;
+
+        &:focus {
+            outline: none;
+            border-color: var(--tertiary-color);
+        }
     }
     button {
-        background-color: var(--tertiary-color);
-        color: var(--primary-color);
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 30px;
+        transition: all 0.3s ease;
         width: 50%;
+
+        &:hover {
+            transform: translateY(-2px);
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+    }
+    .error-message {
+        color: #dc3545;
+        text-align: center;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
     }
 }
 

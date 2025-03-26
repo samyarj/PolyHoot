@@ -362,6 +362,7 @@
         margin-top: 100px;
         .content-title {
             display: flex;
+            flex-direction: column;
             font-size: clamp(1.5rem, 5vw, 3.5rem); /* will shrink on smaller containers */
             height: 10%;
             align-items: center;
@@ -373,6 +374,7 @@
             text-align: center;
             animation: glow 1.5s infinite alternate;
             word-break: break-word;
+            gap: 0.5rem;
         }
         h2 {
             display: flex;
