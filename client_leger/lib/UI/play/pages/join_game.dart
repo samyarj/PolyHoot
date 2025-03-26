@@ -227,7 +227,11 @@ class _JoinGameState extends ConsumerState<JoinGame> {
                                                 ),
                                               ),
                                               ElevatedButton(
-                                                onPressed: lobby.isLocked
+                                                onPressed: (lobby.isLocked ||
+                                                        (joinState.isJoining &&
+                                                            joinState
+                                                                    .joiningRoomId !=
+                                                                lobby.roomId))
                                                     ? null
                                                     : () {
                                                         joinNotifier
@@ -256,7 +260,13 @@ class _JoinGameState extends ConsumerState<JoinGame> {
                                                         const BorderRadius.all(
                                                             Radius.circular(
                                                                 40)),
-                                                    side: lobby.isLocked
+                                                    side: (lobby.isLocked ||
+                                                            (joinState
+                                                                    .isJoining &&
+                                                                joinState
+                                                                        .joiningRoomId !=
+                                                                    lobby
+                                                                        .roomId))
                                                         ? BorderSide.none
                                                         : BorderSide(
                                                             color: colorScheme
@@ -267,43 +277,87 @@ class _JoinGameState extends ConsumerState<JoinGame> {
                                                           ),
                                                   ),
                                                 ),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    Text(
-                                                      lobby.isLocked
-                                                          ? 'Verrouillé'
-                                                          : 'Joindre',
-                                                      style: TextStyle(
-                                                        color: lobby.isLocked
-                                                            ? colorScheme
-                                                                .onPrimary
-                                                                .withValues(
-                                                                    alpha: 0.75)
-                                                            : colorScheme
-                                                                .onPrimary,
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.bold,
+                                                child: (joinState.isJoining &&
+                                                        joinState
+                                                                .joiningRoomId ==
+                                                            lobby.roomId)
+                                                    ? Row(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          SizedBox(
+                                                            width: 16,
+                                                            height: 16,
+                                                            child:
+                                                                CircularProgressIndicator(
+                                                              strokeWidth: 2,
+                                                              color: colorScheme
+                                                                  .onPrimary
+                                                                  .withOpacity(
+                                                                      0.8),
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                              width: 8),
+                                                          Text(
+                                                            'Vérification...',
+                                                            style: TextStyle(
+                                                              color: colorScheme
+                                                                  .onPrimary
+                                                                  .withOpacity(
+                                                                      0.8),
+                                                              fontSize: 16,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      )
+                                                    : Row(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          Text(
+                                                            lobby.isLocked
+                                                                ? 'Verrouillé'
+                                                                : 'Joindre',
+                                                            style: TextStyle(
+                                                              color: lobby
+                                                                      .isLocked
+                                                                  ? colorScheme
+                                                                      .onPrimary
+                                                                      .withValues(
+                                                                          alpha:
+                                                                              0.75)
+                                                                  : colorScheme
+                                                                      .onPrimary,
+                                                              fontSize: 16,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                              width: 16),
+                                                          Icon(
+                                                            lobby.isLocked
+                                                                ? Icons.lock
+                                                                : Icons
+                                                                    .lock_open,
+                                                            color: lobby
+                                                                    .isLocked
+                                                                ? colorScheme
+                                                                    .onPrimary
+                                                                    .withValues(
+                                                                        alpha:
+                                                                            0.75)
+                                                                : colorScheme
+                                                                    .onPrimary,
+                                                          ),
+                                                        ],
                                                       ),
-                                                    ),
-                                                    const SizedBox(width: 16),
-                                                    Icon(
-                                                      lobby.isLocked
-                                                          ? Icons.lock
-                                                          : Icons.lock_open,
-                                                      color: lobby.isLocked
-                                                          ? colorScheme
-                                                              .onPrimary
-                                                              .withValues(
-                                                                  alpha: 0.75)
-                                                          : colorScheme
-                                                              .onPrimary,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
+                                              )
                                             ],
                                           ),
                                         ),
@@ -390,40 +444,73 @@ class _JoinGameState extends ConsumerState<JoinGame> {
                                 ),
                                 const SizedBox(width: 15),
                                 ElevatedButton(
-                                  onPressed: () {
-                                    final isValid =
-                                        _formKey.currentState?.validate() ??
-                                            false;
-                                    if (_roomIdController.text.length != 4) {
-                                      _showToast(context,
-                                          "Le code doit comporter 4 chiffres.");
-                                      return;
-                                    }
-                                    joinNotifier
-                                        .validGameId(_roomIdController.text);
-                                  },
+                                  onPressed: joinState.isJoining
+                                      ? null
+                                      : () {
+                                          final isValid = _formKey.currentState
+                                                  ?.validate() ??
+                                              false;
+                                          if (_roomIdController.text.length !=
+                                              4) {
+                                            _showToast(context,
+                                                "Le code doit comporter 4 chiffres.");
+                                            return;
+                                          }
+                                          joinNotifier.validGameId(
+                                              _roomIdController.text);
+                                        },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: colorScheme.primary,
                                     foregroundColor: colorScheme.onPrimary,
+                                    disabledBackgroundColor:
+                                        colorScheme.primary.withOpacity(0.7),
+                                    disabledForegroundColor:
+                                        colorScheme.onPrimary.withOpacity(0.7),
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 12, horizontal: 20),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(40),
                                       side: BorderSide(
-                                        color: colorScheme.tertiary,
+                                        color: joinState.isJoining
+                                            ? colorScheme.tertiary
+                                                .withOpacity(0.5)
+                                            : colorScheme.tertiary,
                                         width: 2,
                                       ),
                                     ),
                                   ),
-                                  child: Text(
-                                    "Joindre",
-                                    style: TextStyle(
-                                      color: colorScheme.onPrimary,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
+                                  child: joinState.isJoining
+                                      ? Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            SizedBox(
+                                              width: 16,
+                                              height: 16,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: colorScheme.onPrimary,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              "...",
+                                              style: TextStyle(
+                                                color: colorScheme.onPrimary,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      : Text(
+                                          "Joindre",
+                                          style: TextStyle(
+                                            color: colorScheme.onPrimary,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                )
                               ],
                             ),
                             const SizedBox(height: 18),

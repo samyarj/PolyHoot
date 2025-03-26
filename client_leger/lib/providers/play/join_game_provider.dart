@@ -17,6 +17,8 @@ class JoinGameState {
   final bool wrongPin;
   final bool gameLocked;
   final bool isJoined;
+  final bool isJoining;
+  final String joiningRoomId;
 
   JoinGameState({
     required this.lobbys,
@@ -25,6 +27,8 @@ class JoinGameState {
     required this.wrongPin,
     required this.gameLocked,
     this.isJoined = false,
+    this.isJoining = false,
+    this.joiningRoomId = '',
   });
 
   JoinGameState copyWith({
@@ -34,6 +38,8 @@ class JoinGameState {
     bool? wrongPin,
     bool? gameLocked,
     bool? isJoined,
+    bool? isJoining,
+    String? joiningRoomId,
   }) {
     return JoinGameState(
       lobbys: lobbys ?? this.lobbys,
@@ -42,6 +48,8 @@ class JoinGameState {
       wrongPin: wrongPin ?? this.wrongPin,
       gameLocked: gameLocked ?? this.gameLocked,
       isJoined: isJoined ?? this.isJoined,
+      isJoining: isJoining ?? this.isJoining,
+      joiningRoomId: joiningRoomId ?? this.joiningRoomId,
     );
   }
 }
@@ -56,6 +64,9 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
           gameIdValidated: false,
           wrongPin: false,
           gameLocked: false,
+          isJoined: false,
+          isJoining: false,
+          joiningRoomId: '',
         )) {
     AppLogger.i("JoinGameService initialized");
     _setupListeners();
@@ -125,17 +136,20 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
 
     _socketManager.webSocketReceiver(JoinErrors.InvalidId.value, (_) {
       _showPopUp("Le code d'accès est invalide. Essayez à nouveau.");
+      state = state.copyWith(isJoining: false, joiningRoomId: '');
       AppLogger.e("Invalid game ID entered");
     });
 
     _socketManager.webSocketReceiver(JoinErrors.RoomLocked.value, (_) {
       _showPopUp(
           "La partie est verrouillée. Veuillez demander l'accès à l'organisateur ou essayez un autre code.");
+      state = state.copyWith(isJoining: false, joiningRoomId: '');
       AppLogger.e("Room is locked, cannot join");
     });
 
     _socketManager.webSocketReceiver(JoinErrors.BannedName.value, (_) {
       _showPopUp("Vous avez été banni de cette partie.");
+      state = state.copyWith(isJoining: false, joiningRoomId: '');
       AppLogger.e("Player name is banned");
     });
 
@@ -159,6 +173,7 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
   }
 
   void validGameId(String gameId) {
+    state = state.copyWith(isJoining: true, joiningRoomId: gameId);
     AppLogger.i("Validating game ID: $gameId");
     _socketManager.webSocketSender(JoinEvents.ValidateGameId.value, gameId);
   }
@@ -185,6 +200,7 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
       wrongPin: false,
       gameLocked: false,
       isJoined: false,
+      isJoining: false,
     );
   }
 

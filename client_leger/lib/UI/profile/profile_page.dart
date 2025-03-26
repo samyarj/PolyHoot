@@ -10,8 +10,8 @@ import 'package:client_leger/backend-communication-services/error-handlers/globa
 import 'package:client_leger/backend-communication-services/upload-image/upload_img_service.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/providers/user_provider.dart';
-import 'package:client_leger/utilities/logger.dart';
 import 'package:client_leger/utilities/helper_functions.dart';
+import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -43,6 +43,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   bool _isUsernameTaken = false;
   bool _isTypingUsername = false;
   bool _isChangingUsername = false;
+  bool _isUploading = false;
 
   // Timer for debouncing username checks
   Timer? _debounceTimer;
@@ -177,28 +178,55 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     }
   }
 
+  Future<bool> _validateImageSize(File file) async {
+    final int fileSize = await file.length();
+    final int maxSize = 10 * 1024 * 1024; // 10 MB in bytes
+
+    if (fileSize > maxSize) {
+      if (mounted) {
+        showToast(context,
+            'L\'image est trop volumineuse. La taille maximale est de 1 MB.',
+            type: ToastificationType.error);
+      }
+      return false;
+    }
+    return true;
+  }
+
   Future<void> _pickImage() async {
-    final XFile? image =
-        await _imagePicker.pickImage(source: ImageSource.gallery);
+    final XFile? image = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80, // 80% quality
+    );
 
     if (image != null) {
-      setState(() {
-        _selectedAvatar = null; // Clear any selected avatar
-        _selectedFile = File(image.path);
-      });
+      final file = File(image.path);
+      // Validate file size before setting it
+      if (await _validateImageSize(file)) {
+        setState(() {
+          _selectedAvatar = null; // Clear any selected avatar
+          _selectedFile = file;
+        });
+      }
     }
   }
 
   Future<void> _takePhoto() async {
     try {
-      final XFile? photo =
-          await _imagePicker.pickImage(source: ImageSource.camera);
+      final XFile? photo = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 80, // 80% quality
+      );
 
       if (photo != null) {
-        setState(() {
-          _selectedAvatar = null; // Clear any selected avatar
-          _selectedFile = File(photo.path);
-        });
+        final file = File(photo.path);
+        // Validate file size before setting it
+        if (await _validateImageSize(file)) {
+          setState(() {
+            _selectedAvatar = null; // Clear any selected avatar
+            _selectedFile = file;
+          });
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -216,11 +244,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     }
 
     try {
-      final result =
-          await _uploadImgService.uploadImage(_selectedFile!, 'avatar');
+      // Show loading indicator
+      setState(() {
+        _isUploading = true;
+      });
+
+      // Use the combined method from the service that handles everything
+      final result = await _uploadImgService.processAndUploadImage(
+          _selectedFile!, 'avatar');
 
       if (mounted) {
         setState(() {
+          _isUploading = false;
           // Update the current avatar URL with the newly uploaded one
           if (result.containsKey('avatarUrl')) {
             _currentAvatarUrl = result['avatarUrl'];
@@ -232,7 +267,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       }
     } catch (e) {
       if (mounted) {
-        showErrorDialog(context, getCustomError(e));
+        setState(() {
+          _isUploading = false;
+        });
+
+        // Handle specific error for file size
+        final errorMessage = e.toString();
+        if (errorMessage.contains('maximum limit')) {
+          showToast(context,
+              'L\'image est trop volumineuse. La taille maximale est de 10 MB.',
+              type: ToastificationType.error);
+        } else {
+          showErrorDialog(context, getCustomError(e));
+        }
       }
     }
   }
@@ -256,7 +303,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       if (mounted) {
         setState(() {
           _currentAvatarUrl = _selectedAvatar!;
-          _selectedAvatar = null; // Reset selection after equipping
+          _selectedAvatar = null;
         });
         showToast(context, message, type: ToastificationType.success);
       }
@@ -331,6 +378,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             selectedAvatar: _selectedAvatar,
                             currentAvatarUrl: _currentAvatarUrl,
                             selectedFile: _selectedFile,
+                            isUploading: _isUploading,
                             onAvatarSelected: _selectAvatar,
                             onEquipAvatar: _equipSelectedAvatar,
                             onPickImage: _pickImage,
