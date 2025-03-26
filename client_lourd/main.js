@@ -7,9 +7,6 @@ function initWindow() {
         //fullscreen: true,
         height: 1080,
         width: 1920,
-        resizable: false, // Prevent resizing
-        minimizable: false, // Prevent minimizing
-        maximizable: false, // Prevent maximizing
         webPreferences: {
             nodeIntegration: true,
         },
