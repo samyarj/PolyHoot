@@ -10,7 +10,7 @@ import { User } from '@app/interfaces/user'; // Assurez-vous d'importer l'interf
 import { AuthService } from '@app/services/auth/auth.service';
 import { HistoryPublishedPollService } from '@app/services/poll-services/history-poll.service';
 import { ToastrService } from 'ngx-toastr';
-import { filter, map, Observable, Subject, Subscription, take, takeUntil } from 'rxjs';
+import { combineLatest, filter, map, Observable, Subject, Subscription, take, takeUntil } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -26,6 +26,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     private publishedPollsSubscription: Subscription;
     private userSubscription: Subscription;
     private destroy$ = new Subject<void>();
+    private combinedSubscription: Subscription;
 
     constructor(
         private dialog: MatDialog,
@@ -46,43 +47,35 @@ export class NotificationsComponent implements OnInit, OnDestroy {
             this.showNotifications = false;
         }
     }
-
     ngOnInit(): void {
-        // S'abonner aux changements dans les sondages publiés
-        this.publishedPollsSubscription = this.historyPublishedPollService.watchPublishedPolls().subscribe((publishedPolls) => {
-            if (this.user?.role === 'player') {
-                this.publishedPolls = publishedPolls.filter((poll) => !poll.expired);
-                this.notifications = this.publishedPolls.map((poll) => ({
-                    title: `${poll.title}`,
-                    poll,
-                }));
-            } else if (this.user?.role === 'admin') {
-                this.publishedPolls = publishedPolls.filter((poll) => poll.expired);
-                this.notifications = this.publishedPolls.map((poll) => ({
-                    title: `${poll.title}`,
-                    poll,
-                }));
-            }
-        });
-
         if (this.user && this.user.uid) {
-            this.userSubscription = this.watchUser(this.user.uid).subscribe({
-                next: (userData) => {
-                    // Filtrer les publishedPolls pour retirer ceux qui sont dans pollAnswered
-                    if (userData.pollsAnswered) {
-                        this.publishedPolls = this.publishedPolls.filter((poll) => poll.id && !userData.pollsAnswered?.includes(poll.id));
+            // Combiner les deux observables
+            const combinedSubscription = combineLatest([
+                this.historyPublishedPollService.watchPublishedPolls(),
+                this.watchUser(this.user.uid),
+            ]).subscribe(([publishedPolls, userData]) => {
+                console.log('publishedPolls', publishedPolls);
+                console.log('userData', userData.pollsAnswered);
 
-                        // Mettre à jour les notifications en conséquence
-                        this.notifications = this.publishedPolls.map((poll) => ({
-                            title: `${poll.title}`,
-                            poll,
-                        }));
-                    }
-                },
-                error: (error) => {
-                    console.error("Erreur lors de la surveillance de l'utilisateur:", error);
-                },
+                if (this.user?.role === 'player') {
+                    this.publishedPolls = publishedPolls.filter(
+                        (poll) => !poll.expired && poll.id && !userData.pollsAnswered?.includes(poll.id), // Utilisation directe de userData
+                    );
+                    this.notifications = this.publishedPolls.map((poll) => ({
+                        title: `${poll.title}`,
+                        poll,
+                    }));
+                } else if (this.user?.role === 'admin') {
+                    this.publishedPolls = publishedPolls.filter((poll) => poll.expired);
+                    this.notifications = this.publishedPolls.map((poll) => ({
+                        title: `${poll.title}`,
+                        poll,
+                    }));
+                }
             });
+
+            // Stocker la souscription pour la désabonner plus tard
+            this.combinedSubscription = combinedSubscription;
         }
     }
 
@@ -92,6 +85,9 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         if (this.userSubscription) this.userSubscription.unsubscribe();
         this.destroy$.next();
         this.destroy$.complete();
+        if (this.combinedSubscription) {
+            this.combinedSubscription.unsubscribe();
+        }
     }
 
     toggleNotifications() {
@@ -161,10 +157,12 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     // Fonction pour surveiller les changements d'un utilisateur
     private watchUser(uid: string): Observable<User> {
         return new Observable((subscriber) => {
+            console.log('uid', uid);
             const userDoc = doc(this.firestore, 'users', uid);
             const unsubscribe = onSnapshot(userDoc, (docSnapshot) => {
                 if (docSnapshot.exists()) {
                     const data = docSnapshot.data() as User;
+                    console.log('Data: ', data);
                     subscriber.next({ ...data, uid: docSnapshot.id });
                 } else {
                     subscriber.error(new Error("L'utilisateur n'existe pas."));

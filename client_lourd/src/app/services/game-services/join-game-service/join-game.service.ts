@@ -166,14 +166,8 @@ export class JoinGameService {
     }
 
     private handleUpdateLobby() {
-        this.socketService.on<{
-            playersInfo: {
-                name: string;
-                avatar: string;
-                banner: string;
-            }[];
-            roomId: string;
-        }>(JoinEvents.PlayerJoined, ({ roomId }) => {
+        this.socketService.on<string>(JoinEvents.PlayerJoined, (roomId) => {
+            console.log('123', roomId);
             this.lobbys = this.lobbys.map((lobby) => (lobby.roomId === roomId ? { ...lobby, nbPlayers: lobby.nbPlayers + 1 } : lobby));
             this.lobbysSource.next(this.lobbys);
         });
