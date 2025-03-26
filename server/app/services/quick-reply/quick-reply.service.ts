@@ -45,7 +45,12 @@ Expected Output:
         }
     }
 
-    async generateQuickReplies(channelId: string, user: string, message: string): Promise<string[]> {
+    async generateQuickReplies(
+        channelId: string,
+        user: string,
+        message: string,
+        gameContext?: string, // for game chat
+    ): Promise<string[]> {
         try {
             // Initialize the context for the channel if it doesn't exist
             this.initializeContext(channelId);
@@ -54,17 +59,24 @@ Expected Output:
             const context = this.conversationContexts.get(channelId);
 
             // Add the user's message to the conversation context
+            let userContent = `1. I am user: ${user}
+2. Here is the context:
+${message}`;
+
+            // Include game context if provided
+            if (gameContext) {
+                userContent += `\n3. Game context: ${gameContext}`;
+            }
+
             context?.push({
                 role: 'user',
-                content: `1. I am user: ${user}
-2. Here is the context:
-${message}`,
+                content: userContent,
             });
 
             // Send the conversation context to the LLM
             const chatCompletion = await this.groq.chat.completions.create({
                 messages: context,
-                model: 'mistral-saba-24b',
+                model: 'llama-3.3-70b-versatile',
                 temperature: 1,
                 max_completion_tokens: 1024,
                 top_p: 1,
