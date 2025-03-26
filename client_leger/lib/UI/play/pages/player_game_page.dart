@@ -247,41 +247,44 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
                       SizedBox(height: 8),
                       if (playerGameState.currentQuestion.type ==
                           QuestionType.QRL.name)
-                        TextField(
-                          controller: _QRLanswerController,
-                          maxLength: MAX_CHARACTERS,
-                          enabled: !isSubmissionDisabled(playerGameState),
-                          maxLines: 2,
-                          decoration: InputDecoration(
-                            contentPadding: const EdgeInsets.all(16),
-                            hintText: 'Votre réponse',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide: BorderSide(
-                                color:
-                                    colorScheme.tertiary.withValues(alpha: 0.3),
-                                width: 3,
+                        TapRegion(
+                          onTapOutside: (_) => FocusScope.of(context).unfocus(),
+                          child: TextField(
+                            controller: _QRLanswerController,
+                            maxLength: MAX_CHARACTERS,
+                            enabled: !isSubmissionDisabled(playerGameState),
+                            maxLines: 2,
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.all(16),
+                              hintText: 'Votre réponse',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(30),
+                                borderSide: BorderSide(
+                                  color: colorScheme.tertiary
+                                      .withValues(alpha: 0.3),
+                                  width: 3,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(30),
+                                borderSide: BorderSide(
+                                  color: colorScheme.tertiary
+                                      .withValues(alpha: 0.3),
+                                  width: 3,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(30),
+                                borderSide: BorderSide(
+                                  color: colorScheme.secondary,
+                                  width: 3,
+                                ),
                               ),
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide: BorderSide(
-                                color:
-                                    colorScheme.tertiary.withValues(alpha: 0.3),
-                                width: 3,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide: BorderSide(
-                                color: colorScheme.secondary,
-                                width: 3,
-                              ),
-                            ),
+                            onChanged: (value) {
+                              setState(() {});
+                            },
                           ),
-                          onChanged: (value) {
-                            setState(() {});
-                          },
                         ),
                     ],
                   ),
