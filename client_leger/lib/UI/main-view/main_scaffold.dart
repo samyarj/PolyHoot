@@ -30,7 +30,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
   bool _isSidebarVisible = true;
 
   late AnimationController _animationController;
-  late Animation<double> _sidebarAnimation;
 
   SidebarContent _currentSidebar = SidebarContent.chat;
 
@@ -42,14 +41,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-
-    _sidebarAnimation = Tween<double>(
-      begin: 0,
-      end: sidebarWidth,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
 
     if (_isSidebarVisible) {
       _animationController.value = 1.0;
