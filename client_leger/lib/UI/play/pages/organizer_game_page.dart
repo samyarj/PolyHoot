@@ -1,6 +1,6 @@
 import 'package:client_leger/UI/play/widgets/game_area.dart';
-import 'package:client_leger/UI/play/widgets/title_bar.dart';
 import 'package:client_leger/UI/router/routes.dart';
+import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/providers/play/game_organizer_provider.dart';
 import 'package:client_leger/utilities/confirmation_dialog.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toastification/toastification.dart';
 
-// Main Page Widget
 class OrganizerGamePage extends ConsumerWidget {
   const OrganizerGamePage({super.key});
 
@@ -17,6 +16,7 @@ class OrganizerGamePage extends ConsumerWidget {
     if (!context.mounted) return;
     if (shouldAbandon) {
       ref.read(organizerProvider.notifier).abandonGame();
+      WebSocketManager.instance.isPlaying = false;
       context.go(Paths.play);
     }
   }
@@ -24,11 +24,13 @@ class OrganizerGamePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(organizerProvider.notifier);
+    final colorScheme = Theme.of(context).colorScheme;
 
     ref.listen(organizerProvider, (previous, next) {
       if (next.shouldNavigateToResults) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           final resultPlayerList = notifier.getResultPlayerList();
+          WebSocketManager.instance.isPlaying = false;
           context.go('${Paths.play}/${Paths.resultsView}',
               extra: resultPlayerList);
         });
@@ -36,6 +38,7 @@ class OrganizerGamePage extends ConsumerWidget {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _showToast(context, 'Tous les joueurs ont quitté la partie');
           context.go(Paths.play);
+          WebSocketManager.instance.isPlaying = false;
         });
       }
     });
@@ -48,15 +51,19 @@ class OrganizerGamePage extends ConsumerWidget {
       },
       canPop: false,
       child: Scaffold(
-        body: SafeArea(
-          child: Column(
-            children: [
-              const TitleBar(),
-              Expanded(
-                child: GameArea(),
-              ),
-            ],
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                colorScheme.primary,
+                colorScheme.primary,
+                colorScheme.secondary,
+              ],
+            ),
           ),
+          child: SafeArea(child: ImprovedGameArea()),
         ),
       ),
     );

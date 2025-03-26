@@ -1,16 +1,16 @@
 import 'package:client_leger/UI/confirmation/confirmation_dialog.dart';
-import 'package:client_leger/UI/error/error_dialog.dart';
+import 'package:client_leger/UI/play/widgets/feedback_message.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/enums.dart';
 import 'package:client_leger/models/player_data.dart';
 import 'package:client_leger/providers/play/game_player_provider.dart';
+import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:client_leger/utilities/socket_events.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:client_leger/UI/play/widgets/feedback_message.dart';
 import 'package:numberpicker/numberpicker.dart';
 
 class PlayerGamePage extends ConsumerStatefulWidget {
@@ -31,6 +31,7 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
   void dispose() {
     if (shouldDisconnect) {
       AppLogger.i("Disconnecting player from game and removing roomId");
+      _socketManager.isPlaying = false;
       _socketManager.webSocketSender(DisconnectEvents.Player.value);
       _socketManager.removeRoomId();
     }
@@ -43,6 +44,7 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
         context, "Êtes-vous sûr de vouloir abandonner la partie?", () async {
       playerGameNotifier.stopAlertSound();
       GoRouter.of(context).go(Paths.play);
+      _socketManager.isPlaying = false;
     }, null);
   }
 
@@ -57,11 +59,13 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           shouldDisconnect = false;
           resultPlayerList = playerGameNotifier.getResultPlayerList();
+          _socketManager.isPlaying = false;
           GoRouter.of(context).go('${Paths.play}/${Paths.resultsView}',
               extra: resultPlayerList);
         });
       } else if (next.organizerDisconnected) {
-        showErrorDialog(context, "L'organisateur a quitté la partie.");
+        showToast(context, "L'organisateur a quitté la partie.");
+        _socketManager.isPlaying = false;
         GoRouter.of(context).go(Paths.play);
       }
     });

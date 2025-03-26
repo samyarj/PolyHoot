@@ -1,6 +1,6 @@
+import 'package:client_leger/models/enums.dart';
 import 'package:client_leger/providers/theme_provider.dart';
 import 'package:client_leger/themes/app_theme.dart';
-import 'package:client_leger/utilities/enums.dart';
 import 'package:flutter/material.dart';
 
 class ItemWidget extends StatelessWidget {
