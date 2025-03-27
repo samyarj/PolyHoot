@@ -1,0 +1,19 @@
+<div class="qr-code-popin">
+    <div class="header">
+        <div class="title">Code QR de la partie</div>
+        <div class="description">Partagez ce code QR pour permettre à vos amis de rejoindre votre partie</div>
+    </div>
+    <div class="qr-code-container">
+        <qrcode
+            [qrdata]="qrData"
+            [colorDark]="colorDark"
+            [colorLight]="'#ffffff00'"
+            [errorCorrectionLevel]="'H'"
+            [imageHeight]="200"
+            [imageWidth]="200"
+            class="custom-qr"
+        ></qrcode>
+    </div>
+
+    <button class="custom-button-medium" (click)="onClose()">Fermer</button>
+</div>

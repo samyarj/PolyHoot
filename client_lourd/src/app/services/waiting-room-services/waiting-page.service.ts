@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { QrCodePopInComponent } from '@app/components/general-elements/qr-code-pop-in/qr-code-pop-in.component';
 import { DisconnectEvents, GameEvents, JoinEvents, TimerEvents } from '@app/constants/enum-class';
 import { AuthService } from '@app/services/auth/auth.service';
 import { Subject } from 'rxjs';
@@ -26,9 +28,20 @@ export class WaitingPageService {
     timerEnd$ = this.timerEndSource.asObservable();
 
     isPlayersListEmpty: boolean = true;
+    playerNameStr: string = '';
 
     private areSocketsInitialized: boolean = false;
-    constructor(private authService: AuthService) {}
+    constructor(
+        private authService: AuthService,
+        private dialog: MatDialog,
+    ) {
+        this.authService.user$.subscribe({
+            next: (user) => {
+                if (user && user.username) this.playerNameStr = user.username;
+                else this.playerNameStr = '';
+            },
+        });
+    }
 
     get socketService() {
         return this.authService.getSocketService();
@@ -74,6 +87,22 @@ export class WaitingPageService {
 
     startGameCountdown(time: number) {
         this.socketService.send(GameEvents.StartGameCountdown, time);
+    }
+
+    openQrCode() {
+        this.socketService.send(JoinEvents.TitleRequest, (title: string) => {
+            this.gameTitle = title;
+            this.dialog.open(QrCodePopInComponent, {
+                width: '40vw',
+                backdropClass: 'quiz-info-popup',
+                panelClass: 'custom-container',
+                data: {
+                    type: 'join-game',
+                    roomId: this.roomId,
+                    gameName: this.playerNameStr === '' ? "Salle d'attente" : `Salle de ${this.playerNameStr}`,
+                },
+            });
+        });
     }
 
     setupSockets() {

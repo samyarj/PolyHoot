@@ -72,6 +72,10 @@ export class WaitingPageComponent implements OnDestroy {
         return this.waitingPageService.isPlayersListEmpty;
     }
 
+    openQrCode() {
+        this.waitingPageService.openQrCode();
+    }
+
     @HostListener('window:beforeunload')
     handleBeforeUnload() {
         localStorage.setItem('navigatedFromUnload', 'true');
