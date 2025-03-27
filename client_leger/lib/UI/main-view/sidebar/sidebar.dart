@@ -3,6 +3,7 @@ import 'package:client_leger/UI/chat/ingame_chatwindow.dart';
 import 'package:client_leger/UI/main-view/sidebar/channels.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/user.dart' as user_model;
+import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -47,6 +48,10 @@ class _SideBarState extends ConsumerState<SideBar>
   }
 
   void _changeTabAndChannel(int index, String channel) {
+    AppLogger.i("Changing tab to $index and channel to $channel");
+    if (socketManager.currentRoomIdNotifier.value == null) {
+      index--;
+    }
     _recentChannelNotifier.value = channel;
     _tabController.animateTo(index);
   }
