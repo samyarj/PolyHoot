@@ -238,23 +238,22 @@ export class JoinGameService {
     }
 
     private handleLockedLobby() {
-        this.socketService.on<{ isLocked: boolean; roomId: string }>(GameEvents.AlertLockToggled, ({ isLocked, roomId }) => {
+        this.socketService.on<{ isLocked: boolean; roomId: string }>(GameEvents.LobbyToggledLock, ({ isLocked, roomId }) => {
             this.lobbys = this.lobbys.map((lobby) => (lobby.roomId === roomId ? { ...lobby, isLocked } : lobby));
             this.lobbysSource.next(this.lobbys);
         });
     }
 
     private removeLockedLobby() {
-        this.socketService.socket.off(GameEvents.AlertLockToggled);
+        this.socketService.socket.off(GameEvents.LobbyToggledLock);
     }
 
     private handleUpdateLobby() {
         this.socketService.on<string>(JoinEvents.PlayerJoined, (roomId) => {
-            console.log('123', roomId);
             this.lobbys = this.lobbys.map((lobby) => (lobby.roomId === roomId ? { ...lobby, nbPlayers: lobby.nbPlayers + 1 } : lobby));
             this.lobbysSource.next(this.lobbys);
         });
-        this.socketService.on<{ playerNames: string[]; roomId: string }>(GameEvents.PlayerLeft, ({ roomId }) => {
+        this.socketService.on<string>(GameEvents.PlayerLeftLobby, (roomId) => {
             this.lobbys = this.lobbys.map((lobby) => (lobby.roomId === roomId ? { ...lobby, nbPlayers: lobby.nbPlayers - 1 } : lobby));
             this.lobbysSource.next(this.lobbys);
         });
@@ -262,7 +261,7 @@ export class JoinGameService {
 
     private removeUpdateLobby() {
         this.socketService.socket.off(JoinEvents.PlayerJoined);
-        this.socketService.socket.off(GameEvents.PlayerLeft);
+        this.socketService.socket.off(GameEvents.PlayerLeftLobby);
     }
 
     private showPopUp() {

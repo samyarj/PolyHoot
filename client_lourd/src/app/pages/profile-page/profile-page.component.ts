@@ -8,7 +8,7 @@ import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
 import { UploadImgService } from '@app/services/upload-img.service';
 import { ToastrService } from 'ngx-toastr';
-import { Subject, takeUntil } from 'rxjs';
+import { debounceTime, Subject, takeUntil } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
@@ -61,6 +61,8 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     lastLogin: string = 'N/A';
 
     private readonly baseUrl = `${environment.serverUrl}/users`;
+    private readonly usernameCheckDebounceTime = 500; // milliseconds
+    private usernameInput$ = new Subject<void>();
 
     constructor(
         private uploadImgService: UploadImgService,
@@ -72,6 +74,11 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     ) {
         this.profileForm = this.fb.group({
             username: ['', [Validators.required, Validators.pattern(USERNAME_REGEX)]],
+        });
+
+        // Set up debounced username check
+        this.usernameInput$.pipe(takeUntil(this.destroy$), debounceTime(this.usernameCheckDebounceTime)).subscribe(() => {
+            this.checkUsername();
         });
     }
 
@@ -315,5 +322,9 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         // Calculate the absolute difference in milliseconds and convert to seconds
         // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         return Math.floor(Math.abs(date2.getTime() - date1.getTime()) / 1000);
+    }
+
+    onUsernameInput(): void {
+        this.usernameInput$.next();
     }
 }
