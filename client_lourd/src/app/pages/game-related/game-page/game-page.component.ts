@@ -119,6 +119,7 @@ export class GamePageComponent implements OnDestroy {
         if (location !== AppRoute.RESULTS && this.gameClientService.roomId) {
             this.gameClientService.signalUserDisconnect();
             this.router.navigate([AppRoute.HOME]);
+            this.gameClientService.clearShowEndResults();
         } else if (location === AppRoute.RESULTS && this.gameClientService.shouldDisconnect && this.gameClientService.roomId) {
             this.gameClientService.signalUserDisconnect();
             this.router.navigate([AppRoute.HOME]);

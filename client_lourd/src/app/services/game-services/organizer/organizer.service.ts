@@ -88,11 +88,16 @@ export class OrganizerService {
         this.clearEveryoneSubmitted();
         this.clearPlayerListSockets();
         this.clearTimeSockets();
-        this.clearResultsSockets();
+        // this.clearResultsSockets(); // clears same event as resultService, will be cleared in navigation or results.
         this.clearGameEnded();
         this.socketsInitialized = false;
     }
 
+    clearResultsSockets() {
+        console.log('clearing result sockets from organizer service');
+        this.socketHandlerService.socket.off(GameEvents.SendResults);
+        this.resultService.areSocketsInitialized = false;
+    }
     gradeAnswer(value: QRLGrade) {
         // this.updateTotalAnswersArray(value);
         this.updatePointsForPlayer(value);
@@ -340,10 +345,6 @@ export class OrganizerService {
             this.sentResults = false;
             this.alertSoundPlayer.stop();
         });
-    }
-
-    private clearResultsSockets() {
-        this.socketHandlerService.socket.off(GameEvents.SendResults);
     }
 
     private handleGameEnded() {

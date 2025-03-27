@@ -46,6 +46,7 @@ export class ResultsService {
     }
 
     clearResultsSockets() {
+        console.log('clearing result sockets from result service');
         this.socketHandlerService.socket.off(GameEvents.SendResults);
         this.areSocketsInitialized = false;
     }

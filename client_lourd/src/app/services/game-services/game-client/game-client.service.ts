@@ -153,9 +153,15 @@ export class GameClientService {
         this.clearGoToNextQuestion();
         this.clearPlayerPointsUpdate();
         this.clearOrganizerHasDisconnected();
-        this.clearShowEndResults();
+        // this.clearShowEndResults(); // clears same event as resultService, will be cleared in navigation or results.
         // this.resultService.clearResultsSockets(); // Assuming you have a similar method for resultService
         this.areSocketsInitialized = false;
+    }
+
+    clearShowEndResults() {
+        console.log('clearing result sockets from game service');
+        this.socketHandler.socket.off(GameEvents.SendResults);
+        this.resultService.areSocketsInitialized = false;
     }
 
     private handleTimerValue() {
@@ -274,9 +280,5 @@ export class GameClientService {
             this.router.navigate([AppRoute.RESULTS]);
             this.alertSoundPlayer.stop();
         });
-    }
-
-    private clearShowEndResults() {
-        this.socketHandler.socket.off(GameEvents.SendResults);
     }
 }
