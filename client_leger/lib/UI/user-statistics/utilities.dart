@@ -17,7 +17,7 @@ String getAverageTimePerGame(List<GameLogEntry> gameLogs) {
         totalDurationInSeconds += endTime.difference(startTime).inSeconds;
       }
     } catch (e) {
-      AppLogger.e(
+      AppLogger.w(
           "Error parsing date: $e log = $log, startTime = ${log.startTime}, endTime = ${log.endTime}");
       skippedLogs++;
       continue;

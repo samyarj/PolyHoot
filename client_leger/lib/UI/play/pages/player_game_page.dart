@@ -340,37 +340,52 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
                                         fontWeight: FontWeight.bold),
                                   ),
                             SizedBox(height: 8),
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30),
-                                color: colorScheme.secondary.withAlpha(51),
-                              ),
-                              child: NumberPicker(
-                                value: playerGameState.qreAnswer,
-                                minValue: playerGameState
-                                    .currentQuestion.qreAttributes!.minBound,
-                                maxValue: playerGameState
-                                    .currentQuestion.qreAttributes!.maxBound,
-                                axis: Axis.horizontal,
-                                onChanged:
-                                    playerGameState.playerInfo.submitted ||
-                                            playerGameState.time == 0
-                                        ? (value) {}
-                                        : (value) {
-                                            setState(() {
-                                              playerGameNotifier
-                                                  .setQreAnswer(value);
-                                            });
-                                          },
-                                textStyle: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.tertiary,
-                                    fontSize: 18),
-                                selectedTextStyle: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    fontSize: 34),
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.chevron_left,
+                                  color: colorScheme.onPrimary,
+                                ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(30),
+                                    color: colorScheme.secondary.withAlpha(51),
+                                  ),
+                                  child: NumberPicker(
+                                    value: playerGameState.qreAnswer,
+                                    minValue: playerGameState.currentQuestion
+                                        .qreAttributes!.minBound,
+                                    maxValue: playerGameState.currentQuestion
+                                        .qreAttributes!.maxBound,
+                                    axis: Axis.horizontal,
+                                    onChanged:
+                                        playerGameState.playerInfo.submitted ||
+                                                playerGameState.time == 0
+                                            ? (value) {}
+                                            : (value) {
+                                                setState(() {
+                                                  playerGameNotifier
+                                                      .setQreAnswer(value);
+                                                });
+                                              },
+                                    textStyle: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .tertiary,
+                                        fontSize: 18),
+                                    selectedTextStyle: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        fontSize: 34),
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.chevron_right,
+                                  color: colorScheme.onPrimary,
+                                ),
+                              ],
                             ),
                             SizedBox(height: 8),
                             Row(

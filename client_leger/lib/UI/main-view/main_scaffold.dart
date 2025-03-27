@@ -278,18 +278,19 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
                 color: colorScheme.secondary.withValues(alpha: 0.75),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      onTap: _toggleSidebarVisibility,
-                      child: SizedBox(
-                        width: 24,
-                        height: 64,
-                        child: Center(
+                    Transform.scale(
+                      scale: 2,
+                      child: GestureDetector(
+                        onTap: _toggleSidebarVisibility,
+                        child: Container(
+                          width: 24,
+                          height: 64,
+                          alignment: Alignment.center,
                           child: Icon(
                             _isSidebarVisible
                                 ? Icons.chevron_right_rounded
                                 : Icons.chevron_left_rounded,
                             color: colorScheme.onTertiary,
-                            size: 28,
                           ),
                         ),
                       ),

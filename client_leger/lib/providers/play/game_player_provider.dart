@@ -112,10 +112,12 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
           choiceFeedback: ChoiceFeedback.Idle,
           currentQuestion: Question(type: '', text: '', points: 0),
           playerInfo: PlayerInfo(
-              submitted: false,
-              userFirst: false,
-              choiceSelected: [false, false, false, false],
-              waitingForQuestion: false),
+            submitted: false,
+            userFirst: false,
+            choiceSelected: [false, false, false, false],
+            waitingForQuestion: false,
+            exactAnswer: false,
+          ),
           time: 0,
           qreAnswer: 0,
           shouldNavigateToResults: false,
@@ -205,18 +207,26 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
       }
 
       bool isFirst = playerQuestionInfo['isFirst'] ?? false;
+      bool isExactAnswer = playerQuestionInfo['exactAnswer'] ?? false;
       int points = playerQuestionInfo['points'];
       if (isFirst) {
         feedback = ChoiceFeedback.First;
       }
+      if (isExactAnswer) {
+        feedback = ChoiceFeedback.Exact;
+      }
 
       state = state.copyWith(
         playerPoints: points,
+        time: 0,
         pointsReceived: points,
         realShowAnswers: true,
         choiceFeedback: feedback,
         playerInfo: state.playerInfo.copyWith(
-            choiceSelected: [false, false, false, false], userFirst: isFirst),
+          choiceSelected: [false, false, false, false],
+          userFirst: isFirst,
+          exactAnswer: isExactAnswer,
+        ),
       );
     });
 
@@ -261,7 +271,6 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
   }
 
   void finalizeAnswer() {
-    AppLogger.i("Finalizing answer in game player provider");
     state = state.copyWith(
         playerInfo: state.playerInfo.copyWith(submitted: true),
         choiceFeedback: ChoiceFeedback.Awaiting);

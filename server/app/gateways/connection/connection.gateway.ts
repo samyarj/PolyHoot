@@ -19,7 +19,7 @@ export class ConnectionGateway implements OnGatewayDisconnect {
         private gameManager: GameManagerService,
         private historyManager: HistoryManagerService,
         private userService: UserService,
-    ) {}
+    ) { }
 
     @SubscribeMessage(ConnectEvents.IdentifyClient)
     handleIdentify(@MessageBody() uid: string, @ConnectedSocket() client: Socket) {
@@ -76,6 +76,9 @@ export class ConnectionGateway implements OnGatewayDisconnect {
                 this.disconnectOrganizer(roomId, client);
             } else {
                 const player = game.findTargetedPlayer(client);
+                this.userService.updateGameLog(player.uid, {
+                    endTime: this.userService.formatTimestamp(new Date()),
+                });
                 this.disconnectPlayer(game, player, roomId);
             }
         }
