@@ -79,7 +79,9 @@ class InGameChatService {
       final messages = await Future.wait(
         (history as List<dynamic>).map((message) async {
           final chatMessage = InGameChatMessage.fromJson(message);
-          if (chatMessage.avatar == null && chatMessage.border == null) {
+          if (chatMessage.avatar == null &&
+              chatMessage.border == null &&
+              chatMessage.author != 'System') {
             AppLogger.w(
                 "message has no avatar or border, will fetch from firebase");
             await attachUrlToMessage(chatMessage);
@@ -125,7 +127,9 @@ class InGameChatService {
         (newMessage) async {
       final message = InGameChatMessage.fromJson(newMessage);
 
-      if (message.avatar == null && message.border == null) {
+      if (message.avatar == null &&
+          message.border == null &&
+          message.author != 'System') {
         AppLogger.w(
             "message has no avatar or border, will fetch from firebase");
         await attachUrlToMessage(message);

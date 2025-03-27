@@ -16,16 +16,33 @@ class SideBar extends ConsumerStatefulWidget {
 }
 
 class _SideBarState extends ConsumerState<SideBar>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late TabController _tabController;
   final socketManager = WebSocketManager.instance;
 
   final ValueNotifier<String?> _recentChannelNotifier =
       ValueNotifier<String?>(null);
 
+  void _updateTabController() {
+    final currentRoomId = socketManager.currentRoomIdNotifier.value;
+    final newTabLength = currentRoomId != null ? 4 : 3;
+
+    if (_tabController.length != newTabLength) {
+      _tabController.dispose();
+      setState(() {
+        _tabController =
+            TabController(length: newTabLength, vsync: this, initialIndex: 0);
+      });
+    }
+  }
+
   @override
   void initState() {
-    _tabController = TabController(length: 4, vsync: this, initialIndex: 0);
+    final currentRoomId = socketManager.currentRoomIdNotifier.value;
+    final tabLength = currentRoomId != null ? 4 : 3;
+    _tabController =
+        TabController(length: tabLength, vsync: this, initialIndex: 0);
+    socketManager.currentRoomIdNotifier.addListener(_updateTabController);
     super.initState();
   }
 
@@ -47,6 +64,7 @@ class _SideBarState extends ConsumerState<SideBar>
   @override
   void dispose() {
     _tabController.dispose();
+    socketManager.currentRoomIdNotifier.removeListener(_updateTabController);
     super.dispose();
   }
 
@@ -71,7 +89,8 @@ class _SideBarState extends ConsumerState<SideBar>
             indicatorSize: TabBarIndicatorSize
                 .tab, // Make the indicator cover the entire tab
             tabs: [
-              Tab(text: 'Partie'),
+              if (socketManager.currentRoomIdNotifier.value != null)
+                Tab(text: 'Partie'),
               Tab(text: 'Général'),
               Tab(text: 'Récent'),
               Tab(text: 'Canaux'),
@@ -81,7 +100,8 @@ class _SideBarState extends ConsumerState<SideBar>
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildIngameChat(),
+                if (socketManager.currentRoomIdNotifier.value != null)
+                  _buildIngameChat(),
                 _buildGeneralChat(),
                 _buildRecentChat(),
                 _buildChannels(),
@@ -94,19 +114,7 @@ class _SideBarState extends ConsumerState<SideBar>
   }
 
   Widget _buildIngameChat() {
-    final colorScheme = Theme.of(context).colorScheme;
-    return ValueListenableBuilder<String?>(
-      valueListenable: socketManager.currentRoomIdNotifier,
-      builder: (context, currentRoomId, child) {
-        return currentRoomId == null
-            ? Center(
-                child: Text('Pas de partie courante.',
-                    style: TextStyle(
-                      color: colorScheme.onPrimary,
-                    )))
-            : InGameChatWindow();
-      },
-    );
+    return InGameChatWindow();
   }
 
   Widget _buildGeneralChat() {

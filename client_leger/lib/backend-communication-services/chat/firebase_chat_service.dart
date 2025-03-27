@@ -114,8 +114,8 @@ class FirebaseChatService {
         // Attach user details to messages
         for (ChatMessage msg in newMessages) {
           msg.username = users[msg.uid]?.username ?? 'Unknown';
-          msg.avatar =
-              users[msg.uid]?.avatarEquipped ?? 'assets/default-avatar.png';
+          msg.avatar = users[msg.uid]?.avatarEquipped ??
+              'https://res.cloudinary.com/dtu6fkkm9/image/upload/v1737478954/default-avatar_qcaycl.jpg';
           msg.border = users[msg.uid]?.borderEquipped;
         }
 
@@ -186,8 +186,8 @@ class FirebaseChatService {
       // Attach user details to messages
       for (ChatMessage msg in olderMessages) {
         msg.username = users[msg.uid]?.username ?? 'Unknown';
-        msg.avatar =
-            users[msg.uid]?.avatarEquipped ?? 'assets/default-avatar.png';
+        msg.avatar = users[msg.uid]?.avatarEquipped ??
+            'https://res.cloudinary.com/dtu6fkkm9/image/upload/v1737478954/default-avatar_qcaycl.jpg';
         msg.border = users[msg.uid]?.borderEquipped;
       }
 
