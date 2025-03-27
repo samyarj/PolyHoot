@@ -25,8 +25,10 @@ class AdminUsersTable extends ConsumerStatefulWidget {
 class _AdminUsersTableState extends ConsumerState<AdminUsersTable> {
   int _currentPage = 0;
   final int _rowsPerPage = 10;
-  bool _sortAscending = false;
-  int _sortColumnIndex = 0;
+  bool _sortAscending = true;
+  int _sortColumnIndex = 1;
+
+  final int _banDurationMinutes = 15;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +49,8 @@ class _AdminUsersTableState extends ConsumerState<AdminUsersTable> {
             return _compareVictories(a.user, b.user, _sortAscending);
           case 4: // Reports
             return _compareReports(a.user, b.user, _sortAscending);
+          case 5: // Ban status
+            return _compareBanStatus(a.user, b.user, _sortAscending);
           default:
             return 0;
         }
@@ -164,6 +168,13 @@ class _AdminUsersTableState extends ConsumerState<AdminUsersTable> {
                   children: [Text('BANNIR', style: headerStyle)],
                 ),
                 size: ColumnSize.M,
+                onSort: (columnIndex, ascending) {
+                  // Add this
+                  setState(() {
+                    _sortColumnIndex = columnIndex;
+                    _sortAscending = ascending;
+                  });
+                },
               ),
             ],
             rows: displayedUsers.isEmpty
@@ -258,39 +269,19 @@ class _AdminUsersTableState extends ConsumerState<AdminUsersTable> {
                           Align(
                             alignment: Alignment.centerRight,
                             child: isBanned
-                                ? Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Flexible(
-                                        child: Text(
-                                          'Banni jusqu\'au ${DateFormat('dd/MM/yyyy').format(user.unBanDate!.toDate())}',
-                                          style: TextStyle(
-                                            color: Colors.red,
-                                            fontSize: 14,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      IconButton(
-                                        icon: Icon(Icons.lock_open,
-                                            color: colorScheme.secondary),
-                                        onPressed: () =>
-                                            widget.onUnbanUser(user.uid),
-                                        tooltip: 'Débannir',
-                                        constraints: BoxConstraints(
-                                          minWidth: 40,
-                                          minHeight: 40,
-                                        ),
-                                        iconSize: 26,
-                                        padding: EdgeInsets.zero,
-                                      ),
-                                    ],
+                                ? Text(
+                                    'Banni jusqu\'au ${DateFormat('dd/MM/yyyy HH:mm').format(user.unBanDate!.toDate())}',
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                      fontSize: 14,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   )
                                 : IconButton(
                                     icon: Icon(Icons.block, color: Colors.red),
-                                    onPressed: () =>
-                                        _showBanDialog(context, user),
-                                    tooltip: 'Bannir',
+                                    onPressed: () => _showBanConfirmationDialog(
+                                        context, user),
+                                    tooltip: 'Bannir pour 15 minutes',
                                   ),
                           ),
                         ),
@@ -357,63 +348,53 @@ class _AdminUsersTableState extends ConsumerState<AdminUsersTable> {
     );
   }
 
-  void _showBanDialog(BuildContext context, User user) {
+  void _showBanConfirmationDialog(BuildContext context, User user) {
     final colorScheme = Theme.of(context).colorScheme;
-    int selectedDuration = 15;
 
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          backgroundColor: colorScheme.surface,
-          title: Text('Bannir ${user.username}',
-              style: TextStyle(color: colorScheme.onPrimary)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+      builder: (context) => AlertDialog(
+        backgroundColor: colorScheme.surface,
+        title: Text(
+          'Confirmation de bannissement',
+          style: TextStyle(color: colorScheme.onPrimary),
+        ),
+        content: RichText(
+          text: TextSpan(
+            style: TextStyle(color: colorScheme.onPrimary),
             children: [
-              Text('Choisir la durée du bannissement:',
-                  style: TextStyle(color: colorScheme.onPrimary)),
-              SizedBox(height: 16),
-              DropdownButton<int>(
-                value: selectedDuration,
-                isExpanded: true,
-                items: [
-                  DropdownMenuItem(value: 15, child: Text('15 minutes')),
-                  DropdownMenuItem(value: 60, child: Text('1 heure')),
-                  DropdownMenuItem(value: 180, child: Text('3 heures')),
-                  DropdownMenuItem(value: 1440, child: Text('1 jour')),
-                ],
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      selectedDuration = value;
-                    });
-                  }
-                },
+              TextSpan(text: 'Voulez-vous vraiment bannir '),
+              TextSpan(
+                text: user.username,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.secondary,
+                ),
               ),
+              TextSpan(text: ' pour 15 minutes?'),
             ],
           ),
-          actions: [
-            TextButton(
-              child: Text('Annuler',
-                  style: TextStyle(color: colorScheme.onPrimary)),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.secondary.withValues(alpha: 0.7),
-                foregroundColor: colorScheme.onSecondary,
-              ),
-              child: Text('Bannir',
-                  style: TextStyle(color: colorScheme.onPrimary)),
-              onPressed: () {
-                Navigator.of(context).pop();
-                widget.onBanUser(user.uid, selectedDuration);
-              },
-            ),
-          ],
         ),
+        actions: [
+          TextButton(
+            child: Text(
+              'Annuler',
+              style: TextStyle(color: colorScheme.onPrimary),
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.withOpacity(0.7),
+              foregroundColor: Colors.white,
+            ),
+            child: Text('Bannir'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              widget.onBanUser(user.uid, _banDurationMinutes);
+            },
+          ),
+        ],
       ),
     );
   }
@@ -452,5 +433,15 @@ class _AdminUsersTableState extends ConsumerState<AdminUsersTable> {
     return ascending
         ? aReports.compareTo(bReports)
         : bReports.compareTo(aReports);
+  }
+
+  int _compareBanStatus(User a, User b, bool ascending) {
+    final bool aIsBanned =
+        a.unBanDate != null && a.unBanDate!.toDate().isAfter(DateTime.now());
+    final bool bIsBanned =
+        b.unBanDate != null && b.unBanDate!.toDate().isAfter(DateTime.now());
+    return ascending
+        ? (aIsBanned == bIsBanned ? 0 : (aIsBanned ? 1 : -1))
+        : (aIsBanned == bIsBanned ? 0 : (aIsBanned ? -1 : 1));
   }
 }

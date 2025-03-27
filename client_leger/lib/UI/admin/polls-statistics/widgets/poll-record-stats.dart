@@ -101,7 +101,7 @@ class PollRecordStats extends StatelessWidget {
                                 _buildInfoRow(
                                   context,
                                   "Date de fin:",
-                                  formatDate(poll.endDate) ?? "Non spécifiée",
+                                  formatDate(poll.endDate),
                                   Icons.calendar_today,
                                 ),
                                 SizedBox(height: 12),
@@ -181,171 +181,177 @@ class PollRecordStats extends StatelessWidget {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                    child: LayoutBuilder(builder: (context, constraints) {
+                      return SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Previous Question Button
-                            IconButton(
-                              onPressed: currentQuestionIndex > 0
-                                  ? onPreviousQuestion
-                                  : null,
-                              icon: Icon(
-                                Icons.chevron_left,
-                                size: 28,
-                              ),
-                              color: currentQuestionIndex > 0
-                                  ? colorScheme.tertiary
-                                  : colorScheme.onSurface.withOpacity(0.3),
-                              tooltip: 'Question précédente',
-                            ),
+                            Row(
+                              children: [
+                                // Previous Question Button
+                                IconButton(
+                                  onPressed: currentQuestionIndex > 0
+                                      ? onPreviousQuestion
+                                      : null,
+                                  icon: Icon(
+                                    Icons.chevron_left,
+                                    size: 28,
+                                  ),
+                                  color: currentQuestionIndex > 0
+                                      ? colorScheme.tertiary
+                                      : colorScheme.onSurface.withOpacity(0.3),
+                                  tooltip: 'Question précédente',
+                                ),
 
-                            // Question Title
-                            Expanded(
-                              child: Container(
-                                padding: EdgeInsets.symmetric(vertical: 12),
+                                // Question Title
+                                Expanded(
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(vertical: 12),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          colorScheme.primary.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          "Question ${currentQuestionIndex + 1}/${poll.questions.length}",
+                                          style: TextStyle(
+                                            color: colorScheme.tertiary,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        SizedBox(height: 8),
+                                        Text(
+                                          currentQuestion.text,
+                                          style: TextStyle(
+                                            color: colorScheme.onSurface,
+                                            fontSize: 18,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                // Next Question Button
+                                IconButton(
+                                  onPressed: currentQuestionIndex <
+                                          poll.questions.length - 1
+                                      ? onNextQuestion
+                                      : null,
+                                  icon: Icon(
+                                    Icons.chevron_right,
+                                    size: 28,
+                                  ),
+                                  color: currentQuestionIndex <
+                                          poll.questions.length - 1
+                                      ? colorScheme.tertiary
+                                      : colorScheme.onSurface.withOpacity(0.3),
+                                  tooltip: 'Question suivante',
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 24),
+
+                            // Pie Chart with fixed dimensions to maintain spacing
+                            if (currentQuestion.choices != null &&
+                                currentQuestion.choices!.isNotEmpty)
+                              SizedBox(
+                                height: 200,
+                                width: double.infinity,
+                                child: Center(
+                                  child: PollStatsChart(
+                                    question: currentQuestion,
+                                    votes: votes,
+                                    chartColors: chartColors,
+                                  ),
+                                ),
+                              )
+                            else
+                              SizedBox(
+                                height: 350,
+                                width: double.infinity,
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.info_outline,
+                                        size: 64,
+                                        color: colorScheme.tertiary
+                                            .withOpacity(0.6),
+                                      ),
+                                      SizedBox(height: 16),
+                                      Text(
+                                        "Cette question n'a pas de choix de réponses.",
+                                        style: TextStyle(
+                                          color: colorScheme.onSurface,
+                                          fontSize: 18,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                            SizedBox(height: 24),
+
+                            // Legend
+                            if (currentQuestion.choices != null &&
+                                currentQuestion.choices!.isNotEmpty)
+                              Container(
+                                padding: EdgeInsets.all(16),
                                 decoration: BoxDecoration(
                                   color: colorScheme.primary.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "Question ${currentQuestionIndex + 1}/${poll.questions.length}",
+                                      "Réponses:",
                                       style: TextStyle(
                                         color: colorScheme.tertiary,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 16,
                                       ),
-                                      textAlign: TextAlign.center,
                                     ),
-                                    SizedBox(height: 8),
-                                    Text(
-                                      currentQuestion.text,
-                                      style: TextStyle(
-                                        color: colorScheme.onSurface,
-                                        fontSize: 18,
+                                    SizedBox(height: 12),
+                                    Wrap(
+                                      spacing: 20,
+                                      runSpacing: 12,
+                                      children: List.generate(
+                                        currentQuestion.choices!.length,
+                                        (i) {
+                                          // Make sure the votes list is long enough
+                                          final voteValue =
+                                              i < votes.length ? votes[i] : 0;
+                                          return _buildLegendItem(
+                                            context,
+                                            chartColors[i % chartColors.length],
+                                            currentQuestion.choices![i].text,
+                                            voteValue,
+                                            votes.fold(
+                                                0, (sum, count) => sum + count),
+                                          );
+                                        },
                                       ),
-                                      textAlign: TextAlign.center,
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
-
-                            // Next Question Button
-                            IconButton(
-                              onPressed: currentQuestionIndex <
-                                      poll.questions.length - 1
-                                  ? onNextQuestion
-                                  : null,
-                              icon: Icon(
-                                Icons.chevron_right,
-                                size: 28,
-                              ),
-                              color: currentQuestionIndex <
-                                      poll.questions.length - 1
-                                  ? colorScheme.tertiary
-                                  : colorScheme.onSurface.withOpacity(0.3),
-                              tooltip: 'Question suivante',
-                            ),
                           ],
                         ),
-                        SizedBox(height: 24),
-
-                        // Pie Chart
-                        if (currentQuestion.choices != null &&
-                            currentQuestion.choices!.isNotEmpty)
-                          Expanded(
-                            child: Center(
-                              child: Container(
-                                height: 350,
-                                width: 350,
-                                child: PollStatsChart(
-                                  question: currentQuestion,
-                                  votes: votes,
-                                  chartColors: chartColors,
-                                ),
-                              ),
-                            ),
-                          )
-                        else
-                          Expanded(
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.info_outline,
-                                    size: 64,
-                                    color:
-                                        colorScheme.tertiary.withOpacity(0.6),
-                                  ),
-                                  SizedBox(height: 16),
-                                  Text(
-                                    "Cette question n'a pas de choix de réponses.",
-                                    style: TextStyle(
-                                      color: colorScheme.onSurface,
-                                      fontSize: 18,
-                                      fontStyle: FontStyle.italic,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                        // Legend
-                        if (currentQuestion.choices != null &&
-                            currentQuestion.choices!.isNotEmpty)
-                          Container(
-                            margin: EdgeInsets.only(top: 16),
-                            padding: EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: colorScheme.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Réponses:",
-                                  style: TextStyle(
-                                    color: colorScheme.tertiary,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                SizedBox(height: 12),
-                                Wrap(
-                                  spacing: 20,
-                                  runSpacing: 12,
-                                  children: List.generate(
-                                    currentQuestion.choices!.length,
-                                    (i) {
-                                      // Make sure the votes list is long enough
-                                      final voteValue =
-                                          i < votes.length ? votes[i] : 0;
-                                      return _buildLegendItem(
-                                        context,
-                                        chartColors[i % chartColors.length],
-                                        currentQuestion.choices![i].text,
-                                        voteValue,
-                                        votes.fold(
-                                            0, (sum, count) => sum + count),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
+                      );
+                    }),
                   ),
                 ),
-              ),
+              )
             ],
           ),
         ),

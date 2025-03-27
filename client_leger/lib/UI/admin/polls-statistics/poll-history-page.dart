@@ -16,9 +16,7 @@ class AdminPollHistoryPage extends StatefulWidget {
 
 class _AdminPollHistoryPageState extends State<AdminPollHistoryPage> {
   final PollHistoryService _pollHistoryService = PollHistoryService();
-  List<PublishedPoll> _publishedPolls = [];
   PublishedPoll? _selectedPoll;
-  bool _isLoading = true;
   bool _isClearingHistory = false;
   bool _showPollDetails = false;
   int _currentQuestionIndex = 0;
@@ -26,16 +24,6 @@ class _AdminPollHistoryPageState extends State<AdminPollHistoryPage> {
   @override
   void initState() {
     super.initState();
-    _fetchPolls();
-  }
-
-  void _fetchPolls() {
-    _pollHistoryService.watchPublishedPolls().listen((polls) {
-      setState(() {
-        _publishedPolls = polls.where((poll) => poll.expired).toList();
-        _isLoading = false;
-      });
-    });
   }
 
   void _selectPoll(PublishedPoll poll) {
@@ -119,85 +107,95 @@ class _AdminPollHistoryPageState extends State<AdminPollHistoryPage> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [colorScheme.primary, colorScheme.secondary],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: Stack(
-        children: [
-          // Main Content
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 24.0),
-                child: AnimatedTitleWidget(
-                  title: "HISTORIQUE DES SONDAGES",
-                  fontSize: 42,
-                ),
+    return AnimatedBuilder(
+        animation: _pollHistoryService,
+        builder: (context, _) {
+          final expiredPolls = _pollHistoryService.expiredPolls;
+          final isLoading = _pollHistoryService.isLoading;
+
+          return Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [colorScheme.primary, colorScheme.secondary],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
-              SizedBox(height: 24),
-              Expanded(
-                child: Column(
+            ),
+            child: Stack(
+              children: [
+                // Main Content
+                Column(
                   children: [
-                    Expanded(
-                      child: _buildPollsListContent(colorScheme),
-                    ),
-                    SizedBox(height: 10),
-                    Center(
-                      child: ElevatedButton.icon(
-                        onPressed: _publishedPolls.isEmpty || _isClearingHistory
-                            ? null
-                            : _confirmDeleteHistory,
-                        icon: Icon(
-                          Icons.delete_outline,
-                          color: colorScheme.onPrimary,
-                        ),
-                        label: Text(
-                          "Supprimer l'historique",
-                          style: TextStyle(
-                            color: colorScheme.onPrimary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: colorScheme.primary,
-                          foregroundColor: colorScheme.onPrimary,
-                          disabledBackgroundColor:
-                              colorScheme.primary.withOpacity(0.5),
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 40, vertical: 14),
-                          side: BorderSide(
-                            color: colorScheme.tertiary,
-                            width: 2,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 24.0),
+                      child: AnimatedTitleWidget(
+                        title: "HISTORIQUE DES SONDAGES",
+                        fontSize: 42,
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 24),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: _buildPollsListContent(
+                                colorScheme, expiredPolls, isLoading),
+                          ),
+                          SizedBox(height: 10),
+                          Center(
+                            child: ElevatedButton.icon(
+                              onPressed:
+                                  expiredPolls.isEmpty || _isClearingHistory
+                                      ? null
+                                      : _confirmDeleteHistory,
+                              icon: Icon(
+                                Icons.delete_outline,
+                                color: colorScheme.onPrimary,
+                              ),
+                              label: Text(
+                                "Supprimer l'historique",
+                                style: TextStyle(
+                                  color: colorScheme.onPrimary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: colorScheme.primary,
+                                foregroundColor: colorScheme.onPrimary,
+                                disabledBackgroundColor:
+                                    colorScheme.primary.withOpacity(0.5),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 40, vertical: 14),
+                                side: BorderSide(
+                                  color: colorScheme.tertiary,
+                                  width: 2,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-              ),
-            ],
-          ),
 
-          // Popup Poll Details
-          if (_showPollDetails && _selectedPoll != null)
-            _buildPollDetailsPopup(colorScheme),
-        ],
-      ),
-    );
+                // Popup Poll Details
+                if (_showPollDetails && _selectedPoll != null)
+                  _buildPollDetailsPopup(colorScheme),
+              ],
+            ),
+          );
+        });
   }
 
-  Widget _buildPollsListContent(ColorScheme colorScheme) {
+  Widget _buildPollsListContent(ColorScheme colorScheme,
+      List<PublishedPoll> publishedPolls, bool isLoading) {
     return Card(
       margin: EdgeInsets.all(16),
       color: colorScheme.surface.withOpacity(0.9),
@@ -212,11 +210,11 @@ class _AdminPollHistoryPageState extends State<AdminPollHistoryPage> {
           children: [
             // List or Empty State
             Expanded(
-              child: _isLoading
+              child: isLoading
                   ? Center(child: CircularProgressIndicator())
-                  : _publishedPolls.isEmpty
+                  : publishedPolls.isEmpty
                       ? _buildEmptyState(colorScheme)
-                      : _buildPollsList(colorScheme),
+                      : _buildPollsList(colorScheme, publishedPolls),
             ),
           ],
         ),
@@ -256,13 +254,12 @@ class _AdminPollHistoryPageState extends State<AdminPollHistoryPage> {
     );
   }
 
-  // Changed to a vertical ListView instead of GridView
-  Widget _buildPollsList(ColorScheme colorScheme) {
+  Widget _buildPollsList(ColorScheme colorScheme, List<PublishedPoll> polls) {
     return ListView.separated(
-      itemCount: _publishedPolls.length,
+      itemCount: polls.length,
       separatorBuilder: (context, index) => SizedBox(height: 8),
       itemBuilder: (context, index) {
-        final poll = _publishedPolls[index];
+        final poll = polls[index];
 
         return Container(
           decoration: BoxDecoration(
@@ -288,7 +285,7 @@ class _AdminPollHistoryPageState extends State<AdminPollHistoryPage> {
                 overflow: TextOverflow.ellipsis,
               ),
               subtitle: Text(
-                "Date fin: ${formatDate(poll.endDate) ?? 'Non spécifiée'}",
+                "Date fin: ${formatDate(poll.endDate)}",
                 style: TextStyle(
                   color: colorScheme.onSurface.withOpacity(0.7),
                   fontSize: 14,
@@ -297,9 +294,8 @@ class _AdminPollHistoryPageState extends State<AdminPollHistoryPage> {
               trailing: ElevatedButton(
                 onPressed: () => _selectPoll(poll),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.secondary.withValues(alpha: 0.9),
-                  foregroundColor:
-                      colorScheme.onSecondary.withValues(alpha: 0.9),
+                  backgroundColor: colorScheme.secondary.withOpacity(0.9),
+                  foregroundColor: colorScheme.onSecondary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -314,42 +310,46 @@ class _AdminPollHistoryPageState extends State<AdminPollHistoryPage> {
     );
   }
 
-  // Replace the _buildPollDetailsPopup method in your AdminPollHistoryPage class
-
   Widget _buildPollDetailsPopup(ColorScheme colorScheme) {
+    // Check if keyboard is visible
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final isKeyboardVisible = keyboardHeight > 0;
+
+    // Dynamic height based on keyboard visibility
+    final containerHeight = isKeyboardVisible
+        ? MediaQuery.of(context).size.height * 0.5
+        : MediaQuery.of(context).size.height * 0.8;
+
     return Stack(
       children: [
-        // Dark background with dismiss
-        GestureDetector(
-          onTap: _closePollDetails,
-          child: Container(
-            color: Colors.black.withOpacity(0.7),
-            width: double.infinity,
-            height: double.infinity,
-          ),
+        // Dark overlay background
+        ModalBarrier(
+          color: Colors.black.withOpacity(0.7),
+          dismissible: true,
+          onDismiss: _closePollDetails,
         ),
 
-        // Poll details popup content
-        Center(
-          child: Material(
-            color: Colors.transparent,
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.8,
-              height: MediaQuery.of(context).size.height * 0.8,
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
+        // Dialog content
+        Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.zero,
+          child: Center(
+            child: Material(
+              color: colorScheme.surface,
+              elevation: 24,
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 15,
-                    offset: Offset(0, 5),
-                  ),
-                ],
+                side: BorderSide(
+                  color: colorScheme.tertiary.withOpacity(0.5),
+                  width: 2.0,
+                ),
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                height: containerHeight,
                 child: Stack(
+                  clipBehavior: Clip.none,
                   children: [
                     // Close Button
                     Positioned(

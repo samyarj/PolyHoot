@@ -100,7 +100,7 @@ class _PollStatsChartState extends State<PollStatsChart>
             centerSpaceRadius: 15,
             startDegreeOffset: -40,
           ),
-          swapAnimationDuration: Duration(milliseconds: 800),
+          duration: Duration(milliseconds: 800),
           swapAnimationCurve: Curves.easeInOutQuint,
         );
       },
@@ -120,7 +120,7 @@ class _PollStatsChartState extends State<PollStatsChart>
       (i) {
         final isTouched = i == _touchedIndex;
         final radius =
-            isTouched ? 110.0 * _animation.value : 100.0 * _animation.value;
+            isTouched ? 90.0 * _animation.value : 80.0 * _animation.value;
         final fontSize = isTouched ? 20.0 : 16.0;
         final fontWeight = isTouched ? FontWeight.bold : FontWeight.normal;
 

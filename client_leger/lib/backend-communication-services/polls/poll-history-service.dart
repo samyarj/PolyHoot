@@ -2,52 +2,107 @@ import 'dart:async';
 
 import 'package:client_leger/models/polls/published-poll-model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 
-class PollHistoryService {
+class PollHistoryService extends ChangeNotifier {
+  // Singleton pattern implementation
+  static final PollHistoryService _instance = PollHistoryService._internal();
+
+  factory PollHistoryService() {
+    return _instance;
+  }
+
+  PollHistoryService._internal() {
+    _initializeStream();
+  }
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String baseUrl =
-      "https://yourserver.com/api/published-polls"; // Replace with your server URL
 
-  // Stream for real-time updates
-  Stream<List<PublishedPoll>> watchPublishedPolls() {
-    return _firestore.collection('publishedPolls').snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) {
+  List<PublishedPoll> _publishedPolls = [];
+  bool _isLoading = true;
+  StreamSubscription<QuerySnapshot>? _subscription;
+
+  List<PublishedPoll> get allPublishedPolls => _publishedPolls;
+  List<PublishedPoll> get expiredPolls =>
+      _publishedPolls.where((poll) => poll.expired).toList();
+  bool get isLoading => _isLoading;
+  bool get hasExpiredPolls => expiredPolls.isNotEmpty;
+
+  void _initializeStream() {
+    _subscription?.cancel();
+
+    _isLoading = true;
+    notifyListeners();
+
+    _subscription = _firestore
+        .collection('publishedPolls')
+        .orderBy('publicationDate', descending: true)
+        .snapshots()
+        .listen((snapshot) {
+      _publishedPolls = snapshot.docs.map((doc) {
         Map<String, dynamic> data = doc.data();
         data['id'] = doc.id;
         return PublishedPoll.fromJson(data);
       }).toList();
+
+      _isLoading = false;
+      notifyListeners();
+    }, onError: (error) {
+      print("Error in poll history stream: $error");
+      _isLoading = false;
+      notifyListeners();
     });
   }
 
-  // Get a specific poll by ID
-  Future<PublishedPoll> getPublishedPollById(String id) async {
-    try {
-      DocumentSnapshot doc =
-          await _firestore.collection('publishedPolls').doc(id).get();
+  Stream<List<PublishedPoll>> watchPublishedPolls() {
+    final controller = StreamController<List<PublishedPoll>>();
 
-      if (doc.exists) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        data['id'] = doc.id;
-        return PublishedPoll.fromJson(data);
-      } else {
-        throw Exception("Poll not found");
-      }
-    } catch (e) {
-      throw Exception("Failed to get poll: $e");
+    if (!_isLoading) {
+      controller.add(_publishedPolls);
     }
+
+    void listener() {
+      if (!controller.isClosed) {
+        controller.add(_publishedPolls);
+      }
+    }
+
+    addListener(listener);
+
+    controller.onCancel = () {
+      removeListener(listener);
+      controller.close();
+    };
+
+    return controller.stream;
   }
 
-  // Delete all expired polls - HTTP request to backend
   Future<void> deleteAllExpiredPolls() async {
     try {
-      final response = await http.delete(Uri.parse('$baseUrl/delete'));
+      final QuerySnapshot querySnapshot = await _firestore
+          .collection('publishedPolls')
+          .where('expired', isEqualTo: true)
+          .get();
 
-      if (response.statusCode != 200) {
-        throw Exception("Failed to delete expired polls");
+      if (querySnapshot.docs.isEmpty) {
+        return;
       }
+
+      final WriteBatch batch = _firestore.batch();
+
+      for (final DocumentSnapshot doc in querySnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      await batch.commit();
     } catch (e) {
       throw Exception("Failed to delete expired polls: $e");
     }
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
   }
 }
