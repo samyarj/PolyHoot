@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
@@ -85,10 +86,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
   }
 
   void setupUserDocListener(String uid) {
-    // Cancel any existing subscription
     _userDocSubscription?.cancel();
 
-    // Listen to the user document
     _userDocSubscription = FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
@@ -128,7 +127,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
         isLoggedIn.value = true;
         WebSocketManager.instance.playerName = user.username;
         if (userCredential.user != null) {
-          listenToTokenChanges(); // it will call  connect socket
+          listenToTokenChanges();
           setupUserDocListener(userCredential.user!.uid);
         }
       } else {
