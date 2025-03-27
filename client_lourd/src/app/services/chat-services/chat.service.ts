@@ -55,7 +55,7 @@ export class ChatService implements OnDestroy {
                     author: user.username,
                     uid: user.uid,
                     avatar: user.avatarEquipped || 'https://res.cloudinary.com/dtu6fkkm9/image/upload/v1737478954/default-avatar_qcaycl.jpg',
-                    banner: user.borderEquipped,
+                    border: user.borderEquipped,
                 };
                 this.socketClientService.send(ChatEvents.RoomMessage, message);
             }

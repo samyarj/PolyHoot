@@ -98,7 +98,8 @@ class InGameChatService {
       message: inputMessage,
       author: getAuthor(),
       uid: _uid,
-      avatar: _avatar,
+      avatar: _avatar ??
+          'https://res.cloudinary.com/dtu6fkkm9/image/upload/v1737478954/default-avatar_qcaycl.jpg',
       border: _border,
     );
 
