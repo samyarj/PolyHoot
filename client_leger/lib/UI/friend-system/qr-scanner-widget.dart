@@ -28,12 +28,7 @@ class QRScannerScreen extends ConsumerStatefulWidget {
 
 class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
   final FriendService _friendService = FriendService();
-  final MobileScannerController _controller = MobileScannerController(
-    facing: CameraFacing.back,
-    formats: [BarcodeFormat.qrCode],
-    detectionSpeed: DetectionSpeed.normal,
-    detectionTimeoutMs: 1000,
-  );
+  final MobileScannerController _controller = MobileScannerController();
   bool _hasPermission = false;
   bool _isProcessing = false;
   bool _hasProcessedCode = false;
@@ -362,15 +357,6 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
                 }
               }
             },
-            fit: BoxFit.cover,
-            scanWindow: Rect.fromCenter(
-              center: Offset(
-                MediaQuery.of(context).size.width / 2,
-                MediaQuery.of(context).size.height / 2,
-              ),
-              width: 250,
-              height: 250,
-            ),
           ),
           // Overlay with scanning guide
           Center(

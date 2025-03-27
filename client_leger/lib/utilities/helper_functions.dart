@@ -112,3 +112,22 @@ ColorScheme getThemeColorScheme(AppTheme theme) {
       return AppThemes.darkTheme.colorScheme;
   }
 }
+
+String formatDate(String? dateString) {
+  if (dateString == null) return "Non spécifiée";
+
+  try {
+    // Parse the date
+    DateTime dateTime = DateTime.parse(dateString);
+
+    // Format date and time with "à" in French
+    return "${dateTime.year}-${_twoDigits(dateTime.month)}-${_twoDigits(dateTime.day)} à ${_twoDigits(dateTime.hour)}:${_twoDigits(dateTime.minute)}";
+  } catch (e) {
+    return dateString; // Fallback to original string if parsing fails
+  }
+}
+
+// Helper method to ensure two-digit formatting
+String _twoDigits(int n) {
+  return n.toString().padLeft(2, '0');
+}
