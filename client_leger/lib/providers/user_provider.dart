@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
+import 'package:client_leger/backend-communication-services/report/report_service.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/user.dart' as user_model;
 import 'package:client_leger/utilities/logger.dart';
@@ -24,6 +25,7 @@ ValueNotifier<bool> isLoggedIn = ValueNotifier<bool>(false);
 class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
   StreamSubscription<DocumentSnapshot>? _userDocSubscription;
   StreamSubscription<User?>? _tokenSubscription;
+  final ReportService _reportService = ReportService();
   String? currentToken;
 
   AuthNotifier() : super(const AsyncValue.loading()) {
@@ -98,6 +100,14 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
         final userData = docSnapshot.data() as Map<String, dynamic>;
         final user = user_model.User.fromJson(userData);
         state = AsyncValue.data(user);
+
+        if (user.nbReport != _reportService.nbReport.value ||
+            _reportService.nbReport.value == null) {
+          AppLogger.w(
+              "User report count changed: ${_reportService.nbReport.value} -> ${user.nbReport}");
+          _reportService.nbReport.value = user.nbReport;
+        }
+
         isLoggedIn.value = true;
         WebSocketManager.instance.playerName = user.username;
         AppLogger.d("User data updated in real-time: ${user.username}");
