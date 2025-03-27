@@ -50,9 +50,9 @@ export class ResultsPageComponent implements OnInit, OnDestroy {
             if (this.resultsService.roomId) {
                 this.resultsService.disconnectUser();
             }
-            this.returnHome();
-            this.resultsService.clearResultsSockets();
+            // this.returnHome();
         }
+        this.resultsService.clearResultsSockets();
     }
     private onUnload() {
         localStorage.removeItem('navigatedFromUnload');

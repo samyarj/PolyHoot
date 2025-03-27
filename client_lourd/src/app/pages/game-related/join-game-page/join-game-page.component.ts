@@ -44,6 +44,9 @@ export class JoinGamePageComponent implements OnDestroy, OnInit {
         return this.joinGameService.wrongGameId;
     }
 
+    get isJoiningGame() {
+        return this.joinGameService.isJoiningGame;
+    }
     ngOnInit() {
         this.lobbysSubscription = this.joinGameService.lobbysObservable.subscribe(this.lobbyObserver);
         this.joinGameService.getAllLobbys();

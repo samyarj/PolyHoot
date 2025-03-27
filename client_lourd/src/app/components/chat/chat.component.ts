@@ -1,4 +1,4 @@
-import { AfterViewChecked, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, Input, OnDestroy, ViewChild } from '@angular/core';
 import { MAX_CHAR } from '@app/constants/constants';
 import { AuthService } from '@app/services/auth/auth.service';
 import { ChatEvents } from '@app/services/chat-services/chat-events';
@@ -13,7 +13,7 @@ import { Observer, Subscription } from 'rxjs';
     templateUrl: './chat.component.html',
     styleUrls: ['./chat.component.scss'],
 })
-export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
+export class ChatComponent implements OnDestroy, AfterViewChecked {
     @ViewChild('previousMessages') private previousMessagesContainer: ElementRef;
     @Input() parentAction!: () => void; // Function passed from the parent
 
@@ -42,17 +42,7 @@ export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
         private messageHandlerService: MessageHandlerService,
         private authService: AuthService,
         private toastr: ToastrService,
-    ) {}
-
-    get user() {
-        return this.authService.user$;
-    }
-
-    get name() {
-        return this.chatService.getUserName();
-    }
-
-    ngOnInit(): void {
+    ) {
         this.messagesSubscription = this.chatService.allChatMessagesObservable.subscribe(this.messagesObserver);
         this.chatEventsSubscription = this.chatService.chatEvents$.subscribe((event) => {
             if (event.event === ChatEvents.RoomLeft) {
@@ -60,10 +50,16 @@ export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
             }
         });
 
-        if (!this.chatService.isInitialized) {
-            this.chatService.configureChatSocketFeatures();
-            this.chatService.getHistory();
-        } else this.chatService.retrieveRoomIdChat();
+        this.chatService.configureChatSocketFeatures();
+        this.chatService.retrieveRoomIdChat();
+    }
+
+    get user() {
+        return this.authService.user$;
+    }
+
+    get name() {
+        return this.chatService.getUserName();
     }
 
     ngAfterViewChecked() {

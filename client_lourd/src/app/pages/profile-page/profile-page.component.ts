@@ -36,6 +36,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     selectedFile: File | null = null;
     defaultAvatars: string[] = [];
     selectedAvatar: string | null = null;
+    isEquippingAvatar: boolean = false;
     profileForm: FormGroup;
     currentUsername: string = '';
     isCheckingUsername: boolean = false;
@@ -207,25 +208,30 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     }
 
     onUpload(): void {
-        if (!this.selectedFile) {
-            this.toastr.warning('Veuillez sélectionner une image à téléverser.');
-            return;
-        }
+        if (!this.isEquippingAvatar) {
+            this.isEquippingAvatar = true;
+            if (!this.selectedFile) {
+                this.toastr.warning('Veuillez sélectionner une image à téléverser.');
+                return;
+            }
 
-        this.uploadImgService
-            .uploadImage(this.selectedFile, 'avatar')
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: () => {
-                    this.toastr.success('Image téléversée avec succès');
-                    this.selectedFile = null;
-                    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-                    if (fileInput) fileInput.value = '';
-                },
-                error: (error) => {
-                    this.toastr.error(`Erreur : ${error.message}`);
-                },
-            });
+            this.uploadImgService
+                .uploadImage(this.selectedFile, 'avatar')
+                .pipe(takeUntil(this.destroy$))
+                .subscribe({
+                    next: () => {
+                        this.toastr.success('Image téléversée avec succès');
+                        this.selectedFile = null;
+                        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+                        if (fileInput) fileInput.value = '';
+                        this.isEquippingAvatar = false;
+                    },
+                    error: (error) => {
+                        this.toastr.error(`Erreur : ${error.message}`);
+                        this.isEquippingAvatar = false;
+                    },
+                });
+        }
     }
 
     selectAvatar(avatarUrl: string) {
@@ -234,7 +240,8 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     }
 
     equipSelectedAvatar() {
-        if (this.selectedAvatar) {
+        if (this.selectedAvatar && !this.isEquippingAvatar) {
+            this.isEquippingAvatar = true;
             this.uploadImgService
                 .updateSelectedDefaultAvatar(this.selectedAvatar)
                 .pipe(takeUntil(this.destroy$))
@@ -242,10 +249,12 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
                     next: () => {
                         this.toastr.success('Avatar mis à jour avec succès !');
                         this.selectedAvatar = null;
+                        this.isEquippingAvatar = false;
                     },
                     error: (error) => {
                         this.toastr.error(`Erreur lors de l'équipement de l'avatar : ${error.message}`);
                         this.selectedAvatar = null;
+                        this.isEquippingAvatar = false;
                     },
                 });
         }

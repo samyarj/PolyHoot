@@ -54,9 +54,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                 this.historyPublishedPollService.watchPublishedPolls(),
                 this.watchUser(this.user.uid),
             ]).subscribe(([publishedPolls, userData]) => {
-                console.log('publishedPolls', publishedPolls);
-                console.log('userData', userData.pollsAnswered);
-
                 if (this.user?.role === 'player') {
                     this.publishedPolls = publishedPolls.filter(
                         (poll) => !poll.expired && poll.id && !userData.pollsAnswered?.includes(poll.id), // Utilisation directe de userData
@@ -157,12 +154,10 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     // Fonction pour surveiller les changements d'un utilisateur
     private watchUser(uid: string): Observable<User> {
         return new Observable((subscriber) => {
-            console.log('uid', uid);
             const userDoc = doc(this.firestore, 'users', uid);
             const unsubscribe = onSnapshot(userDoc, (docSnapshot) => {
                 if (docSnapshot.exists()) {
                     const data = docSnapshot.data() as User;
-                    console.log('Data: ', data);
                     subscriber.next({ ...data, uid: docSnapshot.id });
                 } else {
                     subscriber.error(new Error("L'utilisateur n'existe pas."));

@@ -22,6 +22,7 @@
                                     (click)="sortData('name', 'asc')"
                                     [ngClass]="{ 'active-sort': isSorted('name', 'asc') }"
                                     matTooltip="tri en ordre ascendant"
+                                    matTooltipClass="custom-tooltip"
                                 >
                                     <i class="fa-sharp fa-solid fa-arrow-up"></i>
                                 </button>
@@ -30,6 +31,7 @@
                                     (click)="sortData('name', 'desc')"
                                     [ngClass]="{ 'active-sort': isSorted('name', 'desc') }"
                                     matTooltip="tri en ordre descendant"
+                                    matTooltipClass="custom-tooltip"
                                 >
                                     <i class="fa-solid fa-arrow-down"></i>
                                 </button>
@@ -42,6 +44,7 @@
                                     mat-icon-button
                                     (click)="sortData('startingDate', 'asc')"
                                     matTooltip="tri en ordre ascendant"
+                                    matTooltipClass="custom-tooltip"
                                     [ngClass]="{ 'active-sort': isSorted('startingDate', 'asc') }"
                                 >
                                     <i class="fa-sharp fa-solid fa-arrow-up"></i>
@@ -51,6 +54,7 @@
                                     (click)="sortData('startingDate', 'desc')"
                                     [ngClass]="{ 'active-sort': isSorted('startingDate', 'desc') }"
                                     matTooltip="tri en ordre descendant"
+                                    matTooltipClass="custom-tooltip"
                                 >
                                     <i class="fa-solid fa-arrow-down"></i>
                                 </button>

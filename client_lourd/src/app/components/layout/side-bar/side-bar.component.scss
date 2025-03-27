@@ -382,6 +382,7 @@ img.global-channels-icon {
         justify-content: center;
         > * {
             width: 50%;
+            text-align: center;
         }
     }
 }
@@ -688,7 +689,6 @@ img.global-channels-icon {
     bottom: 0;
     background-color: var(--primary-color);
     z-index: 1000;
-    padding: 1rem;
 
     .search-friend-content {
         display: flex;
@@ -699,6 +699,8 @@ img.global-channels-icon {
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            margin: 15px;
+            margin-bottom: 0px;
 
             input {
                 flex: 1;
@@ -766,7 +768,6 @@ img.global-channels-icon {
     bottom: 0;
     background-color: var(--primary-color);
     z-index: 1000;
-    padding: 1rem;
 
     .friend-requests-content {
         display: flex;
@@ -777,6 +778,7 @@ img.global-channels-icon {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin: 15px;
             margin-bottom: 1rem;
 
             h3 {
@@ -809,9 +811,22 @@ img.global-channels-icon {
         }
 
         .friend-requests-list {
-            max-height: 300px;
+            height: calc(100vh - 150px);
+            padding: 20px;
             overflow-y: auto;
+            &::-webkit-scrollbar {
+                width: 6px;
+            }
 
+            &::-webkit-scrollbar-thumb {
+                background: var(--active-bg);
+                border-radius: 12px;
+            }
+
+            &::-webkit-scrollbar-track {
+                background: var(--nav-bg);
+                border-radius: 12px;
+            }
             .no-requests {
                 text-align: center;
                 color: var(--tertiary-color);
@@ -833,7 +848,7 @@ img.global-channels-icon {
                 .friend-request-avatar {
                     width: 48px;
                     height: 48px;
-                    margin-right: 12px;
+                    margin-right: 24px;
                 }
 
                 span {
@@ -1024,11 +1039,27 @@ img.global-channels-icon {
 }
 
 .search-results {
-    margin-top: 10px;
-    max-height: 700px;
+    position: relative;
+    height: calc(100vh - 150px);
+    padding: 20px;
     overflow-y: auto;
+    overflow-x: visible !important;
     border-radius: 4px;
     background: var(--primary-color);
+
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--active-bg);
+        border-radius: 12px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: var(--nav-bg);
+        border-radius: 12px;
+    }
 }
 
 .search-result-item {
@@ -1036,9 +1067,11 @@ img.global-channels-icon {
     align-items: center;
     justify-content: space-between;
     padding: 10px;
-    border-bottom: 2px solid var(--tertiary-color);
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    border-bottom: 1px solid var(--tertiary-color);
     &:hover {
-        background-color: var(--secondary-color);
+        // background-color: var(--secondary-color);
     }
     &:last-child {
         border-bottom: none;
@@ -1047,7 +1080,7 @@ img.global-channels-icon {
     .search-result-avatar {
         width: 48px;
         height: 48px;
-        margin-right: 12px;
+        margin-right: 24px;
     }
 
     .username {
@@ -1056,21 +1089,22 @@ img.global-channels-icon {
         margin-right: 10px;
     }
 
-    .send-request-btn {
-        background: none;
+    button {
+        width: 40px;
+        aspect-ratio: 1 / 1;
+        background: var(--primary-color);
         border: none;
         color: var(--tertiary-color);
         cursor: pointer;
-        padding: 5px 10px;
-        border-radius: 4px;
+        border-radius: 500px;
         transition: all 0.2s ease;
 
         &:hover {
-            background: rgba(76, 175, 80, 0.1);
+            background: var(--tertiary-color);
+            color: var(--primary-color);
         }
 
         i {
-            color: var(--tertiary-color);
             font-size: 1.1em;
         }
     }

@@ -15,7 +15,12 @@
                 }"
             ></i>
             <span class="truncate-text question-title">{{ question.text }}</span>
-            <i matTooltip="Ajouter au jeu" (click)="addQuestionToQuiz(question)" class="fas fa-plus-circle add-icon"></i>
+            <i
+                matTooltip="Ajouter au jeu"
+                matTooltipClass="custom-tooltip"
+                (click)="addQuestionToQuiz(question)"
+                class="fas fa-plus-circle add-icon"
+            ></i>
         </li>
     </ul>
 </div>

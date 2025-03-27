@@ -35,6 +35,7 @@ export class ResultsService {
     }
 
     handleResultsSockets() {
+        console.log(this.areSocketsInitialized);
         if (!this.areSocketsInitialized) {
             this.socketHandlerService.on(GameEvents.SendResults, (data: PlayerData[]) => {
                 this.playerList = data;

@@ -21,11 +21,11 @@ export class JoinGameService {
     lobbysSource: Subject<Lobby[]>;
     lobbysObservable: Observable<Lobby[]>;
     user$: Observable<User | null>;
+    isJoiningGame: boolean = false;
     private areSocketsInitialized: boolean = false;
     private username: string;
     private socketService: SocketClientService;
     private hasJoinedGame: boolean = false; // Add this variable
-
     constructor(
         private router: Router,
         private authService: AuthService,
@@ -43,7 +43,10 @@ export class JoinGameService {
     }
 
     validGameId(gameId: string) {
-        this.socketService.send(JoinEvents.ValidateGameId, gameId);
+        if (!this.isJoiningGame) {
+            this.isJoiningGame = true;
+            this.socketService.send(JoinEvents.ValidateGameId, gameId);
+        }
     }
 
     redirectToPage(page: string) {
@@ -54,6 +57,7 @@ export class JoinGameService {
         this.popUpMessage = '';
         this.canAccessGame = false;
         this.wrongGameId = false;
+        this.isJoiningGame = false;
     }
 
     getAllLobbys() {
@@ -139,6 +143,7 @@ export class JoinGameService {
         this.socketService.on(JoinErrors.InvalidId, () => {
             this.canAccessGame = false;
             this.popUpMessage = "Le code d'accès est invalide. Essayez à nouveau.";
+            this.isJoiningGame = false;
             this.showPopUp();
         });
     }
@@ -152,6 +157,7 @@ export class JoinGameService {
             this.canAccessGame = false;
             this.popUpMessage = "La partie est verrouillée. Veuillez demander l'accès à l'organisateur ou essayez un différent code.";
             this.showPopUp();
+            this.isJoiningGame = false;
         });
     }
 
@@ -166,6 +172,7 @@ export class JoinGameService {
             this.socketService.isOrganizer = false;
             this.hasJoinedGame = true; // Set to true when join game is successful
             this.redirectToPage('/waiting');
+            this.isJoiningGame = false;
         });
     }
 
@@ -188,6 +195,7 @@ export class JoinGameService {
         this.socketService.on(JoinErrors.Generic, () => {
             this.popUpMessage = 'Une erreur fait en sorte que vous ne pouvez pas joindre la partie';
             this.showPopUp();
+            this.isJoiningGame = false;
         });
     }
 
