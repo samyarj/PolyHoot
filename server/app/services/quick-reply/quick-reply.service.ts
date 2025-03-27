@@ -92,6 +92,9 @@ ${message}`;
                 max_completion_tokens: 1024,
                 top_p: 1,
                 stream: false,
+                response_format: {
+                    type: 'json_object',
+                },
                 stop: null,
             });
 
