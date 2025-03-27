@@ -4,5 +4,5 @@ export interface ChatMessage {
     date?: Date;
     uid?: string;
     avatar?: string;
-    banner?: string;
+    border?: string;
 }

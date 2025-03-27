@@ -24,7 +24,8 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
   @override
   void initState() {
     final user = ref.read(userProvider).value!;
-    _inGameChatManager.setUserInfosAndInitialize(user.username, user.uid);
+    _inGameChatManager.setUserInfosAndInitialize(
+        user.username, user.uid, user.avatarEquipped, user.borderEquipped);
     super.initState();
   }
 
