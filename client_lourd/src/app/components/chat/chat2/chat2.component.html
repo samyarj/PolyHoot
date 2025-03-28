@@ -21,7 +21,7 @@
                 <app-avatar-banner [avatarUrl]="chatmessage.avatar" [bannerUrl]="chatmessage.banner" class="chat-avatar"> </app-avatar-banner>
                 <span class="chat-username">{{ chatmessage.username }}</span>
                 <div
-                    *ngIf="(user | async)?.uid !== chatmessage.uid"
+                    *ngIf="(user | async)?.uid !== chatmessage.uid && !chatmessage.isAdmin"
                     class="report-button"
                     (click)="reportUser(chatmessage.uid)"
                     matTooltip="Signaler"
@@ -29,6 +29,14 @@
                 >
                     <i class="fa-solid fa-triangle-exclamation"></i>
                 </div>
+                <div
+                *ngIf="chatmessage.isAdmin"
+                class="report-button"
+                matTooltip="Administrateur"
+                matTooltipClass="custom-tooltip"
+            >
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
             </div>
             <div class="message">{{ chatmessage.message }}</div>
             <div class="date-container">

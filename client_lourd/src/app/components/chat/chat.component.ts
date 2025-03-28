@@ -108,7 +108,7 @@ export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
                             break;
                         }
                         case false: {
-                            this.toastr.info('Vous avez déjà signalé cet utilisateur.');
+                            this.toastr.info('Vous avez déjà signalé ce joueur.');
                             break;
                         }
                         case null: {
