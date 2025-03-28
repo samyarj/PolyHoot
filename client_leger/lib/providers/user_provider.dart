@@ -182,6 +182,9 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
             duration: const Duration(seconds: 5),
           );
         });
+
+        _reportService.isBanned = true;
+
         return;
       }
 
@@ -346,6 +349,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       state = const AsyncValue.data(null);
       WebSocketManager.instance.disconnectFromSocket();
       isLoggedIn.value = false;
+      _reportService.resetParam();
     } catch (e, stack) {
       AppLogger.e("Logout error: $e");
 
@@ -359,6 +363,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       state = const AsyncValue.data(null);
       WebSocketManager.instance.disconnectFromSocket();
       isLoggedIn.value = false;
+      _reportService.resetParam();
 
       throw Exception(getCustomError(e));
     }

@@ -229,7 +229,9 @@ final GoRouter router = GoRouter(
             await _reportService.getReportState(currentUserState.value?.uid);
         if (reportState != null && reportState.isBanned) {
           _reportService.banInfo(reportState.message, context);
-          containerRef.read(user_provider.userProvider.notifier).logout();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            containerRef.read(user_provider.userProvider.notifier).logout();
+          });
         }
       }
 

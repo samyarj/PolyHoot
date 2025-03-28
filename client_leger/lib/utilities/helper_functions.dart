@@ -11,7 +11,11 @@ void showToast(
 }) {
   toastification.show(
     context: context,
-    title: Text(message),
+    title: Text(
+      message,
+      softWrap: true,
+      overflow: TextOverflow.visible,
+    ),
     type: type,
     autoCloseDuration: duration,
     alignment: Alignment.topCenter,
