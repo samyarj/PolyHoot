@@ -9,6 +9,7 @@ import 'package:client_leger/providers/user_provider.dart';
 import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -57,13 +58,17 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
         }
       }, onError: (error) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          showErrorDialog(context, getCustomError(error));
+          if (FirebaseAuth.instance.currentUser != null) {
+            showErrorDialog(context, getCustomError(error));
+          }
         });
       });
     } catch (e) {
       // if the exception is not thrown in the stream
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        showErrorDialog(context, e.toString());
+        if (FirebaseAuth.instance.currentUser != null) {
+          showErrorDialog(context, e.toString());
+        }
       });
     }
   }
@@ -83,7 +88,9 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
         }
       } catch (e) {
         if (!mounted) return;
-        showErrorDialog(context, e.toString());
+        if (FirebaseAuth.instance.currentUser != null) {
+          showErrorDialog(context, e.toString());
+        }
       }
     }
   }
@@ -103,7 +110,9 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
             widget.channel, _textController.text);
       } catch (e) {
         if (!mounted) return;
-        showErrorDialog(context, e.toString());
+        if (FirebaseAuth.instance.currentUser != null) {
+          showErrorDialog(context, e.toString());
+        }
       }
     }
     _textController.clear();
