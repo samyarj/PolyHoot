@@ -5,17 +5,21 @@ import 'package:toastification/toastification.dart';
 
 void showToast(
   BuildContext context,
-  String message, {
+  String title, {
   ToastificationType type = ToastificationType.info,
   Duration duration = const Duration(seconds: 3),
+  String? description,
 }) {
   toastification.show(
     context: context,
     title: Text(
-      message,
-      softWrap: true,
-      overflow: TextOverflow.visible,
+      title,
+      style: TextStyle(fontSize: 14),
     ),
+    description: description == null
+        ? null
+        : Text(description, style: TextStyle(fontSize: 14)),
+    // pour les longs textes on met dans description car le titre est limité
     type: type,
     autoCloseDuration: duration,
     alignment: Alignment.topCenter,

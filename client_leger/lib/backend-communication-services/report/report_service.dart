@@ -28,10 +28,12 @@ class ReportService {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showToast(
           context,
-          "Attention à votre comportement, plusieurs personnes vous ont signalé. Vous serez banni si vous continuez.",
+          "Attention à votre comportement !",
           type: ToastificationType.warning,
+          description:
+              "Plusieurs personnes vous ont signalé. Vous serez banni si vous continuez.",
           duration: const Duration(
-            seconds: 5,
+            seconds: 6,
           ),
         );
       });
