@@ -7,6 +7,7 @@ import { filter } from 'rxjs';
 })
 export class HeaderNavigationService {
     isGameRelatedRoute = false;
+    isOnResultsPage = false;
     private readonly gameRoutes = ['/game', '/waiting', '/organizer'];
 
     constructor(private router: Router) {
@@ -17,6 +18,7 @@ export class HeaderNavigationService {
             .subscribe(() => {
                 const currentUrl = this.router.url;
                 this.isGameRelatedRoute = this.gameRoutes.includes(currentUrl);
+                this.isOnResultsPage = currentUrl === '/results';
             });
     }
 }

@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { QrCodePopInComponent } from '@app/components/general-elements/qr-code-pop-in/qr-code-pop-in.component';
 import { DisconnectEvents, GameEvents, JoinEvents, TimerEvents } from '@app/constants/enum-class';
 import { AuthService } from '@app/services/auth/auth.service';
 import { Subject } from 'rxjs';
@@ -26,9 +28,19 @@ export class WaitingPageService {
     timerEnd$ = this.timerEndSource.asObservable();
 
     isPlayersListEmpty: boolean = true;
-    constructor(private authService: AuthService) {
-        this.handleUserSockets();
-        this.handleGameSockets();
+    playerNameStr: string = '';
+
+    private areSocketsInitialized: boolean = false;
+    constructor(
+        private authService: AuthService,
+        private dialog: MatDialog,
+    ) {
+        this.authService.user$.subscribe({
+            next: (user) => {
+                if (user && user.username) this.playerNameStr = user.username;
+                else this.playerNameStr = '';
+            },
+        });
     }
 
     get socketService() {
@@ -77,11 +89,48 @@ export class WaitingPageService {
         this.socketService.send(GameEvents.StartGameCountdown, time);
     }
 
+    openQrCode() {
+        this.socketService.send(JoinEvents.TitleRequest, (title: string) => {
+            this.gameTitle = title;
+            this.dialog.open(QrCodePopInComponent, {
+                width: '40vw',
+                backdropClass: 'quiz-info-popup',
+                panelClass: 'custom-container',
+                data: {
+                    type: 'join-game',
+                    roomId: this.roomId,
+                    gameName: this.playerNameStr === '' ? "Salle d'attente" : `Salle de ${this.playerNameStr}`,
+                },
+            });
+        });
+    }
+
+    setupSockets() {
+        if (!this.areSocketsInitialized) {
+            this.handleUserSockets();
+            this.handleGameSockets();
+            this.areSocketsInitialized = true;
+        }
+    }
+
+    clearSockets() {
+        this.removeUserSockets();
+        this.removeGameSockets();
+        this.areSocketsInitialized = false;
+    }
+
     private handleUserSockets() {
         this.handlePlayerLeft();
         this.handleJoinGameSuccess();
         this.handleBanPlayer();
         this.handleOrganizerDisconnect();
+    }
+
+    private removeUserSockets() {
+        this.removePlayerLeft();
+        this.removeJoinGameSuccess();
+        this.removeBanPlayer();
+        this.removeOrganizerDisconnect();
     }
 
     private handleGameSockets() {
@@ -91,17 +140,27 @@ export class WaitingPageService {
         this.handleGameTitle();
     }
 
+    private removeGameSockets() {
+        this.removeToggleGameLock();
+        this.removeCountdownTimerValue();
+        this.removeCountdownEnd();
+        this.removeGameTitle();
+    }
+
     private handlePlayerLeft() {
-        this.socketService.on<{
-            playersInfo: {
+        this.socketService.on<
+            {
                 name: string;
                 avatar: string;
                 banner: string;
-            }[];
-            roomId: string;
-        }>(GameEvents.PlayerLeft, ({ playersInfo }) => {
+            }[]
+        >(GameEvents.PlayerLeft, (playersInfo) => {
             this.players = playersInfo;
         });
+    }
+
+    private removePlayerLeft() {
+        this.socketService.socket.off(GameEvents.PlayerLeft);
     }
 
     private handleJoinGameSuccess() {
@@ -112,10 +171,13 @@ export class WaitingPageService {
                 banner: string;
             }[]
         >(JoinEvents.JoinSuccess, (playersInfo) => {
-            console.log(playersInfo);
             this.players = playersInfo;
             this.isPlayersListEmpty = false;
         });
+    }
+
+    private removeJoinGameSuccess() {
+        this.socketService.socket.off(JoinEvents.JoinSuccess);
     }
 
     private handleBanPlayer() {
@@ -125,6 +187,10 @@ export class WaitingPageService {
         });
     }
 
+    private removeBanPlayer() {
+        this.socketService.socket.off(GameEvents.PlayerBanned);
+    }
+
     private handleOrganizerDisconnect() {
         this.socketService.on(DisconnectEvents.OrganizerHasLeft, () => {
             this.organizorDisconnectSource.next(true);
@@ -132,16 +198,28 @@ export class WaitingPageService {
         });
     }
 
+    private removeOrganizerDisconnect() {
+        this.socketService.socket.off(DisconnectEvents.OrganizerHasLeft);
+    }
+
     private handleToggleGameLock() {
-        this.socketService.on<{ isLocked: boolean; roomId: string }>(GameEvents.AlertLockToggled, ({ isLocked }) => {
+        this.socketService.on<boolean>(GameEvents.AlertLockToggled, (isLocked) => {
             this.gameLocked = isLocked;
         });
+    }
+
+    private removeToggleGameLock() {
+        this.socketService.socket.off(GameEvents.AlertLockToggled);
     }
 
     private handleCountdownTimerValue() {
         this.socketService.on(TimerEvents.GameCountdownValue, (time: number) => {
             this.time = time;
         });
+    }
+
+    private removeCountdownTimerValue() {
+        this.socketService.socket.off(TimerEvents.GameCountdownValue);
     }
 
     private handleCountdownEnd() {
@@ -152,10 +230,18 @@ export class WaitingPageService {
         });
     }
 
+    private removeCountdownEnd() {
+        this.socketService.socket.off(TimerEvents.GameCountdownEnd);
+    }
+
     private handleGameTitle() {
         this.socketService.on(GameEvents.Title, (title: string) => {
             this.gameTitle = title;
         });
+    }
+
+    private removeGameTitle() {
+        this.socketService.socket.off(GameEvents.Title);
     }
 
     private resetAttributes() {

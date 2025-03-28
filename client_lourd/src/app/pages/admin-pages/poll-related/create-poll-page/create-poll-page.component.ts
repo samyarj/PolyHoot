@@ -148,7 +148,6 @@ export class CreatePollPageComponent implements OnDestroy {
                     .updatePoll(this.poll.id, this.poll)
                     .pipe(
                         tap(() => {
-                            console.log('✅ Sondage modifié, maintenant on redirige...');
                             this.emptyPollAndRedirectCallback();
                         }),
                     )
@@ -159,7 +158,6 @@ export class CreatePollPageComponent implements OnDestroy {
                 .createPoll(this.poll)
                 .pipe(
                     tap(() => {
-                        console.log('✅ Sondage créé, maintenant on redirige...');
                         this.emptyPollAndRedirectCallback();
                     }),
                 )

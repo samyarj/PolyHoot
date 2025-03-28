@@ -6,6 +6,9 @@ export const environment = {
     production: false,
     serverUrl: 'http://localhost:3000/api',
     serverUrlSocket: 'http://localhost:3000',
+    // production: true,
+    // serverUrl: 'http://ec2-15-223-113-26.ca-central-1.compute.amazonaws.com:3000/api',
+    // serverUrlSocket: 'ws://ec2-15-223-113-26.ca-central-1.compute.amazonaws.com:3000',
     firebase: {
         apiKey: 'AIzaSyC_qjB-wOAY_C_hFhK51S-_wJHvh9uilDE',
         authDomain: 'polyhoot.firebaseapp.com',

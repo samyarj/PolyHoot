@@ -86,6 +86,7 @@
                                             *ngIf="question.choices && question.choices.length > 2"
                                             (click)="deleteAnswer(i)"
                                             matTooltip="Supprimer"
+                                            matTooltipClass="custom-tooltip"
                                         >
                                             <i class="fas fa-trash"></i>
                                         </button>
@@ -103,7 +104,7 @@
                             *ngIf="question.choices && question.choices.length < 4"
                             (click)="addAnswer()"
                         >
-                            <i matTooltip="Ajouter un choix de réponse" class="fa-solid fa-plus"></i>
+                            <i matTooltip="Ajouter un choix de réponse" class="fa-solid fa-plus" matTooltipClass="custom-tooltip"></i>
                         </button>
                         <div *ngIf="!validUniqueChoiceTexts()" class="text-danger">*Les choix de réponse doivent être uniques</div>
                         <div *ngIf="!questionForm.valid || !areQuestionChoicesTextValid()" class="text-danger">*Tous les champs sont requis.</div>
@@ -129,14 +130,11 @@
                     >
                         <div class="question-title truncate-text">{{ i + 1 }}. {{ question.text }}</div>
                         <span class="action-icons">
-                            <i class="fas fa-pencil-alt" (click)="editQuestion(i)" matTooltip="Modifier"></i>
-                            <i class="fas fa-trash-alt" (click)="deleteQuestion(i)" matTooltip="Supprimer"></i>
+                            <i class="fas fa-pencil-alt" (click)="editQuestion(i)" matTooltip="Modifier" matTooltipClass="custom-tooltip"></i>
+                            <i class="fas fa-trash-alt" (click)="deleteQuestion(i)" matTooltip="Supprimer" matTooltipClass="custom-tooltip"></i>
                         </span>
                     </li>
                 </ul>
-                <div *ngIf="poll.questions.length > 0" class="custom-button-medium add-question-icon">
-                    <i class="fas fa-plus-circle" (click)="addQuestion()"></i>
-                </div>
             </div>
         </div>
         <div class="submit-poll-section">

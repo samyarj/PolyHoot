@@ -66,7 +66,7 @@
                                     class="search-result-avatar"
                                 ></app-avatar-banner>
                                 <span class="username">{{ user.username }}</span>
-                                <button class="send-request-btn" (click)="sendFriendRequest(user.id, user.username)">
+                                <button (click)="sendFriendRequest(user.id, user.username)">
                                     <i class="fa-solid fa-user-plus"></i>
                                 </button>
                             </div>
@@ -164,7 +164,7 @@
                     <i class="fa-solid fa-globe"></i>
                 </a>
             </li>
-            <li class="nav-item" *ngIf="isOnGamePage">
+            <li class="nav-item" *ngIf="isOnGamePage || isOnResultsPage">
                 <a class="nav-link" data-bs-toggle="tab" href="#tab2" title="Clavardage de partie" (click)="setActiveTab(2)">
                     <i class="fa-solid fa-gamepad"></i>
                 </a>
@@ -197,7 +197,7 @@
                     ></app-chat2>
                 </div>
             </div>
-            <div class="tab-pane fade" id="tab2" *ngIf="isOnGamePage">
+            <div class="tab-pane fade" id="tab2" *ngIf="isOnGamePage || isOnResultsPage">
                 <h2>Clavardage de partie</h2>
                 <div class="app-chat2">
                     <app-chat [parentAction]="getBoundHandleChildAction()"></app-chat>
@@ -235,13 +235,21 @@
                             <div *ngIf="filteredJoinedChannels().length === 0" class="no-channels-message">
                                 <p>Vous n'avez rejoint aucun canal. Veuillez en rejoindre un.</p>
                             </div>
-                            <div *ngFor="let channel of filteredJoinedChannels()" class="my-channels">
-                                <div (click)="selectChannel(channel)">{{ channel }}</div>
+                            <div *ngFor="let channel of filteredJoinedChannels()" (click)="selectChannel(channel)" class="my-channels">
+                                <div>{{ channel }}</div>
                                 <div class="channel-buttons">
-                                    <button (click)="quitChannel(channel)" class="leave-channel-button">
+                                    <button
+                                        [disabled]="this.isWorkingWithChannel"
+                                        (click)="quitChannel(channel, $event)"
+                                        class="leave-channel-button"
+                                    >
                                         <i class="fa-solid fa-right-from-bracket"></i>
                                     </button>
-                                    <button (click)="deleteChannel(channel)" class="delete-channel-button">
+                                    <button
+                                        [disabled]="this.isWorkingWithChannel"
+                                        (click)="deleteChannel(channel, $event)"
+                                        class="delete-channel-button"
+                                    >
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
@@ -256,9 +264,13 @@
                                 <p>Aucun canal n'a été créé.</p>
                                 <p>Veuillez en créer un pour commencer à discuter.</p>
                             </div>
-                            <div *ngFor="let channel of filteredChannels()" class="join-channels">
-                                <div (click)="selectChannel(channel.name)">{{ channel.name }}</div>
-                                <button (click)="deleteChannel(channel.name)" class="delete-channel-button">
+                            <div *ngFor="let channel of filteredChannels()" (click)="selectChannel(channel.name)" class="join-channels">
+                                <div>{{ channel.name }}</div>
+                                <button
+                                    [disabled]="this.isWorkingWithChannel"
+                                    (click)="deleteChannel(channel.name, $event)"
+                                    class="delete-channel-button"
+                                >
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
                             </div>
@@ -272,7 +284,7 @@
                     <form (submit)="createChannel()">
                         <input type="text" [(ngModel)]="newChannelName" name="newChannelName" placeholder="Nom du canal" required />
                         <button
-                            [disabled]="this.newChannelName === ''"
+                            [disabled]="this.newChannelName === '' || this.isWorkingWithChannel"
                             [ngClass]="{ 'custom-button-disabled': this.newChannelName === '' }"
                             type="submit"
                             class="custom-button"

@@ -8,12 +8,15 @@
                 <div class="game-info">
                     <span class="game-title"> Mode classique: {{ lobby.title }} </span>
                     <div class="specific-game-info">
-                        <div class="players" matTooltip="Nombre d'utilisateurs">{{ lobby.nbPlayers }} <i class="fa-solid fa-users"></i></div>
+                        <div class="players" matTooltip="Nombre d'utilisateurs" matTooltipClass="custom-tooltip">
+                            {{ lobby.nbPlayers }} <i class="fa-solid fa-users"></i>
+                        </div>
                         <div class="vertical-separator"></div>
                         <i
                             (click)="openQuizInfoDialog(lobby.quiz)"
                             class="fa-solid fa-clipboard-question"
                             matTooltip="Consulter le quiz de cette partie"
+                            matTooltipClass="custom-tooltip"
                         ></i>
                     </div>
                 </div>
@@ -22,11 +25,11 @@
                     id="submit"
                     type="button"
                     class="custom-button-medium"
-                    [ngClass]="{ 'custom-button-medium-disabled': lobby.isLocked }"
-                    [disabled]="lobby.isLocked"
+                    [ngClass]="{ 'custom-button-medium-disabled': lobby.isLocked || isJoiningGame }"
+                    [disabled]="lobby.isLocked || isJoiningGame"
                     (click)="validGameId(lobby.roomId)"
                 >
-                    {{ lobby.isLocked ? 'Vérouillé' : 'Joindre' }}
+                    {{ lobby.isLocked ? 'Vérouillé' : isJoiningGame ? '...' : 'Joindre' }}
                 </button>
             </div>
         </div>

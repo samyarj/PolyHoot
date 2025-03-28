@@ -176,7 +176,8 @@ export class ConnectionGateway implements OnGatewayDisconnect {
                 avatar: player.equippedAvatar,
                 banner: player.equippedBorder,
             }));
-        this.server.emit(GameEvents.PlayerLeft, { playersInfo, roomId });
+        this.server.to(roomId).emit(GameEvents.PlayerLeft, playersInfo);
+        this.server.emit(GameEvents.PlayerLeftLobby, roomId);
     }
 
     private disconnectPlayerFromGamePage(game: Game, player: Player) {

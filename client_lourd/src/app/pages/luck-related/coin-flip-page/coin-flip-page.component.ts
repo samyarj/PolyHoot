@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CoinFlipService } from '@app/services/luck-services/coin-flip.service';
 
 @Component({
@@ -6,7 +6,7 @@ import { CoinFlipService } from '@app/services/luck-services/coin-flip.service';
     templateUrl: './coin-flip-page.component.html',
     styleUrls: ['./coin-flip-page.component.scss'],
 })
-export class CoinFlipPageComponent {
+export class CoinFlipPageComponent implements OnDestroy {
     constructor(private coinFlipService: CoinFlipService) {
         this.coinFlipService.getState();
         this.coinFlipService.initializeEventListeners();
@@ -45,6 +45,9 @@ export class CoinFlipPageComponent {
         this.coinFlipService.betAmount = value;
     }
 
+    ngOnDestroy(): void {
+        this.coinFlipService.removeEventListeners();
+    }
     selectSide(side: string) {
         this.coinFlipService.selectSide(side);
     }

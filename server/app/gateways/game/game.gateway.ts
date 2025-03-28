@@ -171,7 +171,7 @@ export class GameGateway {
             client.emit(JoinEvents.CanJoin, { playerName: user.username, gameId });
             const roomId = Array.from(client.rooms.values())[1];
             this.server.to(roomId).emit(JoinEvents.JoinSuccess, playersInfo);
-            this.server.emit(JoinEvents.PlayerJoined,roomId);
+            this.server.emit(JoinEvents.PlayerJoined, roomId);
             this.gameManager.socketRoomsMap.set(client, data.gameId);
         } else if (game.isPlayerBanned(playerName)) {
             client.emit(JoinErrors.BannedName);
@@ -219,7 +219,8 @@ export class GameGateway {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         const isLocked = game.toggleGameLock();
-        this.server.emit(GameEvents.AlertLockToggled, { isLocked, roomId });
+        this.server.to(roomId).emit(GameEvents.AlertLockToggled, isLocked);
+        this.server.emit(GameEvents.LobbyToggledLock, { isLocked, roomId });
     }
     @SubscribeMessage(GameEvents.PlayerBan)
     handleBanPlayer(@ConnectedSocket() client: AuthenticatedSocket, @MessageBody() playerName: string) {
@@ -237,7 +238,8 @@ export class GameGateway {
             avatar: player.equippedAvatar,
             banner: player.equippedBorder,
         }));
-        this.server.emit(GameEvents.PlayerLeft, { playersInfo, roomId });
+        this.server.to(roomId).emit(GameEvents.PlayerLeft, playersInfo);
+        this.server.emit(GameEvents.PlayerLeftLobby, roomId);
     }
 
     @SubscribeMessage(GameEvents.CorrectionFinished)

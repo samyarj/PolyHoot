@@ -58,9 +58,7 @@ export class HistoryPollPageComponent implements OnInit, OnDestroy {
         private route: ActivatedRoute,
         private router: Router, // Ajouter Router
         private toastr: ToastrService,
-    ) {
-        console.log('CurrentPoll:', this.currentPoll?.title);
-    }
+    ) {}
 
     ngOnInit(): void {
         // S'abonner aux changements dans les sondages publiés
@@ -81,7 +79,6 @@ export class HistoryPollPageComponent implements OnInit, OnDestroy {
     }
 
     show(poll: PublishedPoll) {
-        console.log('rentré avec poll', poll.title, 'currentPoll', this.currentPoll?.title);
         this.currentQuestionIndex = 0;
         this.currentPoll = poll;
         this.updateUrl(poll.id); // Mettre à jour l'URL quand on change de poll
@@ -136,36 +133,27 @@ export class HistoryPollPageComponent implements OnInit, OnDestroy {
         }
     }
     private updateUrl(pollId?: string): void {
-        console.log("L'url il a changé, dans updateUrl");
         this.router.navigate(['/polls/history/', pollId], {
             replaceUrl: true, // Empêche l'accumulation d'historique
         });
     }
 
     private initRouteListener() {
-        console.log('entré dans le listener ngoninit');
         const initialPollId = this.route.snapshot.paramMap.get('id');
         if (!initialPollId) return;
-        console.log(initialPollId);
         const existingPoll = this.publishedPolls.find((p) => p.id === initialPollId);
-        console.log(this.publishedPolls);
         if (existingPoll) {
-            console.log('Bah le poll existe logique');
             this.show(existingPoll);
         }
 
         this.routeSub = this.route.paramMap.subscribe((params) => {
-            console.log('LIstener actif pcq url a changé ');
             const pollId = params.get('id');
             if (!pollId) return;
 
             // Vérifie si le poll est déjà chargé (même référence)
             const pollInArray = this.publishedPolls.find((p) => p.id === pollId);
-            if (this.currentPoll === pollInArray) {
-                console.log('Les ref sont identiques');
-            } else {
-                console.log('Le poll existe');
-                if (pollInArray) this.show(pollInArray);
+            if (this.currentPoll !== pollInArray && pollInArray) {
+                this.show(pollInArray);
             }
         });
     }

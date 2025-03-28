@@ -90,8 +90,10 @@ export class OrganizerPageComponent implements OnDestroy {
 
         if (location !== AppRoute.RESULTS || shouldGoHome) {
             this.organizerService.signalUserDisconnect();
+            this.organizerService.clearResultsSockets();
             this.router.navigate([AppRoute.HOME]);
         }
+        this.organizerService.clearSockets();
     }
 
     showResults() {

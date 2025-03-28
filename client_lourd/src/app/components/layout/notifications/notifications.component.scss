@@ -8,6 +8,12 @@
     i {
         color: var(--tertiary-color);
         font-size: 2rem;
+        transition: all 0.2s ease-in-out;
+
+        &:hover {
+            text-shadow: 0 0 20px color-mix(in srgb, var(--tertiary-color) 70%, transparent);
+            transform: translateY(-1px);
+        }
     }
 }
 .notification-container {
@@ -20,7 +26,6 @@
     border: none;
     cursor: pointer;
     font-size: 1.5rem;
-    color: #333;
 }
 
 .dropdown-menu {

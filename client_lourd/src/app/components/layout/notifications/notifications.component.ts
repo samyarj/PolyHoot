@@ -48,25 +48,38 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         }
     }
     ngOnInit(): void {
+        console.log('1');
         if (this.user && this.user.uid) {
             // Combiner les deux observables
             const combinedSubscription = combineLatest([
                 this.historyPublishedPollService.watchPublishedPolls(),
                 this.watchUser(this.user.uid),
             ]).subscribe(([publishedPolls, userData]) => {
-                console.log('publishedPolls', publishedPolls);
-                console.log('userData', userData.pollsAnswered);
-
                 if (this.user?.role === 'player') {
-                    this.publishedPolls = publishedPolls.filter(
-                        (poll) => !poll.expired && poll.id && !userData.pollsAnswered?.includes(poll.id), // Utilisation directe de userData
-                    );
+                    this.publishedPolls = publishedPolls
+                        .filter(
+                            (poll) => !poll.expired && poll.id && !userData.pollsAnswered?.includes(poll.id), // Utilisation directe de userData
+                        )
+                        .sort((a, b) => {
+                            // Convertir les dates en timestamps pour comparaison
+                            const dateA = new Date(a.endDate!).getTime();
+                            const dateB = new Date(b.endDate!).getTime();
+                            return dateA - dateB; // Tri ascendant (plus petite date en premier)
+                        });
                     this.notifications = this.publishedPolls.map((poll) => ({
                         title: `${poll.title}`,
                         poll,
                     }));
                 } else if (this.user?.role === 'admin') {
-                    this.publishedPolls = publishedPolls.filter((poll) => poll.expired);
+                    this.publishedPolls = publishedPolls
+                        .filter((poll) => poll.expired)
+                        .sort((a, b) => {
+                            // Convertir les dates en timestamps pour comparaison
+                            const dateA = new Date(a.endDate!).getTime();
+                            const dateB = new Date(b.endDate!).getTime();
+                            return dateB - dateA; // Tri ascendant (plus petite date en premier)
+                        });
+                    this.publishedPolls.forEach((poll) => console.log(poll.endDate));
                     this.notifications = this.publishedPolls.map((poll) => ({
                         title: `${poll.title}`,
                         poll,
@@ -157,12 +170,10 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     // Fonction pour surveiller les changements d'un utilisateur
     private watchUser(uid: string): Observable<User> {
         return new Observable((subscriber) => {
-            console.log('uid', uid);
             const userDoc = doc(this.firestore, 'users', uid);
             const unsubscribe = onSnapshot(userDoc, (docSnapshot) => {
                 if (docSnapshot.exists()) {
                     const data = docSnapshot.data() as User;
-                    console.log('Data: ', data);
                     subscriber.next({ ...data, uid: docSnapshot.id });
                 } else {
                     subscriber.error(new Error("L'utilisateur n'existe pas."));

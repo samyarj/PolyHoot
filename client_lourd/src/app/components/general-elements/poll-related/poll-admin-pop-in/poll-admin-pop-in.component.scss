@@ -94,6 +94,8 @@
             background: color-mix(in srgb, var(--primary-color) 20%, transparent);
             border-radius: 15px;
             border: 2px solid var(--tertiary-color);
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
 
         .poll-questions {
@@ -126,6 +128,8 @@
                     border-radius: 15px;
                     padding: 1rem;
                     margin: 0;
+                    word-break: break-word;
+                    overflow-wrap: break-word;
                 }
             }
         }

@@ -29,6 +29,7 @@ export class GamePageComponent implements OnDestroy {
         this.gameClientService.resetInformationFields();
         this.gameClientService.resetAttributes();
         this.gameClientService.playerPoints = 0;
+        this.gameClientService.handleSockets();
         this.gameClientService.signalUserConnect();
     }
     get choiceFeedback(): ChoiceFeedback {
@@ -118,10 +119,12 @@ export class GamePageComponent implements OnDestroy {
         if (location !== AppRoute.RESULTS && this.gameClientService.roomId) {
             this.gameClientService.signalUserDisconnect();
             this.router.navigate([AppRoute.HOME]);
+            this.gameClientService.clearShowEndResults();
         } else if (location === AppRoute.RESULTS && this.gameClientService.shouldDisconnect && this.gameClientService.roomId) {
             this.gameClientService.signalUserDisconnect();
             this.router.navigate([AppRoute.HOME]);
         }
+        this.gameClientService.clearSockets();
         this.gameClientService.resetAttributes();
     }
     defaultKeyDownHandler(event: KeyboardEvent): void {

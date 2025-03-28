@@ -86,9 +86,14 @@
             >
                 <div class="question-title truncate-text">{{ i + 1 }}. {{ question.text }}</div>
                 <span class="action-icons">
-                    <i class="fas fa-plus-circle" (click)="addQuestionToBank(question)" matTooltip="Ajouter à la banque de questions"></i>
-                    <i class="fas fa-pencil-alt" (click)="modifyQuestionAction(question)" matTooltip="Modifier"></i>
-                    <i class="fas fa-trash-alt" (click)="deleteQuestion(i)" matTooltip="Supprimer"></i>
+                    <i
+                        class="fas fa-plus-circle"
+                        (click)="addQuestionToBank(question)"
+                        matTooltip="Ajouter à la banque de questions"
+                        matTooltipClass="custom-tooltip"
+                    ></i>
+                    <i class="fas fa-pencil-alt" (click)="modifyQuestionAction(question)" matTooltip="Modifier" matTooltipClass="custom-tooltip"></i>
+                    <i class="fas fa-trash-alt" (click)="deleteQuestion(i)" matTooltip="Supprimer" matTooltipClass="custom-tooltip"></i>
                 </span>
             </li>
         </ul>

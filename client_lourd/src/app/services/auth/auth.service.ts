@@ -214,26 +214,25 @@ export class AuthService {
     ): void {
         const username = formGroup.controls.username.value.toString().trim();
         formGroup.controls.username.setValue(username);
-        setIsTyping(false);
+        setIsTyping(true);
 
         if (!username || username === currentUsername || formGroup.get('username')?.hasError('pattern')) {
+            setIsTyping(false);
             return;
         }
 
         setIsTaken(false);
         setIsChecking(true);
-        formGroup.get('username')?.disable();
 
         this.checkingUsername(username).subscribe({
             next: (isTaken) => {
                 setIsChecking(false);
                 setIsTyping(false);
                 setIsTaken(isTaken);
-                formGroup.get('username')?.enable();
             },
             error: () => {
                 setIsChecking(false);
-                formGroup.get('username')?.enable();
+                setIsTyping(false);
             },
         });
     }

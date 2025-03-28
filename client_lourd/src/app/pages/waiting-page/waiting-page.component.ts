@@ -36,6 +36,7 @@ export class WaitingPageComponent implements OnDestroy {
     ) {
         this.onUnload();
         this.handleSocketSubscriptions();
+        this.waitingPageService.setupSockets();
         this.waitingPageService.playerName.subscribe((value: User | null) => {
             if (value) {
                 this.name = value.username;
@@ -71,6 +72,10 @@ export class WaitingPageComponent implements OnDestroy {
         return this.waitingPageService.isPlayersListEmpty;
     }
 
+    openQrCode() {
+        this.waitingPageService.openQrCode();
+    }
+
     @HostListener('window:beforeunload')
     handleBeforeUnload() {
         localStorage.setItem('navigatedFromUnload', 'true');
@@ -78,6 +83,7 @@ export class WaitingPageComponent implements OnDestroy {
 
     ngOnDestroy() {
         this.handleRouteNavigation();
+        this.waitingPageService.clearSockets();
         this.organizorDisconnectedSub.unsubscribe();
         this.bannedSubscription.unsubscribe();
         this.timerEndSubscription.unsubscribe();

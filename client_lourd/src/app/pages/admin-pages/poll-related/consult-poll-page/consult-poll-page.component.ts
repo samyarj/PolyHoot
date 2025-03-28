@@ -32,7 +32,6 @@ export class ConsultPollPageComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         // S'abonner aux changements dans les sondages
         this.pollsSubscription = this.consultPollService.watchPolls().subscribe((polls) => {
-            console.log(polls);
             this.polls = polls;
         });
 
@@ -46,7 +45,6 @@ export class ConsultPollPageComponent implements OnInit, OnDestroy {
                     const dateB = new Date(b.endDate!).getTime();
                     return dateA - dateB; // Tri ascendant (plus petite date en premier)
                 });
-            console.log(this.publishedPolls);
         });
     }
 

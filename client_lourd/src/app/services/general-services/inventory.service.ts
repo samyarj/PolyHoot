@@ -64,7 +64,6 @@ export class InventoryService {
         const options = {
             headers: { authorization: `Bearer ${this.tokenID}` },
         };
-        console.log(avatarURL);
         return this.http
             .post<boolean>(`${this.baseUrl}/avatar`, { avatarURL }, options)
             .pipe(catchError((error) => this.messageHandler.handleHttpError(error)));

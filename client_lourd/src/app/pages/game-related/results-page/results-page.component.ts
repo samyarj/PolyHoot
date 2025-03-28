@@ -16,7 +16,9 @@ export class ResultsPageComponent implements OnInit, OnDestroy {
         private resultsService: ResultsService,
         private router: Router,
         private location: Location,
-    ) {}
+    ) {
+        this.resultsService.handleResultsSockets();
+    }
     get nbPlayers() {
         return this.resultsService.nbPlayers;
     }
@@ -48,8 +50,9 @@ export class ResultsPageComponent implements OnInit, OnDestroy {
             if (this.resultsService.roomId) {
                 this.resultsService.disconnectUser();
             }
-            this.returnHome();
+            // this.returnHome();
         }
+        this.resultsService.clearResultsSockets();
     }
     private onUnload() {
         localStorage.removeItem('navigatedFromUnload');
