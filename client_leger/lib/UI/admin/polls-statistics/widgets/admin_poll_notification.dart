@@ -17,6 +17,7 @@ class _AdminPollNotificationState extends State<AdminPollNotification> {
   bool _showPollDetails = false;
   int _currentQuestionIndex = 0;
   bool _menuOpen = false;
+  bool _isDialogShowing = false;
 
   @override
   void initState() {
@@ -30,12 +31,17 @@ class _AdminPollNotificationState extends State<AdminPollNotification> {
       _showPollDetails = true;
       _menuOpen = false;
     });
+
+    _showPollDetailsDialog();
   }
 
   void _closePollDetails() {
-    setState(() {
-      _showPollDetails = false;
-    });
+    if (mounted) {
+      setState(() {
+        _showPollDetails = false;
+        _isDialogShowing = false;
+      });
+    }
   }
 
   void _nextQuestion() {
@@ -55,11 +61,110 @@ class _AdminPollNotificationState extends State<AdminPollNotification> {
     }
   }
 
+  void _showPollDetailsDialog() {
+    if (_isDialogShowing || !_showPollDetails || _selectedPoll == null) return;
+
+    _isDialogShowing = true;
+
+    final colorScheme = Theme.of(context).colorScheme;
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(builder: (context, setStateDialog) {
+          final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+          final isKeyboardVisible = keyboardHeight > 0;
+
+          final containerHeight = isKeyboardVisible
+              ? MediaQuery.of(context).size.height * 0.5
+              : MediaQuery.of(context).size.height * 0.8;
+
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: EdgeInsets.zero,
+            child: Center(
+              child: Material(
+                color: colorScheme.surface,
+                elevation: 24,
+                clipBehavior: Clip.antiAlias,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(
+                    color: colorScheme.tertiary.withOpacity(0.5),
+                    width: 2.0,
+                  ),
+                ),
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  height: containerHeight,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      // Close Button
+                      Positioned(
+                        top: 12,
+                        right: 12,
+                        child: IconButton(
+                          onPressed: () {
+                            Navigator.of(dialogContext).pop();
+                            _closePollDetails();
+                          },
+                          icon: Icon(Icons.close),
+                          color: colorScheme.onSurface,
+                          tooltip: 'Fermer',
+                        ),
+                      ),
+
+                      // Poll Details Content
+                      Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: PollRecordStats(
+                          poll: _selectedPoll!,
+                          currentQuestionIndex: _currentQuestionIndex,
+                          onPreviousQuestion: () {
+                            if (_currentQuestionIndex > 0) {
+                              final newIndex = _currentQuestionIndex - 1;
+                              setStateDialog(() {
+                                _currentQuestionIndex = newIndex;
+                              });
+                              setState(() {
+                                _currentQuestionIndex = newIndex;
+                              });
+                            }
+                          },
+                          onNextQuestion: () {
+                            if (_selectedPoll != null &&
+                                _currentQuestionIndex <
+                                    _selectedPoll!.questions.length - 1) {
+                              final newIndex = _currentQuestionIndex + 1;
+                              setStateDialog(() {
+                                _currentQuestionIndex = newIndex;
+                              });
+                              setState(() {
+                                _currentQuestionIndex = newIndex;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        });
+      },
+    ).then((_) {
+      _closePollDetails();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    // Listen to changes in the service
     return AnimatedBuilder(
         animation: _pollHistoryService,
         builder: (context, _) {
@@ -69,7 +174,6 @@ class _AdminPollNotificationState extends State<AdminPollNotification> {
 
           return Stack(
             children: [
-              // Poll notification button with dropdown
               Theme(
                 data: Theme.of(context).copyWith(
                   popupMenuTheme: PopupMenuThemeData(
@@ -234,14 +338,12 @@ class _AdminPollNotificationState extends State<AdminPollNotification> {
 
                     return menuItems;
                   },
-                  // FIX FOR GRAY ICON: Don't use IconButton here, just use an Icon directly
                   child: Container(
                     height: 46,
                     width: 46,
                     alignment: Alignment.center,
                     child: Stack(
                       children: [
-                        // Using Icon instead of IconButton
                         Container(
                           padding: EdgeInsets.all(13),
                           child: Icon(
@@ -273,92 +375,8 @@ class _AdminPollNotificationState extends State<AdminPollNotification> {
                   ),
                 ),
               ),
-
-              // Poll details modal popup - FIX FOR BLOCKING SCREEN
-              if (_showPollDetails && _selectedPoll != null)
-                _buildPollDetailsPopup(context),
             ],
           );
         });
-  }
-
-  Widget _buildPollDetailsPopup(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    // Check if keyboard is visible
-    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-    final isKeyboardVisible = keyboardHeight > 0;
-
-    // Dynamic height based on keyboard visibility
-    final containerHeight = isKeyboardVisible
-        ? MediaQuery.of(context).size.height * 0.5
-        : MediaQuery.of(context).size.height * 0.8;
-
-    // FIX FOR BLOCKING SCREEN: Use showDialog pattern instead of direct Stack
-    // This will ensure proper modal management
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_showPollDetails && _selectedPoll != null) {
-        showDialog(
-          context: context,
-          barrierDismissible: true,
-          builder: (BuildContext dialogContext) {
-            return Dialog(
-              backgroundColor: Colors.transparent,
-              insetPadding: EdgeInsets.zero,
-              child: Center(
-                child: Material(
-                  color: colorScheme.surface,
-                  elevation: 24,
-                  clipBehavior: Clip.antiAlias,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(
-                      color: colorScheme.tertiary.withOpacity(0.5),
-                      width: 2.0,
-                    ),
-                  ),
-                  child: Container(
-                    width: MediaQuery.of(context).size.width * 0.8,
-                    height: containerHeight,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        // Close Button
-                        Positioned(
-                          top: 12,
-                          right: 12,
-                          child: IconButton(
-                            onPressed: () {
-                              Navigator.of(dialogContext).pop();
-                              _closePollDetails();
-                            },
-                            icon: Icon(Icons.close),
-                            color: colorScheme.onSurface,
-                            tooltip: 'Fermer',
-                          ),
-                        ),
-
-                        // Poll Details Content
-                        Padding(
-                          padding: const EdgeInsets.all(24.0),
-                          child: PollRecordStats(
-                            poll: _selectedPoll!,
-                            currentQuestionIndex: _currentQuestionIndex,
-                            onPreviousQuestion: _previousQuestion,
-                            onNextQuestion: _nextQuestion,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        ).then((_) => _closePollDetails());
-      }
-    });
-
-    return Container();
   }
 }

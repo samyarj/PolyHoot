@@ -29,7 +29,7 @@ class _PollStatsChartState extends State<PollStatsChart>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 800),
     );
     _animation = CurvedAnimation(
       parent: _animationController,
