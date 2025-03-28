@@ -18,7 +18,7 @@ export class ChatGateway {
     ) {}
 
     @SubscribeMessage(ChatEvents.RoomMessage)
-    roomMessage(clientSocket: Socket, message: ChatMessage) {
+    async roomMessage(clientSocket: Socket, message: ChatMessage) {
         message.date = new Date();
         const clientRoomId: string = Array.from(clientSocket.rooms.values())[1];
         this.chatService.addMessage(message, clientRoomId);
@@ -32,16 +32,23 @@ export class ChatGateway {
     }
 
     @SubscribeMessage(ChatEvents.RequestQuickReplies)
-    async handleQuickRepliesRequest(clientSocket: Socket, data: { user: string; gameContext?: string }) {
+    async handleQuickRepliesRequest(clientSocket: Socket, data: { user: string }) {
         const clientRoomId: string = Array.from(clientSocket.rooms.values())[1];
         try {
-            // Get chat history for context
+            // Get chat history
             const messageHistory = this.chatService.getHistory(clientRoomId);
             let history = '';
             for (const h of messageHistory) {
                 history += `${h.author}: ${h.message}\n`;
             }
-            const quickReplies = await this.quickReplyService.generateQuickReplies(clientRoomId, data.user, history, data.gameContext);
+            // Get Game Context
+            const game = this.gameManagerService.getGameByRoomId(clientRoomId);
+            const gameContext = game
+                ? `Game State: ${game.gameState}. Current Question: ${game['currentQuestionIndex'] + 1}. Players: ${game.players.map((player) => `${player.name} (${player.points} points)`).join(', ')}`
+                : null;
+            console.log(gameContext);
+            console.log(data.user);
+            const quickReplies = await this.quickReplyService.generateQuickReplies(clientRoomId, data.user, history, gameContext);
             // Send quick replies only to the requesting user
             clientSocket.emit(ChatEvents.QuickRepliesGenerated, quickReplies);
         } catch (error) {

@@ -20,7 +20,6 @@
     margin-bottom: 10px;
     padding: 15px;
     border-radius: 12px;
-    // box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     box-shadow: 0 0 5px var(--tertiary-color);
     overflow-y: auto;
 }
@@ -30,7 +29,6 @@
     background-color: var(--tertiary-color);
     color: var(--primary-color);
     border-radius: 15px 15px 0 15px;
-    // box-shadow: 0 6px 12px rgba(71, 174, 108, 0.5);
 }
 
 .otherUser {
@@ -38,7 +36,6 @@
     background: var(--secondary-color);
     color: var(--primary-color);
     border-radius: 15px 15px 15px 0;
-    // box-shadow: 0 6px 12px rgba(74, 105, 187, 0.5);
 }
 
 .user,
@@ -90,7 +87,6 @@
     align-items: center;
     height: 25%;
     width: 100%;
-    // background: linear-gradient(to right, #3498db, #2980b9);
     background: var(--nav-bg);
     padding: 10px;
     padding-right: 15px;
@@ -148,14 +144,36 @@ span.error {
     padding: 12px 25px;
     font-family: 'Lato', sans-serif;
     border-radius: 15px;
-    //background-color: var(--active-bg);
-    //color: var(--text-color);
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
 #send-button:hover {
     // background-color: var(--hover-bg);
+}
+
+.quick-replies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 0 15px;
+}
+
+.quick-reply-button {
+    padding: 8px 15px;
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+        background-color: var(--tertiary-color);
+    }
 }
 
 h2 {

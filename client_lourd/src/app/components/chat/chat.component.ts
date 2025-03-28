@@ -15,21 +15,25 @@ import { Observer, Subscription } from 'rxjs';
 })
 export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
     @ViewChild('previousMessages') private previousMessagesContainer: ElementRef;
-    @Input() parentAction!: () => void; // Function passed from the parent
-
-    // Trigger the function when needed (e.g., on some event)
-    triggerParentAction() {
-        if (this.parentAction) {
-            this.parentAction(); // This will call the parent's function
-        }
-    }
+    @Input() parentAction!: () => void;
 
     inputMessage = '';
     containerHasChanged: boolean = false;
     chatMessages: ChatMessage[] = [];
     chatMessagesLoading: boolean = false;
+    quickReplies: string[] = []; // Array to hold quick reply suggestions
+    private quickRepliesSubscription: Subscription;
+
     messagesObserver: Partial<Observer<ChatMessage[]>> = {
         next: (newChatMessages: ChatMessage[]) => {
+            // Check if the last message is from someone else
+            if (newChatMessages.length > this.chatMessages.length) {
+                const lastMessage = newChatMessages[newChatMessages.length - 1];
+                if (lastMessage.author !== this.name) {
+                    const user = this.authService.getUser()?.username ?? '';
+                    this.chatService.requestQuickReplies(user);
+                }
+            }
             this.chatMessages = newChatMessages;
             this.containerHasChanged = true;
         },
@@ -60,10 +64,18 @@ export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
             }
         });
 
+        // Subscribe to quick replies
+        this.quickRepliesSubscription = this.chatService.quickReplies$.subscribe((replies) => {
+            this.quickReplies = replies;
+            console.log(replies);
+        });
+
         if (!this.chatService.isInitialized) {
             this.chatService.configureChatSocketFeatures();
             this.chatService.getHistory();
-        } else this.chatService.retrieveRoomIdChat();
+        } else {
+            this.chatService.retrieveRoomIdChat();
+        }
     }
 
     ngAfterViewChecked() {
@@ -120,11 +132,23 @@ export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
             });
     }
 
+    // Request quick replies when the input field is focused
+    onInputFocus() {
+        const user = this.authService.getUser()?.username ?? '';
+        this.chatService.requestQuickReplies(user);
+    }
+
+    // Use a quick reply
+    useQuickReply(reply: string) {
+        this.inputMessage = reply;
+        this.sendMessageToRoom();
+    }
+
     ngOnDestroy(): void {
         if (this.messagesSubscription) this.messagesSubscription.unsubscribe();
         if (this.chatEventsSubscription) this.chatEventsSubscription.unsubscribe();
+        if (this.quickRepliesSubscription) this.quickRepliesSubscription.unsubscribe();
         console.log('Child component destroyed!');
-        // Emit the event when the component is destroyed
         this.triggerParentAction();
     }
 
@@ -142,5 +166,11 @@ export class ChatComponent implements OnDestroy, OnInit, AfterViewChecked {
 
     private clearMessages(): void {
         this.chatMessages = [];
+    }
+
+    triggerParentAction() {
+        if (this.parentAction) {
+            this.parentAction();
+        }
     }
 }

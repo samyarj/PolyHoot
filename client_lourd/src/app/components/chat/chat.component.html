@@ -33,8 +33,20 @@
             </div>
         </div>
     </div>
+
+    <!-- Quick reply suggestions -->
+    <div *ngIf="quickReplies.length > 0" class="quick-replies">
+        <button *ngFor="let reply of quickReplies" (click)="useQuickReply(reply)" class="quick-reply-button">{{ reply }}</button>
+    </div>
+
     <div id="chat-message-input-div">
-        <textarea id="myTextInput" (keydown)="onKeyDown($event)" placeholder="Entrez votre message." [(ngModel)]="inputMessage"></textarea>
+        <textarea
+            id="myTextInput"
+            (keydown)="onKeyDown($event)"
+            placeholder="Entrez votre message."
+            [(ngModel)]="inputMessage"
+            (focus)="onInputFocus()"
+        ></textarea>
         <button
             type="button"
             [disabled]="inputMessage === ''"

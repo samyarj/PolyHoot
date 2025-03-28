@@ -22,6 +22,9 @@ export class ChatService implements OnDestroy {
     private roomLeftSubscription: Subscription;
     private userSubscription: Subscription;
 
+    private quickRepliesSubject = new Subject<string[]>();
+    quickReplies$ = this.quickRepliesSubject.asObservable();
+
     constructor(
         private socketClientService: SocketClientService,
         private authService: AuthService,
@@ -75,8 +78,13 @@ export class ChatService implements OnDestroy {
         return this.socketClientService.isOrganizer ? (this.socketClientService.playerName = 'Organisateur') : this.socketClientService.playerName;
     }
 
+    requestQuickReplies(user: string) {
+        if (this.socketClientService.roomId) {
+            this.socketClientService.send(ChatEvents.RequestQuickReplies, { user });
+        }
+    }
+
     configureChatSocketFeatures() {
-        // Unsubscribe from previous subscriptions if they exist
         if (this.messageAddedSubscription) {
             this.messageAddedSubscription.unsubscribe();
         }
@@ -84,11 +92,9 @@ export class ChatService implements OnDestroy {
             this.roomLeftSubscription.unsubscribe();
         }
 
-        // Remove old event listeners
         this.socketClientService.socket.off(ChatEvents.MessageAdded);
         this.socketClientService.socket.off(ChatEvents.RoomLeft);
 
-        // Subscribe to new messages
         const messageAddedHandler = (newMessage: ChatMessage) => {
             this.allChatMessages.push(newMessage);
             this.allChatMessagesSource.next(this.allChatMessages);
@@ -96,7 +102,6 @@ export class ChatService implements OnDestroy {
         this.messageAddedSubscription = new Subscription();
         this.socketClientService.on(ChatEvents.MessageAdded, messageAddedHandler);
 
-        // Subscribe to room left events
         const roomLeftHandler = (chatData: ChatData) => {
             if (!chatData || this.socketClientService.playerName === chatData.playerName) {
                 this.socketClientService.roomId = '';
@@ -112,6 +117,11 @@ export class ChatService implements OnDestroy {
         };
         this.roomLeftSubscription = new Subscription();
         this.socketClientService.on(ChatEvents.RoomLeft, roomLeftHandler);
+
+        const quickRepliesHandler = (data: string[]) => {
+            this.quickRepliesSubject.next(data);
+        };
+        this.socketClientService.on(ChatEvents.QuickRepliesGenerated, quickRepliesHandler);
 
         this.isInitialized = true;
     }
