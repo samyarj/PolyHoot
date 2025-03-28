@@ -18,6 +18,7 @@ import { AppComponent } from '@app/pages/app/app.component';
 import { GamePageComponent } from '@app/pages/game-related/game-page/game-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { WINDOW } from '@app/services/general-services/window.token';
+import { QRCodeComponent } from 'angularx-qrcode';
 import { NgChartsModule } from 'ng2-charts';
 import { ToastrModule } from 'ngx-toastr';
 import { environment } from 'src/environments/environment';
@@ -30,9 +31,10 @@ import { AvatarBannerComponent } from './components/general-elements/avatar-bann
 import { ConfirmationDialogComponent } from './components/general-elements/confirmation-dialog/confirmation-dialog.component';
 import { ErrorDialogComponent } from './components/general-elements/error-dialog/error-dialog.component';
 import { LootBoxWinDialogComponent } from './components/general-elements/lootbox-win-dialog/lootbox-win-dialog.component';
-import { PollPlayerPopInComponent } from './components/general-elements/poll-related/poll-player-pop-in/poll-player-pop-in.component';
 import { PollAdminPopInComponent } from './components/general-elements/poll-related/poll-admin-pop-in/poll-admin-pop-in.component';
+import { PollPlayerPopInComponent } from './components/general-elements/poll-related/poll-player-pop-in/poll-player-pop-in.component';
 import { PopUpCreationComponent } from './components/general-elements/pop-up-creation/pop-up-creation.component';
+import { QrCodePopInComponent } from './components/general-elements/qr-code-pop-in/qr-code-pop-in.component';
 import { HeaderGameComponent } from './components/layout/filler/header-game/header-game.component';
 import { SecondaryHeaderGameComponent } from './components/layout/filler/secondary-header-game/secondary-header-game.component';
 import { MainHeaderComponent } from './components/layout/main-header/main-header.component';
@@ -90,6 +92,7 @@ import { ReportService } from './services/report-service';
 import { HeaderNavigationService } from './services/ui-services/header-navigation.service';
 import { ThemeService } from './services/ui-services/theme/theme.service';
 import { SocketClientService } from './services/websocket-services/general/socket-client-manager.service';
+
 /**
  * Main module that is used in main.ts.
  * All automatically generated components will appear in this module.
@@ -156,6 +159,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         PollPlayerPopInComponent,
         PollAdminPopInComponent,
         NotificationsComponent,
+        QrCodePopInComponent,
     ],
     providers: [
         AuthService,
@@ -187,6 +191,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         MatExpansionModule,
         MatIconModule,
         NgChartsModule,
+        QRCodeComponent,
         provideFirebaseApp(() => initializeApp(environment.firebase)),
         provideAuth(() => getAuth()),
         provideFirestore(() => getFirestore()),

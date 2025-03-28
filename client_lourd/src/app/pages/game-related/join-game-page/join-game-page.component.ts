@@ -23,11 +23,14 @@ export class JoinGamePageComponent implements OnDestroy, OnInit {
             this.lobbys = lobbys;
         },
     };
+
     private lobbysSubscription: Subscription;
     constructor(
         private joinGameService: JoinGameService,
         private dialog: MatDialog,
-    ) {}
+    ) {
+        this.joinGameService.setUpSockets();
+    }
 
     get popUpMessage() {
         return this.joinGameService.popUpMessage;
@@ -41,6 +44,9 @@ export class JoinGamePageComponent implements OnDestroy, OnInit {
         return this.joinGameService.wrongGameId;
     }
 
+    get isJoiningGame() {
+        return this.joinGameService.isJoiningGame;
+    }
     ngOnInit() {
         this.lobbysSubscription = this.joinGameService.lobbysObservable.subscribe(this.lobbyObserver);
         this.joinGameService.getAllLobbys();
@@ -48,6 +54,7 @@ export class JoinGamePageComponent implements OnDestroy, OnInit {
     }
 
     ngOnDestroy() {
+        this.joinGameService.clearSockets();
         this.joinGameService.resetService();
         if (this.lobbysSubscription) this.lobbysSubscription.unsubscribe();
     }

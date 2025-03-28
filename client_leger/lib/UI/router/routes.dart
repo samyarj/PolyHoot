@@ -18,4 +18,7 @@ class Paths {
   static const String luck = '/luck';
   static const String inventory = '/inventory';
   static const String shop = '/shop';
+
+  static const String adminHome = '/admin_home';
+  static const String adminUsers = '/admin_users';
 }

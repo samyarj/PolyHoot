@@ -80,7 +80,7 @@
 // MatDialog Border radius.
 .custom-container {
     border-radius: 30px !important;
-    overflow: hidden;
+    overflow: hidden !important;
     background: rgba(255, 255, 255, 0) !important;
 }
 // ******************************
@@ -344,3 +344,22 @@
 }
 
 /* SECONDARY NAVBAR */
+
+select {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border: 2px solid var(--tertiary-color);
+    border-radius: 30px;
+    padding: 5px;
+    align-self: center;
+
+    option {
+        background-color: var(--primary-color);
+        color: var(--text-color);
+    }
+
+    option:hover {
+        background-color: var(--primary-color);
+        color: var(--text-color);
+    }
+}

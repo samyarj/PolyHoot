@@ -30,7 +30,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
   bool _isSidebarVisible = true;
 
   late AnimationController _animationController;
-  late Animation<double> _sidebarAnimation;
 
   SidebarContent _currentSidebar = SidebarContent.chat;
 
@@ -42,14 +41,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-
-    _sidebarAnimation = Tween<double>(
-      begin: 0,
-      end: sidebarWidth,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
 
     if (_isSidebarVisible) {
       _animationController.value = 1.0;
@@ -99,6 +90,11 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
   void _toggleSidebar(SidebarContent content) {
     setState(() {
       _currentSidebar = content;
+
+      if (!_isSidebarVisible) {
+        _isSidebarVisible = true;
+        _animationController.forward();
+      }
     });
   }
 
@@ -278,67 +274,56 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(child: widget.statefulNavigationShell),
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: _toggleSidebarVisibility,
-                    child: Container(
-                      width: 24,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: colorScheme.secondary.withValues(alpha: 0.75),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(8),
-                          bottomLeft: Radius.circular(8),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 4,
-                            offset: Offset(-2, 0),
+              Container(
+                color: colorScheme.secondary.withValues(alpha: 0.75),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: _toggleSidebarVisibility,
+                      child: SizedBox(
+                        width: 24,
+                        height: 64,
+                        child: Center(
+                          child: Icon(
+                            _isSidebarVisible
+                                ? Icons.chevron_right_rounded
+                                : Icons.chevron_left_rounded,
+                            color: colorScheme.onTertiary,
+                            size: 28,
                           ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Icon(
-                          _isSidebarVisible
-                              ? Icons.chevron_right
-                              : Icons.chevron_left,
-                          color: colorScheme.onPrimary,
-                          size: 28,
                         ),
                       ),
                     ),
-                  ),
 
-                  // Animated sidebar
-                  // Replace the AnimatedContainer in your MainScaffold with this:
-                  AnimatedContainer(
-                    duration: Duration(milliseconds: 300),
-                    width: _isSidebarVisible ? sidebarWidth : 0,
-                    curve: Curves.easeInOut,
-                    child: _isSidebarVisible
-                        ? LayoutBuilder(
-                            builder: (context, constraints) {
-                              // Only show sidebar if there's enough width
-                              if (constraints.maxWidth < 100) {
-                                // Threshold width for rendering
-                                return Container(color: colorScheme.primary);
-                              }
+                    // Animated sidebar
+                    // Replace the AnimatedContainer in your MainScaffold with this:
+                    AnimatedContainer(
+                      duration: Duration(milliseconds: 300),
+                      width: _isSidebarVisible ? sidebarWidth : 0,
+                      curve: Curves.easeInOut,
+                      child: _isSidebarVisible
+                          ? LayoutBuilder(
+                              builder: (context, constraints) {
+                                // Only show sidebar if there's enough width
+                                if (constraints.maxWidth < 100) {
+                                  // Threshold width for rendering
+                                  return Container(color: colorScheme.primary);
+                                }
 
-                              // Render the appropriate sidebar
-                              return _currentSidebar == SidebarContent.chat
-                                  ? SideBar(user: user)
-                                  : FriendSidebar(
-                                      user: user,
-                                      onClose: () =>
-                                          _toggleSidebar(SidebarContent.chat),
-                                    );
-                            },
-                          )
-                        : null,
-                  ),
-                ],
+                                // Render the appropriate sidebar
+                                return _currentSidebar == SidebarContent.chat
+                                    ? SideBar(user: user)
+                                    : FriendSidebar(
+                                        user: user,
+                                        onClose: () =>
+                                            _toggleSidebar(SidebarContent.chat),
+                                      );
+                              },
+                            )
+                          : null,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

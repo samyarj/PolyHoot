@@ -38,6 +38,7 @@ export class GameClientService {
     qreAnswer: number;
     private finalAnswer: boolean;
     private realShowAnswers: boolean;
+    private areSocketsInitialized: boolean = false;
 
     // constructeur a 4 parametres permis selon les charges et le prof, etant donne la nature des attributs
     // eslint-disable-next-line max-params
@@ -47,7 +48,6 @@ export class GameClientService {
         private resultService: ResultsService,
         private messageHandlerService: MessageHandlerService,
     ) {
-        this.handleSockets();
         this.resetAttributes();
     }
 
@@ -133,16 +133,37 @@ export class GameClientService {
         });
     }
 
-    private handleSockets() {
-        this.handleWaitingForCorrection();
-        this.handleTimerValue();
-        this.goToNextQuestion();
-        this.getTitle();
-        this.playerPointsUpdate();
-        this.organizerHasDisconnected();
-        this.showEndResults();
-        this.resultService.handleResultsSockets();
+    handleSockets() {
+        if (!this.areSocketsInitialized) {
+            this.handleWaitingForCorrection();
+            this.handleTimerValue();
+            this.goToNextQuestion();
+            this.getTitle();
+            this.playerPointsUpdate();
+            this.organizerHasDisconnected();
+            this.showEndResults();
+            this.resultService.handleResultsSockets();
+            this.areSocketsInitialized = true;
+        }
     }
+
+    clearSockets() {
+        this.clearWaitingForCorrection();
+        this.clearTimerValue();
+        this.clearGoToNextQuestion();
+        this.clearPlayerPointsUpdate();
+        this.clearOrganizerHasDisconnected();
+        // this.clearShowEndResults(); // clears same event as resultService, will be cleared in navigation or results.
+        // this.resultService.clearResultsSockets(); // Assuming you have a similar method for resultService
+        this.areSocketsInitialized = false;
+    }
+
+    clearShowEndResults() {
+        console.log('clearing result sockets from game service');
+        this.socketHandler.socket.off(GameEvents.SendResults);
+        this.resultService.areSocketsInitialized = false;
+    }
+
     private handleTimerValue() {
         this.socketHandler.on(TimerEvents.Paused, (pauseState: boolean) => {
             this.gamePaused = pauseState;
@@ -172,11 +193,24 @@ export class GameClientService {
         });
     }
 
+    private clearTimerValue() {
+        this.socketHandler.socket.off(TimerEvents.Paused);
+        this.socketHandler.socket.off(TimerEvents.AlertModeStarted);
+        this.socketHandler.socket.off(TimerEvents.QuestionCountdownValue);
+        this.socketHandler.socket.off(TimerEvents.QuestionCountdownEnd);
+        this.socketHandler.socket.off(TimerEvents.Value);
+        this.socketHandler.socket.off(TimerEvents.End);
+    }
+
     private handleWaitingForCorrection() {
         this.socketHandler.on(GameEvents.WaitingForCorrection, () => {
             this.time = 0;
             this.choiceFeedback = ChoiceFeedback.AwaitingCorrection;
         });
+    }
+
+    private clearWaitingForCorrection() {
+        this.socketHandler.socket.off(GameEvents.WaitingForCorrection);
     }
 
     private goToNextQuestion() {
@@ -191,6 +225,11 @@ export class GameClientService {
             }
         });
     }
+
+    private clearGoToNextQuestion() {
+        this.socketHandler.socket.off(GameEvents.NextQuestion);
+    }
+
     private playerPointsUpdate() {
         this.socketHandler.on(GameEvents.PlayerPointsUpdate, (playerQuestionInfo: { points: number; isFirst: boolean; exactAnswer: boolean }) => {
             this.time = 0;
@@ -217,6 +256,10 @@ export class GameClientService {
         });
     }
 
+    private clearPlayerPointsUpdate() {
+        this.socketHandler.socket.off(GameEvents.PlayerPointsUpdate);
+    }
+
     private organizerHasDisconnected() {
         this.socketHandler.on(DisconnectEvents.OrganizerHasLeft, () => {
             this.router.navigate([AppRoute.HOME]);
@@ -225,6 +268,10 @@ export class GameClientService {
                 this.alertSoundPlayer.stop();
             }
         });
+    }
+
+    private clearOrganizerHasDisconnected() {
+        this.socketHandler.socket.off(DisconnectEvents.OrganizerHasLeft);
     }
 
     private showEndResults() {

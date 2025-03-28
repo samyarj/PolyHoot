@@ -46,7 +46,6 @@ export class ConsultPollPageComponent implements OnInit, OnDestroy {
                     const dateB = new Date(b.endDate!).getTime();
                     return dateA - dateB; // Tri ascendant (plus petite date en premier)
                 });
-            console.log(this.publishedPolls);
         });
     }
 

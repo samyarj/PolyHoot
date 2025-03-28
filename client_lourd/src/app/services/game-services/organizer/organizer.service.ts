@@ -70,6 +70,7 @@ export class OrganizerService {
     }
 
     handleSockets() {
+        console.log(this.socketsInitialized);
         if (!this.socketsInitialized) {
             this.handleQRLAnswer();
             this.handleEveryoneSubmitted();
@@ -82,6 +83,21 @@ export class OrganizerService {
         }
     }
 
+    clearSockets() {
+        this.clearQRLAnswer();
+        this.clearEveryoneSubmitted();
+        this.clearPlayerListSockets();
+        this.clearTimeSockets();
+        // this.clearResultsSockets(); // clears same event as resultService, will be cleared in navigation or results.
+        this.clearGameEnded();
+        this.socketsInitialized = false;
+    }
+
+    clearResultsSockets() {
+        console.log('clearing result sockets from organizer service');
+        this.socketHandlerService.socket.off(GameEvents.SendResults);
+        this.resultService.areSocketsInitialized = false;
+    }
     gradeAnswer(value: QRLGrade) {
         // this.updateTotalAnswersArray(value);
         this.updatePointsForPlayer(value);
@@ -164,11 +180,19 @@ export class OrganizerService {
         });
     }
 
+    private clearQRLAnswer() {
+        this.socketHandlerService.socket.off(GameEvents.QRLAnswerSubmitted);
+    }
+
     private handleEveryoneSubmitted() {
         this.socketHandlerService.on(GameEvents.EveryoneSubmitted, () => {
             this.gameInfo.time = 0;
             this.gameStatus = GameStatus.OrganizerCorrecting;
         });
+    }
+
+    private clearEveryoneSubmitted() {
+        this.socketHandlerService.socket.off(GameEvents.EveryoneSubmitted);
     }
 
     private handlePlayerStatus() {
@@ -180,11 +204,20 @@ export class OrganizerService {
         });
     }
 
+    private clearPlayerStatus() {
+        this.socketHandlerService.socket.off(GameEvents.PlayerStatusUpdate);
+    }
+
     private handlePlayerPoints() {
         this.socketHandlerService.on(GameEvents.OrganizerPointsUpdate, (player: { name: string; points: number }) => {
             this.playerListService.updatePlayerPoints(player.name, player.points);
         });
     }
+
+    private clearPlayerPoints() {
+        this.socketHandlerService.socket.off(GameEvents.OrganizerPointsUpdate);
+    }
+
     private handlePlayerList() {
         this.socketHandlerService.on(GameEvents.SendPlayerList, (playerList: PartialPlayer[]) => {
             if (playerList.length === 0) {
@@ -199,10 +232,20 @@ export class OrganizerService {
         });
     }
 
+    private clearPlayerList() {
+        this.socketHandlerService.socket.off(GameEvents.SendPlayerList);
+    }
+
     private handlePlayerListSockets() {
         this.handlePlayerStatus();
         this.handlePlayerPoints();
         this.handlePlayerList();
+    }
+
+    private clearPlayerListSockets() {
+        this.clearPlayerStatus();
+        this.clearPlayerPoints();
+        this.clearPlayerList();
     }
 
     private handleTimerValue() {
@@ -221,6 +264,13 @@ export class OrganizerService {
         });
     }
 
+    private clearTimerValue() {
+        this.socketHandlerService.socket.off(TimerEvents.Value);
+        this.socketHandlerService.socket.off(TimerEvents.QuestionCountdownValue);
+        this.socketHandlerService.socket.off(TimerEvents.Paused);
+        this.socketHandlerService.socket.off(TimerEvents.AlertModeStarted);
+    }
+
     private handleTimerEnd() {
         this.socketHandlerService.on(TimerEvents.QuestionCountdownEnd, () => {
             this.alertSoundPlayer.stop();
@@ -231,10 +281,19 @@ export class OrganizerService {
         });
     }
 
+    private clearTimerEnd() {
+        this.socketHandlerService.socket.off(TimerEvents.QuestionCountdownEnd);
+        this.socketHandlerService.socket.off(TimerEvents.End);
+    }
+
     private handleQuestionsLength() {
         this.socketHandlerService.on(GameEvents.QuestionsLength, (length: number) => {
             this.questionsLength = length;
         });
+    }
+
+    private clearQuestionsLength() {
+        this.socketHandlerService.socket.off(GameEvents.QuestionsLength);
     }
 
     private handleNextQuestion() {
@@ -260,11 +319,23 @@ export class OrganizerService {
         });
     }
 
+    private clearNextQuestion() {
+        this.socketHandlerService.socket.off(GameEvents.ProceedToNextQuestion);
+        this.socketHandlerService.socket.off(GameEvents.NextQuestion);
+    }
+
     private handleTimeSockets() {
         this.handleTimerValue();
         this.handleTimerEnd();
         this.handleQuestionsLength();
         this.handleNextQuestion();
+    }
+
+    private clearTimeSockets() {
+        this.clearTimerValue();
+        this.clearTimerEnd();
+        this.clearQuestionsLength();
+        this.clearNextQuestion();
     }
 
     private handleResultsSockets() {
@@ -282,5 +353,9 @@ export class OrganizerService {
             this.messageHandlerService.popUpErrorDialog('Les joueurs ont tous quitté la partie!');
             this.alertSoundPlayer.stop();
         });
+    }
+
+    private clearGameEnded() {
+        this.socketHandlerService.socket.off(ConnectEvents.AllPlayersLeft);
     }
 }

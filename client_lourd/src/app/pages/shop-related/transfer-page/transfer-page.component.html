@@ -2,15 +2,25 @@
     <div class="content-wrapper">
         <div class="transfer-container">
             <div class="tabs-container">
-                <div class="tab" [class.active]="currentTab === 0" (click)="currentTab = 0">
+                <div class="tab" [class.active]="currentTab === 0" [class.selected]="currentTab !== 0" (click)="currentTab = 0">
                     <span class="tab-number">1</span>
                     <span class="tab-title">Choisir le destinataire</span>
                 </div>
-                <div class="tab" [class.active]="currentTab === 1" (click)="canProceedToNextTab() && currentTab !== 1 ? (currentTab = 1) : null">
+                <div
+                    class="tab"
+                    [class.active]="currentTab === 1"
+                    [class.selected]="canProceedToNextTab() && currentTab !== 1"
+                    (click)="canProceedToNextTab() && currentTab !== 1 ? (currentTab = 1) : null"
+                >
                     <span class="tab-number">2</span>
                     <span class="tab-title">Montant des coins</span>
                 </div>
-                <div class="tab" [class.active]="currentTab === 2" (click)="canProceedToNextTab() && currentTab === 1 ? (currentTab = 2) : null">
+                <div
+                    class="tab"
+                    [class.active]="currentTab === 2"
+                    [class.selected]="canProceedToNextTab() && currentTab === 1"
+                    (click)="canProceedToNextTab() && currentTab === 1 ? (currentTab = 2) : null"
+                >
                     <span class="tab-number">3</span>
                     <span class="tab-title">Finaliser</span>
                 </div>
@@ -37,21 +47,19 @@
                         <h3 *ngIf="searchQuery">Résultats de la recherche</h3>
                         <div *ngIf="searchQuery" class="search-results">
                             <div
-                                *ngFor="let user of searchResults"
+                                *ngFor="let friend of searchResults"
                                 class="friend-item"
-                                [class.selected]="selectedRecipient?.id === user.id"
-                                (click)="selectRecipient(user)"
+                                [class.selected]="selectedRecipient?.id === friend.id"
+                                (click)="selectRecipient(friend)"
                             >
                                 <div class="avatar-banner-container">
                                     <app-avatar-banner
-                                        [avatarUrl]="user.avatarEquipped"
-                                        [bannerUrl]="user.borderEquipped"
+                                        [avatarUrl]="friend.avatarEquipped"
+                                        [bannerUrl]="friend.borderEquipped"
                                         class="avatar"
                                     ></app-avatar-banner>
-                                    <img class="friend-avatar" [src]="user.avatarEquipped || 'assets/images/default-avatar.png'" alt="Avatar" />
-                                    <img *ngIf="user.borderEquipped" class="friend-banner" [src]="user.borderEquipped" alt="Banner" />
                                 </div>
-                                <span class="username">{{ user.username }}</span>
+                                <span class="username">{{ friend.username }}</span>
                             </div>
                         </div>
 

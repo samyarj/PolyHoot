@@ -20,6 +20,7 @@ export class ResultsService {
     playerList: PlayerData[];
     nbPlayers: number;
     resultsReady: boolean = false;
+    areSocketsInitialized: boolean = false;
 
     constructor(private socketHandlerService: SocketClientService) {
         this.resetAttributes();
@@ -34,10 +35,20 @@ export class ResultsService {
     }
 
     handleResultsSockets() {
-        this.socketHandlerService.on(GameEvents.SendResults, (data: PlayerData[]) => {
-            this.playerList = data;
-            this.setAttributes();
-        });
+        console.log(this.areSocketsInitialized);
+        if (!this.areSocketsInitialized) {
+            this.socketHandlerService.on(GameEvents.SendResults, (data: PlayerData[]) => {
+                this.playerList = data;
+                this.setAttributes();
+            });
+            this.areSocketsInitialized = true;
+        }
+    }
+
+    clearResultsSockets() {
+        console.log('clearing result sockets from result service');
+        this.socketHandlerService.socket.off(GameEvents.SendResults);
+        this.areSocketsInitialized = false;
     }
 
     disconnectUser() {

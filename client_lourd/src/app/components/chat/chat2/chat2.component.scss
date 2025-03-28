@@ -227,7 +227,8 @@ div.time {
 
 .loading-container .spinner-border {
     margin-bottom: 15px;
-    color: var(--tertiary-color);
+    border-color: var(--tertiary-color);
+    border-right-color: transparent !important;
 }
 
 .chat-header {

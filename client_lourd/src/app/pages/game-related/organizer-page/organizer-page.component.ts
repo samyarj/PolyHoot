@@ -21,6 +21,7 @@ export class OrganizerPageComponent implements OnDestroy {
         // que reload la page
         if (localStorage.getItem('navigatedFromUnload') === 'true') {
             this.onUnload();
+            console.log('SIGMA');
             return;
         }
         this.organizerService.initializeAttributes();
@@ -90,8 +91,10 @@ export class OrganizerPageComponent implements OnDestroy {
 
         if (location !== AppRoute.RESULTS || shouldGoHome) {
             this.organizerService.signalUserDisconnect();
+            this.organizerService.clearResultsSockets();
             this.router.navigate([AppRoute.HOME]);
         }
+        this.organizerService.clearSockets();
     }
 
     showResults() {

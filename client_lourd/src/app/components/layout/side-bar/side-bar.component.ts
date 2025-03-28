@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { doc, FieldPath, Firestore, getDoc, onSnapshot, Unsubscribe } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { FirebaseChatMessage } from '@app/interfaces/chat-message';
@@ -19,7 +19,7 @@ import { Observable, Subscription } from 'rxjs';
     templateUrl: './side-bar.component.html',
     styleUrls: ['./side-bar.component.scss'],
 })
-export class SideBarComponent implements OnInit, OnDestroy {
+export class SideBarComponent implements OnDestroy {
     globalChatMessages: FirebaseChatMessage[] = [];
     globalChatMessagesLoading: boolean = true;
     selectedChannelMessages: FirebaseChatMessage[] = [];
@@ -55,6 +55,7 @@ export class SideBarComponent implements OnInit, OnDestroy {
     private gameChatSubscription: Subscription;
     private chatEventsSubscription: Subscription;
     isGameChatInitialized: boolean = false;
+    isWorkingWithChannel: boolean = false;
     @ViewChild('tab1Link') tab1Link: any;
     activeTab: number = 1;
     constructor(
@@ -67,26 +68,6 @@ export class SideBarComponent implements OnInit, OnDestroy {
         private chatService: ChatService,
     ) {
         this.user$ = this.authService.user$;
-    }
-
-    get isOnGamePage() {
-        return this.headerService.isGameRelatedRoute;
-    }
-
-    setActiveTab(tab: number) {
-        this.activeTab = tab;
-    }
-
-    handleChildAction() {
-        console.log('Action executed in the parent component!');
-        if (this.activeTab === 2) this.tab1Link.nativeElement.click();
-    }
-
-    getBoundHandleChildAction() {
-        return this.handleChildAction.bind(this); // Bind to the parent's context
-    }
-
-    ngOnInit(): void {
         // Subscribe to live chat messages for the global chat
         this.subscribeToGlobalMessages();
         // Subscribe to chat channels
@@ -130,6 +111,27 @@ export class SideBarComponent implements OnInit, OnDestroy {
         if (this.isOnGamePage) {
             this.initializeGameChat();
         }
+    }
+
+    get isOnGamePage() {
+        return this.headerService.isGameRelatedRoute;
+    }
+
+    get isOnResultsPage() {
+        return this.headerService.isOnResultsPage;
+    }
+
+    setActiveTab(tab: number) {
+        this.activeTab = tab;
+    }
+
+    handleChildAction() {
+        console.log('Action executed in the parent component!');
+        if (this.activeTab === 2) this.tab1Link.nativeElement.click();
+    }
+
+    getBoundHandleChildAction() {
+        return this.handleChildAction.bind(this); // Bind to the parent's context
     }
 
     private setupRealtimeUserUpdates(uid: string) {
@@ -282,8 +284,9 @@ export class SideBarComponent implements OnInit, OnDestroy {
     }
 
     async createChannel(): Promise<void> {
-        if (this.newChannelName.trim()) {
+        if (this.newChannelName.trim() && !this.isWorkingWithChannel) {
             try {
+                this.isWorkingWithChannel = true;
                 const user = this.authService.getUser();
                 if (!user) {
                     throw new Error('User is not authenticated');
@@ -295,6 +298,7 @@ export class SideBarComponent implements OnInit, OnDestroy {
                     setTimeout(() => {
                         this.errorMessage = '';
                     }, 4000);
+                    this.isWorkingWithChannel = false;
                     return;
                 }
 
@@ -311,59 +315,78 @@ export class SideBarComponent implements OnInit, OnDestroy {
                     tab3.click();
                 }
                 this.subscribeToSelectedChannelMessages(this.selectedChannel);
+                this.isWorkingWithChannel = false;
             } catch (error) {
                 console.error('Error creating channel:', error);
+                this.isWorkingWithChannel = false;
             }
         }
     }
 
     async selectChannel(channel: string): Promise<void> {
-        try {
-            await this.firebaseChatService.joinChannel(channel);
-            this.selectedChannel = channel;
-            this.selectedChannelMessages = []; // Clear the messages array
-            this.selectedChannelMessagesLoading = true; // Set loading state
-            // Switch to the third tab
-            const tab3 = document.querySelector('[href="#tab3"]') as HTMLElement;
-            if (tab3) {
-                tab3.click();
+        if (!this.isWorkingWithChannel) {
+            this.isWorkingWithChannel = true;
+            try {
+                await this.firebaseChatService.joinChannel(channel);
+                this.selectedChannel = channel;
+                this.selectedChannelMessages = []; // Clear the messages array
+                this.selectedChannelMessagesLoading = true; // Set loading state
+                // Switch to the third tab
+                const tab3 = document.querySelector('[href="#tab3"]') as HTMLElement;
+                if (tab3) {
+                    tab3.click();
+                }
+                this.subscribeToSelectedChannelMessages(channel);
+                this.isWorkingWithChannel = false;
+            } catch (error) {
+                console.error('Failed to join channel:', error);
+                this.isWorkingWithChannel = false;
             }
-            this.subscribeToSelectedChannelMessages(channel);
-        } catch (error) {
-            console.error('Failed to join channel:', error);
         }
     }
 
-    async deleteChannel(channel: string): Promise<void> {
-        try {
-            await this.firebaseChatService.deleteChannel(channel);
-            this.channels = this.channels.filter((c) => c.name !== channel);
-            this.joinedChannels = this.joinedChannels.filter((c) => c !== channel);
+    async deleteChannel(channel: string, event: Event): Promise<void> {
+        if (!this.isWorkingWithChannel) {
+            this.isWorkingWithChannel = true;
+            try {
+                event.stopPropagation();
+                await this.firebaseChatService.deleteChannel(channel);
+                this.channels = this.channels.filter((c) => c.name !== channel);
+                this.joinedChannels = this.joinedChannels.filter((c) => c !== channel);
 
-            // If the deleted channel is the currently selected channel, clear the selected channel
-            if (this.selectedChannel === channel) {
-                this.selectedChannel = null;
-                this.selectedChannelMessages = [];
-                this.selectedChannelMessagesLoading = false;
+                // If the deleted channel is the currently selected channel, clear the selected channel
+                if (this.selectedChannel === channel) {
+                    this.selectedChannel = null;
+                    this.selectedChannelMessages = [];
+                    this.selectedChannelMessagesLoading = false;
+                }
+                this.isWorkingWithChannel = false;
+            } catch (error) {
+                console.error('Failed to delete channel:', error);
+                this.isWorkingWithChannel = false;
             }
-        } catch (error) {
-            console.error('Failed to delete channel:', error);
         }
     }
 
-    async quitChannel(channel: string): Promise<void> {
-        try {
-            await this.firebaseChatService.quitChannel(channel);
-            this.joinedChannels = this.joinedChannels.filter((c) => c !== channel);
+    async quitChannel(channel: string, event: Event): Promise<void> {
+        if (!this.isWorkingWithChannel) {
+            this.isWorkingWithChannel = true;
+            try {
+                event.stopPropagation();
+                await this.firebaseChatService.quitChannel(channel);
+                this.joinedChannels = this.joinedChannels.filter((c) => c !== channel);
 
-            // If the quit channel is the currently selected channel, clear the selected channel
-            if (this.selectedChannel === channel) {
-                this.selectedChannel = null;
-                this.selectedChannelMessages = [];
-                this.selectedChannelMessagesLoading = false;
+                // If the quit channel is the currently selected channel, clear the selected channel
+                if (this.selectedChannel === channel) {
+                    this.selectedChannel = null;
+                    this.selectedChannelMessages = [];
+                    this.selectedChannelMessagesLoading = false;
+                }
+                this.isWorkingWithChannel = false;
+            } catch (error) {
+                console.error('Failed to quit channel:', error);
+                this.isWorkingWithChannel = false;
             }
-        } catch (error) {
-            console.error('Failed to quit channel:', error);
         }
     }
 
