@@ -21,7 +21,6 @@ export class QuizService {
     getAllQuizzes(): Observable<Quiz[]> {
         return this.http.get<Quiz[]>(this.baseUrl).pipe(
             map((quizzes) => {
-                console.log('a get tous les quizzes');
                 this.filterQuizzes(quizzes);
                 return quizzes;
             }),
@@ -42,7 +41,6 @@ export class QuizService {
     createQuiz(quizData: unknown): Observable<Quiz[]> {
         return this.http.post<Quiz[]>(`${this.baseUrl}/create`, quizData).pipe(
             map((quizzes) => {
-                console.log('a recu la reponse du create ', quizzes);
                 this.filterQuizzes(quizzes);
                 return quizzes;
             }),

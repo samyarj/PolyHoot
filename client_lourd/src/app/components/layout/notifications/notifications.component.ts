@@ -48,6 +48,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         }
     }
     ngOnInit(): void {
+        console.log('1');
         if (this.user && this.user.uid) {
             // Combiner les deux observables
             const combinedSubscription = combineLatest([
@@ -70,7 +71,15 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                         poll,
                     }));
                 } else if (this.user?.role === 'admin') {
-                    this.publishedPolls = publishedPolls.filter((poll) => poll.expired);
+                    this.publishedPolls = publishedPolls
+                        .filter((poll) => poll.expired)
+                        .sort((a, b) => {
+                            // Convertir les dates en timestamps pour comparaison
+                            const dateA = new Date(a.endDate!).getTime();
+                            const dateB = new Date(b.endDate!).getTime();
+                            return dateB - dateA; // Tri ascendant (plus petite date en premier)
+                        });
+                    this.publishedPolls.forEach((poll) => console.log(poll.endDate));
                     this.notifications = this.publishedPolls.map((poll) => ({
                         title: `${poll.title}`,
                         poll,

@@ -21,7 +21,6 @@ export class OrganizerPageComponent implements OnDestroy {
         // que reload la page
         if (localStorage.getItem('navigatedFromUnload') === 'true') {
             this.onUnload();
-            console.log('SIGMA');
             return;
         }
         this.organizerService.initializeAttributes();

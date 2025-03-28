@@ -32,7 +32,6 @@ export class ConsultPollPageComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         // S'abonner aux changements dans les sondages
         this.pollsSubscription = this.consultPollService.watchPolls().subscribe((polls) => {
-            console.log(polls);
             this.polls = polls;
         });
 
