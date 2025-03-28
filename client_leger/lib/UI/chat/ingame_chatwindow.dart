@@ -1,13 +1,17 @@
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/global/avatar_banner_widget.dart';
 import 'package:client_leger/backend-communication-services/chat/ingame_chat_service.dart';
+import 'package:client_leger/backend-communication-services/report/report_service.dart';
 import 'package:client_leger/models/ingame_chat_messages.dart';
 import 'package:client_leger/providers/user_provider.dart';
+import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:toastification/toastification.dart';
 
 class InGameChatWindow extends ConsumerStatefulWidget {
   const InGameChatWindow({super.key});
@@ -20,6 +24,7 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   final InGameChatService _inGameChatManager = InGameChatService();
+  final ReportService _reportService = ReportService();
 
   @override
   void initState() {
@@ -51,6 +56,24 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
       }
     }
     _textController.clear();
+  }
+
+  _reportPlayer(String? uid) async {
+    if (uid == null) {
+      return;
+    }
+    final bool? isReported = await _reportService.reportPlayer(uid);
+    if (isReported == null && mounted) {
+      showToast(context, "Une erreur a eu lieu",
+          type: ToastificationType.error);
+    } else if (isReported! && mounted) {
+      showToast(context,
+          'Merci pour votre contribution à la bonne atmosphère du jeu. Le joueur est signalé.',
+          type: ToastificationType.success);
+    } else if (mounted) {
+      showToast(context, 'Vous avez déjà signalé ce joueur.',
+          type: ToastificationType.info);
+    }
   }
 
   @override
@@ -263,6 +286,18 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                                                 false, // Keeps text in one line
                                                           ),
                                                         ),
+                                                        if (!isUserMessage)
+                                                          IconButton(
+                                                            icon: Icon(
+                                                                FontAwesomeIcons
+                                                                    .triangleExclamation,
+                                                                color: colorScheme
+                                                                    .onSecondary),
+                                                            onPressed: () =>
+                                                                _reportPlayer(
+                                                                    message
+                                                                        .uid),
+                                                          ),
                                                       ],
                                                     ),
                                                     SizedBox(height: 8),

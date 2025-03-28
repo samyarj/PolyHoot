@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
+import 'package:client_leger/backend-communication-services/chat/firebase_chat_service.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/report/report_service.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
@@ -30,6 +31,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
   StreamSubscription<DocumentSnapshot>? _userDocSubscription;
   StreamSubscription<User?>? _tokenSubscription;
   final ReportService _reportService = ReportService();
+  final FirebaseChatService _firebaseChatService = FirebaseChatService();
   String? currentToken;
 
   AuthNotifier() : super(const AsyncValue.loading()) {
@@ -183,7 +185,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
           );
         });
 
-        _reportService.isBanned = true;
+        state = const AsyncValue.data(null);
 
         return;
       }
@@ -245,9 +247,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
         final reportState = await isUserBanned(userCredential.user?.uid);
 
         if (reportState != null && reportState.isBanned) {
-          await GoogleSignIn().signOut();
-          FirebaseAuth.instance.signOut();
-          WidgetsBinding.instance.addPostFrameCallback((_) {
+          AppLogger.w(
+              "User is banned: ${reportState.message}, will terminate sign in process");
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            await FirebaseAuth.instance.signOut();
+            await GoogleSignIn().signOut();
             showToast(
               context,
               reportState.message,
@@ -255,6 +259,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
               duration: const Duration(seconds: 5),
             );
           });
+          state = const AsyncValue.data(null);
+
           return;
         }
       }
@@ -343,19 +349,24 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       }
 
       // Sign out regardless of whether the Firestore update succeeded
-      await FirebaseAuth.instance.signOut();
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await FirebaseAuth.instance.signOut();
+      });
 
       // Update state
       state = const AsyncValue.data(null);
       WebSocketManager.instance.disconnectFromSocket();
       isLoggedIn.value = false;
       _reportService.resetParam();
+      _firebaseChatService.clearUserDetailsCache();
     } catch (e, stack) {
       AppLogger.e("Logout error: $e");
 
       // Even if there's an error, try to sign out and clean up state
       try {
-        await FirebaseAuth.instance.signOut();
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          await FirebaseAuth.instance.signOut();
+        });
       } catch (_) {
         // Ignore any error here
       }
@@ -364,6 +375,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       WebSocketManager.instance.disconnectFromSocket();
       isLoggedIn.value = false;
       _reportService.resetParam();
+      _firebaseChatService.clearUserDetailsCache();
 
       throw Exception(getCustomError(e));
     }

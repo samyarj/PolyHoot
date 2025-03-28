@@ -5,6 +5,7 @@ import 'package:client_leger/models/chat_message.dart';
 import 'package:client_leger/models/user.dart' as user_model;
 import 'package:client_leger/utilities/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
 class FirebaseChatService {
@@ -28,6 +29,14 @@ class FirebaseChatService {
   CollectionReference get _usersCollection => _firestore.collection('users');
 
   static const int messagesLimit = 8;
+
+  Map<String, user_model.PartialUser> _userDetailsCache =
+      {}; // key = uid, value = border + avatar + isAdmin
+  // to avoid excessive refetches
+
+  void clearUserDetailsCache() {
+    _userDetailsCache.clear();
+  }
 
   Future<void> sendMessage(
       String currentUserUid, String channel, String message) async {
@@ -134,7 +143,8 @@ class FirebaseChatService {
   }
 
   Future<Map<String, user_model.PartialUser>> fetchUserDetails(
-      List<String> userIds) async {
+    List<String> userIds,
+  ) async {
     AppLogger.d("In fetchUserDetails");
 
     try {
@@ -142,10 +152,18 @@ class FirebaseChatService {
 
       final userFetches = userIds.map(
         (uid) async {
-          final userDoc = await _usersCollection.doc(uid).get();
-          if (userDoc.exists) {
-            userDetails[uid] = user_model.PartialUser.fromJson(
-                userDoc.data() as Map<String, dynamic>);
+          // Check if the user details are already cached
+          if (_userDetailsCache.containsKey(uid)) {
+            userDetails[uid] = _userDetailsCache[uid]!;
+            AppLogger.w("User details for $uid fetched from cache");
+          } else if (FirebaseAuth.instance.currentUser != null) {
+            final userDoc = await _usersCollection.doc(uid).get();
+            if (userDoc.exists) {
+              userDetails[uid] = user_model.PartialUser.fromJson(
+                  userDoc.data() as Map<String, dynamic>);
+              // Cache the user details
+              _userDetailsCache[uid] = userDetails[uid]!;
+            }
           }
         },
       );
