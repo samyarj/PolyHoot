@@ -75,6 +75,13 @@ class AdminUsersNotifier extends StateNotifier<AdminUsersState> {
               .map((doc) {
                 try {
                   final data = doc.data();
+
+                  if (data.isEmpty) {
+                    // we should not enter here, but just in case
+                    AppLogger.e("User data is empty for doc: ${doc.id}");
+                    return null;
+                  }
+
                   final user = User.fromJson(data);
 
                   return UserWithId(
