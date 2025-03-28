@@ -117,6 +117,7 @@ class FirebaseChatService {
           msg.avatar = users[msg.uid]?.avatarEquipped ??
               'https://res.cloudinary.com/dtu6fkkm9/image/upload/v1737478954/default-avatar_qcaycl.jpg';
           msg.border = users[msg.uid]?.borderEquipped;
+          msg.isAdmin = users[msg.uid]?.isAdmin;
         }
 
         newMessages.sort((ChatMessage a, ChatMessage b) =>
@@ -189,6 +190,7 @@ class FirebaseChatService {
         msg.avatar = users[msg.uid]?.avatarEquipped ??
             'https://res.cloudinary.com/dtu6fkkm9/image/upload/v1737478954/default-avatar_qcaycl.jpg';
         msg.border = users[msg.uid]?.borderEquipped;
+        msg.isAdmin = users[msg.uid]?.isAdmin;
       }
 
       olderMessages.sort(

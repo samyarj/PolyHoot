@@ -5,13 +5,17 @@ import 'package:client_leger/backend-communication-services/auth/auth_service.da
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/report/report_service.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
+import 'package:client_leger/models/report/report_state.dart';
 import 'package:client_leger/models/user.dart' as user_model;
+import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:toastification/toastification.dart';
 
 // User state provider
 final userProvider =
@@ -152,16 +156,34 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
     }
   }
 
-  Future<void> signIn(String identifier, String password) async {
+  Future<void> signIn(
+      String identifier, String password, BuildContext context) async {
     state = const AsyncValue.loading();
     try {
       AppLogger.d("Signing in...");
       final email = await auth_service.getEmailFromIdentifier(identifier);
 
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      final reportState = await isUserBanned(userCredential.user?.uid);
+
+      if (reportState != null && reportState.isBanned) {
+        await FirebaseAuth.instance.signOut();
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showToast(
+            context,
+            reportState.message,
+            type: ToastificationType.error,
+            duration: const Duration(seconds: 5),
+          );
+        });
+        return;
+      }
 
       await fetchUser();
       isLoggedIn.value = true;
@@ -170,6 +192,19 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       state = AsyncValue.error(e, stack);
       isLoggedIn.value = false;
       throw Exception(getCustomError(e));
+    }
+  }
+
+  Future<ReportState?> isUserBanned(String? uid) async {
+    if (uid == null) {
+      return null;
+    }
+    try {
+      final reportState = await _reportService.getReportState(uid);
+      return reportState;
+    } catch (e) {
+      AppLogger.e("Error fetching report state: $e");
+      return ReportState(isBanned: false, message: "");
     }
   }
 
@@ -194,12 +229,32 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
     }
   }
 
-  Future<void> signWithGoogle({bool isLogin = true}) async {
+  Future<void> signWithGoogle(
+      {bool isLogin = true, BuildContext? context}) async {
     state = const AsyncValue.loading();
     try {
       AppLogger.d("Signing in with Google...");
 
-      await auth_service.signInWithGoogle(isLogin: isLogin);
+      final userCredential =
+          await auth_service.signInWithGoogle(isLogin: isLogin);
+
+      if (isLogin && context != null) {
+        final reportState = await isUserBanned(userCredential.user?.uid);
+
+        if (reportState != null && reportState.isBanned) {
+          await GoogleSignIn().signOut();
+          FirebaseAuth.instance.signOut();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            showToast(
+              context,
+              reportState.message,
+              type: ToastificationType.error,
+              duration: const Duration(seconds: 5),
+            );
+          });
+          return;
+        }
+      }
 
       await fetchUser();
       isLoggedIn.value = true;

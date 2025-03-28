@@ -108,9 +108,11 @@ class PartialUser {
   final String? username;
   final String? avatarEquipped;
   final String? borderEquipped;
+  final bool isAdmin;
 
   PartialUser(
       {required this.uid,
+      required this.isAdmin,
       this.avatarEquipped,
       this.borderEquipped,
       this.username});
@@ -122,16 +124,7 @@ class PartialUser {
       avatarEquipped: data['avatarEquipped'],
       borderEquipped: data['borderEquipped'],
       username: data['username'],
+      isAdmin: data['role'] == 'player' ? false : true,
     );
-  }
-
-  // Convert to Map (for Firestore or JSON serialization)
-  Map<String, dynamic> toMap() {
-    return {
-      'uid': uid,
-      'avatarEquipped': avatarEquipped,
-      'borderEquipped': borderEquipped,
-      'username': username,
-    };
   }
 }

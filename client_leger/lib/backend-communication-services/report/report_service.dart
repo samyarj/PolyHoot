@@ -25,14 +25,16 @@ class ReportService {
   behaviourWarning(BuildContext context) {
     if (!isWarned) {
       isWarned = true;
-      showToast(
-        context,
-        "Attention à votre comportement, plusieurs personnes vous ont signalé. Vous serez banni si vous continuez.",
-        type: ToastificationType.warning,
-        duration: const Duration(
-          seconds: 5,
-        ),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showToast(
+          context,
+          "Attention à votre comportement, plusieurs personnes vous ont signalé. Vous serez banni si vous continuez.",
+          type: ToastificationType.warning,
+          duration: const Duration(
+            seconds: 5,
+          ),
+        );
+      });
     }
   }
 
@@ -42,14 +44,16 @@ class ReportService {
   }
 
   banInfo(String message, BuildContext context) {
-    showToast(
-      context,
-      message,
-      type: ToastificationType.error,
-      duration: const Duration(
-        seconds: 5,
-      ),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showToast(
+        context,
+        message,
+        type: ToastificationType.error,
+        duration: const Duration(
+          seconds: 5,
+        ),
+      );
+    });
   }
 
   Future<bool?> reportPlayer(String uid) async {
@@ -76,7 +80,7 @@ class ReportService {
 
   Future<ReportState?> getReportState(String? uid) async {
     AppLogger.i("Getting report state for uid: $uid");
-    
+
     if (uid == null) return null;
 
     final tokenValue = await FirebaseAuth.instance.currentUser?.getIdToken();
@@ -88,7 +92,7 @@ class ReportService {
     final response = await http.post(
       Uri.parse('$baseUrl/state'),
       headers: headers,
-      body: jsonEncode({uid}),
+      body: jsonEncode({"uid": uid}),
     );
 
     AppLogger.w(

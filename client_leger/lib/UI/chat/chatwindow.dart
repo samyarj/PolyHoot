@@ -1,16 +1,19 @@
 import 'dart:async';
-
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/global/avatar_banner_widget.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
+import 'package:client_leger/backend-communication-services/report/report_service.dart';
 import 'package:client_leger/business/channel_manager.dart';
 import 'package:client_leger/models/chat_message.dart';
 import 'package:client_leger/providers/user_provider.dart';
+import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:toastification/toastification.dart';
 
 class ChatWindow extends ConsumerStatefulWidget {
   const ChatWindow({super.key, required this.channel});
@@ -29,6 +32,7 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
   bool isLoadingInitialMessages = true;
   StreamSubscription<List<ChatMessage>>? _messagesSubscription;
   bool _isSending = false;
+  final ReportService _reportService = ReportService();
 
   @override
   void initState() {
@@ -111,6 +115,21 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
         timestamp.toDate().toUtc().subtract(Duration(hours: 4))); // UTC-5
   }
 
+  _reportPlayer(String uid) async {
+    final bool? isReported = await _reportService.reportPlayer(uid);
+    if (isReported == null && mounted) {
+      showToast(context, "Une erreur a eu lieu",
+          type: ToastificationType.error);
+    } else if (isReported! && mounted) {
+      showToast(context,
+          'Merci pour votre contribution à la bonne atmosphère du jeu. Le joueur est signalé.',
+          type: ToastificationType.success);
+    } else if (mounted) {
+      showToast(context, 'Vous avez déjà signalé ce joueur.',
+          type: ToastificationType.info);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final userState = ref.read(userProvider);
@@ -153,6 +172,8 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                 _allMessagesDisplayed[index];
                                             final isUserMessage =
                                                 message.uid == user!.uid;
+                                            final bool isAdmin =
+                                                message.isAdmin ?? false;
                                             final isSystemMessage =
                                                 message.username == 'System';
                                             if (isSystemMessage) {
@@ -324,11 +345,8 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                                     "Unknown",
                                                                 style:
                                                                     TextStyle(
-                                                                  color: isUserMessage
-                                                                      ? colorScheme
-                                                                          .onSecondary
-                                                                      : colorScheme
-                                                                          .onSurface,
+                                                                  color: colorScheme
+                                                                      .onSecondary,
                                                                   fontSize: 18,
                                                                   fontWeight:
                                                                       FontWeight
@@ -341,6 +359,25 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                                     false, // Keeps text in one line
                                                               ),
                                                             ),
+                                                            if (isAdmin)
+                                                              Icon(
+                                                                  FontAwesomeIcons
+                                                                      .shieldHalved,
+                                                                  color: colorScheme
+                                                                      .onSecondary),
+                                                            if (!isUserMessage &&
+                                                                !isAdmin)
+                                                              IconButton(
+                                                                icon: Icon(
+                                                                    FontAwesomeIcons
+                                                                        .triangleExclamation,
+                                                                    color: colorScheme
+                                                                        .onSecondary),
+                                                                onPressed: () =>
+                                                                    _reportPlayer(
+                                                                        message
+                                                                            .uid),
+                                                              ),
                                                           ],
                                                         ),
                                                         SizedBox(height: 8),

@@ -26,11 +26,12 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     super.dispose();
   }
 
-  Future<void> signIn() async {
+  Future<void> signIn(BuildContext context) async {
     try {
       await ref.read(userProvider.notifier).signIn(
             _identifierController.text.trim(),
             _passwordController.text.trim(),
+            context,
           );
     } catch (e) {
       if (context.mounted) {
@@ -39,9 +40,9 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     }
   }
 
-  void loginWithGoogle() async {
+  void loginWithGoogle(BuildContext context) async {
     try {
-      await ref.read(userProvider.notifier).signWithGoogle();
+      await ref.read(userProvider.notifier).signWithGoogle(context: context);
     } catch (e) {
       if (!mounted) return;
       showErrorDialog(context, getCustomError(e));
@@ -140,7 +141,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
               },
               onFieldSubmitted: (_) async {
                 if (_formKey.currentState!.validate()) {
-                  await signIn();
+                  await signIn(context);
                 }
               },
             ),
@@ -155,7 +156,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                     ? null
                     : () async {
                         if (_formKey.currentState!.validate()) {
-                          await signIn();
+                          await signIn(context);
                         }
                       },
                 style: customButtonStyle,
@@ -270,7 +271,9 @@ class _LoginFormState extends ConsumerState<LoginForm> {
               width: double.infinity,
               height: 40,
               child: OutlinedButton.icon(
-                onPressed: userState is AsyncLoading ? null : loginWithGoogle,
+                onPressed: userState is AsyncLoading
+                    ? null
+                    : () => loginWithGoogle(context),
                 icon: const FaIcon(FontAwesomeIcons.google, size: 14),
                 label: const Text(
                   'Se connecter avec Google',
