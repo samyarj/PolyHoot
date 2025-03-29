@@ -140,7 +140,6 @@ class _AppBarRightSectionState extends State<AppBarRightSection> {
                             height: 1,
                             color: colorScheme.tertiary.withOpacity(0.5)),
                       ),
-                      // Regular menu items
                       PopupMenuItem<int>(
                         value: 2,
                         child: Row(
@@ -237,29 +236,26 @@ class _AppBarRightSectionState extends State<AppBarRightSection> {
                           bottomLeft: Radius.circular(6),
                         ),
                       ),
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2), // Reduced vertical padding
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           AvatarBannerWidget(
                             avatarUrl: user?.avatarEquipped,
                             bannerUrl: user?.borderEquipped,
-                            size: 36, // Slightly smaller
+                            size: 36,
                             avatarFit: BoxFit.cover,
                           ),
                           SizedBox(width: 8),
                           Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment:
-                                MainAxisAlignment.center, // Center vertically
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 user?.username ?? 'Guest',
                                 style: TextStyle(
-                                  fontSize: 15, // Slightly smaller
+                                  fontSize: 15,
                                   fontWeight: FontWeight.bold,
                                   color: colorScheme.onPrimary,
                                 ),
@@ -267,7 +263,7 @@ class _AppBarRightSectionState extends State<AppBarRightSection> {
                               Text(
                                 'Coins: ${user?.coins ?? 0}',
                                 style: TextStyle(
-                                  fontSize: 13, // Slightly smaller
+                                  fontSize: 13,
                                   color: colorScheme.onPrimary,
                                 ),
                               ),

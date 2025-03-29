@@ -74,7 +74,7 @@ class AdminHomePage extends StatelessWidget {
                   SizedBox(width: 20),
                   ElevatedButton(
                     onPressed: () => {
-                      // TODO: Navigate to the poll interface
+                      GoRouter.of(context).go(Paths.adminHistoryPolls),
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: colorScheme.primary,

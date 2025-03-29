@@ -28,61 +28,94 @@ class QRScannerScreen extends ConsumerStatefulWidget {
 
 class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
   final FriendService _friendService = FriendService();
-  final MobileScannerController _controller = MobileScannerController();
+  // Configure camera controller with facing and rotation settings
+  late MobileScannerController _controller;
   bool _hasPermission = false;
   bool _isProcessing = false;
   bool _hasProcessedCode = false;
+  bool _isCheckingPermission = true;
 
   @override
   void initState() {
     super.initState();
-    _checkPermission();
+    _initializeCamera();
+  }
+
+  Future<void> _initializeCamera() async {
+    setState(() {
+      _isCheckingPermission = true;
+    });
+
+    final status = await Permission.camera.status;
+
+    if (status.isGranted) {
+      _setupCameraController();
+    } else {
+      final result = await Permission.camera.request();
+      if (result.isGranted) {
+        _setupCameraController();
+      } else {
+        if (mounted) {
+          setState(() {
+            _hasPermission = false;
+            _isCheckingPermission = false;
+          });
+        }
+      }
+    }
+  }
+
+  void _setupCameraController() {
+    _controller = MobileScannerController(
+      facing: CameraFacing.back,
+      detectionSpeed: DetectionSpeed.normal,
+      formats: [BarcodeFormat.qrCode],
+    );
+
+    // Start the camera
+    _controller.start().then((_) {
+      if (mounted) {
+        setState(() {
+          _hasPermission = true;
+          _isCheckingPermission = false;
+        });
+      }
+    }).catchError((error) {
+      if (mounted) {
+        setState(() {
+          _hasPermission = false;
+          _isCheckingPermission = false;
+        });
+        showErrorDialog(context,
+            'Erreur d\'initialisation de la caméra: ${error.toString()}');
+      }
+    });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (_hasPermission) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
-  Future<void> _checkPermission() async {
-    final status = await Permission.camera.request();
+  Future<void> _requestCameraPermission() async {
     setState(() {
-      _hasPermission = status.isGranted;
+      _isCheckingPermission = true;
     });
 
-    if (!status.isGranted) {
-      // Si l'utilisateur n'a pas accordé la permission, afficher un message
-      Future.delayed(Duration(milliseconds: 500), () {
-        if (mounted) {
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => AlertDialog(
-              title: Text('Permission requise'),
-              content: Text(
-                  'L\'accès à la caméra est nécessaire pour scanner les QR codes'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    widget.onClose();
-                  },
-                  child: Text('Annuler'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    Navigator.pop(context);
-                    await openAppSettings();
-                    widget.onClose();
-                  },
-                  child: Text('Ouvrir les paramètres'),
-                ),
-              ],
-            ),
-          );
-        }
-      });
+    final result = await Permission.camera.request();
+
+    if (result.isGranted) {
+      _setupCameraController();
+    } else {
+      if (mounted) {
+        setState(() {
+          _hasPermission = false;
+          _isCheckingPermission = false;
+        });
+      }
     }
   }
 
@@ -95,10 +128,8 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
     });
 
     try {
-      // Arrêter le scanner pendant le traitement
       await _controller.stop();
 
-      // Décoder les données du QR code
       final jsonData = jsonDecode(data);
 
       switch (widget.mode) {
@@ -110,7 +141,6 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
           break;
       }
     } catch (e) {
-      // Erreur lors du décodage du QR code
       if (mounted) {
         showToast(
           context,
@@ -131,7 +161,6 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
       final username = jsonData['username'];
       final uid = jsonData['uid'];
 
-      // Afficher le dialogue de confirmation
       final result = await showConfirmationDialog(
         context,
         'Voulez-vous envoyer une demande d\'ami à $username?',
@@ -149,13 +178,11 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
               'Demande d\'ami envoyée à $username avec succès',
               type: ToastificationType.success,
             );
-            // Fermer l'écran scanner après envoi de la demande
             widget.onClose();
           }
         } catch (e) {
           if (mounted) {
             showErrorDialog(context, e.toString());
-            // Redémarrer le scanner après erreur
             _controller.start();
             setState(() {
               _isProcessing = false;
@@ -164,7 +191,6 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
           }
         }
       } else {
-        // Si l'utilisateur annule, redémarrer le scanner
         if (mounted) {
           _controller.start();
           setState(() {
@@ -197,7 +223,6 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
       final String roomId = jsonData['roomId'];
       final String gameName = jsonData['gameName'];
 
-      // Afficher le dialogue de confirmation
       final result = await showConfirmationDialog(
         context,
         'Voulez-vous rejoindre la partie "$gameName"?',
@@ -208,7 +233,6 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
 
       if (result == true) {
         try {
-          // Access the joinGameProvider to validate and join the game
           final joinNotifier = ref.read(joinGameProvider.notifier);
           joinNotifier.validGameId(roomId);
 
@@ -218,13 +242,11 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
               'Tentative de connexion à la partie "$gameName"...',
               type: ToastificationType.info,
             );
-            // Fermer l'écran scanner après l'envoi de la demande
             widget.onClose();
           }
         } catch (e) {
           if (mounted) {
             showErrorDialog(context, e.toString());
-            // Redémarrer le scanner après erreur
             _controller.start();
             setState(() {
               _isProcessing = false;
@@ -233,7 +255,6 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
           }
         }
       } else {
-        // Si l'utilisateur annule, redémarrer le scanner
         if (mounted) {
           _controller.start();
           setState(() {
@@ -271,6 +292,39 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final screenSize = MediaQuery.of(context).size;
+
+    // Show loading indicator while checking permission
+    if (_isCheckingPermission) {
+      return Scaffold(
+        backgroundColor: colorScheme.surface,
+        appBar: AppBar(
+          title: Text('Scanner QR Code'),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: widget.onClose,
+          ),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                color: colorScheme.tertiary,
+              ),
+              SizedBox(height: 24),
+              Text(
+                'Initialisation de la caméra...',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     if (!_hasPermission) {
       return Scaffold(
@@ -313,22 +367,42 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
                 ),
               ),
               SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () async {
-                  await openAppSettings();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.tertiary,
-                  foregroundColor: colorScheme.onTertiary,
-                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                ),
-                child: Text('Ouvrir les paramètres'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: _requestCameraPermission,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.tertiary,
+                      foregroundColor: colorScheme.onTertiary,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    ),
+                    child: Text('Autoriser la caméra'),
+                  ),
+                  SizedBox(width: 16),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await openAppSettings();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.surface,
+                      foregroundColor: colorScheme.tertiary,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    ),
+                    child: Text('Ouvrir les paramètres'),
+                  ),
+                ],
               ),
             ],
           ),
         ),
       );
     }
+
+    // Calculate the square dimensions for the scanner
+    final scannerSize = screenSize.height * 0.6;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -344,25 +418,38 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
           onPressed: widget.onClose,
         ),
       ),
-      body: Stack(
-        children: [
-          MobileScanner(
-            controller: _controller,
-            onDetect: (capture) {
-              final List<Barcode> barcodes = capture.barcodes;
-              if (barcodes.isNotEmpty && !_hasProcessedCode) {
-                final String? code = barcodes.first.rawValue;
-                if (code != null) {
-                  _processQRCode(code);
-                }
-              }
-            },
-          ),
-          // Overlay with scanning guide
-          Center(
-            child: Container(
-              width: 250,
-              height: 250,
+      body: Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: scannerSize,
+              height: scannerSize,
+              clipBehavior: Clip.hardEdge,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Transform.rotate(
+                angle: 4.71239, // 270 degrees in radians (3π/2)
+                child: MobileScanner(
+                  controller: _controller,
+                  onDetect: (capture) {
+                    final List<Barcode> barcodes = capture.barcodes;
+                    if (barcodes.isNotEmpty && !_hasProcessedCode) {
+                      final String? code = barcodes.first.rawValue;
+                      if (code != null) {
+                        _processQRCode(code);
+                      }
+                    }
+                  },
+                ),
+              ),
+            ),
+
+            // Scanner border overlay
+            Container(
+              width: scannerSize,
+              height: scannerSize,
               decoration: BoxDecoration(
                 border: Border.all(
                   color: colorScheme.tertiary,
@@ -371,31 +458,67 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-          ),
-          // Processing indicator
-          if (_isProcessing)
+
+            // Scanning guide lines (horizontal)
             Container(
-              color: Colors.black54,
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CircularProgressIndicator(
-                      color: colorScheme.tertiary,
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Traitement du QR code...',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ],
+              width: scannerSize,
+              height: 2,
+              color: colorScheme.tertiary.withOpacity(0.7),
+            ),
+
+            // Scanning guide lines (vertical)
+            Container(
+              width: 2,
+              height: scannerSize,
+              color: colorScheme.tertiary.withOpacity(0.7),
+            ),
+
+            // Helper text below scanner
+            Positioned(
+              bottom: screenSize.height * 0.05,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'Positionnez le QR code dans le cadre',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
                 ),
               ),
             ),
-        ],
+
+            // Processing indicator
+            if (_isProcessing)
+              Container(
+                width: screenSize.width,
+                height: screenSize.height,
+                color: Colors.black54,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(
+                        color: colorScheme.tertiary,
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'Traitement du QR code...',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

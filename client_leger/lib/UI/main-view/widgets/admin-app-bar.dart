@@ -1,18 +1,18 @@
 import 'package:client_leger/UI/global/avatar_banner_widget.dart';
+import 'package:client_leger/UI/admin/polls-statistics/widgets/admin_poll_notification.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class AdminAppBarRightSection extends StatefulWidget {
   final User? user;
   final Function() logout;
-  final double sidebarWidth; // Added sidebar width parameter
+  final double sidebarWidth;
 
   const AdminAppBarRightSection({
     Key? key,
     required this.user,
     required this.logout,
-    required this.sidebarWidth, // Required parameter
+    required this.sidebarWidth,
   }) : super(key: key);
 
   @override
@@ -21,8 +21,6 @@ class AdminAppBarRightSection extends StatefulWidget {
 }
 
 class _AdminAppBarRightSectionState extends State<AdminAppBarRightSection> {
-  bool _pollActive = false;
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -185,25 +183,7 @@ class _AdminAppBarRightSectionState extends State<AdminAppBarRightSection> {
                 width: 2,
               ),
             ),
-            child: IconButton(
-              icon: Icon(
-                FontAwesomeIcons.bullhorn,
-                size: 20,
-                color:
-                    _pollActive ? colorScheme.secondary : colorScheme.tertiary,
-              ),
-              constraints: BoxConstraints(
-                minWidth: 46,
-                minHeight: 46,
-              ),
-              padding: EdgeInsets.zero,
-              onPressed: () {
-                setState(() {
-                  _pollActive = !_pollActive;
-                });
-                // TODO: Implement poll functionality
-              },
-            ),
+            child: AdminPollNotification(),
           ),
         ],
       ),
