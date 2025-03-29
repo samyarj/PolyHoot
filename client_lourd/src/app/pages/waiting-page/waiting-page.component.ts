@@ -82,7 +82,6 @@ export class WaitingPageComponent implements OnDestroy {
     }
 
     ngOnDestroy() {
-        console.log('destroyed bomborascalt!');
         this.handleRouteNavigation();
         this.waitingPageService.clearSockets();
         this.organizorDisconnectedSub.unsubscribe();

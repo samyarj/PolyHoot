@@ -38,7 +38,6 @@ export class PublishedPollService implements OnModuleInit {
 
             // 2. Vérifier s'il y a des sondages à supprimer
             if (expiredPollsSnapshot.empty) {
-                console.log('Aucun sondage expiré à supprimer.');
                 return;
             }
 
@@ -50,7 +49,6 @@ export class PublishedPollService implements OnModuleInit {
 
             // 4. Exécuter la suppression en une seule opération
             await batch.commit();
-            console.log(`${expiredPollsSnapshot.size} sondage(s) expiré(s) supprimé(s).`);
         } catch (error) {
             console.error('Erreur lors de la suppression des sondages expirés:', error);
             throw error; // Propager l'erreur pour la gestion ultérieure
@@ -102,7 +100,6 @@ export class PublishedPollService implements OnModuleInit {
             const pollEndDate = new Date(poll.endDate);
 
             if (pollEndDate <= currentDate && !poll.expired) {
-                console.log(`Poll ${poll.id} has expired.`);
                 await doc.ref.update({ expired: true });
             }
         });

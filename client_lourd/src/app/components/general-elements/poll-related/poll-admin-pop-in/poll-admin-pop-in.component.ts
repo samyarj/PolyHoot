@@ -39,7 +39,6 @@ export class PollAdminPopInComponent implements AfterViewInit {
                     console.log('Publication annulée');
                 },
             );
-            console.log('Est sorti');
         }
     }
     ngAfterViewInit(): void {

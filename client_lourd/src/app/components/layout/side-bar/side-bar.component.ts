@@ -126,7 +126,6 @@ export class SideBarComponent implements OnDestroy {
     }
 
     handleChildAction() {
-        console.log('Action executed in the parent component!');
         if (this.activeTab === 2) this.tab1Link.nativeElement.click();
     }
 

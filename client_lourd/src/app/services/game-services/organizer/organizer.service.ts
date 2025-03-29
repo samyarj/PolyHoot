@@ -70,7 +70,6 @@ export class OrganizerService {
     }
 
     handleSockets() {
-        console.log(this.socketsInitialized);
         if (!this.socketsInitialized) {
             this.handleQRLAnswer();
             this.handleEveryoneSubmitted();
@@ -94,7 +93,6 @@ export class OrganizerService {
     }
 
     clearResultsSockets() {
-        console.log('clearing result sockets from organizer service');
         this.socketHandlerService.socket.off(GameEvents.SendResults);
         this.resultService.areSocketsInitialized = false;
     }

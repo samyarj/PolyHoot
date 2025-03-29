@@ -38,7 +38,6 @@ export class HistoryPublishedPollService {
     }
 
     getPublishedPollById(id: string): Observable<PublishedPoll> {
-        console.log('veut obtenir le poll ', id);
         return this.http.get<PublishedPoll>(`${this.baseUrl}/${id}`).pipe(
             catchError((error) => {
                 return this.messageHandler.handleHttpError(error);

@@ -25,7 +25,6 @@ export class QuestionService {
     }
 
     createQuestion(questionData: Question): Observable<Question[]> {
-        console.log(questionData);
         return this.http.post<Question[]>(`${this.baseUrl}/create`, questionData).pipe(catchError(this.messageHandler.handleHttpError));
     }
 

@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { collection, Firestore, onSnapshot } from '@angular/fire/firestore';
 import { Poll, PublishedPoll } from '@app/interfaces/poll';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
-import { catchError, Observable, tap } from 'rxjs';
+import { catchError, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -57,7 +57,6 @@ export class ConsultPollService {
     // Supprimer un sondage
     deletePollById(id: string): Observable<void> {
         return this.http.delete<void>(`${this.baseUrl}/delete/${id}`).pipe(
-            tap(() => console.log(`🗑️ Sondage ${id} supprimé`)),
             catchError((error) => {
                 console.error(`❌ Erreur lors de la suppression du sondage ${id}:`, error);
                 return this.messageHandler.handleHttpError(error);

@@ -35,7 +35,6 @@ export class ResultsService {
     }
 
     handleResultsSockets() {
-        console.log(this.areSocketsInitialized);
         if (!this.areSocketsInitialized) {
             this.socketHandlerService.on(GameEvents.SendResults, (data: PlayerData[]) => {
                 this.playerList = data;
@@ -46,7 +45,6 @@ export class ResultsService {
     }
 
     clearResultsSockets() {
-        console.log('clearing result sockets from result service');
         this.socketHandlerService.socket.off(GameEvents.SendResults);
         this.areSocketsInitialized = false;
     }

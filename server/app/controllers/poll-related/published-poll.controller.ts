@@ -23,7 +23,6 @@ export class PublishedPollController {
     async getAllPublishedPolls(@Res() response: Response) {
         try {
             const publishedPolls = await this.publishedPollService.getAllPublishedPolls();
-            console.log('Doit lui retourner ces polls: ', publishedPolls);
             response.status(HttpStatus.OK).json(publishedPolls);
         } catch (error) {
             if (error.status === HttpStatus.NOT_FOUND) {
@@ -41,7 +40,6 @@ export class PublishedPollController {
     @Get('/:id')
     async getPublishedPollById(@Param('id') id: string, @Res() response: Response) {
         try {
-            console.log('Ouais avec ', id);
             const publishedPoll = await this.publishedPollService.getPublishedPollById(id);
             response.status(HttpStatus.OK).json(publishedPoll);
         } catch (error) {
@@ -97,7 +95,6 @@ export class PublishedPollController {
     @Patch('/:uid/addPollsAnswered/')
     async updatePollsAnswered(@Param('uid') uid: string, @Body('id') id: string, @Res() response: Response) {
         try {
-            console.log('uid:', uid, 'pollid: ', id);
             await this.userService.addPollAnswered(uid, id);
             response.status(HttpStatus.OK).json({ message: 'Poll ID ajouté à pollsAnswered avec succès' });
         } catch (error) {

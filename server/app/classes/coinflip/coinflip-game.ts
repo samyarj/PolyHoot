@@ -79,7 +79,6 @@ export class CoinFlipGame {
     startGame(): void {
         this.initializeGame();
         this.server.emit(CoinFlipEvents.StartGame);
-        //console.log('START-GAME');
         this.timer.startTimer(BET_TIMER_CS, CoinFlipEvents.BetTimeCountdown, () => {
             this.timer.stopTimer();
             this.startPreFlippingPhase();
@@ -89,7 +88,6 @@ export class CoinFlipGame {
     startPreFlippingPhase() {
         this.gameState = CoinFlipGameState.PreFlippingPhase;
         this.server.emit(CoinFlipEvents.PreFlippingPhase);
-        //console.log('START-PRE-GAME');
         this.timer.startTimer(PRE_FLIP_TIMER_CS, CoinFlipEvents.BetTimeCountdown, () => {
             this.timer.stopTimer();
             this.startFlippingPhase();
@@ -99,7 +97,6 @@ export class CoinFlipGame {
     startFlippingPhase() {
         this.gameState = CoinFlipGameState.FlippingPhase;
         this.server.emit(CoinFlipEvents.FlippingPhase);
-        //console.log('START-FLIP');
         this.timer.startTimer(FLIP_TIMER_CS, CoinFlipEvents.BetTimeCountdown, () => {
             this.timer.stopTimer();
             this.startResultsPhase();
@@ -110,7 +107,6 @@ export class CoinFlipGame {
         this.gameState = CoinFlipGameState.ResultsPhase;
         let result = this.flipCoin();
         this.adjustBalances(result);
-        //console.log('START-RESULTS');
         this.server.emit(CoinFlipEvents.Results, {
             result,
             playerList: {

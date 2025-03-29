@@ -43,7 +43,6 @@ export class PollController {
     })
     @Get('/:id')
     async getPollById(@Param('id') id: string, @Res() response: Response) {
-        console.log('veut obtenir le poll ', id);
 
         try {
             const poll = await this.pollService.getPollById(id);
