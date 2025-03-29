@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:client_leger/UI/confirmation/confirmation_dialog.dart';
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/global/avatar_banner_widget.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
@@ -122,6 +123,16 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
   String formatDate(Timestamp timestamp) {
     return DateFormat('HH:mm:ss').format(
         timestamp.toDate().toUtc().subtract(Duration(hours: 4))); // UTC-5
+  }
+
+  _confirmReportPlayer(
+      String uid, String playerUsername, BuildContext context) async {
+    await showConfirmationDialog(
+      context,
+      "Êtes-vous sûr de vouloir signaler le joueur $playerUsername ?",
+      () => _reportPlayer(uid),
+      null,
+    );
   }
 
   _reportPlayer(String uid) async {
@@ -351,7 +362,7 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                             Expanded(
                                                               child: Text(
                                                                 message.username ??
-                                                                    "Unknown",
+                                                                    "Inconnu",
                                                                 style:
                                                                     TextStyle(
                                                                   color: colorScheme
@@ -383,9 +394,12 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                                                     color: colorScheme
                                                                         .onSecondary),
                                                                 onPressed: () =>
-                                                                    _reportPlayer(
+                                                                    _confirmReportPlayer(
                                                                         message
-                                                                            .uid),
+                                                                            .uid,
+                                                                        message.username ??
+                                                                            "Inconnu",
+                                                                        context),
                                                               ),
                                                           ],
                                                         ),

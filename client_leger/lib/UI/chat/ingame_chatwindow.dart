@@ -1,3 +1,4 @@
+import 'package:client_leger/UI/confirmation/confirmation_dialog.dart';
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/global/avatar_banner_widget.dart';
 import 'package:client_leger/backend-communication-services/chat/ingame_chat_service.dart';
@@ -56,6 +57,16 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
       }
     }
     _textController.clear();
+  }
+
+  _confirmReportPlayer(
+      String? uid, String playerUsername, BuildContext context) async {
+    await showConfirmationDialog(
+      context,
+      "Êtes-vous sûr de vouloir signaler le joueur $playerUsername ?",
+      () => _reportPlayer(uid),
+      null,
+    );
   }
 
   _reportPlayer(String? uid) async {
@@ -294,9 +305,11 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                                                 color: colorScheme
                                                                     .onSecondary),
                                                             onPressed: () =>
-                                                                _reportPlayer(
+                                                                _confirmReportPlayer(
+                                                                    message.uid,
                                                                     message
-                                                                        .uid),
+                                                                        .author,
+                                                                    context),
                                                           ),
                                                       ],
                                                     ),
