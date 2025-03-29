@@ -37,7 +37,7 @@ export class Chat2Component implements OnChanges {
         const dialogRef = this.matdialog.open(ConfirmationDialogComponent, {
             width: WIDTH_SIZE,
             panelClass: 'custom-container',
-            data: `Voulez vous signaler ${username}?`,
+            data: `Voulez-vous signaler ${username}?`,
         });
 
         dialogRef.afterClosed().subscribe((result) => {
