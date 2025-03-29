@@ -1,23 +1,22 @@
 import 'dart:async';
 import 'dart:convert';
-
-import 'package:client_leger/backend-communication-services/environment.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
+import 'package:client_leger/environment_config.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 
-const String baseUrl = '${Environment.serverUrl}/users';
-const String getProfileUrl = '$baseUrl/profile';
-const String createUserUrl = '$baseUrl/create-user';
-const String updateUserNameUrl = '$baseUrl/update-username';
-const String logOutUrl = '$baseUrl/logout';
-const String checkEmailUrl = '$baseUrl/check-email';
-const String googleSignInUrl = '$baseUrl/signin-google';
-const String checkUsernameUrl = '$baseUrl/check-username';
-const String getEmailUrl = '$baseUrl/get-email';
+final String baseUrl = '${EnvironmentConfig.serverUrl}/users';
+final String getProfileUrl = '$baseUrl/profile';
+final String createUserUrl = '$baseUrl/create-user';
+final String updateUserNameUrl = '$baseUrl/update-username';
+final String logOutUrl = '$baseUrl/logout';
+final String checkEmailUrl = '$baseUrl/check-email';
+final String googleSignInUrl = '$baseUrl/signin-google';
+final String checkUsernameUrl = '$baseUrl/check-username';
+final String getEmailUrl = '$baseUrl/get-email';
 const String googleProvider = "google.com";
 const String passwordProvider = 'password';
 

@@ -21,6 +21,8 @@ class InGameChatMessage {
       author: json['author'] ?? "inconnu",
       date: json['date'] != null ? DateTime.parse(json['date']) : null,
       uid: json['uid'],
+      avatar: json['avatar'],
+      border: json['border'],
     );
   }
 
@@ -30,6 +32,8 @@ class InGameChatMessage {
       'author': author,
       'date': date?.toIso8601String(),
       'uid': uid,
+      'avatar': avatar,
+      'border': border,
     };
   }
 }

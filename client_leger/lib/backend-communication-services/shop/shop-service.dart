@@ -1,7 +1,6 @@
 import 'dart:convert';
-
-import 'package:client_leger/backend-communication-services/environment.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
+import 'package:client_leger/environment_config.dart';
 import 'package:client_leger/models/enums.dart';
 import 'package:client_leger/models/shop/shop-item-model.dart';
 import 'package:client_leger/providers/user_provider.dart';
@@ -47,7 +46,7 @@ class ShopService {
     _initializeShop();
   }
 
-  final String baseUrl = '${Environment.serverUrl}/shop';
+  final String baseUrl = '${EnvironmentConfig.serverUrl}/shop';
 
   // Getters for the shop items
   List<ShopItem> get avatars => _avatars;

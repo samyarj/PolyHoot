@@ -92,6 +92,15 @@ class _CoinAnimationAreaState extends State<CoinAnimationArea>
                         ]
                       : null,
                 ),
+                alignment: Alignment.center,
+                child: Text(
+                  "F",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).colorScheme.onTertiary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           Container(
@@ -218,6 +227,15 @@ class _CoinAnimationAreaState extends State<CoinAnimationArea>
                           )
                         ]
                       : null,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  "P",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).colorScheme.onTertiary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),

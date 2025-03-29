@@ -4,45 +4,41 @@ import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/business/channel_manager.dart';
 import 'package:client_leger/models/chat_channels.dart';
+import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
 
 class ChannelSearch extends StatefulWidget {
-  const ChannelSearch(
-      {super.key,
-      required this.joinableChannels,
-      required this.onDeleteChannel,
-      required this.currentUserUid});
-  final List<ChatChannel> joinableChannels;
+  const ChannelSearch({
+    super.key,
+    required this.filteredChannels,
+    required this.onDeleteChannel,
+    required this.currentUserUid,
+    required this.filterChannels,
+    required this.currentQuery,
+  });
+  final List<ChatChannel> filteredChannels; // filtered by parent
   final Future<void> Function(String) onDeleteChannel;
+  final Function(String) filterChannels; // parent callback
   final String currentUserUid;
+  final String currentQuery;
 
   @override
   State<ChannelSearch> createState() => _ChannelSearchState();
 }
 
 class _ChannelSearchState extends State<ChannelSearch> {
-  late ChannelManager _channelManager;
+  final ChannelManager _channelManager = ChannelManager();
   final TextEditingController _searchChannelTextController =
       TextEditingController();
   final TextEditingController _textChannelController = TextEditingController();
-
   final FocusNode _focusNode = FocusNode();
-  List<ChatChannel> _filteredChannels = [];
 
   @override
   void initState() {
-    _channelManager = ChannelManager();
-    _filteredChannels = widget.joinableChannels;
+    if (widget.currentQuery.isNotEmpty) {
+      _searchChannelTextController.text = widget.currentQuery;
+    }
     super.initState();
-  }
-
-  void _filterChannels(String query) {
-    setState(() {
-      _filteredChannels = widget.joinableChannels
-          .where((channel) =>
-              channel.name.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-    });
   }
 
   @override
@@ -55,81 +51,71 @@ class _ChannelSearchState extends State<ChannelSearch> {
 
   @override
   Widget build(BuildContext context) {
+    AppLogger.i("Building ChannelSearch widget");
     final colorScheme = Theme.of(context).colorScheme;
 
-    return widget.joinableChannels.isEmpty
-        ? Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Center(
-                  child: Text(
-                    'Aucun canal trouvé',
-                    style:
-                        TextStyle(color: colorScheme.onPrimary, fontSize: 18),
+    return SingleChildScrollView(
+      physics:
+          const AlwaysScrollableScrollPhysics(), // to prevent a bug, do not remove
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TapRegion(
+            onTapOutside: (_) => FocusScope.of(context).unfocus(),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                controller: _searchChannelTextController,
+                focusNode: _focusNode,
+                decoration: InputDecoration(
+                  suffixIcon: IconButton(
+                    icon: Icon(Icons.clear, color: colorScheme.onPrimary),
+                    onPressed: () {
+                      _searchChannelTextController.clear();
+                      widget.filterChannels("");
+                    },
+                  ),
+                  labelText: 'Chercher un canal',
+                  labelStyle: TextStyle(color: colorScheme.onPrimary),
+                  fillColor: colorScheme.surface.withValues(alpha: 0.3),
+                  filled: true,
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: colorScheme.secondary),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: colorScheme.onPrimary.withValues(alpha: 0.5)),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: colorScheme.secondary),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
+                style: TextStyle(color: colorScheme.onPrimary),
+                onChanged: (query) => widget.filterChannels(query),
               ),
-              addChannel()
-            ],
-          )
-        : SingleChildScrollView(
-            physics:
-                const AlwaysScrollableScrollPhysics(), // to prevent a bug, do not remove
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TapRegion(
-                  onTapOutside: (_) => FocusScope.of(context).unfocus(),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: TextField(
-                      controller: _searchChannelTextController,
-                      focusNode: _focusNode,
-                      decoration: InputDecoration(
-                        suffixIcon: IconButton(
-                          icon: Icon(Icons.clear, color: colorScheme.onPrimary),
-                          onPressed: () {
-                            setState(() {
-                              _searchChannelTextController.clear();
-                              _filteredChannels = widget.joinableChannels;
-                            });
-                          },
-                        ),
-                        labelText: 'Chercher un canal',
-                        labelStyle: TextStyle(color: colorScheme.onPrimary),
-                        fillColor: colorScheme.surface.withValues(alpha: 0.3),
-                        filled: true,
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(color: colorScheme.secondary),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color:
-                                  colorScheme.onPrimary.withValues(alpha: 0.5)),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: colorScheme.secondary),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      style: TextStyle(color: colorScheme.onPrimary),
-                      onChanged: _filterChannels,
+          ),
+          SizedBox(
+            height: 300,
+            child: widget.filteredChannels.isEmpty
+                ? Text(
+                    "Aucun channel trouvé",
+                    style: TextStyle(
+                      color: colorScheme.onPrimary,
+                      fontSize: 16,
                     ),
-                  ),
-                ),
-                SizedBox(
-                  height: 300,
-                  child: ListView.builder(
+                  )
+                : ListView.builder(
                     shrinkWrap: true,
-                    itemCount: _filteredChannels.length,
+                    itemCount: widget.filteredChannels.length,
                     itemBuilder: (context, index) {
-                      final channel = _filteredChannels[index];
+                      final channel = widget.filteredChannels[index];
                       return ListTile(
                         title: Text(
                           channel.name,
@@ -169,11 +155,11 @@ class _ChannelSearchState extends State<ChannelSearch> {
                       );
                     },
                   ),
-                ),
-                addChannel(),
-              ],
-            ),
-          );
+          ),
+          addChannel(),
+        ],
+      ),
+    );
   }
 
   Widget addChannel() {

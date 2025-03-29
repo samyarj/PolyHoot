@@ -1,14 +1,13 @@
 import 'dart:convert';
-
-import 'package:client_leger/backend-communication-services/environment.dart';
+import 'package:client_leger/environment_config.dart';
 import 'package:client_leger/models/enums.dart';
 import 'package:client_leger/models/question.dart';
 import 'package:client_leger/models/quiz.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:http/http.dart' as http;
 
-const String baseUrl = Environment.serverUrl;
-const String getQuizzesUrl = "$baseUrl/quizzes";
+String baseUrl = EnvironmentConfig.serverUrl;
+String getQuizzesUrl = "$baseUrl/quizzes";
 
 Future<List<Quiz>> getAllQuizzes() async {
   try {

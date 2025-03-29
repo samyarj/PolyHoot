@@ -5,6 +5,7 @@ class ChatMessage {
   String? username;
   String? avatar;
   String? border;
+  bool? isAdmin;
   final Timestamp timestamp;
   final String uid; // user uid
 
@@ -12,6 +13,7 @@ class ChatMessage {
     required this.message,
     required this.timestamp,
     required this.uid,
+    this.isAdmin,
     this.username,
     this.avatar,
     this.border,

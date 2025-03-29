@@ -22,6 +22,7 @@ import 'package:client_leger/UI/profile/profile_page.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/UI/shop/shop-page.dart';
 import 'package:client_leger/UI/signup/signup_page.dart';
+import 'package:client_leger/backend-communication-services/report/report_service.dart';
 import 'package:client_leger/models/player_data.dart';
 import 'package:client_leger/providers/play/game_player_provider.dart';
 import 'package:client_leger/providers/play/join_game_provider.dart';
@@ -36,9 +37,13 @@ import 'package:go_router/go_router.dart';
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _playShellNavigatorKey = GlobalKey<NavigatorState>();
 final _adminShellNavigatorKey = GlobalKey<NavigatorState>();
+final ReportService _reportService = ReportService();
 
 final GoRouter router = GoRouter(
-  refreshListenable: user_provider.isLoggedIn,
+  refreshListenable: Listenable.merge([
+    user_provider.isLoggedIn,
+    _reportService.nbReport,
+  ]),
   initialLocation: Paths.play,
   navigatorKey: rootNavigatorKey,
   debugLogDiagnostics: true,
@@ -220,6 +225,20 @@ final GoRouter router = GoRouter(
       // Get the current user
       final containerRef = ProviderScope.containerOf(context);
       final currentUserState = containerRef.read(user_provider.userProvider);
+
+      if (_reportService.nbReport.value != null &&
+          _reportService.nbReport.value! > 2) {
+        AppLogger.e("User has been reported more than 2 times");
+        _reportService.behaviourWarning(context);
+        final reportState =
+            await _reportService.getReportState(currentUserState.value?.uid);
+        if (reportState != null && reportState.isBanned) {
+          _reportService.banInfo(reportState.message, context);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            containerRef.read(user_provider.userProvider.notifier).logout();
+          });
+        }
+      }
 
       final isAdmin = currentUserState.value?.role == 'admin';
 

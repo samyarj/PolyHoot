@@ -72,7 +72,7 @@ class UserStatsAndLogsPage extends ConsumerWidget {
                               totalGamesPlayed: totalGamesPlayed,
                               gamesWon: gamesWon,
                               winRate: user.stats?.rightAnswerPercentage
-                                      ?.toString() ??
+                                      ?.toStringAsFixed(1) ??
                                   '0.0',
                               averageTimePerGame:
                                   getAverageTimePerGame(user.gameLogs ?? []),

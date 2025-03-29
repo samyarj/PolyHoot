@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:toastification/toastification.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,10 +38,12 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeProvider);
 
-    return MaterialApp.router(
-      title: 'PolyHoot',
-      theme: theme,
-      routerConfig: router,
+    return ToastificationWrapper(
+      child: MaterialApp.router(
+        title: 'PolyHoot',
+        theme: theme,
+        routerConfig: router,
+      ),
     );
   }
 }

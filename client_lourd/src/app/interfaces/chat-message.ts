@@ -7,4 +7,5 @@ export interface FirebaseChatMessage {
     banner?: string;
     date: FieldValue;
     uid: string;
+    isAdmin?: boolean;
 }

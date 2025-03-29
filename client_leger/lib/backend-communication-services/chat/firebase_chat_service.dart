@@ -1,10 +1,11 @@
-import 'package:client_leger/backend-communication-services/environment.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
+import 'package:client_leger/environment_config.dart';
 import 'package:client_leger/models/chat_channels.dart';
 import 'package:client_leger/models/chat_message.dart';
 import 'package:client_leger/models/user.dart' as user_model;
 import 'package:client_leger/utilities/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
 class FirebaseChatService {
@@ -29,6 +30,14 @@ class FirebaseChatService {
 
   static const int messagesLimit = 8;
 
+  Map<String, user_model.PartialUser> _userDetailsCache =
+      {}; // key = uid, value = border + avatar + isAdmin
+  // to avoid excessive refetches
+
+  void clearUserDetailsCache() {
+    _userDetailsCache.clear();
+  }
+
   Future<void> sendMessage(
       String currentUserUid, String channel, String message) async {
     try {
@@ -38,9 +47,9 @@ class FirebaseChatService {
         'date': FieldValue.serverTimestamp(),
       };
 
-      if (channel == "General") {
+      if (channel == "General" && FirebaseAuth.instance.currentUser != null) {
         await _globalChatCollection.add(chatMessage);
-      } else {
+      } else if (FirebaseAuth.instance.currentUser != null) {
         await _chatChannelsCollection
             .doc(channel)
             .collection("messages")
@@ -54,19 +63,21 @@ class FirebaseChatService {
 
   Future<void> createChannel(String channel) async {
     try {
-      final channelDoc = await _chatChannelsCollection.doc(channel).get();
+      if (FirebaseAuth.instance.currentUser != null) {
+        final channelDoc = await _chatChannelsCollection.doc(channel).get();
 
-      if (channelDoc.exists) {
-        throw Exception(
-            'Un canal de communication avec un nom identique existe déjà.');
+        if (channelDoc.exists) {
+          throw Exception(
+              'Un canal de communication avec un nom identique existe déjà.');
+        }
+
+        Map<String, dynamic> newChannelData = {
+          'name': channel,
+          'users': [],
+        };
+
+        await _chatChannelsCollection.doc(channel).set(newChannelData);
       }
-
-      Map<String, dynamic> newChannelData = {
-        'name': channel,
-        'users': [],
-      };
-
-      await _chatChannelsCollection.doc(channel).set(newChannelData);
     } catch (e) {
       AppLogger.e(e.toString());
       throw Exception(getCustomError(e));
@@ -76,56 +87,64 @@ class FirebaseChatService {
   Stream<List<ChatMessage>> getMessages(String channel) {
     AppLogger.d("getMessages for channel $channel");
     try {
-      final messagesQuery = channel == "General"
-          ? _globalChatCollection
-              .orderBy('date', descending: true)
-              .limit(messagesLimit)
-          : _chatChannelsCollection
-              .doc(channel)
-              .collection("messages")
-              .orderBy('date', descending: true)
-              .limit(messagesLimit);
+      if (FirebaseAuth.instance.currentUser != null) {
+        final messagesQuery = channel == "General"
+            ? _globalChatCollection
+                .orderBy('date', descending: true)
+                .limit(messagesLimit)
+            : _chatChannelsCollection
+                .doc(channel)
+                .collection("messages")
+                .orderBy('date', descending: true)
+                .limit(messagesLimit);
 
-      return messagesQuery.snapshots().asyncMap((snapshot) async {
-        // returns a stream of updates
+        return messagesQuery.snapshots().asyncMap((snapshot) async {
+          // returns a stream of updates
+          if (FirebaseAuth.instance.currentUser != null) {
+            List<ChatMessage> newMessages = [];
+            Set<String> userIds = {};
+            AppLogger.d("In the asyncMap");
 
-        List<ChatMessage> newMessages = [];
-        Set<String> userIds = {};
-        AppLogger.d("In the asyncMap");
+            for (final change in snapshot.docChanges) {
+              Map<String, dynamic> jsonMessage =
+                  change.doc.data() as Map<String, dynamic>;
+              if (change.type == DocumentChangeType.modified ||
+                  change.type == DocumentChangeType.added &&
+                      jsonMessage['date'] != null) {
+                // when server adds the timestamp the document change type is modified and not added
+                final ChatMessage message = ChatMessage.fromJson(jsonMessage);
+                newMessages.add(message);
+                userIds.add(message.uid);
+              }
+            }
 
-        for (final change in snapshot.docChanges) {
-          Map<String, dynamic> jsonMessage =
-              change.doc.data() as Map<String, dynamic>;
-          if (change.type == DocumentChangeType.modified ||
-              change.type == DocumentChangeType.added &&
-                  jsonMessage['date'] != null) {
-            // when server adds the timestamp the document change type is modified and not added
-            final ChatMessage message = ChatMessage.fromJson(jsonMessage);
-            newMessages.add(message);
-            userIds.add(message.uid);
+            if (newMessages.isEmpty) return [];
+
+            // Fetch user details for unique UIDs
+            final users = await fetchUserDetails(userIds.toList());
+
+            // Attach user details to messages
+            for (ChatMessage msg in newMessages) {
+              msg.username = users[msg.uid]?.username ?? 'Unknown';
+              msg.avatar = users[msg.uid]?.avatarEquipped ??
+                  'https://res.cloudinary.com/dtu6fkkm9/image/upload/v1737478954/default-avatar_qcaycl.jpg';
+              msg.border = users[msg.uid]?.borderEquipped;
+              msg.isAdmin = users[msg.uid]?.isAdmin;
+            }
+
+            newMessages.sort((ChatMessage a, ChatMessage b) =>
+                b.timestamp.compareTo(a.timestamp));
+
+            AppLogger.i("newmessage length is: ${newMessages.length}");
+
+            return newMessages;
+          } else {
+            return [];
           }
-        }
-
-        if (newMessages.isEmpty) return [];
-
-        // Fetch user details for unique UIDs
-        final users = await fetchUserDetails(userIds.toList());
-
-        // Attach user details to messages
-        for (ChatMessage msg in newMessages) {
-          msg.username = users[msg.uid]?.username ?? 'Unknown';
-          msg.avatar =
-              users[msg.uid]?.avatarEquipped ?? 'assets/default-avatar.png';
-          msg.border = users[msg.uid]?.borderEquipped;
-        }
-
-        newMessages.sort((ChatMessage a, ChatMessage b) =>
-            b.timestamp.compareTo(a.timestamp));
-
-        AppLogger.i("newmessage length is: ${newMessages.length}");
-
-        return newMessages;
-      });
+        });
+      } else {
+        return Stream.value([]); // Return an empty stream if not logged in
+      }
     } catch (e) {
       AppLogger.e("In getMessages of FirebaseChatService ${e.toString()}");
       throw Exception(getCustomError(e));
@@ -133,7 +152,8 @@ class FirebaseChatService {
   }
 
   Future<Map<String, user_model.PartialUser>> fetchUserDetails(
-      List<String> userIds) async {
+    List<String> userIds,
+  ) async {
     AppLogger.d("In fetchUserDetails");
 
     try {
@@ -141,10 +161,18 @@ class FirebaseChatService {
 
       final userFetches = userIds.map(
         (uid) async {
-          final userDoc = await _usersCollection.doc(uid).get();
-          if (userDoc.exists) {
-            userDetails[uid] = user_model.PartialUser.fromJson(
-                userDoc.data() as Map<String, dynamic>);
+          // Check if the user details are already cached
+          if (_userDetailsCache.containsKey(uid)) {
+            userDetails[uid] = _userDetailsCache[uid]!;
+            AppLogger.w("User details for $uid fetched from cache");
+          } else if (FirebaseAuth.instance.currentUser != null) {
+            final userDoc = await _usersCollection.doc(uid).get();
+            if (userDoc.exists) {
+              userDetails[uid] = user_model.PartialUser.fromJson(
+                  userDoc.data() as Map<String, dynamic>);
+              // Cache the user details
+              _userDetailsCache[uid] = userDetails[uid]!;
+            }
           }
         },
       );
@@ -160,6 +188,7 @@ class FirebaseChatService {
 
   Future<List<ChatMessage>> loadOlderMessages(
       String channel, Timestamp lastMessageDate) async {
+    if (FirebaseAuth.instance.currentUser == null) return [];
     try {
       final olderMessagesQuery = channel == "General"
           ? _globalChatCollection
@@ -170,6 +199,8 @@ class FirebaseChatService {
               .collection("messages")
               .orderBy('date', descending: true)
               .startAfter([lastMessageDate]).limit(50);
+
+      if (FirebaseAuth.instance.currentUser == null) return [];
 
       final snapshot =
           await olderMessagesQuery.get(); // Fetch once, not as a stream
@@ -186,9 +217,10 @@ class FirebaseChatService {
       // Attach user details to messages
       for (ChatMessage msg in olderMessages) {
         msg.username = users[msg.uid]?.username ?? 'Unknown';
-        msg.avatar =
-            users[msg.uid]?.avatarEquipped ?? 'assets/default-avatar.png';
+        msg.avatar = users[msg.uid]?.avatarEquipped ??
+            'https://res.cloudinary.com/dtu6fkkm9/image/upload/v1737478954/default-avatar_qcaycl.jpg';
         msg.border = users[msg.uid]?.borderEquipped;
+        msg.isAdmin = users[msg.uid]?.isAdmin;
       }
 
       olderMessages.sort(
@@ -204,7 +236,11 @@ class FirebaseChatService {
   }
 
   Stream<List<ChatChannel>> fetchAllChannels(String currentUserUid) {
+    if (FirebaseAuth.instance.currentUser == null) return Stream.value([]);
+
     return _chatChannelsCollection.snapshots().asyncMap((snapshot) async {
+      if (FirebaseAuth.instance.currentUser == null) return [];
+
       return snapshot.docs.map((doc) {
         return ChatChannel.fromJson(
             doc.data() as Map<String, dynamic>, currentUserUid);
@@ -213,6 +249,8 @@ class FirebaseChatService {
   }
 
   joinChannel(String currentUserUid, String channel) async {
+    if (FirebaseAuth.instance.currentUser == null) return;
+
     try {
       final channelRef = _chatChannelsCollection.doc(channel);
       await channelRef.update({
@@ -225,6 +263,8 @@ class FirebaseChatService {
   }
 
   quitChannel(String currentUserUid, String channel) async {
+    if (FirebaseAuth.instance.currentUser == null) return [];
+
     try {
       final channelRef = _chatChannelsCollection.doc(channel);
       await channelRef.update({
@@ -237,7 +277,7 @@ class FirebaseChatService {
   }
 
   Future<void> deleteChannel(String channelName) async {
-    final url = "${Environment.serverUrl}/chat-channels/$channelName";
+    final url = "${EnvironmentConfig.serverUrl}/chat-channels/$channelName";
 
     try {
       final response = await http.delete(Uri.parse(url));

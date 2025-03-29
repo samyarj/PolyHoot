@@ -12,6 +12,8 @@ class InGameChatService {
   final FirebaseChatService _firebaseChatService = FirebaseChatService();
   late String _username;
   late String? _uid;
+  late String? _avatar;
+  late String? _border;
   Map<String, PartialUser> _userDetails =
       {}; // key = uid, value = border + avatar
 
@@ -30,25 +32,32 @@ class InGameChatService {
     if (currentRoomId == _socketManager.roomId && currentRoomId != null) {
       AppLogger.i("user changed channel tabs, not resetting InGameChatService");
     } else if (_socketManager.roomId == null) {
-      currentRoomId = null;
       AppLogger.i(
           "Resetting InGameChatService because we're not in a game anymore");
       _socketManager.socket?.off(ChatEvents.RoomLeft.value);
       _socketManager.socket?.off(ChatEvents.MessageAdded.value);
+      currentRoomId = null;
+      _username = "";
+      _avatar = null;
+      _border = null;
+      _uid = null;
       _userDetails = {};
       inGameChatMessagesNotifier.value = [];
     }
   }
 
-  void setUserInfosAndInitialize(String username, String? uid) {
-    _username = username;
-    _uid = uid;
+  void setUserInfosAndInitialize(
+      String username, String? uid, String? avatar, String? border) {
     if (currentRoomId == _socketManager.roomId && currentRoomId != null) {
       AppLogger.i(
           "user changed channel tabs, not initializing InGameChatService");
       return;
     } else {
       AppLogger.i("new game detected. SetUsernameAndInitialize");
+      _username = username;
+      _avatar = avatar;
+      _border = border;
+      _uid = uid;
       currentRoomId = _socketManager.roomId;
       configureChatSocketFeatures();
       getHistory();
@@ -70,7 +79,13 @@ class InGameChatService {
       final messages = await Future.wait(
         (history as List<dynamic>).map((message) async {
           final chatMessage = InGameChatMessage.fromJson(message);
-          await attachUrlToMessage(chatMessage);
+          if (chatMessage.avatar == null &&
+              chatMessage.border == null &&
+              chatMessage.author != 'System') {
+            AppLogger.w(
+                "message has no avatar or border, will fetch from firebase");
+            await attachUrlToMessage(chatMessage);
+          }
           return chatMessage;
         }),
       );
@@ -85,6 +100,9 @@ class InGameChatService {
       message: inputMessage,
       author: getAuthor(),
       uid: _uid,
+      avatar: _avatar ??
+          'https://res.cloudinary.com/dtu6fkkm9/image/upload/v1737478954/default-avatar_qcaycl.jpg',
+      border: _border,
     );
 
     _socketManager.webSocketSender(
@@ -109,7 +127,13 @@ class InGameChatService {
         (newMessage) async {
       final message = InGameChatMessage.fromJson(newMessage);
 
-      await attachUrlToMessage(message);
+      if (message.avatar == null &&
+          message.border == null &&
+          message.author != 'System') {
+        AppLogger.w(
+            "message has no avatar or border, will fetch from firebase");
+        await attachUrlToMessage(message);
+      }
 
       inGameChatMessagesNotifier.value = [
         message,
