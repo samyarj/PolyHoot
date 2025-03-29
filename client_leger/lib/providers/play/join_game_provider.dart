@@ -98,7 +98,7 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
       AppLogger.i("Received active lobbies: ${state.lobbys.length} available");
     });
 
-    _socketManager.webSocketReceiver(GameEvents.AlertLockToggled.value, (data) {
+    _socketManager.webSocketReceiver(GameEvents.LobbyToggledLock.value, (data) {
       state = state.copyWith(
         lobbys: state.lobbys.map((lobby) {
           return lobby.roomId == data['roomId']
@@ -125,16 +125,19 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
           "Player joined room: $roomId (Total: ${state.lobbys.firstWhere((l) => l.roomId == roomId).nbPlayers} players)");
     });
 
-    _socketManager.webSocketReceiver(GameEvents.PlayerLeft.value, (data) {
+    _socketManager.webSocketReceiver(GameEvents.PlayerLeftLobby.value, (data) {
+      final String roomId = data as String;
+
       state = state.copyWith(
         lobbys: state.lobbys.map((lobby) {
-          return lobby.roomId == data['roomId']
+          return lobby.roomId == roomId
               ? lobby.copyWith(nbPlayers: lobby.nbPlayers - 1)
               : lobby;
         }).toList(),
       );
+
       AppLogger.i(
-          "Player left room: ${data['roomId']} (Remaining: ${state.lobbys.firstWhere((l) => l.roomId == data['roomId']).nbPlayers} players)");
+          "Player left room: $roomId (Remaining: ${state.lobbys.firstWhere((l) => l.roomId == roomId).nbPlayers} players)");
     });
 
     _socketManager.webSocketReceiver(JoinErrors.InvalidId.value, (_) {
@@ -214,9 +217,9 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
     _socketManager.socket?.off(JoinEvents.LobbyCreated.value);
     _socketManager.socket?.off(GameEvents.End.value);
     _socketManager.socket?.off(GameEvents.GetCurrentGames.value);
-    _socketManager.socket?.off(GameEvents.AlertLockToggled.value);
+    _socketManager.socket?.off(GameEvents.LobbyToggledLock.value);
     _socketManager.socket?.off(JoinEvents.PlayerJoined.value);
-    _socketManager.socket?.off(GameEvents.PlayerLeft.value);
+    _socketManager.socket?.off(GameEvents.PlayerLeftLobby.value);
     _socketManager.socket?.off(JoinErrors.InvalidId.value);
     _socketManager.socket?.off(JoinErrors.RoomLocked.value);
     _socketManager.socket?.off(JoinErrors.BannedName.value);

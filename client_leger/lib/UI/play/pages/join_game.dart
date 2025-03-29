@@ -34,8 +34,9 @@ class _JoinGameState extends ConsumerState<JoinGame> {
   void _openQRScanner() {
     if (!mounted) return;
 
-    Navigator.of(context).push(
+    Navigator.of(context, rootNavigator: true).push(
       MaterialPageRoute(
+        fullscreenDialog: true,
         builder: (context) => QRScannerScreen(
           onClose: () => Navigator.of(context).pop(),
           mode: QRScannerMode.joinGame,

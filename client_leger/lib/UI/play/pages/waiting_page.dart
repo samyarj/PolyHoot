@@ -119,14 +119,12 @@ class WaitingPage extends ConsumerWidget {
                         const SizedBox(width: 10),
                         GestureDetector(
                           onTap: () {
-                            // Show the QR code dialog
                             showDialog(
                               context: context,
                               builder: (context) => GameQRCodeDialog(
                                 roomId: socketManager.roomId ?? "0000",
-                                gameTitle: waitingState.playersInfo.isNotEmpty
-                                    ? "Salle de ${socketManager.playerName}"
-                                    : "Salle d'attente",
+                                gameTitle:
+                                    "Salle de ${socketManager.playerName}",
                               ),
                             );
                           },

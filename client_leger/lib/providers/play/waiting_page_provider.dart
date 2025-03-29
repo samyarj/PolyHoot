@@ -72,8 +72,9 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
   void _initializeListeners() {
     _socketManager.webSocketReceiver(GameEvents.PlayerLeft.value, (data) {
       if (state.banned) return;
-      if (data is Map<String, dynamic> && data.containsKey('playersInfo')) {
-        final List<PlayerDetails> updatedPlayers = (data['playersInfo'] as List)
+
+      if (data is List) {
+        final List<PlayerDetails> updatedPlayers = data
             .map((player) =>
                 PlayerDetails.fromJson(player as Map<String, dynamic>))
             .toList();
@@ -81,7 +82,8 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
         state = state.copyWith(playersInfo: updatedPlayers);
         AppLogger.i("Players updated: ${state.playersInfo}");
       } else {
-        AppLogger.w("Invalid or missing data for PlayerLeft event.");
+        AppLogger.w(
+            "Invalid data format for PlayerLeft event: expected List, got ${data.runtimeType}");
       }
     });
 
@@ -117,7 +119,8 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
     });
 
     _socketManager.webSocketReceiver(GameEvents.AlertLockToggled.value, (data) {
-      state = state.copyWith(gameLocked: data['isLocked']);
+      final bool isLocked = data as bool;
+      state = state.copyWith(gameLocked: isLocked);
       AppLogger.i("Game lock status: ${state.gameLocked}");
     });
 

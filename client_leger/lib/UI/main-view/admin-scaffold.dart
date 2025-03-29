@@ -153,7 +153,8 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold>
                       icon: Icon(Icons.poll),
                       iconSize: 28,
                       color: colorScheme.tertiary,
-                      onPressed: () => {}, // Navigate to polls page
+                      onPressed: () =>
+                          GoRouter.of(context).go(Paths.adminHistoryPolls),
                       tooltip: 'Sondages',
                     ),
                     SizedBox(width: 8),

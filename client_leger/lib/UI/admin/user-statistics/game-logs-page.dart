@@ -1,5 +1,5 @@
 import 'package:client_leger/UI/global/header_title.dart';
-import 'package:client_leger/UI/user-statistics/widget/game-logs-table.dart';
+import 'package:client_leger/UI/admin/user-statistics/widget/game-logs-table.dart';
 import 'package:client_leger/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

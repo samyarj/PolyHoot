@@ -1,7 +1,7 @@
 import 'package:client_leger/UI/global/header_title.dart';
-import 'package:client_leger/UI/user-statistics/utilities.dart';
-import 'package:client_leger/UI/user-statistics/widget/connection-logs-table.dart';
-import 'package:client_leger/UI/user-statistics/widget/user-statistics-panel.dart';
+import 'package:client_leger/UI/admin/user-statistics/utilities.dart';
+import 'package:client_leger/UI/admin/user-statistics/widget/connection-logs-table.dart';
+import 'package:client_leger/UI/admin/user-statistics/widget/user-statistics-panel.dart';
 import 'package:client_leger/models/connection-log-entry-model.dart';
 import 'package:client_leger/providers/user_provider.dart';
 import 'package:flutter/material.dart';
