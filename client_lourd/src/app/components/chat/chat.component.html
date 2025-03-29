@@ -20,7 +20,7 @@
                 <div
                     *ngIf="(user | async)?.username !== chatmessage.author && chatmessage.uid"
                     class="report-button"
-                    (click)="reportUser(chatmessage.uid)"
+                    (click)="reportUser(chatmessage.uid, chatmessage.author)"
                     matTooltip="Signaler"
                     matTooltipClass="custom-tooltip"
                 >

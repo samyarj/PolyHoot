@@ -1,5 +1,6 @@
 import { AfterViewChecked, Component, ElementRef, Input, OnDestroy, ViewChild } from '@angular/core';
-import { MAX_CHAR } from '@app/constants/constants';
+import { MatDialog } from '@angular/material/dialog';
+import { MAX_CHAR, WIDTH_SIZE } from '@app/constants/constants';
 import { AuthService } from '@app/services/auth/auth.service';
 import { ChatEvents } from '@app/services/chat-services/chat-events';
 import { ChatService } from '@app/services/chat-services/chat.service';
@@ -7,6 +8,7 @@ import { MessageHandlerService } from '@app/services/general-services/error-hand
 import { ChatMessage } from '@common/chat-message';
 import { ToastrService } from 'ngx-toastr';
 import { Observer, Subscription } from 'rxjs';
+import { ConfirmationDialogComponent } from '../general-elements/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
     selector: 'app-chat',
@@ -42,6 +44,7 @@ export class ChatComponent implements OnDestroy, AfterViewChecked {
         private messageHandlerService: MessageHandlerService,
         private authService: AuthService,
         private toastr: ToastrService,
+        private matdialog: MatDialog,
     ) {
         this.messagesSubscription = this.chatService.allChatMessagesObservable.subscribe(this.messagesObserver);
         this.chatEventsSubscription = this.chatService.chatEvents$.subscribe((event) => {
@@ -92,28 +95,38 @@ export class ChatComponent implements OnDestroy, AfterViewChecked {
         }
     }
 
-    reportUser(uid: string) {
-        this.authService
-            .getReportService()
-            .reportPlayer(uid)
-            .subscribe({
-                next: (value: boolean | null) => {
-                    switch (value) {
-                        case true: {
-                            this.toastr.success('Merci pour votre contribution à la bonne atmosphère du jeu. Le joueur est signalé.');
-                            break;
-                        }
-                        case false: {
-                            this.toastr.info('Vous avez déjà signalé ce joueur.');
-                            break;
-                        }
-                        case null: {
-                            this.toastr.info('Vous ne pouvez pas signaler un administrateur.');
-                            break;
-                        }
-                    }
-                },
-            });
+    reportUser(uid: string, username: string) {
+        const dialogRef = this.matdialog.open(ConfirmationDialogComponent, {
+            width: WIDTH_SIZE,
+            panelClass: 'custom-container',
+            data: `Voulez vous signaler ${username}?`,
+        });
+
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                this.authService
+                    .getReportService()
+                    .reportPlayer(uid)
+                    .subscribe({
+                        next: (value: boolean | null) => {
+                            switch (value) {
+                                case true: {
+                                    this.toastr.success('Merci pour votre contribution à la bonne atmosphère du jeu. Le joueur est signalé.');
+                                    break;
+                                }
+                                case false: {
+                                    this.toastr.info('Vous avez déjà signalé ce joueur.');
+                                    break;
+                                }
+                                case null: {
+                                    this.toastr.info('Vous ne pouvez pas signaler un administrateur.');
+                                    break;
+                                }
+                            }
+                        },
+                    });
+            }
+        });
     }
 
     ngOnDestroy(): void {
