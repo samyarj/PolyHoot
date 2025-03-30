@@ -30,12 +30,12 @@ Expected Output:
 2. Ensure the replies reflect the tone of the conversation.
 3. Aim for responses that are engaging and relevant to the conversation.
 4. If the context suggests multiple emotions, provide a variety of responses to choose from.
-6. All quick replies must be in french
-5. Your output must follow this JSON format:
+5. All quick replies must be in french
+6. Your output must follow this JSON format:
 {
   "quick_replies": ["answer1", "answer2", "answer3"]
 }
-6. If you are not sure what to do, give this default output:
+7. If you are not sure what to do, give this default output:
 {
   "quick_replies": ["Wow!", "Bien joué!", "Intéressant!"]
 }`,
@@ -88,7 +88,7 @@ ${message}`;
             // Send the conversation context to the LLM
             const chatCompletion = await this.groq.chat.completions.create({
                 messages: context,
-                model: 'llama-3.3-70b-versatile',
+                model: 'llama3-70b-8192',
                 temperature: 1,
                 max_completion_tokens: 1024,
                 top_p: 1,

@@ -51,15 +51,13 @@ export class ChatGateway {
                 : `${player.name}'s last answer was ${player.lastAnswerCorrect ? 'correct' : 'incorrect'}`;
 
             const fullContext = `${gameContext}${playerContext}`;
-            console.log(fullContext);
             const quickReplies = await this.quickReplyService.generateQuickReplies(clientRoomId, data.user, history, fullContext);
-            console.log(quickReplies);
             // Send quick replies only to the requesting user
             clientSocket.emit(ChatEvents.QuickRepliesGenerated, quickReplies);
         } catch (error) {
             console.error('Error generating quick replies:', error);
             // default quick replies
-            clientSocket.emit(ChatEvents.QuickRepliesGenerated, ['Hello!', 'Nice to meet you!', 'How are you?']);
+            clientSocket.emit(ChatEvents.QuickRepliesGenerated, ['Wow!', 'Bien joué!', 'Intéressant!']);
         }
     }
 }
