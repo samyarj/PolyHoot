@@ -227,7 +227,7 @@ final GoRouter router = GoRouter(
       final currentUserState = containerRef.read(user_provider.userProvider);
 
       if (_reportService.nbReport.value != null &&
-          _reportService.nbReport.value! > 2) {
+          _reportService.nbReport.value! >= 2) {
         AppLogger.e("User has been reported more than 2 times");
         _reportService.behaviourWarning(context);
         final reportState =
