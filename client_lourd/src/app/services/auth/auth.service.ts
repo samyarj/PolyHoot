@@ -57,7 +57,7 @@ export class AuthService {
     ) {
         this.user$.subscribe({
             next: (user: User | null) => {
-                if (user && user.nbReport !== undefined && user.nbReport > 2) {
+                if (user && user.nbReport !== undefined && user.nbReport >= 2) {
                     this.reportService.behaviourWarning();
                     this.reportService.getReportState(user.uid).subscribe({
                         next: (value: { message: string; isBanned: boolean }) => {
