@@ -30,13 +30,14 @@ Expected Output:
 2. Ensure the replies reflect the tone of the conversation.
 3. Aim for responses that are engaging and relevant to the conversation.
 4. If the context suggests multiple emotions, provide a variety of responses to choose from.
+6. All quick replies must be in french
 5. Your output must follow this JSON format:
 {
   "quick_replies": ["answer1", "answer2", "answer3"]
 }
 6. If you are not sure what to do, give this default output:
 {
-  "quick_replies": ["Hello!", "Nice to meet you!", "How are you?"]
+  "quick_replies": ["Wow!", "Bien joué!", "Intéressant!"]
 }`,
             },
         ];
@@ -104,11 +105,11 @@ ${message}`;
             if (this.validateQuickRepliesSchema(parsedResponse)) {
                 return parsedResponse.quick_replies;
             } else {
-                return ['Hello!', 'Nice to meet you!', 'How are you?'];
+                return ['Wow!', 'Bien joué!', 'Intéressant!'];
             }
         } catch (error) {
             console.error('Error generating quick replies:', error);
-            return ['Hello!', 'Nice to meet you!', 'How are you?'];
+            return ['Wow!', 'Bien joué!', 'Intéressant!'];
         }
     }
 }

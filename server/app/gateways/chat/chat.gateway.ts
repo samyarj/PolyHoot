@@ -18,7 +18,7 @@ export class ChatGateway {
     ) {}
 
     @SubscribeMessage(ChatEvents.RoomMessage)
-    roomMessage(clientSocket: Socket, message: ChatMessage) {
+    async roomMessage(clientSocket: Socket, message: ChatMessage) {
         message.date = new Date();
         const clientRoomId: string = Array.from(clientSocket.rooms.values())[1];
         this.chatService.addMessage(message, clientRoomId);
@@ -32,16 +32,28 @@ export class ChatGateway {
     }
 
     @SubscribeMessage(ChatEvents.RequestQuickReplies)
-    async handleQuickRepliesRequest(clientSocket: Socket, data: { user: string; gameContext?: string }) {
+    async handleQuickRepliesRequest(clientSocket: Socket, data: { user: string }) {
         const clientRoomId: string = Array.from(clientSocket.rooms.values())[1];
         try {
-            // Get chat history for context
+            // Get chat history
             const messageHistory = this.chatService.getHistory(clientRoomId);
-            let history = '';
-            for (const h of messageHistory) {
-                history += `${h.author}: ${h.message}\n`;
-            }
-            const quickReplies = await this.quickReplyService.generateQuickReplies(clientRoomId, data.user, history, data.gameContext);
+            const history = messageHistory.map((h) => `${h.author}: ${h.message}`).join('\n');
+            // Get Game Context
+            const game = this.gameManagerService.getGameByRoomId(clientRoomId);
+            const gameContext = game
+                ? `Leaderboard of Players:\n${game.players.map((player) => `${player.name} (${player.points} points)`).join('\n')}\n`
+                : '';
+
+            const player = game.players.find((p) => p.name === data.user) ?? null;
+            const isOrganizer = player === null;
+            const playerContext = isOrganizer
+                ? 'You are the game Organizer, you do not play.'
+                : `${player.name}'s last answer was ${player.lastAnswerCorrect ? 'correct' : 'incorrect'}`;
+
+            const fullContext = `${gameContext}${playerContext}`;
+            console.log(fullContext);
+            const quickReplies = await this.quickReplyService.generateQuickReplies(clientRoomId, data.user, history, fullContext);
+            console.log(quickReplies);
             // Send quick replies only to the requesting user
             clientSocket.emit(ChatEvents.QuickRepliesGenerated, quickReplies);
         } catch (error) {
