@@ -14,7 +14,7 @@ export class PublishedPollController {
         private readonly userService: UserService,
     ) {}
 
-    @ApiOkResponse({
+    /* @ApiOkResponse({
         description: 'Returns all published polls',
         type: PublishedPoll,
         isArray: true,
@@ -31,7 +31,7 @@ export class PublishedPollController {
                 response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: ERROR.INTERNAL_SERVER_ERROR });
             }
         }
-    }
+    } */
 
     @ApiOkResponse({
         description: 'Get published poll by ID',
@@ -39,6 +39,8 @@ export class PublishedPollController {
     })
     @Get('/:id')
     async getPublishedPollById(@Param('id') id: string, @Res() response: Response) {
+        console.log('Utilisé dans historique');
+
         try {
             const publishedPoll = await this.publishedPollService.getPublishedPollById(id);
             response.status(HttpStatus.OK).json(publishedPoll);
@@ -59,6 +61,7 @@ export class PublishedPollController {
     })
     @Delete('delete')
     async deleteExpiredPolls(@Res() response: Response) {
+        console.log('Utilisé dans historique');
         try {
             await this.publishedPollService.deleteExpiredPolls();
             //const updatedPublishedPolls = await this.publishedPollService.getAllPublishedPolls();
@@ -76,6 +79,8 @@ export class PublishedPollController {
     @ApiBadRequestResponse({ description: 'Bad request' })
     @Patch('/:id')
     async updatePublishedPollVotes(@Param('id') id: string, @Body() results: number[], @Res() response: Response) {
+        console.log('Utilisé dans notifications coté joueur');
+
         try {
             const updatedPublishedPoll = await this.publishedPollService.updatePublishedPollVotes(id, results);
             response.status(HttpStatus.OK).json(updatedPublishedPoll);
@@ -94,6 +99,7 @@ export class PublishedPollController {
     @ApiBadRequestResponse({ description: 'Bad request' })
     @Patch('/:uid/addPollsAnswered/')
     async updatePollsAnswered(@Param('uid') uid: string, @Body('id') id: string, @Res() response: Response) {
+        console.log('Utilisé dans notifications');
         try {
             await this.userService.addPollAnswered(uid, id);
             response.status(HttpStatus.OK).json({ message: 'Poll ID ajouté à pollsAnswered avec succès' });

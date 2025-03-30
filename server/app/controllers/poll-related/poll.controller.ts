@@ -17,7 +17,7 @@ export class PollController {
         private readonly publishedPollService: PublishedPollService,
     ) {}
 
-    @ApiOkResponse({
+    /* @ApiOkResponse({
         description: 'Returns all polls',
         type: Poll,
         isArray: true,
@@ -35,7 +35,7 @@ export class PollController {
                 response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: ERROR.INTERNAL_SERVER_ERROR });
             }
         }
-    }
+    } */
 
     @ApiOkResponse({
         description: 'Get poll by ID',
@@ -43,7 +43,7 @@ export class PollController {
     })
     @Get('/:id')
     async getPollById(@Param('id') id: string, @Res() response: Response) {
-
+        console.log('Utilisé dans create');
         try {
             const poll = await this.pollService.getPollById(id);
             response.status(HttpStatus.OK).json(poll);
@@ -62,6 +62,8 @@ export class PollController {
     })
     @Post('/create')
     async createPoll(@Body() createPollDto: CreatePollDto, @Res() response: Response) {
+        console.log('Utilisé dans create');
+
         try {
             await this.pollService.createPoll(createPollDto);
             const updatedPolls = await this.pollService.getAllPolls();
@@ -78,8 +80,9 @@ export class PollController {
     @ApiOkResponse({ description: 'Poll successfully updated' })
     @ApiNotFoundResponse({ description: 'Poll not found' })
     @ApiBadRequestResponse({ description: 'Bad request' })
-    @Patch('/update/:id')
+    @Patch('/:id')
     async updatePoll(@Param('id') id: string, @Body() updatePollDto: UpdatePollDto, @Res() response: Response) {
+        console.log('Utilisé dans create');
         try {
             await this.pollService.updatePoll(id, updatePollDto);
             const updatedPolls = await this.pollService.getAllPolls();
@@ -104,6 +107,8 @@ export class PollController {
     })
     @Patch('publish')
     async publishPoll(@Body() poll: Poll, @Res() response: Response) {
+        console.log('Utilisé dans consult');
+
         try {
             // 1. Construire le DTO de PublishedPoll
             const createPublishedPollDto: PublishedPoll = {
@@ -143,8 +148,9 @@ export class PollController {
     @ApiNotFoundResponse({
         description: 'Poll not found',
     })
-    @Delete('/delete/:id')
+    @Delete('/:id')
     async deletePollById(@Param('id') id: string, @Res() response: Response) {
+        console.log('Utilisé dans consult');
         try {
             await this.pollService.deletePollById(id);
             response.status(HttpStatus.OK).send();

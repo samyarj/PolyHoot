@@ -40,8 +40,8 @@ export class CreatePollService {
         );
     }
 
-    updatePoll(id: string, pollData: unknown): Observable<Poll[]> {
-        return this.http.patch<Poll[]>(`${this.baseUrl}/update/${id}`, pollData).pipe(
+    updatePoll(id: string, pollData: Poll): Observable<Poll[]> {
+        return this.http.patch<Poll[]>(`${this.baseUrl}/${id}`, pollData).pipe(
             map((polls) => {
                 return polls;
             }),

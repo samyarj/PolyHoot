@@ -56,7 +56,7 @@ export class ConsultPollService {
 
     // Supprimer un sondage
     deletePollById(id: string): Observable<void> {
-        return this.http.delete<void>(`${this.baseUrl}/delete/${id}`).pipe(
+        return this.http.delete<void>(`${this.baseUrl}/${id}`).pipe(
             catchError((error) => {
                 console.error(`❌ Erreur lors de la suppression du sondage ${id}:`, error);
                 return this.messageHandler.handleHttpError(error);
