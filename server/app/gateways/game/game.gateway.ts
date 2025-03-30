@@ -63,7 +63,7 @@ export class GameGateway {
         if (game) game.preparePlayersForNextQuestion();
     }
 
-    @SubscribeMessage(GameEvents.GetCurrentPlayers)
+    /* @SubscribeMessage(GameEvents.GetCurrentPlayers)
     handleCurrentPlayers(@ConnectedSocket() client: AuthenticatedSocket, @MessageBody() data: { roomId: string }) {
         const roomId = data.roomId;
         const game = this.gameManager.getGameByRoomId(roomId);
@@ -73,7 +73,7 @@ export class GameGateway {
             banner: player.equippedBorder,
         }));
         return { playersInfo };
-    }
+    } */
 
     @SubscribeMessage(GameEvents.GetCurrentGames)
     handleGetCurrentGames(@ConnectedSocket() client: AuthenticatedSocket) {
