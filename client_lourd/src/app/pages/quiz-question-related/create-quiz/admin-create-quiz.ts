@@ -72,6 +72,8 @@ export class AdminQuizCreateComponent implements OnDestroy {
     }
 
     addQuestionToBank(clickedQuestion: Question): void {
+        console.log('Ajout de question a partir de admin create quiz?');
+
         this.questionBankComponent.addQuestionToBank(clickedQuestion);
     }
 

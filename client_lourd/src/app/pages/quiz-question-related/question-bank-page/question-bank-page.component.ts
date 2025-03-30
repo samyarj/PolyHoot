@@ -3,11 +3,14 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { EMPTY_QCM_QUESTION } from '@app/constants/mock-constants';
 import { Question } from '@app/interfaces/question';
+import { User } from '@app/interfaces/user';
 import { QuestionValidationService } from '@app/services/admin-services/validation-services/question-validation-service/question-validation.service';
 import { QuestionService } from '@app/services/back-end-communication-services/question-service/question.service';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
 import { SortingService } from '@app/services/general-services/sorting-service/sorting.service';
-import { Observer } from 'rxjs';
+import { Observable, Observer } from 'rxjs';
+import { AuthService } from '@app/services/auth/auth.service';
+
 
 @Component({
     selector: 'app-banque-questions-page',
@@ -25,7 +28,8 @@ export class QuestionBankPageComponent {
     selectedQuestions: Question[] = this.bankQuestions;
 
     selectedType: string = 'ALL';
-
+    user$: Observable<User | null>;
+    private username: string;
     private questionsObserver: Partial<Observer<Question[]>> = {
         next: (questions: Question[]) => {
             this.bankQuestions = this.sortingService.sortQuestionsByLastModified(questions);
@@ -42,9 +46,16 @@ export class QuestionBankPageComponent {
         private questionValidationService: QuestionValidationService,
         private router: Router,
         private messageHandler: MessageHandlerService,
+        private authService: AuthService,
         private sortingService: SortingService,
     ) {
         this.questionService.getAllQuestions().subscribe(this.questionsObserver);
+        this.user$ = this.authService.user$;
+        this.user$.subscribe((user) => {
+            if (user) {
+                this.username = user.username;
+            }
+        });
     }
 
     addNewQuestion() {
@@ -69,6 +80,8 @@ export class QuestionBankPageComponent {
     }
 
     handleAddedQuestion(addedQuestion: Question) {
+        console.log('DIRECT DE LA BANQUE');
+        addedQuestion.creator = this.username;
         this.showForm = false;
         this.questionService.createQuestion(addedQuestion).subscribe(this.questionsObserver);
     }
