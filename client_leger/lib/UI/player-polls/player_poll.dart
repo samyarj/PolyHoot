@@ -3,6 +3,7 @@ import 'package:client_leger/UI/global/themed_progress_indicator.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/polls/poll-history-service.dart';
 import 'package:client_leger/models/polls/published-poll-model.dart';
+import 'package:client_leger/utilities/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +12,7 @@ class PlayerPoll extends StatefulWidget {
       {super.key, required this.selectedPoll, required this.closeDialog});
 
   final PublishedPoll selectedPoll;
-  final Function() closeDialog;
+  final Function(bool isSuccess) closeDialog;
 
   @override
   State<PlayerPoll> createState() => _PlayerPollState();
@@ -33,6 +34,18 @@ class _PlayerPollState extends State<PlayerPoll> {
   final List<int> _playerAnswers = [];
   bool _isLoadingSubmit = false;
   final PollHistoryService _pollService = PollHistoryService();
+
+// pas nécessaire mais par mesure de précaution
+  @override
+  void initState() {
+    AppLogger.w("PlayerPoll initState called");
+    super.initState();
+    _currentState = PollState.NotStarted;
+    _currentQuestionIndex = 0;
+    _selectedChoiceIndex = null;
+    _playerAnswers.clear();
+    _isLoadingSubmit = false;
+  }
 
   selectChoice(int answerIndex) {
     setState(() {
@@ -68,15 +81,16 @@ class _PlayerPollState extends State<PlayerPoll> {
         });
         await _pollService.sendAnsweredPlayerPoll(
             _playerAnswers, widget.selectedPoll.id!, userUid);
+        widget.closeDialog(true);
       } catch (e) {
         if (mounted) {
           showErrorDialog(context, getCustomError(e));
         }
+        widget.closeDialog(false);
       } finally {
         setState(() {
           _isLoadingSubmit = false;
         });
-        widget.closeDialog();
       }
     }
   }
@@ -341,36 +355,37 @@ class _PlayerPollState extends State<PlayerPoll> {
                         ],
                       ),
                     ),
-         _isLoadingSubmit
-                ? ThemedProgressIndicator() : TextButton(
-            onPressed: () {
-              _currentState == PollState.NotStarted
-                  ? setState(() {
-                      _currentState = PollState.Started;
-                      _currentQuestionIndex = 0;
-                    })
-                  : _currentState == PollState.Finished
-                      ? onSubmit(context)
-                      : _selectedChoiceIndex == null
-                          ? null
-                          : _nextQuestion();
-            },
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(
-                colorScheme.surface,
-              ),
-              shape: WidgetStateProperty.all(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50), // Rounded corners
-                  side: BorderSide(
-                    color: colorScheme.tertiary.withOpacity(0.5),
-                    width: 3,
+          _isLoadingSubmit
+              ? ThemedProgressIndicator()
+              : TextButton(
+                  onPressed: () {
+                    _currentState == PollState.NotStarted
+                        ? setState(() {
+                            _currentState = PollState.Started;
+                            _currentQuestionIndex = 0;
+                          })
+                        : _currentState == PollState.Finished
+                            ? onSubmit(context)
+                            : _selectedChoiceIndex == null
+                                ? null
+                                : _nextQuestion();
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all(
+                      colorScheme.surface,
+                    ),
+                    shape: WidgetStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(50), // Rounded corners
+                        side: BorderSide(
+                          color: colorScheme.tertiary.withOpacity(0.5),
+                          width: 3,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ),
-            child: 
-                Text(
+                  child: Text(
                     _currentState == PollState.NotStarted
                         ? "Débuter"
                         : _currentState == PollState.Finished
@@ -381,7 +396,7 @@ class _PlayerPollState extends State<PlayerPoll> {
                       fontSize: 20,
                     ),
                   ),
-          ),
+                ),
         ],
       ),
     );

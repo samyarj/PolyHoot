@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:toastification/toastification.dart';
 
 class PlayerPollsNotification extends ConsumerStatefulWidget {
   const PlayerPollsNotification({
@@ -39,13 +40,28 @@ class _PlayerPollsNotificationState
     _showPollDetailsDialog();
   }
 
-  void _closePollDialog(BuildContext dialogContext) {
+  void _closePollDialog(BuildContext dialogContext, bool? isSuccess) {
     if (mounted) {
       Navigator.of(dialogContext).pop();
-      setState(() {
-        _isDialogShowing = false;
-        _selectedPoll = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          _isDialogShowing = false;
+          _selectedPoll = null;
+        });
       });
+      if (isSuccess != null && isSuccess) {
+        showToast(
+          context,
+          'Sondage complété!',
+          type: ToastificationType.success,
+        );
+      } else if (isSuccess != null) {
+        showToast(
+          context,
+          'Complétion du sondage annulée',
+          type: ToastificationType.warning,
+        );
+      }
     }
   }
 
@@ -95,7 +111,8 @@ class _PlayerPollsNotificationState
                         right: 12,
                         child: IconButton(
                           onPressed: () {
-                            _closePollDialog(dialogContext);
+                            final bool isSuccess = _selectedPoll == null;
+                            _closePollDialog(dialogContext, isSuccess);
                           },
                           icon: Icon(Icons.close),
                           color: colorScheme.onSurface,
@@ -106,9 +123,8 @@ class _PlayerPollsNotificationState
                       // Poll Details Content
                       PlayerPoll(
                         selectedPoll: _selectedPoll!,
-                        closeDialog: () {
-                          _closePollDialog(dialogContext);
-                        },
+                        closeDialog: (isSuccess) =>
+                            _closePollDialog(dialogContext, isSuccess),
                       ),
                     ],
                   ),
@@ -146,6 +162,15 @@ class _PlayerPollsNotificationState
             final isLoading = _pollService.isLoading;
             final playerPolls = _pollService.playerPolls;
             final hasPolls = playerPolls.isNotEmpty;
+
+            if (_selectedPoll != null && !playerPolls.contains(_selectedPoll)) {
+              _closePollDialog(context, null);
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showToast(
+                    context, 'Ce sondage a expiré pendant que vous répondiez',
+                    type: ToastificationType.error);
+              });
+            }
 
             if (!listEquals(currentPlayerPolls, playerPolls) &&
                 _menuOpen &&
