@@ -56,8 +56,6 @@ export enum TimerEvents {
 }
 
 export enum GameEvents {
-    SelectFromPlayer = 'selected',
-    PlayerChoiceToOrganizer = 'selectChoice',
     StartQuestionCountdown = 'startQuestionCountdown',
     QuestionEndByTimer = 'questionEndByTimer',
     FinalizePlayerAnswer = 'finalizePlayerAnswer',
@@ -86,10 +84,9 @@ export enum GameEvents {
     EveryoneSubmitted = 'everyoneSubmitted',
     CorrectionFinished = 'correctionFinished',
     WaitingForCorrection = 'waitingForCorrection',
-    PlayerInteraction = 'playerInteraction',
     PlayerSubmitted = 'playerSubmitted',
     GetCurrentGames = 'getCurrentGames',
-    GetCurrentPlayers = 'getCurrentPlayers',
+    // GetCurrentPlayers = 'getCurrentPlayers',
 }
 
 export enum JoinEvents {
