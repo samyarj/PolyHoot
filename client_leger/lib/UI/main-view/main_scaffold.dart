@@ -67,6 +67,12 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
     });
 
     try {
+      // close any open dialogs or popup menus
+      Navigator.of(context).popUntil((route) => route.isFirst);
+
+      // Small delay to allow UI to update
+      await Future.delayed(Duration(milliseconds: 50));
+
       if (mounted) {
         isLoggedIn.value = false;
 

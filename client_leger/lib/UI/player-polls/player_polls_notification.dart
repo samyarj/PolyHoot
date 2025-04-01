@@ -436,8 +436,8 @@ class _PlayerPollsNotificationState
                               FontAwesomeIcons.bullhorn,
                               size: 18,
                               color: _menuOpen || hasPolls
-                                  ? colorScheme.secondary
-                                  : colorScheme.tertiary,
+                                  ? colorScheme.tertiary
+                                  : colorScheme.secondary,
                             ),
                           ),
                           if (hasPolls && !_menuOpen)

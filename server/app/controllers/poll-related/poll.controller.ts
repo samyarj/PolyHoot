@@ -43,7 +43,6 @@ export class PollController {
     })
     @Get('/:id')
     async getPollById(@Param('id') id: string, @Res() response: Response) {
-
         try {
             const poll = await this.pollService.getPollById(id);
             response.status(HttpStatus.OK).json(poll);
@@ -102,7 +101,7 @@ export class PollController {
     @ApiNotFoundResponse({
         description: 'Poll not found or could not be published',
     })
-    @Patch('publish')
+    @Patch('/publish')
     async publishPoll(@Body() poll: Poll, @Res() response: Response) {
         try {
             // 1. Construire le DTO de PublishedPoll
@@ -118,7 +117,6 @@ export class PollController {
                     {} as { [questionIndex: string]: number[] },
                 ),
             };
-
             // 2. Créer le sondage publié dans Firestore
             const publishedPoll = await this.publishedPollService.createPublishedPoll(createPublishedPollDto);
 
@@ -127,6 +125,7 @@ export class PollController {
 
             // 4. Récupérer la liste de sondages et celle des publiés
             const updatedPolls = await this.pollService.getAllPolls();
+
             const updatedPublishedPolls = await this.publishedPollService.getAllPublishedPolls();
 
             // 5. Retourner le sondage publié et les listes mises à jour
