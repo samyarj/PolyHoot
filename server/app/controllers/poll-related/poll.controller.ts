@@ -15,9 +15,9 @@ export class PollController {
     constructor(
         private readonly pollService: PollService,
         private readonly publishedPollService: PublishedPollService,
-    ) {}
+    ) { }
 
-    /* @ApiOkResponse({
+    @ApiOkResponse({
         description: 'Returns all polls',
         type: Poll,
         isArray: true,
@@ -35,7 +35,7 @@ export class PollController {
                 response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: ERROR.INTERNAL_SERVER_ERROR });
             }
         }
-    } */
+    }
 
     @ApiOkResponse({
         description: 'Get poll by ID',
