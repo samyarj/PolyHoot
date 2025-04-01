@@ -325,13 +325,15 @@ class _AdminPollNotificationState extends State<AdminPollNotification> {
                                 color: colorScheme.tertiary.withOpacity(0.6),
                               ),
                               SizedBox(height: 8),
-                              Text(
-                                "Aucun sondage expiré",
-                                style: TextStyle(
-                                  color: colorScheme.onSurface,
-                                  fontSize: 14,
+                              Center(
+                                child: Text(
+                                  "Aucun sondage expiré",
+                                  style: TextStyle(
+                                    color: colorScheme.onSurface,
+                                    fontSize: 14,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                textAlign: TextAlign.center,
                               ),
                             ],
                           ),
