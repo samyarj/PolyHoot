@@ -155,7 +155,7 @@ class _PlayerPollsNotificationState
 
     return userState.when(
       data: (user) {
-        _pollService.initializePlayerPollsAnswered(user!.pollsAnswered);
+        _pollService.initializePlayerPollsAnswered(user?.pollsAnswered);
         return ListenableBuilder(
           listenable: _pollService,
           builder: (context, _) {

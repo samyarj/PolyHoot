@@ -37,7 +37,10 @@ class PollHistoryService extends ChangeNotifier {
 
   List<String> playerPollsAnsweredCache = [];
 
-  initializePlayerPollsAnswered(List<String> playerPollsAnswered) {
+  initializePlayerPollsAnswered(List<String>? playerPollsAnswered) {
+    if (playerPollsAnswered == null) {
+      return;
+    }
     playerPollsAnsweredCache = playerPollsAnswered;
   }
 

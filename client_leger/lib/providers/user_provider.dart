@@ -133,7 +133,10 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
     state = const AsyncValue.loading();
     try {
       final idToken = await userCredential.user?.getIdToken();
-      final headers = {'Authorization': 'Bearer $idToken'};
+      final headers = {
+        'Authorization': 'Bearer $idToken',
+        'Content-Type': 'application/json',
+      };
       final http.Response response;
 
       if (isLogin) {

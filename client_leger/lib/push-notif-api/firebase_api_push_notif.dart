@@ -49,10 +49,12 @@ class FirebasePushApi {
     // backend will write the fcmToken in the database
     currentUserId = userUid;
     _fcmToken = await _firebaseMessaging.getToken() ?? '';
+    AppLogger.w("getting _fcmToken $_fcmToken for userId: $userUid");
     return _fcmToken;
   }
 
   Future<void> onLogin() async {
+    AppLogger.w("onLogin");
     final newFcmToken = await _firebaseMessaging.getToken() ?? '';
     await setAndSaveFcmToken(newFcmToken);
     setupFcmTokenListener();
