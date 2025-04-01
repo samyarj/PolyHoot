@@ -143,10 +143,13 @@ $primary-color: #00115a;
 
 .generate-question-section {
     display: flex;
-    justify-content: flex-end;
+    flex-direction: column;
     margin-top: 1rem;
+    width: 100%;
+    position: relative;
 
     .generate-button {
+        align-self: flex-end;
         background-color: var(--tertiary-color);
         color: var(--text-color);
         border: none;
@@ -154,6 +157,7 @@ $primary-color: #00115a;
         border-radius: 0.5rem;
         cursor: pointer;
         transition: background-color 0.3s ease;
+        margin-bottom: 1rem;
 
         &:hover {
             background-color: color-mix(in srgb, var(--tertiary-color) 80%, white);
@@ -161,6 +165,81 @@ $primary-color: #00115a;
 
         i {
             margin-right: 0.5rem;
+        }
+    }
+}
+
+.reformulation-preview {
+    margin-top: 0;
+    padding: 1.2rem;
+    border: 3px dashed var(--tertiary-color);
+    background: color-mix(in srgb, var(--primary-color) 70%, transparent);
+    border-radius: 1rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .preview-content {
+        margin-bottom: 1.2rem;
+
+        h4 {
+            color: var(--text-color);
+            font-weight: bold;
+            margin-bottom: 0.8rem;
+        }
+
+        p {
+            margin-bottom: 1.2rem;
+            padding: 0.8rem;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            border-radius: 0.5rem;
+            border: 1px solid var(--tertiary-color);
+            box-shadow: 0 0 5px var(--tertiary-color);
+        }
+    }
+
+    .preview-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+
+        .accept-button {
+            background-color: var(--tertiary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 0 5px var(--tertiary-color);
+
+            &:hover {
+                background-color: color-mix(in srgb, var(--tertiary-color) 80%, white);
+            }
+
+            i {
+                margin-right: 0.5rem;
+            }
+        }
+
+        .reject-button {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 0 5px var(--tertiary-color);
+
+            &:hover {
+                background-color: color-mix(in srgb, var(--primary-color) 80%, white);
+            }
+
+            i {
+                margin-right: 0.5rem;
+            }
         }
     }
 }

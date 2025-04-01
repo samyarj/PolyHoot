@@ -22,6 +22,7 @@
                 id="question-text-id"
                 type="text"
                 [(ngModel)]="question.text"
+                (ngModelChange)="onQuestionTextChange()"
                 placeholder="Entrez votre question."
                 name="text"
                 #text="ngModel"
@@ -70,7 +71,30 @@
     </div>
 
     <div class="generate-question-section">
-        <button type="button" class="custom-button generate-button" (click)="generateQuestion()"><i class="fas fa-magic"></i> Générer!</button>
+        <button *ngIf="!isGeneratedQuestion" type="button" class="custom-button generate-button" (click)="generateQuestion()">
+            <i class="fas fa-magic"></i> Générer!
+        </button>
+        <div *ngIf="isGeneratedQuestion">
+            <button type="button" class="custom-button generate-button" (click)="reformulateQuestion()">
+                <i class="fas fa-sync"></i> Reformuler!
+            </button>
+            <div *ngIf="isReformulating" class="reformulation-preview">
+                <div class="preview-content">
+                    <h4>Question actuelle:</h4>
+                    <p>{{ question.text }}</p>
+                    <h4>Nouvelle formulation:</h4>
+                    <p>{{ temporaryQuestionText }}</p>
+                </div>
+                <div class="preview-actions">
+                    <button type="button" class="custom-button accept-button" (click)="acceptReformulation()">
+                        <i class="fas fa-check"></i> Accepter
+                    </button>
+                    <button type="button" class="custom-button reject-button" (click)="rejectReformulation()">
+                        <i class="fas fa-times"></i> Rejeter
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="form-group answers-section" *ngIf="questionType === 'QRE'">

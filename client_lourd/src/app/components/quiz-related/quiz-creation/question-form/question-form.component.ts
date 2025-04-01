@@ -30,6 +30,9 @@ export class QuestionFormComponent implements OnChanges {
     minBound: number;
     maxBound: number;
     tolerance: number;
+    isGeneratedQuestion: boolean = false;
+    isReformulating: boolean = false;
+    temporaryQuestionText: string = '';
 
     constructor(
         private questionValidationService: QuestionValidationService,
@@ -67,6 +70,7 @@ export class QuestionFormComponent implements OnChanges {
     }
 
     resetAnswers(): void {
+        this.isGeneratedQuestion = false;
         this.emptyQuestion.emit(this.questionType);
     }
 
@@ -93,6 +97,7 @@ export class QuestionFormComponent implements OnChanges {
     }
 
     onQuestionTypeChange() {
+        this.isGeneratedQuestion = false;
         switch (this.questionType) {
             case QuestionType.QRL: {
                 this.question.type = QuestionType.QRL;
@@ -180,12 +185,10 @@ export class QuestionFormComponent implements OnChanges {
                             text: value as string,
                             isCorrect: key === response.Réponse,
                         }));
-
                         break;
                     }
                     case QuestionType.QRL: {
                         this.question.text = response.Question;
-
                         break;
                     }
                     case QuestionType.QRE: {
@@ -196,11 +199,10 @@ export class QuestionFormComponent implements OnChanges {
                             maxBound: response['Borne maximale'],
                             tolerance: response['Marge de tolérance'],
                         };
-
                         break;
                     }
-                    // No default
                 }
+                this.isGeneratedQuestion = true;
                 this.toastr.success('Question générée avec succès');
             },
             error: (error) => {
@@ -208,5 +210,42 @@ export class QuestionFormComponent implements OnChanges {
                 console.error('Error generating question:', error);
             },
         });
+    }
+
+    reformulateQuestion(): void {
+        if (!this.question.text) {
+            this.toastr.warning('Aucune question à reformuler');
+            return;
+        }
+
+        this.isReformulating = true;
+        this.http.post(`${environment.serverUrl}/quizzes/reformulate-question`, { question: this.question.text }).subscribe({
+            next: (response: any) => {
+                this.temporaryQuestionText = response.reformulatedQuestion;
+                this.toastr.success('Question reformulée avec succès');
+            },
+            error: (error) => {
+                this.toastr.error('Erreur lors de la reformulation de la question');
+                console.error('Error reformulating question:', error);
+                this.isReformulating = false;
+            },
+        });
+    }
+
+    acceptReformulation(): void {
+        this.question.text = this.temporaryQuestionText;
+        this.isReformulating = false;
+        this.toastr.success('Reformulation acceptée');
+    }
+
+    rejectReformulation(): void {
+        this.isReformulating = false;
+        this.toastr.info('Reformulation rejetée');
+    }
+
+    onQuestionTextChange(): void {
+        if (this.isGeneratedQuestion || !this.question.text) {
+            this.isGeneratedQuestion = false;
+        }
     }
 }
