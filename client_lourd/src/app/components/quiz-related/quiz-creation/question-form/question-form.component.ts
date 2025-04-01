@@ -142,7 +142,7 @@ export class QuestionFormComponent implements OnChanges {
         // Téléversement immédiat après la sélection
         this.uploadImgService.uploadImage(file, 'question').subscribe({
             next: (response) => {
-                this.toastr.success('Image téléversée avec succès');
+                if (response.imageUrl !== '' && response.message !== '') this.toastr.success('Image téléversée avec succès');
 
                 // Stockez l'URL de l'image pour l'afficher dans le formulaire
                 this.question.image = response.imageUrl;

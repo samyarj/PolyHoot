@@ -6,7 +6,7 @@ export interface Question {
     type: string;
     text: string;
     points: number;
-    creator: string;
+    creator?: string;
     choices?: QuestionChoice[];
     qreAttributes?: QreAttributes;
     image?: string;

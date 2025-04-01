@@ -24,8 +24,8 @@ export class CreateQuestionDto {
 
     @ApiProperty()
     @IsString()
-    @IsNotEmpty()
-    creator: string;
+    @IsOptional()
+    creator?: string;
 
     @ApiProperty({ type: [ChoiceDto] })
     @IsOptional()

@@ -38,9 +38,10 @@ export class Question {
     @ApiProperty()
     @Prop({ required: true })
     points: number;
+    
     @ApiProperty()
-    @Prop({ required: true })
-    creator: string;
+    @Prop({ required: false })
+    creator?: string;
 
     @ApiProperty()
     @Prop({
