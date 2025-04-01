@@ -3,14 +3,18 @@ import { ERROR } from '@app/constants/error-messages';
 import { PublishedPoll } from '@app/model/schema/poll/published-poll.schema';
 import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import * as admin from 'firebase-admin';
+import { PollPushNotifService } from '@app/services/push-notif/poll-push-notif.service';
 
 @Injectable()
 export class PublishedPollService implements OnModuleInit {
     private firestore = admin.firestore();
-    constructor() {}
+
+    constructor(private readonly pushNotifService: PollPushNotifService) { }
+
     async createPublishedPoll(poll: PublishedPoll): Promise<PublishedPoll> {
         const pollRef = this.firestore.collection('publishedPolls').doc(poll.id);
         await pollRef.set(poll);
+        await this.pushNotifService.onNewPublishedPoll(poll.title);
         return poll;
     }
 
@@ -89,6 +93,7 @@ export class PublishedPollService implements OnModuleInit {
     } */
     //Pas idéal mais meilleur endroit pour maintenant
     onModuleInit() {
+        console.log("on module init published poll service");
         setInterval(() => this.checkAndUpdateExpiredStatus(), 1000); // Vérifie toutes les secondes
     }
 
@@ -98,9 +103,14 @@ export class PublishedPollService implements OnModuleInit {
         snapshot.forEach(async (doc) => {
             const poll = doc.data() as PublishedPoll;
             const pollEndDate = new Date(poll.endDate);
+            console.log("expired poll title is and isexpired and current date is and poll end date is", poll.title, poll.expired, currentDate, pollEndDate);
 
             if (pollEndDate <= currentDate && !poll.expired) {
+                console.log("Poll expired:", poll.title);
                 await doc.ref.update({ expired: true });
+                console.log(
+                    "Poll expired and updated in Firestore:");
+                await this.pushNotifService.onPublishedPollExpired(poll.title);
             }
         });
     }

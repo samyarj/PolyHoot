@@ -22,12 +22,14 @@ export class PollPushNotifService {
 
     async onNewPublishedPoll(pollTitle: string) {
         // Fetch users who have FCM tokens
+        this.logger.debug("New published poll.");
+
         const usersRef = this.firestore.collection('users');
         const usersSnapshot = await usersRef.where('fcmToken', '!=', '').get();
 
         const filteredUsers = usersSnapshot.docs.filter(doc => doc.data().role === 'player');
 
-        // Si plusieurs joueurs utilisent la mÃªme tablette, on envoie une seule notification de sondage
+        // Si plusieurs joueurs utilisent la meme tablette, on envoie une seule notification de sondage
         const uniqueTokens = new Set<string>();
 
         filteredUsers.forEach((userDoc) => {
@@ -37,7 +39,7 @@ export class PollPushNotifService {
             }
         });
 
-        this.logger.log("Will send push notifications to this number of mobile clients:", uniqueTokens.size);
+        this.logger.log(`Will send push notifications to this number of mobile clients: ${uniqueTokens.size}`);
 
         const notifications = Array.from(uniqueTokens).map(token =>
             this.sendNotification(token, 'Polyhoot veut ton opinion !', `Nouveau sondage disponible: ${pollTitle}`)
@@ -48,12 +50,16 @@ export class PollPushNotifService {
 
     async onPublishedPollExpired(pollTitle: string) {
         // Fetch users who have FCM tokens
+        this.logger.debug("Poll expired.");
+
         const usersRef = this.firestore.collection('users');
         const usersSnapshot = await usersRef.where('fcmToken', '!=', '').get();
 
         const filteredUsers = usersSnapshot.docs.filter(doc => doc.data().role === 'admin');
 
-        // Si plusieurs joueurs utilisent la mÃªme tablette, on envoie une seule notification d'expiration
+        this.logger.debug(`FilteredUsers for admin with tablet is ${filteredUsers.length}`);
+
+        // Si plusieurs joueurs utilisent la meme tablette, on envoie une seule notification d'expiration
         const uniqueTokens = new Set<string>();
 
         filteredUsers.forEach((userDoc) => {
@@ -63,7 +69,7 @@ export class PollPushNotifService {
             }
         });
 
-        this.logger.log("Will send push notifications to this number of mobile clients:", uniqueTokens.size);
+        this.logger.log("Poll expired. Will send push notifications to this number of mobile clients:", uniqueTokens.size);
 
         const notifications = Array.from(uniqueTokens).map(token =>
             this.sendNotification(token, 'Les statistiques sont prêtes!', `sondage expiré: ${pollTitle}`)

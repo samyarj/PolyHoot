@@ -15,27 +15,8 @@ export class PollController {
     constructor(
         private readonly pollService: PollService,
         private readonly publishedPollService: PublishedPollService,
-    ) {}
+    ) { }
 
-    @ApiOkResponse({
-        description: 'Returns all polls',
-        type: Poll,
-        isArray: true,
-    })
-    @Get()
-    async getAllPolls(@Res() response: Response) {
-        try {
-            const polls = await this.pollService.getAllPolls();
-            const publishedPolls = await this.publishedPollService.getAllPublishedPolls();
-            response.status(HttpStatus.OK).send();
-        } catch (error) {
-            if (error.status === HttpStatus.NOT_FOUND) {
-                response.status(HttpStatus.NOT_FOUND).send({ message: error.message });
-            } else {
-                response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: ERROR.INTERNAL_SERVER_ERROR });
-            }
-        }
-    }
 
     @ApiOkResponse({
         description: 'Get poll by ID',
