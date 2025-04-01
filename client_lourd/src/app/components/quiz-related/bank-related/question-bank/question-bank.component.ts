@@ -48,7 +48,6 @@ export class QuestionBankComponent {
     }
 
     addQuestionToBank(clickedQuestion: Question): void {
-        console.log('Ajout de question a partir de bank component?');
         clickedQuestion.lastModified = new Date().toString();
         if (this.username) clickedQuestion.creator = this.username;
         this.questionService.createQuestion(clickedQuestion).subscribe(this.questionsObserver);
