@@ -1,18 +1,15 @@
-import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/global/themed_progress_indicator.dart';
-import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/polls/poll-history-service.dart';
 import 'package:client_leger/models/polls/published-poll-model.dart';
 import 'package:client_leger/utilities/logger.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class PlayerPoll extends StatefulWidget {
   const PlayerPoll(
-      {super.key, required this.selectedPoll, required this.closeDialog});
+      {super.key, required this.selectedPoll, required this.onSubmit});
 
   final PublishedPoll selectedPoll;
-  final Function(bool isSuccess) closeDialog;
+  final Function(List<int> playerAnswers) onSubmit;
 
   @override
   State<PlayerPoll> createState() => _PlayerPollState();
@@ -70,28 +67,21 @@ class _PlayerPollState extends State<PlayerPoll> {
     }
   }
 
-  onSubmit(BuildContext context) async {
-    final String? userUid = FirebaseAuth.instance.currentUser?.uid;
-    if (userUid == null || widget.selectedPoll.id == null) {
-      return;
-    } else {
-      try {
-        setState(() {
-          _isLoadingSubmit = true;
-        });
-        await _pollService.sendAnsweredPlayerPoll(
-            _playerAnswers, widget.selectedPoll.id!, userUid);
-        widget.closeDialog(true);
-      } catch (e) {
-        if (mounted) {
-          showErrorDialog(context, getCustomError(e));
-        }
-        widget.closeDialog(false);
-      } finally {
+  onSubmit() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        _isLoadingSubmit = true;
+      });
+    });
+
+    await widget.onSubmit(_playerAnswers);
+
+    if (mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         setState(() {
           _isLoadingSubmit = false;
         });
-      }
+      });
     }
   }
 
@@ -365,7 +355,7 @@ class _PlayerPollState extends State<PlayerPoll> {
                             _currentQuestionIndex = 0;
                           })
                         : _currentState == PollState.Finished
-                            ? onSubmit(context)
+                            ? onSubmit()
                             : _selectedChoiceIndex == null
                                 ? null
                                 : _nextQuestion();
