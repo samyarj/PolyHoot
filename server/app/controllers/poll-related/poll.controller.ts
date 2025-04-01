@@ -43,7 +43,7 @@ export class PollController {
     })
     @Get('/:id')
     async getPollById(@Param('id') id: string, @Res() response: Response) {
-        console.log('Utilisé dans create');
+        console.log('Utilisé dans create1');
         try {
             const poll = await this.pollService.getPollById(id);
             response.status(HttpStatus.OK).json(poll);
@@ -62,7 +62,7 @@ export class PollController {
     })
     @Post('/create')
     async createPoll(@Body() createPollDto: CreatePollDto, @Res() response: Response) {
-        console.log('Utilisé dans create');
+        console.log('Utilisé dans create2');
 
         try {
             await this.pollService.createPoll(createPollDto);
@@ -80,9 +80,9 @@ export class PollController {
     @ApiOkResponse({ description: 'Poll successfully updated' })
     @ApiNotFoundResponse({ description: 'Poll not found' })
     @ApiBadRequestResponse({ description: 'Bad request' })
-    @Patch('/:id')
+    @Patch('/update/:id')
     async updatePoll(@Param('id') id: string, @Body() updatePollDto: UpdatePollDto, @Res() response: Response) {
-        console.log('Utilisé dans create');
+        console.log('Utilisé dans create3');
         try {
             await this.pollService.updatePoll(id, updatePollDto);
             const updatedPolls = await this.pollService.getAllPolls();
@@ -105,10 +105,10 @@ export class PollController {
     @ApiNotFoundResponse({
         description: 'Poll not found or could not be published',
     })
-    @Patch('publish')
+    @Patch('/publish')
     async publishPoll(@Body() poll: Poll, @Res() response: Response) {
+        console.log(poll);
         console.log('Utilisé dans consult');
-
         try {
             // 1. Construire le DTO de PublishedPoll
             const createPublishedPollDto: PublishedPoll = {
@@ -123,16 +123,19 @@ export class PollController {
                     {} as { [questionIndex: string]: number[] },
                 ),
             };
-
+            console.log('1', createPublishedPollDto);
             // 2. Créer le sondage publié dans Firestore
             const publishedPoll = await this.publishedPollService.createPublishedPoll(createPublishedPollDto);
+            console.log('2', publishedPoll);
 
             // 3. Supprimer l'ancien sondage de Firestore
             await this.deletePollById(poll.id, response);
-
+            console.log('3', publishedPoll);
             // 4. Récupérer la liste de sondages et celle des publiés
             const updatedPolls = await this.pollService.getAllPolls();
+            console.log('4', publishedPoll);
             const updatedPublishedPolls = await this.publishedPollService.getAllPublishedPolls();
+            console.log('5', publishedPoll);
 
             // 5. Retourner le sondage publié et les listes mises à jour
             return response.status(HttpStatus.OK).send();

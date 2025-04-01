@@ -66,6 +66,7 @@ export class ConsultPollService {
 
     // Publier un sondage
     publishPoll(poll: Poll): Observable<{ polls: Poll[]; publishedPolls: PublishedPoll[] }> {
+        console.log('va publish normalement');
         return this.http.patch<{ polls: Poll[]; publishedPolls: PublishedPoll[] }>(`${this.baseUrl}/publish`, poll).pipe(
             catchError((error) => {
                 console.error('❌ Erreur lors de la publication du sondage', error);
