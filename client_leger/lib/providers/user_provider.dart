@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
 import 'package:client_leger/backend-communication-services/chat/firebase_chat_service.dart';
@@ -9,6 +8,7 @@ import 'package:client_leger/backend-communication-services/report/report_servic
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/report/report_state.dart';
 import 'package:client_leger/models/user.dart' as user_model;
+import 'package:client_leger/push-notif-api/firebase_api_push_notif.dart';
 import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -34,6 +34,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
   final ReportService _reportService = ReportService();
   final FirebaseChatService _firebaseChatService = FirebaseChatService();
   String? currentToken;
+  final FirebasePushApi _firebasePushApi = FirebasePushApi();
 
   AuthNotifier() : super(const AsyncValue.loading()) {
     fetchUser();
@@ -127,21 +128,37 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
 
   // Create a new user
   Future<void> createAndFetchUser(
-      UserCredential userCredential, String endpoint) async {
+      UserCredential userCredential, String endpoint,
+      {bool isLogin = false}) async {
     state = const AsyncValue.loading();
     try {
       final idToken = await userCredential.user?.getIdToken();
       final headers = {'Authorization': 'Bearer $idToken'};
+      final http.Response response;
 
-      final http.Response response =
-          await http.post(Uri.parse(endpoint), headers: headers);
+      if (isLogin) {
+        response = await http.post(Uri.parse(endpoint), headers: headers);
+      } else {
+        final fcmToken =
+            await _firebasePushApi.onSignUp(userCredential.user?.uid ?? '');
+        final body = jsonEncode({'fcmToken': fcmToken});
+        AppLogger.e("body is $body");
+        response =
+            await http.post(Uri.parse(endpoint), headers: headers, body: body);
+      }
 
       if (response.statusCode == 201) {
         final userJson = jsonDecode(response.body);
         final user = user_model.User.fromJson(userJson);
         state = AsyncValue.data(user);
         isLoggedIn.value = true;
+        if (isLogin) {
+          await _firebasePushApi.onLogin();
+        } else {
+          _firebasePushApi.setupFcmTokenListener();
+        }
         WebSocketManager.instance.playerName = user.username;
+
         if (userCredential.user != null) {
           listenToTokenChanges();
           setupUserDocListener(userCredential.user!.uid);
@@ -191,6 +208,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
 
       await fetchUser();
       isLoggedIn.value = true;
+      await _firebasePushApi.onLogin();
     } catch (e, stack) {
       AppLogger.e("Sign-in error: $e");
       state = AsyncValue.error(e, stack);
@@ -264,8 +282,21 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
         }
       }
 
-      await fetchUser();
-      isLoggedIn.value = true;
+      if (isLogin && userCredential.user?.email != null) {
+        final bool isOnline =
+            await auth_service.isUserOnline(userCredential.user!.email!);
+        if (isOnline) throw Exception("Vous êtes déjà connecté ailleurs.");
+      }
+
+      if (!isLogin) {
+        AppLogger.d("about to update profile");
+        await userCredential.user!
+            .updateProfile(displayName: userCredential.user?.displayName);
+      }
+
+      // attention, si le compte existe déjà, le backend ne va pas créer un nouveau user et le fcm ne sera pas écrit dans la bd
+      await createAndFetchUser(userCredential, auth_service.googleSignInUrl,
+          isLogin: isLogin);
     } catch (e, stack) {
       AppLogger.e("Google sign-in error: $e");
       state = AsyncValue.error(e, stack);

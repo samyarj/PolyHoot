@@ -12,7 +12,7 @@ export class UserService {
     private usersSocketIdMap = new Map<string, string>();
     private readonly logger = new Logger(UserService.name);
 
-    constructor(private readonly cloudinaryService: CloudinaryService) {}
+    constructor(private readonly cloudinaryService: CloudinaryService) { }
 
     addUserToMap(socketId: string, uid: string) {
         if (!this.isUserInMap(socketId)) {
@@ -75,7 +75,7 @@ export class UserService {
     }
 
     // Sign up a new user and return user data with token
-    async createUserInFirestore(uid: string, username: string, email: string): Promise<User> {
+    async createUserInFirestore(uid: string, username: string, email: string, fcmToken?: string): Promise<User> {
         // Check if the username or email already exists in Firestore
         const usernameExists = await this.isUsernameTaken(username);
         const { emailExists } = await this.isEmailTaken(email);
@@ -90,6 +90,7 @@ export class UserService {
             email,
             avatarEquipped: DEFAULT_AVATAR_URL,
             role: 'player',
+            fcmToken: fcmToken ? fcmToken : '', // Ensure fcmToken is not null or undefined
         };
 
         // Save the user data in Firestore
@@ -98,7 +99,7 @@ export class UserService {
         return newUser; // Return the created user object
     }
 
-    async signInWithGoogle(uid: string, email: string, displayName: string): Promise<User> {
+    async signInWithGoogle(uid: string, email: string, displayName: string, fcmToken?: string): Promise<User> {
         try {
             const userDoc = await this.firestore.collection('users').doc(uid).get();
             if (userDoc.exists) {
@@ -107,7 +108,7 @@ export class UserService {
             } else {
                 // User does not exist, create a new user in Firestore
                 const username = displayName || 'New User'; // Use display name or fallback
-                const newUser = await this.createUserInFirestore(uid, username, email);
+                const newUser = await this.createUserInFirestore(uid, username, email, fcmToken);
                 return newUser;
             }
         } catch (error) {
@@ -459,6 +460,7 @@ export class UserService {
             isOnline: userDoc.isOnline,
             pity: userDoc.pity || 0,
             nextDailyFree: userDoc.nextDailyFree || new Date(),
+            fcmToken: userDoc.fcmToken || '',
         };
     }
 

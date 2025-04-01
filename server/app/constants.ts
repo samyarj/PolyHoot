@@ -49,4 +49,5 @@ export const emptyUser = {
     isOnline: true,
     pity: 0,
     nextDailyFree: new Date(0, 0, 0),
+    fcmToken: '',
 };
