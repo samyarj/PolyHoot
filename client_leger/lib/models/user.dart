@@ -27,6 +27,7 @@ class User {
   final String uid;
   final Timestamp? unBanDate;
   final String username;
+  final List<String> pollsAnswered; // the list of poll id answered by user
 
   User({
     required this.avatarEquipped,
@@ -53,6 +54,7 @@ class User {
     required this.uid,
     required this.unBanDate,
     required this.username,
+    required this.pollsAnswered,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -64,6 +66,11 @@ class User {
       cxnLogs: (json['cxnLogs'] as List<dynamic>?)
           ?.map((e) => e as Map<String, dynamic>)
           .toList(),
+      pollsAnswered: json['pollsAnswered'] == null
+          ? []
+          : (json['pollsAnswered'] as List<dynamic>)
+              .map((e) => e as String)
+              .toList(),
       email: json['email'] as String,
       friendRequests: (json['friendRequests'] as List<dynamic>?)
           ?.map((e) => e as String)
