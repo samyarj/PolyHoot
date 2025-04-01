@@ -1,15 +1,15 @@
 /* eslint-disable no-underscore-dangle */ // Mongo utilise des attributs avec un underscore
 import { ERROR } from '@app/constants/error-messages';
 import { PublishedPoll } from '@app/model/schema/poll/published-poll.schema';
-import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
-import * as admin from 'firebase-admin';
 import { PollPushNotifService } from '@app/services/push-notif/poll-push-notif.service';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import * as admin from 'firebase-admin';
 
 @Injectable()
-export class PublishedPollService implements OnModuleInit {
+export class PublishedPollService /*implements OnModuleInit*/ {
     private firestore = admin.firestore();
 
-    constructor(private readonly pushNotifService: PollPushNotifService) { }
+    constructor(private readonly pushNotifService: PollPushNotifService) {}
 
     async createPublishedPoll(poll: PublishedPoll): Promise<PublishedPoll> {
         const pollRef = this.firestore.collection('publishedPolls').doc(poll.id);
@@ -78,22 +78,8 @@ export class PublishedPollService implements OnModuleInit {
 
         return pollData;
     }
-    /* async expirePublishedPoll(id: string): Promise<PublishedPoll> {
-        const pollRef = this.firestore.collection('publishedPolls').doc(id);
-        const pollDoc = await pollRef.get();
-
-        if (!pollDoc.exists) {
-            throw new NotFoundException(ERROR.POLL.ID_NOT_FOUND);
-        }
-
-        await pollRef.update({ expired: true });
-
-        const updatedPollData = pollDoc.data() as PublishedPoll;
-        return updatedPollData;
-    } */
     //Pas idéal mais meilleur endroit pour maintenant
     onModuleInit() {
-        console.log("on module init published poll service");
         setInterval(() => this.checkAndUpdateExpiredStatus(), 1000); // Vérifie toutes les secondes
     }
 
@@ -103,13 +89,11 @@ export class PublishedPollService implements OnModuleInit {
         snapshot.forEach(async (doc) => {
             const poll = doc.data() as PublishedPoll;
             const pollEndDate = new Date(poll.endDate);
-            console.log("expired poll title is and isexpired and current date is and poll end date is", poll.title, poll.expired, currentDate, pollEndDate);
-
+            console.log(poll.title, poll.expired, currentDate, pollEndDate);
             if (pollEndDate <= currentDate && !poll.expired) {
-                console.log("Poll expired:", poll.title);
+                console.log('Poll expired:', poll.title);
                 await doc.ref.update({ expired: true });
-                console.log(
-                    "Poll expired and updated in Firestore:");
+                console.log('Poll expired and updated in Firestore:');
                 await this.pushNotifService.onPublishedPollExpired(poll.title);
             }
         });

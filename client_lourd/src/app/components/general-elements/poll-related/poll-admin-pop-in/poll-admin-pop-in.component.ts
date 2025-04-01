@@ -22,7 +22,6 @@ export class PollAdminPopInComponent implements AfterViewInit {
         private messageHandlerService: MessageHandlerService,
     ) {
         this.poll = data.poll;
-        // this.poll.endDate = poll.endDate.slice(0, 16);
     }
     onPublish() {
         if (this.data.poll.id) {

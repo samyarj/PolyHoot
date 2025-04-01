@@ -104,10 +104,10 @@ export class PollController {
             // 3. Supprimer l'ancien sondage de Firestore
             await this.deletePollById(poll.id, response);
 
-            // 4. Récupérer la liste de sondages et celle des publiés
+            /* // 4. Récupérer la liste de sondages et celle des publiés
             const updatedPolls = await this.pollService.getAllPolls();
 
-            const updatedPublishedPolls = await this.publishedPollService.getAllPublishedPolls();
+            const updatedPublishedPolls = await this.publishedPollService.getAllPublishedPolls(); */
 
             // 5. Retourner le sondage publié et les listes mises à jour
             return response.status(HttpStatus.OK).send();
