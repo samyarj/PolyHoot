@@ -9,7 +9,27 @@ $primary-color: #00115a;
     flex-direction: column;
     align-items: center;
     gap: 50px;
+    overflow-y: auto;
     background: linear-gradient(to bottom, var(--primary-color), var(--primary-color), var(--secondary-color));
+    &::-webkit-scrollbar {
+        width: 4px;
+        margin-top: 12px;
+        margin-bottom: 12px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--secondary-color);
+        border-radius: 12px;
+        margin-top: 12px;
+        margin-bottom: 12px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: var(--tertiary-color);
+        border-radius: 12px;
+        margin-top: 12px;
+        margin-bottom: 12px;
+    }
 }
 
 .questions-from-bank {
@@ -44,9 +64,6 @@ ul {
     transition: all 0.3s ease;
     margin-bottom: 1.5rem;
     border-radius: 5px;
-}
-.questions-from-bank li:hover {
-    scale: 1.1;
 }
 
 @media (max-width: 1400px) {
