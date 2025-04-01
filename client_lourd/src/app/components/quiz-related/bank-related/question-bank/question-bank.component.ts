@@ -1,13 +1,12 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { Question } from '@app/interfaces/question';
+import { User } from '@app/interfaces/user';
+import { AuthService } from '@app/services/auth/auth.service';
 import { QuestionService } from '@app/services/back-end-communication-services/question-service/question.service';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
 import { SortingService } from '@app/services/general-services/sorting-service/sorting.service';
 import { Observable, Observer } from 'rxjs';
-import { User } from '@app/interfaces/user';
-import { AuthService } from '@app/services/auth/auth.service';
-
 
 @Component({
     selector: 'app-question-bank',
@@ -20,7 +19,7 @@ export class QuestionBankComponent {
     selectedQuestions: Question[] = this.bankQuestions;
     selectedType: string = 'ALL';
     user$: Observable<User | null>;
-    private username: string;
+    private username: string | null;
     private questionsObserver: Partial<Observer<Question[]>> = {
         next: (questions: Question[]) => {
             this.bankQuestions = this.sortingService.sortQuestionsByLastModified(questions);
@@ -40,9 +39,7 @@ export class QuestionBankComponent {
         this.questionService.getAllQuestions().subscribe(this.questionsObserver);
         this.user$ = this.authService.user$;
         this.user$.subscribe((user) => {
-            if (user) {
-                this.username = user.username;
-            }
+            this.username = user?.username ?? null;
         });
     }
 
@@ -53,7 +50,7 @@ export class QuestionBankComponent {
     addQuestionToBank(clickedQuestion: Question): void {
         console.log('Ajout de question a partir de bank component?');
         clickedQuestion.lastModified = new Date().toString();
-        clickedQuestion.creator = this.username;
+        if (this.username) clickedQuestion.creator = this.username;
         this.questionService.createQuestion(clickedQuestion).subscribe(this.questionsObserver);
     }
 
