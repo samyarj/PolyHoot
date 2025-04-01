@@ -2,14 +2,14 @@ import 'package:client_leger/UI/admin/polls-statistics/widgets/poll-record-stats
 import 'package:client_leger/backend-communication-services/polls/poll-history-service.dart';
 import 'package:client_leger/models/polls/published-poll-model.dart';
 import 'package:client_leger/utilities/helper_functions.dart';
-import 'package:flutter/foundation.dart';
+import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
 
 class AdminPollNotification extends StatefulWidget {
   const AdminPollNotification({Key? key}) : super(key: key);
 
   @override
-  _AdminPollNotificationState createState() => _AdminPollNotificationState();
+  State<AdminPollNotification> createState() => _AdminPollNotificationState();
 }
 
 class _AdminPollNotificationState extends State<AdminPollNotification> {
@@ -22,6 +22,7 @@ class _AdminPollNotificationState extends State<AdminPollNotification> {
   final GlobalKey<PopupMenuButtonState> _popupMenuKey =
       GlobalKey<PopupMenuButtonState>();
   List<PublishedPoll> currentExpiredPolls = [];
+  bool _isForcingMenuRebuild = false;
 
   void _forceMenuRebuild() {
     // so that the list of popup menu items is updated on live when menu is open
@@ -30,6 +31,9 @@ class _AdminPollNotificationState extends State<AdminPollNotification> {
         Navigator.of(_popupMenuKey.currentContext!)
             .pop(); // Close the menu if open
         _popupMenuKey.currentState?.showButtonMenu(); // Show it again
+        _isForcingMenuRebuild = true;
+        _menuOpen = true;
+        AppLogger.w("Menu open is $_menuOpen");
       }
     });
   }
@@ -183,6 +187,17 @@ class _AdminPollNotificationState extends State<AdminPollNotification> {
     });
   }
 
+  // check if the two lists are equal by comparing the poll.id
+  bool listEquals(List<PublishedPoll> list1, List<PublishedPoll> list2) {
+    if (list1.length != list2.length) return false;
+
+    for (int i = 0; i < list1.length; i++) {
+      if (list1[i].id != list2[i].id) return false;
+    }
+
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -226,14 +241,20 @@ class _AdminPollNotificationState extends State<AdminPollNotification> {
                   position: PopupMenuPosition.under,
                   offset: const Offset(0, 8),
                   onCanceled: () {
+                    if (_isForcingMenuRebuild) {
+                      _isForcingMenuRebuild = false;
+                      return;
+                    }
                     setState(() {
                       _menuOpen = false;
                     });
+                    AppLogger.w("_menuOpen is now $_menuOpen");
                   },
                   onOpened: () {
                     setState(() {
                       _menuOpen = true;
                     });
+                    AppLogger.w("_menuOpen is now $_menuOpen");
                   },
                   onSelected: _selectPoll,
                   itemBuilder: (context) {

@@ -30,6 +30,7 @@ class _PlayerPollsNotificationState
   final GlobalKey<PopupMenuButtonState> _popupMenuKey =
       GlobalKey<PopupMenuButtonState>();
   List<PublishedPoll> currentPlayerPolls = [];
+  bool _isForcingMenuRebuild = false;
 
   @override
   void initState() {
@@ -158,6 +159,9 @@ class _PlayerPollsNotificationState
         Navigator.of(_popupMenuKey.currentContext!)
             .pop(); // Close the menu if open
         _popupMenuKey.currentState?.showButtonMenu(); // Show it again
+        _isForcingMenuRebuild = true;
+        _menuOpen = true;
+        AppLogger.w("Menu open is now $_menuOpen");
       }
     });
   }
@@ -217,14 +221,20 @@ class _PlayerPollsNotificationState
                     offset: const Offset(0, 8),
                     key: _popupMenuKey,
                     onCanceled: () {
+                      if (_isForcingMenuRebuild) {
+                        _isForcingMenuRebuild = false;
+                        return;
+                      }
                       setState(() {
                         _menuOpen = false;
                       });
+                      AppLogger.w("_menuOpen is now $_menuOpen");
                     },
                     onOpened: () {
                       setState(() {
                         _menuOpen = true;
                       });
+                      AppLogger.w("_menuOpen is now $_menuOpen");
                     },
                     onSelected: _selectPoll,
                     itemBuilder: (context) {
