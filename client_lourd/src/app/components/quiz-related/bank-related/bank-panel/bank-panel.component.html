@@ -20,6 +20,7 @@
                     }"
                 ></i>
                 {{ question.lastModified | date: 'yyyy-MM-dd HH:mm:ss' }}
+                {{question.creator}}
             </mat-panel-title>
 
             <mat-icon *ngIf="!panelOpenState">more_vert</mat-icon>
