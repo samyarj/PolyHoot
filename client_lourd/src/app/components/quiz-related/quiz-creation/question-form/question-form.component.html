@@ -31,12 +31,12 @@
             <small class="text-danger" *ngIf="isQuestionTextValid()">Entrez votre question</small>
         </div>
 
-        <div class="form-group question-score">
-            <label class="form-label" for="question-score-id">Pointage:</label>
+        <div class="form-group">
+            <label class="form-label" for="-id">Pointage:</label>
             <div class="input-group">
                 <input
                     class="form-control"
-                    id="question-score-id"
+                    id="-id"
                     type="number"
                     min="10"
                     max="100"
@@ -74,7 +74,7 @@
         <button *ngIf="!isGeneratedQuestion" type="button" class="custom-button generate-button" (click)="generateQuestion()">
             <i class="fas fa-magic"></i> Générer!
         </button>
-        <div *ngIf="isGeneratedQuestion">
+        <div class="generate-sect-wrapper" *ngIf="isGeneratedQuestion">
             <button type="button" class="custom-button generate-button" (click)="reformulateQuestion()">
                 <i class="fas fa-sync"></i> Reformuler!
             </button>
@@ -86,11 +86,11 @@
                     <p>{{ temporaryQuestionText }}</p>
                 </div>
                 <div class="preview-actions">
-                    <button type="button" class="custom-button accept-button" (click)="acceptReformulation()">
-                        <i class="fas fa-check"></i> Accepter
-                    </button>
                     <button type="button" class="custom-button reject-button" (click)="rejectReformulation()">
                         <i class="fas fa-times"></i> Rejeter
+                    </button>
+                    <button type="button" class="custom-button-cancel accept-button" (click)="acceptReformulation()">
+                        <i class="fas fa-check"></i> Accepter
                     </button>
                 </div>
             </div>
