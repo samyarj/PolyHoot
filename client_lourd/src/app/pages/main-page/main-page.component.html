@@ -41,7 +41,7 @@
                 >
                     <div class="nav-element-title">
                         <ng-container [ngSwitch]="item.title">
-                            <ng-container *ngSwitchCase="'Administrer les quiz'">
+                            <ng-container *ngSwitchCase="'Administrer les questionnaires'">
                                 <i class="fa-solid fa-screwdriver-wrench"></i> Administrer les quiz
                             </ng-container>
                             <ng-container *ngSwitchCase="'Section chance'"> <i class="fa-solid fa-clover"></i> Section chance </ng-container>
@@ -79,7 +79,7 @@
             <div class="info-section">
                 <h1 class="title">
                     <ng-container [ngSwitch]="this.navInfo[activeSlideIndex].title">
-                        <ng-container *ngSwitchCase="'Administrer les quiz'">
+                        <ng-container *ngSwitchCase="'Administrer les questionnaires'">
                             <i class="fa-solid fa-screwdriver-wrench"></i> Administrer les quiz
                         </ng-container>
                         <ng-container *ngSwitchCase="'Section chance'"> <i class="fa-solid fa-clover"></i> Section chance </ng-container>
