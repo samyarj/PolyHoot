@@ -31,6 +31,12 @@ class _PlayerPollsNotificationState
       GlobalKey<PopupMenuButtonState>();
   List<PublishedPoll> currentPlayerPolls = [];
 
+  @override
+  void initState() {
+    _pollService.initializeStream();
+    super.initState();
+  }
+
   void _selectPoll(PublishedPoll poll) {
     setState(() {
       _selectedPoll = poll;
@@ -42,8 +48,10 @@ class _PlayerPollsNotificationState
 
   void _closePollDialog(BuildContext dialogContext, bool? isSuccess) {
     if (mounted) {
-      Navigator.of(dialogContext).pop();
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (Navigator.of(dialogContext).canPop()) {
+          Navigator.of(dialogContext).pop();
+        }
         setState(() {
           _isDialogShowing = false;
           _selectedPoll = null;
@@ -135,6 +143,12 @@ class _PlayerPollsNotificationState
         });
       },
     );
+  }
+
+  @override
+  dispose() {
+    _pollService.cancelSub();
+    super.dispose();
   }
 
   void _forceMenuRebuild() {

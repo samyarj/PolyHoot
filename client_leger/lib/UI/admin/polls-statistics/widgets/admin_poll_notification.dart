@@ -2,6 +2,7 @@ import 'package:client_leger/UI/admin/polls-statistics/widgets/poll-record-stats
 import 'package:client_leger/backend-communication-services/polls/poll-history-service.dart';
 import 'package:client_leger/models/polls/published-poll-model.dart';
 import 'package:client_leger/utilities/helper_functions.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class AdminPollNotification extends StatefulWidget {
@@ -18,10 +19,31 @@ class _AdminPollNotificationState extends State<AdminPollNotification> {
   int _currentQuestionIndex = 0;
   bool _menuOpen = false;
   bool _isDialogShowing = false;
+  final GlobalKey<PopupMenuButtonState> _popupMenuKey =
+      GlobalKey<PopupMenuButtonState>();
+  List<PublishedPoll> currentExpiredPolls = [];
+
+  void _forceMenuRebuild() {
+    // so that the list of popup menu items is updated on live when menu is open
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_popupMenuKey.currentState != null) {
+        Navigator.of(_popupMenuKey.currentContext!)
+            .pop(); // Close the menu if open
+        _popupMenuKey.currentState?.showButtonMenu(); // Show it again
+      }
+    });
+  }
 
   @override
   void initState() {
+    _pollHistoryService.initializeStream();
     super.initState();
+  }
+
+  @override
+  dispose() {
+    _pollHistoryService.cancelSub();
+    super.dispose();
   }
 
   void _selectPoll(PublishedPoll poll) {
@@ -165,12 +187,21 @@ class _AdminPollNotificationState extends State<AdminPollNotification> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return AnimatedBuilder(
-        animation: _pollHistoryService,
+    return ListenableBuilder(
+        listenable: _pollHistoryService,
         builder: (context, _) {
           final hasPolls = _pollHistoryService.hasExpiredPolls;
           final isLoading = _pollHistoryService.isLoading;
           final expiredPolls = _pollHistoryService.expiredPolls;
+
+          if (!listEquals(currentExpiredPolls, expiredPolls) &&
+              _menuOpen &&
+              !isLoading &&
+              hasPolls) {
+            _forceMenuRebuild();
+          }
+
+          currentExpiredPolls = expiredPolls;
 
           return Stack(
             children: [
@@ -190,6 +221,7 @@ class _AdminPollNotificationState extends State<AdminPollNotification> {
                 ),
                 child: PopupMenuButton<PublishedPoll>(
                   initialValue: null,
+                  key: _popupMenuKey,
                   tooltip: 'Notifications de sondages',
                   position: PopupMenuPosition.under,
                   offset: const Offset(0, 8),

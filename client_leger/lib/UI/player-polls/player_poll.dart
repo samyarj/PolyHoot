@@ -81,16 +81,20 @@ class _PlayerPollState extends State<PlayerPoll> {
         });
         await _pollService.sendAnsweredPlayerPoll(
             _playerAnswers, widget.selectedPoll.id!, userUid);
-        widget.closeDialog(true);
+        if (mounted) {
+          widget.closeDialog(true);
+        }
       } catch (e) {
         if (mounted) {
           showErrorDialog(context, getCustomError(e));
+          widget.closeDialog(false);
         }
-        widget.closeDialog(false);
       } finally {
-        setState(() {
-          _isLoadingSubmit = false;
-        });
+        if (mounted) {
+          setState(() {
+            _isLoadingSubmit = false;
+          });
+        }
       }
     }
   }

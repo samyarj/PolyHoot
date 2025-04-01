@@ -18,7 +18,7 @@ class PollHistoryService extends ChangeNotifier {
   PollHistoryService._internal() {
     AppLogger.w(
         "PollHistoryService initialized about to call initializeStream");
-    _initializeStream();
+    initializeStream();
   }
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -55,7 +55,8 @@ class PollHistoryService extends ChangeNotifier {
       });
   }
 
-  void _initializeStream() {
+  void initializeStream() {
+    AppLogger.e("in initializeStream");
     _subscription?.cancel();
 
     _isLoading = true;
@@ -179,10 +180,8 @@ class PollHistoryService extends ChangeNotifier {
     }
   }
 
-  @override
-  void dispose() {
-    AppLogger.w("PollHistoryService disposed, canceling stream subscription");
+  void cancelSub() {
+    AppLogger.w("PollHistory : canceling stream subscription");
     _subscription?.cancel();
-    super.dispose();
   }
 }
