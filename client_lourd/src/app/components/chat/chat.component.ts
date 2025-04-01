@@ -132,8 +132,6 @@ export class ChatComponent implements OnDestroy, AfterViewChecked {
     ngOnDestroy(): void {
         if (this.messagesSubscription) this.messagesSubscription.unsubscribe();
         if (this.chatEventsSubscription) this.chatEventsSubscription.unsubscribe();
-        console.log('Child component destroyed!');
-        // Emit the event when the component is destroyed
         this.triggerParentAction();
     }
 

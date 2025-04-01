@@ -17,7 +17,7 @@ export class PollController {
         private readonly publishedPollService: PublishedPollService,
     ) {}
 
-    /* @ApiOkResponse({
+    @ApiOkResponse({
         description: 'Returns all polls',
         type: Poll,
         isArray: true,
@@ -35,7 +35,7 @@ export class PollController {
                 response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: ERROR.INTERNAL_SERVER_ERROR });
             }
         }
-    } */
+    }
 
     @ApiOkResponse({
         description: 'Get poll by ID',
@@ -77,7 +77,7 @@ export class PollController {
     @ApiOkResponse({ description: 'Poll successfully updated' })
     @ApiNotFoundResponse({ description: 'Poll not found' })
     @ApiBadRequestResponse({ description: 'Bad request' })
-    @Patch('/:id')
+    @Patch('/update/:id')
     async updatePoll(@Param('id') id: string, @Body() updatePollDto: UpdatePollDto, @Res() response: Response) {
         try {
             await this.pollService.updatePoll(id, updatePollDto);
@@ -101,9 +101,8 @@ export class PollController {
     @ApiNotFoundResponse({
         description: 'Poll not found or could not be published',
     })
-    @Patch('publish')
+    @Patch('/publish')
     async publishPoll(@Body() poll: Poll, @Res() response: Response) {
-
         try {
             // 1. Construire le DTO de PublishedPoll
             const createPublishedPollDto: PublishedPoll = {
@@ -118,7 +117,6 @@ export class PollController {
                     {} as { [questionIndex: string]: number[] },
                 ),
             };
-
             // 2. Créer le sondage publié dans Firestore
             const publishedPoll = await this.publishedPollService.createPublishedPoll(createPublishedPollDto);
 
@@ -127,6 +125,7 @@ export class PollController {
 
             // 4. Récupérer la liste de sondages et celle des publiés
             const updatedPolls = await this.pollService.getAllPolls();
+
             const updatedPublishedPolls = await this.publishedPollService.getAllPublishedPolls();
 
             // 5. Retourner le sondage publié et les listes mises à jour
