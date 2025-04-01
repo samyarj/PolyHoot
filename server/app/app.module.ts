@@ -40,6 +40,7 @@ import { PublishedPollService } from './services/poll/published-poll.service';
 import { QuestionService } from './services/question/question.service';
 import { QuizService } from './services/quiz/quiz.service';
 import { ShopService } from './services/shop.service';
+import { PollPushNotifService } from './services/push-notif/poll-push-notif.service';
 
 @Module({
     imports: [
@@ -81,6 +82,7 @@ import { ShopService } from './services/shop.service';
         ShopService,
         PollService,
         PublishedPollService,
+        PollPushNotifService,
     ],
 
     controllers: [
@@ -100,4 +102,4 @@ import { ShopService } from './services/shop.service';
         CoinTransferController,
     ],
 })
-export class AppModule {}
+export class AppModule { }
