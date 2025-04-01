@@ -135,7 +135,12 @@ class PollHistoryService extends ChangeNotifier {
 
   // pour player -- quand il submit le poll
   sendAnsweredPlayerPoll(
-      List<int> playerAnswer, String pollId, String userUid) async {
+      List<int> playerAnswer, String? pollId, String? userUid) async {
+        
+    if (pollId == null || userUid == null) {
+      return;
+    }
+
     AppLogger.w(
         "about to send patch poll answer playeranswer is $playerAnswer");
 

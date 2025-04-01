@@ -1,10 +1,13 @@
+import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/global/themed_progress_indicator.dart';
 import 'package:client_leger/UI/player-polls/player_poll.dart';
+import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/polls/poll-history-service.dart';
 import 'package:client_leger/models/polls/published-poll-model.dart';
 import 'package:client_leger/providers/user_provider.dart';
 import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:client_leger/utilities/logger.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,6 +34,7 @@ class _PlayerPollsNotificationState
       GlobalKey<PopupMenuButtonState>();
   List<PublishedPoll> currentPlayerPolls = [];
   bool _isForcingMenuRebuild = false;
+  BuildContext? _currentDialogContext;
 
   @override
   void initState() {
@@ -47,15 +51,35 @@ class _PlayerPollsNotificationState
     _showPollDetailsDialog();
   }
 
-  void _closePollDialog(BuildContext dialogContext, bool? isSuccess) {
-    if (mounted) {
+  _onPlayerPollSubmit(List<int> playerAnswers) async {
+    final String? userUid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (userUid == null || _selectedPoll?.id == null) {
+      return;
+    }
+    try {
+      AppLogger.w("Sending poll answers");
+      await _pollService.sendAnsweredPlayerPoll(
+          playerAnswers, _selectedPoll?.id, userUid);
+      _closePollDialog(true);
+    } catch (e) {
+      if (mounted) {
+        showErrorDialog(context, getCustomError(e));
+        _closePollDialog(false);
+      }
+    }
+  }
+
+  void _closePollDialog(bool? isSuccess) {
+    if (mounted && _currentDialogContext != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (Navigator.of(dialogContext).canPop()) {
-          Navigator.of(dialogContext).pop();
+        if (Navigator.of(_currentDialogContext!).canPop()) {
+          Navigator.of(_currentDialogContext!).pop();
         }
         setState(() {
           _isDialogShowing = false;
           _selectedPoll = null;
+          _currentDialogContext = null;
         });
       });
       if (isSuccess != null && isSuccess) {
@@ -93,6 +117,8 @@ class _PlayerPollsNotificationState
               ? MediaQuery.of(context).size.height * 0.5
               : MediaQuery.of(context).size.height * 0.8;
 
+          _currentDialogContext = dialogContext;
+
           return Dialog(
             backgroundColor: Colors.transparent,
             insetPadding: EdgeInsets.zero,
@@ -121,7 +147,7 @@ class _PlayerPollsNotificationState
                         child: IconButton(
                           onPressed: () {
                             final bool isSuccess = _selectedPoll == null;
-                            _closePollDialog(dialogContext, isSuccess);
+                            _closePollDialog(isSuccess);
                           },
                           icon: Icon(Icons.close),
                           color: colorScheme.onSurface,
@@ -132,8 +158,8 @@ class _PlayerPollsNotificationState
                       // Poll Details Content
                       PlayerPoll(
                         selectedPoll: _selectedPoll!,
-                        closeDialog: (isSuccess) =>
-                            _closePollDialog(dialogContext, isSuccess),
+                        onSubmit: (playerAnswers) =>
+                            _onPlayerPollSubmit(playerAnswers),
                       ),
                     ],
                   ),
@@ -166,6 +192,14 @@ class _PlayerPollsNotificationState
     });
   }
 
+  bool isSelectedPollExpired(List<PublishedPoll> publishedPolls) {
+    final poll = publishedPolls.firstWhere(
+      (poll) => poll.id == _selectedPoll?.id,
+    );
+
+    return poll.expired;
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -178,11 +212,15 @@ class _PlayerPollsNotificationState
           listenable: _pollService,
           builder: (context, _) {
             final isLoading = _pollService.isLoading;
+            final publishedPolls = _pollService.allPublishedPolls;
             final playerPolls = _pollService.playerPolls;
             final hasPolls = playerPolls.isNotEmpty;
 
-            if (_selectedPoll != null && !playerPolls.contains(_selectedPoll)) {
-              _closePollDialog(context, null);
+            if (_selectedPoll != null &&
+                !playerPolls.contains(_selectedPoll) &&
+                isSelectedPollExpired(publishedPolls)) {
+              AppLogger.e("In the condition for sondage expiré");
+              _closePollDialog(null);
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 showToast(
                     context, 'Ce sondage a expiré pendant que vous répondiez',
