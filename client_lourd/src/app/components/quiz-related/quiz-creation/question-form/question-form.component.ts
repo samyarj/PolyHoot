@@ -11,6 +11,7 @@ import { ValidationService } from '@app/services/admin-services/validation-servi
 import { QuestionValidationService } from '@app/services/admin-services/validation-services/question-validation-service/question-validation.service';
 import { UploadImgService } from '@app/services/upload-img.service';
 import { ToastrService } from 'ngx-toastr';
+import { finalize } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -33,7 +34,8 @@ export class QuestionFormComponent implements OnChanges {
     isGeneratedQuestion: boolean = false;
     isReformulating: boolean = false;
     temporaryQuestionText: string = '';
-
+    isChangingPicture: boolean = false;
+    isCallingAI: boolean = false;
     constructor(
         private questionValidationService: QuestionValidationService,
         private commonValidationService: ValidationService,
@@ -141,95 +143,132 @@ export class QuestionFormComponent implements OnChanges {
     }
 
     onFileSelectedAndUpload(event: Event): void {
-        const file = (event.target as HTMLInputElement).files?.[0];
-        if (!file) {
-            this.toastr.warning('Aucun fichier sélectionné.');
-            return;
+        if (!this.isChangingPicture) {
+            this.isChangingPicture = true;
+
+            const file = (event.target as HTMLInputElement).files?.[0];
+            if (!file) {
+                this.toastr.warning('Aucun fichier sélectionné.');
+                this.isChangingPicture = false;
+                return;
+            }
+
+            // Téléversement immédiat après la sélection
+            this.uploadImgService.uploadImage(file, 'question').subscribe({
+                next: (response) => {
+                    this.toastr.success('Image téléversée avec succès');
+
+                    // Stockez l'URL de l'image pour l'afficher dans le formulaire
+                    this.question.image = response.imageUrl;
+                    const fileInput = event.target as HTMLInputElement;
+                    if (fileInput) fileInput.value = ''; // Réinitialise l'input file
+                    this.isChangingPicture = false;
+                },
+                error: (error) => {
+                    this.toastr.error(`Erreur lors du téléversement : ${error.message}`);
+                    this.isChangingPicture = false;
+                },
+            });
         }
-
-        // Téléversement immédiat après la sélection
-        this.uploadImgService.uploadImage(file, 'question').subscribe({
-            next: (response) => {
-                this.toastr.success('Image téléversée avec succès');
-
-                // Stockez l'URL de l'image pour l'afficher dans le formulaire
-                this.question.image = response.imageUrl;
-                const fileInput = event.target as HTMLInputElement;
-                if (fileInput) fileInput.value = ''; // Réinitialise l'input file
-            },
-            error: (error) => {
-                this.toastr.error(`Erreur lors du téléversement : ${error.message}`);
-            },
-        });
     }
     deleteImage(): void {
-        if (!this.question.image) {
-            this.toastr.warning('Aucune image à supprimer.');
-            return;
+        if (!this.isChangingPicture) {
+            this.isChangingPicture = true;
+            if (!this.question.image) {
+                this.toastr.warning('Aucune image à supprimer.');
+                this.isChangingPicture = false;
+                return;
+            }
+            this.uploadImgService.deleteImage(this.question.image).subscribe({
+                next: () => {
+                    this.toastr.success('Image supprimée avec succès');
+                    this.question.image = '';
+                    this.isChangingPicture = false;
+                },
+            });
         }
-        this.uploadImgService.deleteImage(this.question.image).subscribe({
-            next: () => {
-                this.toastr.success('Image supprimée avec succès');
-                this.question.image = '';
-            },
-        });
     }
 
     generateQuestion(): void {
-        this.http.post(`${environment.serverUrl}/quizzes/autofill`, { type: this.questionType }).subscribe({
-            next: (response: any) => {
-                switch (this.questionType) {
-                    case QuestionType.QCM: {
-                        this.question.text = response.Question;
-                        this.question.choices = Object.entries(response.Choix).map(([key, value]) => ({
-                            text: value as string,
-                            isCorrect: key === response.Réponse,
-                        }));
-                        break;
-                    }
-                    case QuestionType.QRL: {
-                        this.question.text = response.Question;
-                        break;
-                    }
-                    case QuestionType.QRE: {
-                        this.question.text = response.Question;
-                        this.question.qreAttributes = {
-                            goodAnswer: response['Bonne réponse'],
-                            minBound: response['Borne minimale'],
-                            maxBound: response['Borne maximale'],
-                            tolerance: response['Marge de tolérance'],
-                        };
-                        break;
-                    }
-                }
-                this.isGeneratedQuestion = true;
-                this.toastr.success('Question générée avec succès');
-            },
-            error: (error) => {
-                this.toastr.error('Erreur lors de la génération de la question');
-                console.error('Error generating question:', error);
-            },
-        });
+        if (!this.isCallingAI) {
+            this.isCallingAI = true;
+            this.http
+                .post(`${environment.serverUrl}/quizzes/autofill`, { type: this.questionType })
+                .pipe(
+                    finalize(() => {
+                        this.isCallingAI = false; // Ensures this runs after success or error
+                    }),
+                )
+                .subscribe({
+                    next: (response: any) => {
+                        switch (this.questionType) {
+                            case QuestionType.QCM: {
+                                this.question.text = response.Question;
+                                this.question.choices = Object.entries(response.Choix).map(([key, value]) => ({
+                                    text: value as string,
+                                    isCorrect: key === response.Réponse,
+                                }));
+                                break;
+                            }
+                            case QuestionType.QRL: {
+                                this.question.text = response.Question;
+                                break;
+                            }
+                            case QuestionType.QRE: {
+                                this.question.text = response.Question;
+                                this.question.qreAttributes = {
+                                    goodAnswer: response['Bonne réponse'],
+                                    minBound: response['Borne minimale'],
+                                    maxBound: response['Borne maximale'],
+                                    tolerance: response['Marge de tolérance'],
+                                };
+                                break;
+                            }
+                        }
+                        this.isGeneratedQuestion = true;
+                        this.toastr.success('Question générée avec succès');
+                        this.isCallingAI = false;
+                    },
+                    error: (error) => {
+                        this.toastr.error('Erreur lors de la génération de la question');
+                        console.error('Error generating question:', error);
+                        this.isCallingAI = false;
+                    },
+                });
+        }
     }
 
     reformulateQuestion(): void {
-        if (!this.question.text) {
-            this.toastr.warning('Aucune question à reformuler');
-            return;
-        }
+        if (!this.isCallingAI) {
+            this.isCallingAI = true;
+            if (!this.question.text) {
+                this.toastr.warning('Aucune question à reformuler');
+                this.isCallingAI = false;
+                return;
+            }
 
-        this.isReformulating = true;
-        this.http.post(`${environment.serverUrl}/quizzes/reformulate-question`, { question: this.question.text }).subscribe({
-            next: (response: any) => {
-                this.temporaryQuestionText = response.reformulatedQuestion;
-                this.toastr.success('Question reformulée avec succès');
-            },
-            error: (error) => {
-                this.toastr.error('Erreur lors de la reformulation de la question');
-                console.error('Error reformulating question:', error);
-                this.isReformulating = false;
-            },
-        });
+            this.isReformulating = true;
+            this.http
+                .post(`${environment.serverUrl}/quizzes/reformulate-question`, { question: this.question.text })
+                .pipe(
+                    finalize(() => {
+                        this.isCallingAI = false; // Ensures this runs after success or error
+                    }),
+                )
+                .subscribe({
+                    next: (response: any) => {
+                        this.temporaryQuestionText = response.reformulatedQuestion;
+                        this.toastr.success('Question reformulée avec succès');
+                        this.isCallingAI = false;
+                    },
+                    error: (error) => {
+                        this.toastr.error('Erreur lors de la reformulation de la question');
+                        console.error('Error reformulating question:', error);
+                        this.isReformulating = false;
+                        this.isCallingAI = false;
+                    },
+                });
+        }
     }
 
     acceptReformulation(): void {

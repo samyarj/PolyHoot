@@ -58,24 +58,48 @@
     </div>
     <div class="upload-section">
         <input type="file" (change)="onFileSelectedAndUpload($event)" accept="image/*" #fileInput style="display: none" />
-        <button (click)="fileInput.click(); $event.stopPropagation(); $event.preventDefault()" class="custom-button">
-            Téléverser une image pour votre question
+        <button
+            [disabled]="this.isChangingPicture"
+            [ngClass]="{ 'custom-button-disabled': this.isChangingPicture }"
+            (click)="fileInput.click(); $event.stopPropagation(); $event.preventDefault()"
+            class="custom-button"
+        >
+            <i class="fa-solid fa-arrow-up-from-bracket"></i>&nbsp;Téléverser une image
         </button>
-        <button (click)="deleteImage(); $event.stopPropagation(); $event.preventDefault()" class="custom-button">
-            Supprimer l'image de votre question
-        </button>
-        <div *ngIf="this.question.image">
-            <p>Image téléversée :</p>
+        <div *ngIf="this.question.image" class="image-container">
+            <button
+                [disabled]="this.isChangingPicture"
+                [ngClass]="{ 'custom-button-disabled': this.isChangingPicture }"
+                matTooltip="Supprimer"
+                matTooltipClass="custom-tooltip"
+                class="custom-button"
+                (click)="deleteImage(); $event.stopPropagation(); $event.preventDefault()"
+            >
+                <mat-icon style="font-size: 20px">close</mat-icon>
+            </button>
             <img [src]="this.question.image" alt="Image associée" style="max-width: 100%; height: auto" />
         </div>
     </div>
 
     <div class="generate-question-section">
-        <button *ngIf="!isGeneratedQuestion" type="button" class="custom-button generate-button" (click)="generateQuestion()">
+        <button
+            [disabled]="this.isCallingAI"
+            [ngClass]="{ 'custom-button-disabled': this.isCallingAI }"
+            *ngIf="!isGeneratedQuestion"
+            type="button"
+            class="custom-button generate-button"
+            (click)="generateQuestion()"
+        >
             <i class="fas fa-magic"></i> Générer!
         </button>
         <div class="generate-sect-wrapper" *ngIf="isGeneratedQuestion">
-            <button type="button" class="custom-button generate-button" (click)="reformulateQuestion()">
+            <button
+                type="button"
+                class="custom-button generate-button"
+                [disabled]="this.isCallingAI"
+                [ngClass]="{ 'custom-button-disabled': this.isCallingAI }"
+                (click)="reformulateQuestion()"
+            >
                 <i class="fas fa-sync"></i> Reformuler!
             </button>
             <div *ngIf="isReformulating" class="reformulation-preview">
