@@ -19,6 +19,11 @@ $question-qrl-color-hover: #15395b;
             mat-expansion-panel-header {
                 mat-icon {
                     font-size: 25px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    align-self: center;
+                    text-align: center;
                 }
             }
         }
@@ -70,9 +75,12 @@ $question-qrl-color-hover: #15395b;
             }
 
             mat-icon {
-                font-size: x-large;
-                margin-right: 8px;
+                font-size: 25px;
+                display: flex;
                 align-items: center;
+                justify-content: center;
+                align-self: center;
+                text-align: center;
             }
         }
         transition: all 0.2s ease-in-out;
@@ -99,13 +107,24 @@ $question-qrl-color-hover: #15395b;
 }
 
 .question-and-score {
+    width: 100%;
     display: flex;
     justify-content: space-between;
+
+    & > p:first-child {
+        width: 70%;
+    }
+
+    & > p:nth-child(2) {
+        width: 25%;
+        text-align: right;
+    }
 }
 
 .question {
     font-size: large;
     margin-top: 15px;
+    width: 100%;
 }
 
 .answer-choices {
