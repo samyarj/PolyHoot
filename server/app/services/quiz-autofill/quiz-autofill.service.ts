@@ -171,4 +171,35 @@ export class QuizAutofillService {
             ];
         }
     }
+
+    async reformulateQuestion(question: string): Promise<string> {
+        try {
+            const messages = [
+                {
+                    role: 'system',
+                    content:
+                        'Vous êtes un expert en reformulation de questions. Votre tâche est de reformuler des questions en gardant le même sens mais en utilisant un style différent.',
+                },
+                {
+                    role: 'user',
+                    content: `Reformulez cette question en gardant le même sens mais en utilisant un style différent: ${question}`,
+                },
+            ];
+
+            const chatCompletion = await this.groq.chat.completions.create({
+                messages: messages,
+                model: 'mistral-saba-24b',
+                temperature: 0.7,
+                max_completion_tokens: 200,
+                top_p: 0.9,
+                stream: false,
+                stop: null,
+            });
+
+            return chatCompletion.choices[0]?.message?.content || question;
+        } catch (error) {
+            console.error('Error reformulating question:', error);
+            return question;
+        }
+    }
 }

@@ -1,4 +1,5 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { HttpClient } from '@angular/common/http';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { EMPTY_STRING, MAX_CHOICES, MIN_CHOICES } from '@app/constants/constants';
 import { ButtonType } from '@app/constants/enum-class';
@@ -10,6 +11,7 @@ import { ValidationService } from '@app/services/admin-services/validation-servi
 import { QuestionValidationService } from '@app/services/admin-services/validation-services/question-validation-service/question-validation.service';
 import { UploadImgService } from '@app/services/upload-img.service';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from 'src/environments/environment';
 
 @Component({
     selector: 'app-question-form',
@@ -34,6 +36,7 @@ export class QuestionFormComponent implements OnChanges {
         private commonValidationService: ValidationService,
         private toastr: ToastrService,
         private uploadImgService: UploadImgService,
+        private http: HttpClient,
     ) {}
 
     submitQuestion() {
@@ -163,6 +166,46 @@ export class QuestionFormComponent implements OnChanges {
             next: () => {
                 this.toastr.success('Image supprimée avec succès');
                 this.question.image = '';
+            },
+        });
+    }
+
+    generateQuestion(): void {
+        this.http.post(`${environment.serverUrl}/quizzes/autofill`, { type: this.questionType }).subscribe({
+            next: (response: any) => {
+                switch (this.questionType) {
+                    case QuestionType.QCM: {
+                        this.question.text = response.Question;
+                        this.question.choices = Object.entries(response.Choix).map(([key, value]) => ({
+                            text: value as string,
+                            isCorrect: key === response.Réponse,
+                        }));
+
+                        break;
+                    }
+                    case QuestionType.QRL: {
+                        this.question.text = response.Question;
+
+                        break;
+                    }
+                    case QuestionType.QRE: {
+                        this.question.text = response.Question;
+                        this.question.qreAttributes = {
+                            goodAnswer: response['Bonne réponse'],
+                            minBound: response['Borne minimale'],
+                            maxBound: response['Borne maximale'],
+                            tolerance: response['Marge de tolérance'],
+                        };
+
+                        break;
+                    }
+                    // No default
+                }
+                this.toastr.success('Question générée avec succès');
+            },
+            error: (error) => {
+                this.toastr.error('Erreur lors de la génération de la question');
+                console.error('Error generating question:', error);
             },
         });
     }

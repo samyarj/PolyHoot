@@ -140,3 +140,27 @@ $primary-color: #00115a;
         }
     }
 }
+
+.generate-question-section {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+
+    .generate-button {
+        background-color: var(--tertiary-color);
+        color: var(--text-color);
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+
+        &:hover {
+            background-color: color-mix(in srgb, var(--tertiary-color) 80%, white);
+        }
+
+        i {
+            margin-right: 0.5rem;
+        }
+    }
+}
