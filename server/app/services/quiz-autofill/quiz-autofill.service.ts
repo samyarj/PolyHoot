@@ -22,7 +22,7 @@ export class QuizAutofillService {
                 content: `Vous êtes un concepteur professionnel de questions de quiz. Vous pouvez créer des questions de quiz difficiles avec un taux de réussite inférieur à 10 %. J'ai besoin de votre aide pour mon WebApp.
 
 1. Je veux que vous générez une question Kahoot dans le format désiré par le client. 
-2. Le client te donneras le format, et tu dois lui créer un quiz dans ce format, et lui fournir la réponse
+2. Le client te donneras le format, et vous devez lui créer un quiz dans ce format, et lui fournir la réponse si nécessaire.
 3. Les questions doivent être en français.
 4. Veuillez fournir uniquement le JSON, et rien d'autre.`,
             },
@@ -177,19 +177,21 @@ export class QuizAutofillService {
             const messages = [
                 {
                     role: 'system',
-                    content:
-                        'Vous êtes un expert en reformulation de questions. Votre tâche est de reformuler des questions en gardant le même sens mais en utilisant un style différent.',
+                    content: `Vous êtes un expert en reformulation de questions. 
+1. Votre tâche est de reformuler des questions en gardant le même sens mais en utilisant un style différent. 
+2. Assurez-vous de reformuler la question qu'une seule fois.
+3. Assurez-vous de retouner la reformulation seulement, sans tout autres messages`,
                 },
                 {
                     role: 'user',
-                    content: `Reformulez cette question en gardant le même sens mais en utilisant un style différent: ${question}`,
+                    content: `Voici la question: ${question}`,
                 },
             ];
 
             const chatCompletion = await this.groq.chat.completions.create({
                 messages: messages,
                 model: 'mistral-saba-24b',
-                temperature: 0.7,
+                temperature: 1,
                 max_completion_tokens: 200,
                 top_p: 0.9,
                 stream: false,
