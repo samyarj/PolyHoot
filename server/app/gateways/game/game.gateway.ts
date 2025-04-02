@@ -63,7 +63,7 @@ export class GameGateway {
         if (game) game.preparePlayersForNextQuestion();
     }
 
-    /* @SubscribeMessage(GameEvents.GetCurrentPlayers)
+    @SubscribeMessage(GameEvents.GetCurrentPlayers)
     handleCurrentPlayers(@ConnectedSocket() client: AuthenticatedSocket, @MessageBody() data: { roomId: string }) {
         const roomId = data.roomId;
         const game = this.gameManager.getGameByRoomId(roomId);
@@ -73,7 +73,7 @@ export class GameGateway {
             banner: player.equippedBorder,
         }));
         return { playersInfo };
-    } */
+    }
 
     @SubscribeMessage(GameEvents.GetCurrentGames)
     handleGetCurrentGames(@ConnectedSocket() client: AuthenticatedSocket) {
@@ -170,6 +170,7 @@ export class GameGateway {
 
             client.emit(JoinEvents.CanJoin, { playerName: user.username, gameId });
             const roomId = Array.from(client.rooms.values())[1];
+            console.log('roomId', roomId);
             this.server.to(roomId).emit(JoinEvents.JoinSuccess, playersInfo);
             this.server.emit(JoinEvents.PlayerJoined, roomId);
             this.gameManager.socketRoomsMap.set(client, data.gameId);
@@ -226,6 +227,7 @@ export class GameGateway {
     handleBanPlayer(@ConnectedSocket() client: AuthenticatedSocket, @MessageBody() playerName: string) {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
+        console.log('banned player', playerName);
         if (game) {
             game.bannedNames.push(playerName.toLowerCase());
             const player = game.players.find((player) => player.name === playerName);
