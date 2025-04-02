@@ -111,7 +111,13 @@
                     </div>
                     <div class="submit-section">
                         <button *ngIf="showButton" type="button" class="custom-button-cancel-medium" (click)="resetAnswers()">Tout effacer</button>
-                        <button *ngIf="showButton" type="submit" class="custom-button-medium" [disabled]="!questionForm.valid || !validQuestion()">
+                        <button
+                            *ngIf="showButton"
+                            type="submit"
+                            class="custom-button-medium"
+                            [disabled]="!questionForm.valid || !validQuestion()"
+                            [ngClass]="{ 'custom-button-medium-disabled': !questionForm.valid || !validQuestion() }"
+                        >
                             {{ submitQuestionButton }}
                         </button>
                     </div>
@@ -141,7 +147,7 @@
             <button (click)="emptyPollAndRedirect()" class="custom-button-cancel-medium">Annuler</button>
             <button
                 class="custom-button-medium"
-                [ngClass]="{ 'custom-button-disabled-medium': !pollForm.valid || !validatePoll() }"
+                [ngClass]="{ 'custom-button-medium-disabled': !pollForm.valid || !validatePoll() }"
                 [disabled]="!pollForm.valid || !validatePoll()"
                 (click)="submitPollEvent()"
             >

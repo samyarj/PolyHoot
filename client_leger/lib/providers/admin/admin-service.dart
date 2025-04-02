@@ -50,13 +50,17 @@ class AdminUsersNotifier extends StateNotifier<AdminUsersState> {
           isLoading: true,
           errorMessage: '',
           searchTerm: '',
-        )) {
-    AppLogger.i("AdminUsersNotifier initialized");
-    _setupListeners();
+        )) {}
+
+  void startListening() {
+    AppLogger.i("AdminUsersNotifier restarting listeners");
+    _listenToUsers();
   }
 
-  void _setupListeners() {
-    _listenToUsers();
+  void stopListening() {
+    _usersSubscription?.cancel();
+    _usersSubscription = null;
+    AppLogger.i("AdminUsersNotifier stopped listening");
   }
 
   void _listenToUsers() {
@@ -186,6 +190,7 @@ class AdminUsersNotifier extends StateNotifier<AdminUsersState> {
   @override
   void dispose() {
     _usersSubscription?.cancel();
+    _usersSubscription = null;
     AppLogger.i("AdminUsersNotifier disposed");
     super.dispose();
   }

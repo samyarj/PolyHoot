@@ -74,33 +74,33 @@ export const NAV_PLAYER_INFO: NavItem[] = [
             {
                 image: 'player/player-luck-daily.png',
                 route: '/luck/dailyFree',
-                buttonDescription: 'Prix Quotidien',
+                buttonDescription: 'Prix quotidien',
             },
             {
                 image: 'player/player-luck-lootbox.png',
                 route: '/luck/lootBox',
-                buttonDescription: 'Ouvrir une LootBox',
+                buttonDescription: 'Ouvrir un coffre',
             },
             {
                 image: 'player/player-luck-coinflip.png',
                 route: '/luck/coinFlip',
-                buttonDescription: 'Jouer au coin flip',
+                buttonDescription: 'Jouer au pile ou face',
             },
         ],
     },
     {
-        title: 'Administrer les quiz', // Administrer les quiz
-        description: 'Gérez et créez des quiz pour les utilisateurs!',
+        title: 'Administrer les questionnaires', // Administrer les quiz
+        description: 'Gérez et créez des questionnaires pour les utilisateurs!',
         screenshots: [
             {
                 image: 'player/player-manage-quiz.png',
                 route: '/quiz-question-management/quizList',
-                buttonDescription: 'Gérer les quiz',
+                buttonDescription: 'Gérer les questionnaires',
             },
             {
                 image: 'player/player-manage-create.png',
                 route: '/quiz-question-management/createQuiz',
-                buttonDescription: 'Créer un quiz',
+                buttonDescription: 'Créer un questionnaire',
             },
             {
                 image: 'player/player-manage-bank.png',
@@ -132,7 +132,7 @@ export const NAV_PLAYER_INFO: NavItem[] = [
             {
                 image: 'player/player-transfer.png',
                 route: '/shop-home/transfer',
-                buttonDescription: 'Transférer des coins',
+                buttonDescription: 'Transférer des pièces',
             },
         ],
     },

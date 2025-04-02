@@ -530,7 +530,7 @@ export class SideBarComponent implements OnDestroy {
                 this.selectedChannelMessagesLoading = false;
                 // Redirect to another tab or handle the UI update as needed
                 const tab1 = document.querySelector('[href="#tab1"]') as HTMLElement;
-                if (tab1) {
+                if (tab1 && this.activeTab === 3) {
                     tab1.click();
                 }
             } else {

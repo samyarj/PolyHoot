@@ -927,7 +927,7 @@ export class UserService {
 
             const senderCoins = senderDoc.data()?.coins || 0;
             if (senderCoins < amount) {
-                return { success: false, message: "Vous n'avez pas assez de coins" };
+                return { success: false, message: "Vous n'avez pas assez de pièces" };
             }
 
             // Check if recipient exists
