@@ -47,6 +47,7 @@ export class QuestionFormComponent implements OnChanges {
     submitQuestion() {
         if (this.question.type !== QuestionType.QCM) delete this.question['choices'];
         this.questionSubmitted.emit(this.question);
+        this.resetAnswers();
     }
 
     toggleAnswer(choice: QuestionChoice): void {
