@@ -80,7 +80,6 @@ export class AdminQuizCreateComponent implements OnDestroy {
             this.quizService.updateQuiz(this.quizHandler.quizId, quiz).subscribe(this.errorObserver);
             return;
         }
-        quiz.visibility = false;
         this.quizService.createQuiz(quiz).subscribe(this.errorObserver);
     }
 

@@ -70,10 +70,6 @@ export class AdminPageComponent {
         this.router.navigate([AppRoute.HOME]);
     }
 
-    toggleVisibility(quizId: string | undefined) {
-        if (quizId) this.adminPageService.toggleQuizVisibility(quizId).subscribe(this.quizzesObserver);
-    }
-
     export(quiz: Quiz) {
         this.adminPageService.exportToJSON(quiz);
     }

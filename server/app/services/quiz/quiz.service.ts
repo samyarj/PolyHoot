@@ -74,17 +74,6 @@ export class QuizService {
         }
     }
 
-    async toggleQuizVisibility(id: string): Promise<Quiz> {
-        const updatedQuiz = await this.quizModel.findByIdAndUpdate(id, [{ $set: { visibility: { $not: '$visibility' } } }], { new: true }).exec();
-
-        if (!updatedQuiz) {
-            throw new NotFoundException(ERROR.QUIZ.ID_NOT_FOUND);
-        }
-
-        this.logger.log(`Quiz avec ID ${id} est visible : ${updatedQuiz.visibility}.`);
-        return updatedQuiz;
-    }
-
     private async findQuizByTitle(title: string) {
         const escapedTitle = title.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
         const titleRegex = new RegExp('^' + escapedTitle + '$', 'i');

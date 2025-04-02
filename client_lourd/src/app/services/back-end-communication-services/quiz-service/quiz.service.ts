@@ -58,16 +58,6 @@ export class QuizService {
         );
     }
 
-    toggleQuizVisibility(id: string): Observable<Quiz[]> {
-        return this.http.patch<Quiz[]>(`${this.baseUrl}/toggle-visibility/${id}`, {}).pipe(
-            map((quizzes) => {
-                this.filterQuizzes(quizzes);
-                return quizzes;
-            }),
-            catchError(this.messageHandler.handleHttpError),
-        );
-    }
-
     deleteQuizById(id: string): Observable<Quiz[]> {
         return this.http.delete<Quiz[]>(`${this.baseUrl}/delete/${id}`).pipe(
             map((quizzes) => {

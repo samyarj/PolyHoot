@@ -48,7 +48,7 @@ export class ImportExportService {
         const title: string = quiz.title;
         // On veut tout sauvegarder sauf la visibilité du quiz donc deconstruction nécessaire (ce qui cause l'erreur de lint)
         // eslint-disable-next-line no-unused-vars
-        const { visibility, ...rest } = quiz;
+        const { ...rest } = quiz;
         return this.objSaveAs.saveAsFunc(new Blob([JSON.stringify(rest, null, 2)], { type: 'JSON' }), title + '.json', { autoBom: false });
     }
 
@@ -80,8 +80,6 @@ export class ImportExportService {
 
     addDate(quiz: Quiz) {
         quiz.lastModification = new Date().toString();
-
-        quiz.visibility = false;
     }
 
     deleteUnwantedQuizAttributes(quiz: Quiz) {

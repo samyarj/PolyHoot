@@ -15,27 +15,7 @@ export class PollController {
     constructor(
         private readonly pollService: PollService,
         private readonly publishedPollService: PublishedPollService,
-    ) {}
-
-    @ApiOkResponse({
-        description: 'Returns all polls',
-        type: Poll,
-        isArray: true,
-    })
-    @Get()
-    async getAllPolls(@Res() response: Response) {
-        try {
-            const polls = await this.pollService.getAllPolls();
-            const publishedPolls = await this.publishedPollService.getAllPublishedPolls();
-            response.status(HttpStatus.OK).send();
-        } catch (error) {
-            if (error.status === HttpStatus.NOT_FOUND) {
-                response.status(HttpStatus.NOT_FOUND).send({ message: error.message });
-            } else {
-                response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: ERROR.INTERNAL_SERVER_ERROR });
-            }
-        }
-    }
+    ) { }
 
     @ApiOkResponse({
         description: 'Get poll by ID',
@@ -63,8 +43,7 @@ export class PollController {
     async createPoll(@Body() createPollDto: CreatePollDto, @Res() response: Response) {
         try {
             await this.pollService.createPoll(createPollDto);
-            const updatedPolls = await this.pollService.getAllPolls();
-            response.status(HttpStatus.CREATED).json(updatedPolls);
+            response.status(HttpStatus.CREATED).send();
         } catch (error) {
             if (error.status === HttpStatus.CONFLICT) {
                 response.status(HttpStatus.CONFLICT).send({ message: error.message });
@@ -81,7 +60,6 @@ export class PollController {
     async updatePoll(@Param('id') id: string, @Body() updatePollDto: UpdatePollDto, @Res() response: Response) {
         try {
             await this.pollService.updatePoll(id, updatePollDto);
-            const updatedPolls = await this.pollService.getAllPolls();
             response.status(HttpStatus.OK).send();
         } catch (error) {
             if (error.status === HttpStatus.CONFLICT) {
@@ -118,16 +96,10 @@ export class PollController {
                 ),
             };
             // 2. Créer le sondage publié dans Firestore
-            const publishedPoll = await this.publishedPollService.createPublishedPoll(createPublishedPollDto);
+            await this.publishedPollService.createPublishedPoll(createPublishedPollDto);
 
             // 3. Supprimer l'ancien sondage de Firestore
             await this.deletePollById(poll.id, response);
-
-            // 4. Récupérer la liste de sondages et celle des publiés
-            const updatedPolls = await this.pollService.getAllPolls();
-
-            const updatedPublishedPolls = await this.publishedPollService.getAllPublishedPolls();
-
             // 5. Retourner le sondage publié et les listes mises à jour
             return response.status(HttpStatus.OK).send();
         } catch (error) {
@@ -142,7 +114,7 @@ export class PollController {
     @ApiNotFoundResponse({
         description: 'Poll not found',
     })
-    @Delete('/:id')
+    @Delete('/delete/:id')
     async deletePollById(@Param('id') id: string, @Res() response: Response) {
         try {
             await this.pollService.deletePollById(id);
