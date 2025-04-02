@@ -18,6 +18,7 @@
         </div>
     </div>
     <div *ngIf="!poll.isPublished" class="publish-section">
+        <div class="date-label">Veuillez sélectionner une date d'échéance pour le sondage</div>
         <input type="datetime-local" name="endDate" #endDate="ngModel" id="dateTimePicker" [(ngModel)]="poll.endDate" required />
         <button
             (click)="onPublish()"
