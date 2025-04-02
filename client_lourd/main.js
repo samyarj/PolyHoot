@@ -1,24 +1,30 @@
 const { app, BrowserWindow } = require('electron');
+const express = require('express');
+const path = require('path');
 
 let appWindow;
+const PORT = 3001;
+
+// Set up an Express server to serve the frontend
+const server = express();
+server.use(express.static(path.join(__dirname, 'dist/client')));
+server.listen(PORT, () => console.log(`Application running at http://localhost:${PORT}`));
 
 function initWindow() {
     appWindow = new BrowserWindow({
-        //fullscreen: true,
         height: 1080,
         width: 1920,
         webPreferences: {
-            nodeIntegration: true,
+            nodeIntegration: true, // Keep this if needed, but Firebase prefers web security.
         },
     });
 
-    // Electron Build Path
-    const path = `file://${__dirname}/dist/client/index.html`;
-    appWindow.loadURL(path);
+    // Load the app via localhost instead of file://
+    appWindow.loadURL(`http://localhost:${PORT}`);
 
     appWindow.setMenuBarVisibility(false);
 
-    // Initialize the DevTools.
+    // Open DevTools for debugging
     appWindow.webContents.openDevTools();
 
     appWindow.on('closed', function () {
@@ -30,7 +36,6 @@ app.on('ready', initWindow);
 
 // Close when all windows are closed.
 app.on('window-all-closed', function () {
-    // On macOS specific close process
     if (process.platform !== 'darwin') {
         app.quit();
     }
