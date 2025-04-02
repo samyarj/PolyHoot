@@ -93,94 +93,104 @@
             <i class="fas fa-magic"></i> Générer!
         </button>
         <div class="generate-sect-wrapper" *ngIf="isGeneratedQuestion">
-            <button
-                type="button"
-                class="custom-button generate-button"
-                [disabled]="this.isCallingAI"
-                [ngClass]="{ 'custom-button-disabled': this.isCallingAI }"
-                (click)="reformulateQuestion()"
-            >
-                <i class="fas fa-sync"></i> Reformuler!
-            </button>
             <div *ngIf="isReformulating" class="reformulation-preview">
                 <div class="preview-content">
-                    <h4>Question actuelle:</h4>
-                    <p>{{ question.text }}</p>
-                    <h4>Nouvelle formulation:</h4>
-                    <p>{{ temporaryQuestionText }}</p>
+                    <h4>Choisissez une option:</h4>
+                    <div class="options-container">
+                        <div class="option-box" (click)="rejectReformulation()">
+                            <p>{{ question.text }}</p>
+                        </div>
+                        <div class="option-box" (click)="acceptReformulation()">
+                            <p>{{ temporaryQuestionText }}</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="preview-actions">
-                    <button type="button" class="custom-button reject-button" (click)="rejectReformulation()">
-                        <i class="fas fa-times"></i> Rejeter
-                    </button>
-                    <button type="button" class="custom-button-cancel accept-button" (click)="acceptReformulation()">
-                        <i class="fas fa-check"></i> Accepter
-                    </button>
-                </div>
+                <button
+                    type="button"
+                    class="custom-button generate-button"
+                    [disabled]="this.isCallingAI"
+                    [ngClass]="{ 'custom-button-disabled': this.isCallingAI }"
+                    (click)="reformulateQuestion()"
+                >
+                    <i class="fas fa-sync"></i> Reformuler!
+                </button>
+            </div>
+            <div *ngIf="!isReformulating">
+                <button
+                    type="button"
+                    class="custom-button generate-button"
+                    [disabled]="this.isCallingAI"
+                    [ngClass]="{ 'custom-button-disabled': this.isCallingAI }"
+                    (click)="reformulateQuestion()"
+                >
+                    <i class="fas fa-sync"></i> Reformuler!
+                </button>
             </div>
         </div>
     </div>
 
-    <div class="form-group answers-section" *ngIf="questionType === 'QRE'">
-        <div class="form-group">
-            <label class="form-label">Bonne réponse:</label>
-            <input
-                *ngIf="question.qreAttributes"
-                type="number"
-                [(ngModel)]="question.qreAttributes.goodAnswer"
-                name="goodAnswer"
-                required
-                #goodAnswerInput="ngModel"
-            />
-        </div>
+    <div class="qre-inputs-container" *ngIf="questionType === 'QRE'">
+        <div class="form-group answers-section">
+            <div class="form-group">
+                <label class="form-label">Bonne réponse:</label>
+                <input
+                    *ngIf="question.qreAttributes"
+                    type="number"
+                    [(ngModel)]="question.qreAttributes.goodAnswer"
+                    name="goodAnswer"
+                    required
+                    #goodAnswerInput="ngModel"
+                />
+            </div>
 
-        <div class="form-group">
-            <label class="form-label">Borne minimale:</label>
-            <input
-                *ngIf="question.qreAttributes"
-                type="number"
-                [(ngModel)]="question.qreAttributes.minBound"
-                name="minBound"
-                required
-                #minBoundInput="ngModel"
-            />
-        </div>
+            <div class="form-group">
+                <label class="form-label">Borne minimale:</label>
+                <input
+                    *ngIf="question.qreAttributes"
+                    type="number"
+                    [(ngModel)]="question.qreAttributes.minBound"
+                    name="minBound"
+                    required
+                    #minBoundInput="ngModel"
+                />
+            </div>
 
-        <div class="form-group">
-            <label class="form-label">Borne maximale:</label>
-            <input
-                *ngIf="question.qreAttributes"
-                type="number"
-                [(ngModel)]="question.qreAttributes.maxBound"
-                name="maxBound"
-                required
-                #maxBoundInput="ngModel"
-            />
-        </div>
+            <div class="form-group">
+                <label class="form-label">Borne maximale:</label>
+                <input
+                    *ngIf="question.qreAttributes"
+                    type="number"
+                    [(ngModel)]="question.qreAttributes.maxBound"
+                    name="maxBound"
+                    required
+                    #maxBoundInput="ngModel"
+                />
+            </div>
 
-        <div class="form-group">
-            <label class="form-label">Marge de tolérance:</label>
-            <input
-                *ngIf="question.qreAttributes"
-                type="number"
-                min="0"
-                [(ngModel)]="question.qreAttributes.tolerance"
-                name="tolerance"
-                required
-                #toleranceInput="ngModel"
-            />
-        </div>
-        <div>
-            <small *ngIf="!toleranceValid()" class="text-danger">
-                La marge de tolérance doit être supérieure à 0 et ne peut dépasser 1/4 de l'intervalle.
-            </small>
-            <small *ngIf="!minBoundValid()" class="text-danger"> La borne minimale doit être inférieure à la bonne réponse.<br /> </small>
-            <small *ngIf="!maxBoundValid()" class="text-danger">
-                La borne maximale doit être supérieure à la borne minimale et à la bonne réponse.<br />
-            </small>
-            <small *ngIf="!goodAnswerValid()" class="text-danger">
-                La bonne réponse doit être comprise entre la borne minimale et la borne maximale.<br />
-            </small>
+            <div class="form-group">
+                <label class="form-label">Marge de tolérance:</label>
+                <input
+                    *ngIf="question.qreAttributes"
+                    type="number"
+                    min="0"
+                    [(ngModel)]="question.qreAttributes.tolerance"
+                    name="tolerance"
+                    required
+                    #toleranceInput="ngModel"
+                />
+            </div>
+            <div>
+                <small *ngIf="!toleranceValid()" class="text-danger">
+                    La marge de tolérance doit être supérieure à 0 et ne peut dépasser 1/4 de l'intervalle.
+                </small>
+                <small *ngIf="!minBoundValid()" class="text-danger"> La borne minimale doit être inférieure à la bonne réponse.<br /> </small>
+                <small *ngIf="!maxBoundValid()" class="text-danger">
+                    La borne maximale doit être supérieure à la borne minimale et à la bonne réponse.<br />
+                </small>
+                <small *ngIf="!goodAnswerValid()" class="text-danger">
+                    La bonne réponse doit être comprise entre la borne minimale et la borne maximale.<br />
+                </small>
+            </div>
         </div>
     </div>
 

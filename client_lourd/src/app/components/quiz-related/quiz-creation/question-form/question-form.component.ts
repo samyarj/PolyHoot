@@ -196,38 +196,56 @@ export class QuestionFormComponent implements OnChanges {
                 .post(`${environment.serverUrl}/quizzes/autofill`, { type: this.questionType })
                 .pipe(
                     finalize(() => {
-                        this.isCallingAI = false; // Ensures this runs after success or error
+                        this.isCallingAI = false;
                     }),
                 )
                 .subscribe({
                     next: (response: any) => {
+                        let generatedQuestion: Question = {
+                            type: this.questionType,
+                            points: 10,
+                            text: '',
+                        };
+
                         switch (this.questionType) {
                             case QuestionType.QCM: {
-                                this.question.text = response.Question;
-                                this.question.choices = Object.entries(response.Choix).map(([key, value]) => ({
-                                    text: value as string,
-                                    isCorrect: key === response.Réponse,
-                                }));
+                                generatedQuestion = {
+                                    ...generatedQuestion,
+                                    text: response.Question,
+                                    choices: Object.entries(response.Choix).map(([key, value]) => ({
+                                        text: value as string,
+                                        isCorrect: key === response.Réponse,
+                                    })),
+                                };
                                 break;
                             }
                             case QuestionType.QRL: {
-                                this.question.text = response.Question;
+                                generatedQuestion = {
+                                    ...generatedQuestion,
+                                    text: response.Question,
+                                };
                                 break;
                             }
                             case QuestionType.QRE: {
-                                this.question.text = response.Question;
-                                this.question.qreAttributes = {
-                                    goodAnswer: response['Bonne réponse'],
-                                    minBound: response['Borne minimale'],
-                                    maxBound: response['Borne maximale'],
-                                    tolerance: response['Marge de tolérance'],
+                                generatedQuestion = {
+                                    ...generatedQuestion,
+                                    text: response.Question,
+                                    qreAttributes: {
+                                        goodAnswer: response['Bonne réponse'],
+                                        minBound: response['Borne minimale'],
+                                        maxBound: response['Borne maximale'],
+                                        tolerance: response['Marge de tolérance'],
+                                    },
                                 };
                                 break;
                             }
                         }
+                        this.question = generatedQuestion;
                         this.isGeneratedQuestion = true;
                         this.toastr.success('Question générée avec succès');
                         this.isCallingAI = false;
+                        // Automatically trigger reformulation after generation
+                        this.reformulateQuestion();
                     },
                     error: (error) => {
                         this.toastr.error('Erreur lors de la génération de la question');
@@ -252,7 +270,7 @@ export class QuestionFormComponent implements OnChanges {
                 .post(`${environment.serverUrl}/quizzes/reformulate-question`, { question: this.question.text })
                 .pipe(
                     finalize(() => {
-                        this.isCallingAI = false; // Ensures this runs after success or error
+                        this.isCallingAI = false;
                     }),
                 )
                 .subscribe({
