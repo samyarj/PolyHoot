@@ -79,7 +79,7 @@ export class PublishedPollService /*implements OnModuleInit*/ {
         return pollData;
     }
     //Pas idéal mais meilleur endroit pour maintenant
-    onModuleInit() {
+    /* onModuleInit() {
         setInterval(() => this.checkAndUpdateExpiredStatus(), 1000); // Vérifie toutes les secondes
     }
 
@@ -96,5 +96,5 @@ export class PublishedPollService /*implements OnModuleInit*/ {
                 await this.pushNotifService.onPublishedPollExpired(poll.title);
             }
         });
-    }
+    } */
 }
