@@ -261,7 +261,7 @@ export class QuestionFormComponent implements OnChanges {
         if (!this.isCallingAI) {
             this.isCallingAI = true;
             if (!this.question.text) {
-                this.toastr.warning('Aucune question à reformuler');
+                // this.toastr.warning('Aucune question à reformuler');
                 this.isCallingAI = false;
                 return;
             }
@@ -277,11 +277,11 @@ export class QuestionFormComponent implements OnChanges {
                 .subscribe({
                     next: (response: any) => {
                         this.temporaryQuestionText = response.reformulatedQuestion;
-                        this.toastr.success('Question reformulée avec succès');
+                        // this.toastr.success('Question reformulée avec succès');
                         this.isCallingAI = false;
                     },
                     error: (error) => {
-                        this.toastr.error('Erreur lors de la reformulation de la question');
+                        // this.toastr.error('Erreur lors de la reformulation de la question');
                         console.error('Error reformulating question:', error);
                         this.isReformulating = false;
                         this.isCallingAI = false;
@@ -293,12 +293,12 @@ export class QuestionFormComponent implements OnChanges {
     acceptReformulation(): void {
         this.question.text = this.temporaryQuestionText;
         this.isReformulating = false;
-        this.toastr.success('Reformulation acceptée');
+        // this.toastr.success('Reformulation acceptée');
     }
 
     rejectReformulation(): void {
         this.isReformulating = false;
-        this.toastr.info('Reformulation rejetée');
+        // this.toastr.info('Reformulation rejetée');
     }
 
     onQuestionTextChange(): void {
