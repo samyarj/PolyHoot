@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { collection, Firestore, getDocs, onSnapshot, query, where } from '@angular/fire/firestore';
+import { collection, doc, Firestore, getDocs, onSnapshot, query, where } from '@angular/fire/firestore';
 import { User } from '@app/interfaces/user';
 import { firstValueFrom, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -106,6 +106,7 @@ export class FriendSystemService {
 
             let searchUnsubscribe: () => void;
             let pendingRequestsUnsubscribe: () => void;
+            let friendsUnsubscribe: () => void;
 
             (async () => {
                 try {
@@ -116,8 +117,16 @@ export class FriendSystemService {
                     }
 
                     const currentUserRole = currentUser.role || 'player';
-                    const friendsList = currentUser.friends || [];
+                    let friendsList: string[] = [];
                     let pendingRequestsIds: string[] = [];
+
+                    // Get real-time updates for friends list
+                    const currentUserRef = doc(this.firestore, 'users', currentUserId);
+                    friendsUnsubscribe = onSnapshot(currentUserRef, (userDoc) => {
+                        if (userDoc.exists()) {
+                            friendsList = userDoc.data()['friends'] || [];
+                        }
+                    });
 
                     // Get real-time updates for pending friend requests
                     const usersRef = collection(this.firestore, 'users');
@@ -179,6 +188,9 @@ export class FriendSystemService {
                 }
                 if (pendingRequestsUnsubscribe) {
                     pendingRequestsUnsubscribe();
+                }
+                if (friendsUnsubscribe) {
+                    friendsUnsubscribe();
                 }
             };
         });

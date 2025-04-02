@@ -1,4 +1,5 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { HttpClient } from '@angular/common/http';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { EMPTY_STRING, MAX_CHOICES, MIN_CHOICES } from '@app/constants/constants';
 import { ButtonType } from '@app/constants/enum-class';
@@ -10,6 +11,8 @@ import { ValidationService } from '@app/services/admin-services/validation-servi
 import { QuestionValidationService } from '@app/services/admin-services/validation-services/question-validation-service/question-validation.service';
 import { UploadImgService } from '@app/services/upload-img.service';
 import { ToastrService } from 'ngx-toastr';
+import { finalize } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 @Component({
     selector: 'app-question-form',
@@ -28,17 +31,23 @@ export class QuestionFormComponent implements OnChanges {
     minBound: number;
     maxBound: number;
     tolerance: number;
-
+    isGeneratedQuestion: boolean = false;
+    isReformulating: boolean = false;
+    temporaryQuestionText: string = '';
+    isChangingPicture: boolean = false;
+    isCallingAI: boolean = false;
     constructor(
         private questionValidationService: QuestionValidationService,
         private commonValidationService: ValidationService,
         private toastr: ToastrService,
         private uploadImgService: UploadImgService,
+        private http: HttpClient,
     ) {}
 
     submitQuestion() {
         if (this.question.type !== QuestionType.QCM) delete this.question['choices'];
         this.questionSubmitted.emit(this.question);
+        this.resetAnswers();
     }
 
     toggleAnswer(choice: QuestionChoice): void {
@@ -64,6 +73,7 @@ export class QuestionFormComponent implements OnChanges {
     }
 
     resetAnswers(): void {
+        this.isGeneratedQuestion = false;
         this.emptyQuestion.emit(this.questionType);
     }
 
@@ -90,6 +100,7 @@ export class QuestionFormComponent implements OnChanges {
     }
 
     onQuestionTypeChange() {
+        this.isGeneratedQuestion = false;
         switch (this.questionType) {
             case QuestionType.QRL: {
                 this.question.type = QuestionType.QRL;
@@ -133,37 +144,164 @@ export class QuestionFormComponent implements OnChanges {
     }
 
     onFileSelectedAndUpload(event: Event): void {
-        const file = (event.target as HTMLInputElement).files?.[0];
-        if (!file) {
-            this.toastr.warning('Aucun fichier sélectionné.');
-            return;
+        if (!this.isChangingPicture) {
+            this.isChangingPicture = true;
+
+            const file = (event.target as HTMLInputElement).files?.[0];
+            if (!file) {
+                this.toastr.warning('Aucun fichier sélectionné.');
+                this.isChangingPicture = false;
+                return;
+            }
+
+            // Téléversement immédiat après la sélection
+            this.uploadImgService.uploadImage(file, 'question').subscribe({
+                next: (response) => {
+                    if (response.imageUrl !== '' && response.message !== '') this.toastr.success('Image téléversée avec succès');
+
+                    // Stockez l'URL de l'image pour l'afficher dans le formulaire
+                    this.question.image = response.imageUrl;
+                    const fileInput = event.target as HTMLInputElement;
+                    if (fileInput) fileInput.value = ''; // Réinitialise l'input file
+                },
+                error: (error) => {
+                    this.toastr.error(`Erreur lors du téléversement : ${error.message}`);
+                },
+            });
         }
-
-        // Téléversement immédiat après la sélection
-        this.uploadImgService.uploadImage(file, 'question').subscribe({
-            next: (response) => {
-                if (response.imageUrl !== '' && response.message !== '') this.toastr.success('Image téléversée avec succès');
-
-                // Stockez l'URL de l'image pour l'afficher dans le formulaire
-                this.question.image = response.imageUrl;
-                const fileInput = event.target as HTMLInputElement;
-                if (fileInput) fileInput.value = ''; // Réinitialise l'input file
-            },
-            error: (error) => {
-                this.toastr.error(`Erreur lors du téléversement : ${error.message}`);
-            },
-        });
     }
     deleteImage(): void {
-        if (!this.question.image) {
-            this.toastr.warning('Aucune image à supprimer.');
-            return;
+        if (!this.isChangingPicture) {
+            this.isChangingPicture = true;
+            if (!this.question.image) {
+                this.toastr.warning('Aucune image à supprimer.');
+                this.isChangingPicture = false;
+                return;
+            }
+            this.uploadImgService.deleteImage(this.question.image).subscribe({
+                next: () => {
+                    this.toastr.success('Image supprimée avec succès');
+                    this.question.image = '';
+                    this.isChangingPicture = false;
+                },
+            });
         }
-        this.uploadImgService.deleteImage(this.question.image).subscribe({
-            next: () => {
-                this.toastr.success('Image supprimée avec succès');
-                this.question.image = '';
-            },
-        });
+    }
+
+    generateQuestion(): void {
+        if (!this.isCallingAI) {
+            this.isCallingAI = true;
+            this.http
+                .post(`${environment.serverUrl}/quizzes/autofill`, { type: this.questionType })
+                .pipe(
+                    finalize(() => {
+                        this.isCallingAI = false;
+                    }),
+                )
+                .subscribe({
+                    next: (response: any) => {
+                        let generatedQuestion: Question = {
+                            type: this.questionType,
+                            points: 10,
+                            text: '',
+                        };
+
+                        switch (this.questionType) {
+                            case QuestionType.QCM: {
+                                generatedQuestion = {
+                                    ...generatedQuestion,
+                                    text: response.Question,
+                                    choices: Object.entries(response.Choix).map(([key, value]) => ({
+                                        text: value as string,
+                                        isCorrect: key === response.Réponse,
+                                    })),
+                                };
+                                break;
+                            }
+                            case QuestionType.QRL: {
+                                generatedQuestion = {
+                                    ...generatedQuestion,
+                                    text: response.Question,
+                                };
+                                break;
+                            }
+                            case QuestionType.QRE: {
+                                generatedQuestion = {
+                                    ...generatedQuestion,
+                                    text: response.Question,
+                                    qreAttributes: {
+                                        goodAnswer: response['Bonne réponse'],
+                                        minBound: response['Borne minimale'],
+                                        maxBound: response['Borne maximale'],
+                                        tolerance: response['Marge de tolérance'],
+                                    },
+                                };
+                                break;
+                            }
+                        }
+                        this.question = generatedQuestion;
+                        this.isGeneratedQuestion = true;
+                        this.toastr.success('Question générée avec succès');
+                        this.isCallingAI = false;
+                        // Automatically trigger reformulation after generation
+                        this.reformulateQuestion();
+                    },
+                    error: (error) => {
+                        this.toastr.error('Erreur lors de la génération de la question');
+                        console.error('Error generating question:', error);
+                        this.isCallingAI = false;
+                    },
+                });
+        }
+    }
+
+    reformulateQuestion(): void {
+        if (!this.isCallingAI) {
+            this.isCallingAI = true;
+            if (!this.question.text) {
+                // this.toastr.warning('Aucune question à reformuler');
+                this.isCallingAI = false;
+                return;
+            }
+
+            this.isReformulating = true;
+            this.http
+                .post(`${environment.serverUrl}/quizzes/reformulate-question`, { question: this.question.text })
+                .pipe(
+                    finalize(() => {
+                        this.isCallingAI = false;
+                    }),
+                )
+                .subscribe({
+                    next: (response: any) => {
+                        this.temporaryQuestionText = response.reformulatedQuestion;
+                        // this.toastr.success('Question reformulée avec succès');
+                        this.isCallingAI = false;
+                    },
+                    error: (error) => {
+                        // this.toastr.error('Erreur lors de la reformulation de la question');
+                        console.error('Error reformulating question:', error);
+                        this.isReformulating = false;
+                        this.isCallingAI = false;
+                    },
+                });
+        }
+    }
+
+    acceptReformulation(): void {
+        this.question.text = this.temporaryQuestionText;
+        this.isReformulating = false;
+        // this.toastr.success('Reformulation acceptée');
+    }
+
+    rejectReformulation(): void {
+        this.isReformulating = false;
+        // this.toastr.info('Reformulation rejetée');
+    }
+
+    onQuestionTextChange(): void {
+        if (this.isGeneratedQuestion || !this.question.text) {
+            this.isGeneratedQuestion = false;
+        }
     }
 }

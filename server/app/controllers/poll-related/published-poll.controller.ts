@@ -14,7 +14,6 @@ export class PublishedPollController {
         private readonly userService: UserService,
     ) { }
 
-
     @ApiOkResponse({
         description: 'Get published poll by ID',
         type: PublishedPoll,
@@ -44,8 +43,7 @@ export class PublishedPollController {
         console.log("deleteExpiredPolls");
         try {
             await this.publishedPollService.deleteExpiredPolls();
-            //const updatedPublishedPolls = await this.publishedPollService.getAllPublishedPolls();
-            response.status(HttpStatus.OK).send(); //json(updatedPublishedPolls);
+            response.status(HttpStatus.OK).send();
         } catch (error) {
             if (error.status === HttpStatus.NOT_FOUND) {
                 response.status(HttpStatus.NOT_FOUND).send({ message: error.message });

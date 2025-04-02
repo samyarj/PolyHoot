@@ -1,14 +1,22 @@
 <form class="form-question-container" #questionForm="ngForm" (ngSubmit)="submitQuestion()">
     <div class="question-info-section">
         <div class="form-group question-type">
-            <label class="form-label" for="options">Type</label>
             <select
                 id="options"
                 [(ngModel)]="questionType"
                 (ngModelChange)="onQuestionTypeChange()"
                 name="type"
                 [disabled]="isTypeLocked"
-                title="Question à choix multiples (QCM) ou question à réponse libre (QRL) ou question à réponse estimée (QRE)"
+                [matTooltip]="
+                    questionType === 'QCM'
+                        ? 'Question à choix multiples'
+                        : questionType === 'QRL'
+                        ? 'Question à réponse libre'
+                        : questionType === 'QRE'
+                        ? 'Question à réponse estimée'
+                        : ''
+                "
+                matTooltipClass="custom-tooltip"
             >
                 <option value="QCM">QCM</option>
                 <option value="QRL">QRL</option>
@@ -16,26 +24,26 @@
             </select>
         </div>
         <div class="form-group question-text">
-            <label class="form-label" for="question-text-id">Question</label>
-            <input
+            <textarea
                 class="form-control"
                 id="question-text-id"
                 type="text"
                 [(ngModel)]="question.text"
+                (ngModelChange)="onQuestionTextChange()"
                 placeholder="Entrez votre question."
                 name="text"
                 #text="ngModel"
                 required
-            />
+                maxlength="300"
+            ></textarea>
             <small class="text-danger" *ngIf="isQuestionTextValid()">Entrez votre question</small>
         </div>
 
-        <div class="form-group question-score">
-            <label class="form-label" for="question-score-id">Pointage:</label>
+        <div class="form-group">
             <div class="input-group">
                 <input
                     class="form-control"
-                    id="question-score-id"
+                    id="-id"
                     type="number"
                     min="10"
                     max="100"
@@ -57,78 +65,139 @@
     </div>
     <div class="upload-section">
         <input type="file" (change)="onFileSelectedAndUpload($event)" accept="image/*" #fileInput style="display: none" />
-        <button (click)="fileInput.click(); $event.stopPropagation(); $event.preventDefault()" class="custom-button">
-            Téléverser une image pour votre question
+        <button
+            [disabled]="this.isChangingPicture"
+            [ngClass]="{ 'custom-button-disabled': this.isChangingPicture }"
+            (click)="fileInput.click(); $event.stopPropagation(); $event.preventDefault()"
+            class="custom-button"
+        >
+            <i class="fa-solid fa-arrow-up-from-bracket"></i>&nbsp;Téléverser une image
         </button>
-        <button (click)="deleteImage(); $event.stopPropagation(); $event.preventDefault()" class="custom-button">
-            Supprimer l'image de votre question
-        </button>
-        <div *ngIf="this.question.image">
-            <p>Image téléversée :</p>
+        <div *ngIf="this.question.image" class="image-container">
+            <button
+                [disabled]="this.isChangingPicture"
+                [ngClass]="{ 'custom-button-disabled': this.isChangingPicture }"
+                matTooltip="Supprimer"
+                matTooltipClass="custom-tooltip"
+                class="custom-button"
+                (click)="deleteImage(); $event.stopPropagation(); $event.preventDefault()"
+            >
+                <mat-icon style="font-size: 20px">close</mat-icon>
+            </button>
             <img [src]="this.question.image" alt="Image associée" style="max-width: 100%; height: auto" />
         </div>
     </div>
 
-    <div class="form-group answers-section" *ngIf="questionType === 'QRE'">
-        <div class="form-group">
-            <label class="form-label">Bonne réponse:</label>
-            <input
-                *ngIf="question.qreAttributes"
-                type="number"
-                [(ngModel)]="question.qreAttributes.goodAnswer"
-                name="goodAnswer"
-                required
-                #goodAnswerInput="ngModel"
-            />
+    <div class="generate-question-section">
+        <button
+            [disabled]="this.isCallingAI"
+            [ngClass]="{ 'custom-button-disabled': this.isCallingAI }"
+            *ngIf="!isGeneratedQuestion"
+            type="button"
+            class="custom-button generate-button"
+            (click)="generateQuestion()"
+        >
+            <i class="fas fa-magic"></i> Générer!
+        </button>
+        <div class="generate-sect-wrapper" *ngIf="isGeneratedQuestion">
+            <div *ngIf="isReformulating" class="reformulation-preview">
+                <div class="preview-content">
+                    <h4>Choisissez une formulation:</h4>
+                    <div class="options-container">
+                        <div class="option-box" (click)="rejectReformulation()">
+                            <p>{{ question.text }}</p>
+                        </div>
+                        <div class="option-box" (click)="acceptReformulation()">
+                            <p>{{ temporaryQuestionText }}</p>
+                        </div>
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    class="custom-button generate-button"
+                    [disabled]="this.isCallingAI"
+                    [ngClass]="{ 'custom-button-disabled': this.isCallingAI }"
+                    (click)="reformulateQuestion()"
+                >
+                    <i class="fas fa-sync"></i> Reformuler!
+                </button>
+            </div>
+            <div *ngIf="!isReformulating">
+                <button
+                    type="button"
+                    class="custom-button generate-button"
+                    [disabled]="this.isCallingAI"
+                    [ngClass]="{ 'custom-button-disabled': this.isCallingAI }"
+                    (click)="reformulateQuestion()"
+                >
+                    <i class="fas fa-sync"></i> Reformuler!
+                </button>
+            </div>
         </div>
+    </div>
 
-        <div class="form-group">
-            <label class="form-label">Borne minimale:</label>
-            <input
-                *ngIf="question.qreAttributes"
-                type="number"
-                [(ngModel)]="question.qreAttributes.minBound"
-                name="minBound"
-                required
-                #minBoundInput="ngModel"
-            />
-        </div>
+    <div class="qre-inputs-container" *ngIf="questionType === 'QRE'">
+        <div class="form-group answers-section">
+            <div class="form-group">
+                <label class="form-label">Bonne réponse:</label>
+                <input
+                    *ngIf="question.qreAttributes"
+                    type="number"
+                    [(ngModel)]="question.qreAttributes.goodAnswer"
+                    name="goodAnswer"
+                    required
+                    #goodAnswerInput="ngModel"
+                />
+            </div>
 
-        <div class="form-group">
-            <label class="form-label">Borne maximale:</label>
-            <input
-                *ngIf="question.qreAttributes"
-                type="number"
-                [(ngModel)]="question.qreAttributes.maxBound"
-                name="maxBound"
-                required
-                #maxBoundInput="ngModel"
-            />
-        </div>
+            <div class="form-group">
+                <label class="form-label">Borne minimale:</label>
+                <input
+                    *ngIf="question.qreAttributes"
+                    type="number"
+                    [(ngModel)]="question.qreAttributes.minBound"
+                    name="minBound"
+                    required
+                    #minBoundInput="ngModel"
+                />
+            </div>
 
-        <div class="form-group">
-            <label class="form-label">Marge de tolérance:</label>
-            <input
-                *ngIf="question.qreAttributes"
-                type="number"
-                min="0"
-                [(ngModel)]="question.qreAttributes.tolerance"
-                name="tolerance"
-                required
-                #toleranceInput="ngModel"
-            />
-        </div>
-        <div>
-            <small *ngIf="!toleranceValid()" class="text-danger">
-                La marge de tolérance doit être supérieure à 0 et ne peut dépasser 1/4 de l'intervalle.
-            </small>
-            <small *ngIf="!minBoundValid()" class="text-danger"> La borne minimale doit être inférieure à la bonne réponse.<br /> </small>
-            <small *ngIf="!maxBoundValid()" class="text-danger">
-                La borne maximale doit être supérieure à la borne minimale et à la bonne réponse.<br />
-            </small>
-            <small *ngIf="!goodAnswerValid()" class="text-danger">
-                La bonne réponse doit être comprise entre la borne minimale et la borne maximale.<br />
-            </small>
+            <div class="form-group">
+                <label class="form-label">Borne maximale:</label>
+                <input
+                    *ngIf="question.qreAttributes"
+                    type="number"
+                    [(ngModel)]="question.qreAttributes.maxBound"
+                    name="maxBound"
+                    required
+                    #maxBoundInput="ngModel"
+                />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Marge de tolérance:</label>
+                <input
+                    *ngIf="question.qreAttributes"
+                    type="number"
+                    min="0"
+                    [(ngModel)]="question.qreAttributes.tolerance"
+                    name="tolerance"
+                    required
+                    #toleranceInput="ngModel"
+                />
+            </div>
+            <div>
+                <small *ngIf="!toleranceValid()" class="text-danger">
+                    La marge de tolérance doit être supérieure à 0 et ne peut dépasser 1/4 de l'intervalle.
+                </small>
+                <small *ngIf="!minBoundValid()" class="text-danger"> La borne minimale doit être inférieure à la bonne réponse.<br /> </small>
+                <small *ngIf="!maxBoundValid()" class="text-danger">
+                    La borne maximale doit être supérieure à la borne minimale et à la bonne réponse.<br />
+                </small>
+                <small *ngIf="!goodAnswerValid()" class="text-danger">
+                    La bonne réponse doit être comprise entre la borne minimale et la borne maximale.<br />
+                </small>
+            </div>
         </div>
     </div>
 
@@ -146,6 +215,7 @@
                         name="answer{{ choice.text }}"
                         required
                         #answer="ngModel"
+                        maxlength="75"
                     />
                     <div class="button-section">
                         <button

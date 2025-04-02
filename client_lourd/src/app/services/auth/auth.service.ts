@@ -424,10 +424,13 @@ export class AuthService {
     private signOutAndClearSession(): void {
         this.tokenBS.next(null);
         this.socketClientService.disconnect();
+
         from(this.auth.signOut())
             .pipe(
                 handleErrorsGlobally(this.injector),
-                finalize(() => this.clearSession()),
+                finalize(() => {
+                    this.clearSession();
+                }),
             )
             .subscribe();
     }
@@ -484,6 +487,9 @@ export class AuthService {
     }
 
     private signInWithGoogleSDK(): Observable<UserCredential> {
+        this.googleProvider.setCustomParameters({
+            prompt: 'select_account', // Forces Google to show the account selection screen
+        });
         return from(signInWithPopup(this.auth, this.googleProvider));
     }
 

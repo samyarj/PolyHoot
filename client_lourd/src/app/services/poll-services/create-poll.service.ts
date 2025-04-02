@@ -7,7 +7,7 @@ import { Poll } from '@app/interfaces/poll';
 import { Question } from '@app/interfaces/question';
 import { QuestionValidationService } from '@app/services/admin-services/validation-services/question-validation-service/question-validation.service';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
-import { Observable, catchError, map } from 'rxjs';
+import { Observable, catchError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -32,21 +32,11 @@ export class CreatePollService {
     }
 
     createPoll(poll: Poll): Observable<Poll[]> {
-        return this.http.post<Poll[]>(`${this.baseUrl}/create`, poll).pipe(
-            map((polls) => {
-                return polls;
-            }),
-            catchError(this.messageHandler.handleHttpError),
-        );
+        return this.http.post<Poll[]>(`${this.baseUrl}/create`, poll).pipe(catchError(this.messageHandler.handleHttpError));
     }
 
     updatePoll(id: string, pollData: Poll): Observable<Poll[]> {
-        return this.http.patch<Poll[]>(`${this.baseUrl}/update/${id}`, pollData).pipe(
-            map((polls) => {
-                return polls;
-            }),
-            catchError(this.messageHandler.handleHttpError),
-        );
+        return this.http.patch<Poll[]>(`${this.baseUrl}/update/${id}`, pollData).pipe(catchError(this.messageHandler.handleHttpError));
     }
     addQuestionToPoll(clickedQuestion: Question): void {
         if (this.questionValidationService.isQuestionTitleUnique(clickedQuestion, this.poll.questions, false)) {

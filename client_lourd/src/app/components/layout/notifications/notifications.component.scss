@@ -1,31 +1,78 @@
 //notification button
 .notification-container {
+    position: relative;
+    display: inline-block;
     padding: 20px;
-    > button {
+
+    .notification-button {
         background: none;
         border: none;
-    }
-    i {
-        color: var(--tertiary-color);
-        font-size: 2rem;
-        transition: all 0.2s ease-in-out;
+        padding: 0.5rem;
+        cursor: pointer;
+        position: relative;
+        color: var(--text-color);
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
 
         &:hover {
-            text-shadow: 0 0 20px color-mix(in srgb, var(--tertiary-color) 70%, transparent);
-            transform: translateY(-1px);
+            color: var(--tertiary-color);
+        }
+
+        i {
+            color: var(--tertiary-color);
+            font-size: 2.5rem;
+            transition: all 0.2s ease-in-out;
+            position: relative;
+            display: inline-block;
+
+            &:hover {
+                text-shadow: 0 0 20px color-mix(in srgb, var(--tertiary-color) 70%, transparent);
+                transform: translateY(-1px);
+            }
+        }
+
+        .notification-icon-container {
+            position: relative;
+            display: inline-block;
+
+            i {
+                color: var(--tertiary-color);
+                font-size: 2.5rem;
+                transition: all 0.2s ease-in-out;
+
+                &:hover {
+                    text-shadow: 0 0 20px color-mix(in srgb, var(--tertiary-color) 70%, transparent);
+                    transform: translateY(-1px);
+                }
+            }
+
+            .notification-bubble {
+                position: absolute;
+                bottom: -4px;
+                right: -4px;
+                width: 12px;
+                height: 12px;
+                background-color: #ff0000;
+                border-radius: 50%;
+                animation: pulse 2s infinite;
+            }
         }
     }
 }
-.notification-container {
-    position: relative;
-    display: inline-block;
-}
 
-.notification-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.5rem;
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 .dropdown-menu {
@@ -40,8 +87,77 @@
     width: 100%;
     min-width: 380px;
     z-index: 1000;
-    max-height: 50vh;
-    cursor: default;
+    display: none;
+    max-height: 400px;
+    overflow-y: auto;
+
+    &.show {
+        display: block;
+    }
+
+    .dropdown-header {
+        padding: 1rem;
+        border-bottom: 1px solid var(--tertiary-color);
+        font-size: 1.1rem;
+    }
+
+    .notifications-container {
+        padding: 0.5rem;
+    }
+
+    .notification-item {
+        padding: 0.5rem;
+        border-bottom: 1px solid var(--tertiary-color);
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+
+    .notification-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 10px;
+
+        .notification-text {
+            flex: 1;
+            min-width: 70%;
+            height: 100%;
+
+            p {
+                margin: 0;
+                padding: 5px 0;
+                cursor: default;
+                word-wrap: break-word;
+                white-space: normal;
+                line-height: 1.4;
+            }
+        }
+
+        .custom-button-medium {
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            text-align: center;
+            flex-shrink: 0;
+
+            i {
+                font-size: 1.5rem !important;
+            }
+
+            &:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+        }
+    }
+
+    .no-notif {
+        padding: 1rem;
+        color: var(--text-color);
+        opacity: 0.7;
+    }
 }
 
 .notifications-container {
