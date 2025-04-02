@@ -64,6 +64,7 @@ export class WaitingPageService {
     }
 
     toggleGameLock() {
+        console.log('toggleGameLock');
         this.socketService.send(GameEvents.ToggleLock);
     }
 
