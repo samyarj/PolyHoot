@@ -9,7 +9,7 @@ import * as admin from 'firebase-admin';
 export class PublishedPollService /*implements OnModuleInit*/ {
     private firestore = admin.firestore();
 
-    constructor(private readonly pushNotifService: PollPushNotifService) {}
+    constructor(private readonly pushNotifService: PollPushNotifService) { }
 
     async createPublishedPoll(poll: PublishedPoll): Promise<PublishedPoll> {
         const pollRef = this.firestore.collection('publishedPolls').doc(poll.id);
@@ -89,7 +89,6 @@ export class PublishedPollService /*implements OnModuleInit*/ {
         snapshot.forEach(async (doc) => {
             const poll = doc.data() as PublishedPoll;
             const pollEndDate = new Date(poll.endDate);
-            console.log(poll.title, poll.expired, currentDate, pollEndDate);
             if (pollEndDate <= currentDate && !poll.expired) {
                 console.log('Poll expired:', poll.title);
                 await doc.ref.update({ expired: true });
