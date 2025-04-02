@@ -124,84 +124,101 @@ export class QuizAutofillService {
     }
 
     async generateQuestion(type: string): Promise<any[]> {
-        try {
-            const initialContext = this.initializeContext();
-            let userContent = this.selectQuestionType(type);
+        const MAX_RETRIES = 5;
+        let attempts = 0;
 
-            initialContext.push({
-                role: 'user',
-                content: userContent,
-            });
+        while (attempts < MAX_RETRIES) {
+            try {
+                const initialContext = this.initializeContext();
+                let userContent = this.selectQuestionType(type);
 
-            const chatCompletion = await this.groq.chat.completions.create({
-                messages: initialContext,
-                model: 'mistral-saba-24b',
-                temperature: 1,
-                max_completion_tokens: 1024,
-                top_p: 1,
-                stream: false,
-                response_format: {
-                    type: 'json_object',
-                },
-                stop: null,
-            });
+                initialContext.push({
+                    role: 'user',
+                    content: userContent,
+                });
 
-            const response = chatCompletion.choices[0]?.message?.content;
-            const parsedResponse = JSON.parse(response);
-
-            if (this.validateQuizSchema(parsedResponse)) {
-                return parsedResponse;
-            } else {
-                return [
-                    {
-                        question: 'What is the capital of France?',
-                        options: ['Paris', 'London', 'Berlin', 'Madrid'],
-                        correct_answer: 'Paris',
+                const chatCompletion = await this.groq.chat.completions.create({
+                    messages: initialContext,
+                    model: 'mistral-saba-24b',
+                    temperature: 1,
+                    max_completion_tokens: 1024,
+                    top_p: 1,
+                    stream: false,
+                    response_format: {
+                        type: 'json_object',
                     },
-                ];
+                    stop: null,
+                });
+
+                const response = chatCompletion.choices[0]?.message?.content;
+                const parsedResponse = JSON.parse(response);
+
+                if (this.validateQuizSchema(parsedResponse)) {
+                    return parsedResponse;
+                }
+
+                attempts++;
+                if (attempts === MAX_RETRIES) {
+                    throw new Error('Failed to generate a valid question after maximum attempts');
+                }
+            } catch (error) {
+                attempts++;
+                if (attempts === MAX_RETRIES) {
+                    console.error('Error generating quiz questions after maximum attempts:', error);
+                    return error;
+                }
             }
-        } catch (error) {
-            console.error('Error generating quiz questions:', error);
-            return [
-                {
-                    question: 'What is the capital of France?',
-                    options: ['Paris', 'London', 'Berlin', 'Madrid'],
-                    correct_answer: 'Paris',
-                },
-            ];
         }
     }
 
     async reformulateQuestion(question: string): Promise<string> {
-        try {
-            const messages = [
-                {
-                    role: 'system',
-                    content: `Vous êtes un expert en reformulation de questions. 
+        const MAX_RETRIES = 5;
+        let attempts = 0;
+
+        while (attempts < MAX_RETRIES) {
+            try {
+                const messages = [
+                    {
+                        role: 'system',
+                        content: `Vous êtes un expert en reformulation de questions. 
 1. Votre tâche est de reformuler des questions en gardant le même sens mais en utilisant un style différent. 
 2. Assurez-vous de reformuler la question qu'une seule fois.
 3. Assurez-vous de retouner la reformulation seulement, sans tout autres messages`,
-                },
-                {
-                    role: 'user',
-                    content: `Voici la question: ${question}`,
-                },
-            ];
+                    },
+                    {
+                        role: 'user',
+                        content: `Voici la question: ${question}`,
+                    },
+                ];
 
-            const chatCompletion = await this.groq.chat.completions.create({
-                messages: messages,
-                model: 'mistral-saba-24b',
-                temperature: 1,
-                max_completion_tokens: 200,
-                top_p: 0.9,
-                stream: false,
-                stop: null,
-            });
+                const chatCompletion = await this.groq.chat.completions.create({
+                    messages: messages,
+                    model: 'mistral-saba-24b',
+                    temperature: 1,
+                    max_completion_tokens: 200,
+                    top_p: 0.9,
+                    stream: false,
+                    stop: null,
+                });
 
-            return chatCompletion.choices[0]?.message?.content || question;
-        } catch (error) {
-            console.error('Error reformulating question:', error);
-            return question;
+                const reformulatedQuestion = chatCompletion.choices[0]?.message?.content;
+                if (reformulatedQuestion) {
+                    return reformulatedQuestion;
+                }
+
+                attempts++;
+                if (attempts === MAX_RETRIES) {
+                    console.error('Failed to reformulate question after maximum attempts');
+                    return question;
+                }
+            } catch (error) {
+                attempts++;
+                if (attempts === MAX_RETRIES) {
+                    console.error('Error reformulating question after maximum attempts:', error);
+                    return question;
+                }
+            }
         }
+        return question;
     }
 }
