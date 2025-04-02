@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container-general">
     <div class="forms-container">
         <form class="row mt-2 game-info" #gameForm="ngForm" @gameFormAnimation>
             <div class="col-md-6">
@@ -13,6 +13,7 @@
                         name="title"
                         required
                         #title="ngModel"
+                        maxlength="100"
                     />
                     <small class="text-danger" *ngIf="isQuizTitleEmpty()"> Il faut un titre.</small>
                 </div>
@@ -69,11 +70,15 @@
             [question]="currentQuestion"
             (questionSubmitted)="onQuestionSubmitted($event)"
             (emptyQuestion)="emptyCurrentQuestion($event)"
+            class="question-form"
         >
         </app-question-form>
     </div>
     <div class="created-question-container" @gameFormAnimation>
         <h2>Questions</h2>
+        <div *ngIf="quiz.questions.length === 0" class="no-question-info">
+            Veuillez ajouter une question depuis l'interface à gauche, ou bien depuis la banque de questions située à droite.
+        </div>
         <ul class="question-list-container" cdkDropList (cdkDropListDropped)="onDrop($event)">
             <li
                 *ngFor="let question of quiz.questions; trackBy: trackByFn; let i = index"

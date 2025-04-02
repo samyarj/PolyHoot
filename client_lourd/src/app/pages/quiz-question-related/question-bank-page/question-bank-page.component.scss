@@ -33,7 +33,7 @@ $primary-color: #00115a;
 }
 
 .questions-from-bank {
-    width: 80%;
+    width: 90%;
     overflow: auto; // Allows scrolling inside if needed
     max-height: 500px; // Prevents excessive height overflow
     display: flex;
@@ -57,7 +57,7 @@ $primary-color: #00115a;
 
 ul {
     list-style-type: none;
-    width: 90%;
+    width: 95%;
     height: 100%;
 }
 .questions-from-bank li {
@@ -88,7 +88,7 @@ ul {
 }
 
 .new-question {
-    margin: 0px 150px;
+    width: calc((90%) * (95 / 100));
 }
 
 .show-logo-button {

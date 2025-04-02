@@ -1,14 +1,22 @@
 <form class="form-question-container" #questionForm="ngForm" (ngSubmit)="submitQuestion()">
     <div class="question-info-section">
         <div class="form-group question-type">
-            <label class="form-label" for="options">Type</label>
             <select
                 id="options"
                 [(ngModel)]="questionType"
                 (ngModelChange)="onQuestionTypeChange()"
                 name="type"
                 [disabled]="isTypeLocked"
-                title="Question à choix multiples (QCM) ou question à réponse libre (QRL) ou question à réponse estimée (QRE)"
+                [matTooltip]="
+                    questionType === 'QCM'
+                        ? 'Question à choix multiples'
+                        : questionType === 'QRL'
+                        ? 'Question à réponse libre'
+                        : questionType === 'QRE'
+                        ? 'Question à réponse estimée'
+                        : ''
+                "
+                matTooltipClass="custom-tooltip"
             >
                 <option value="QCM">QCM</option>
                 <option value="QRL">QRL</option>
@@ -16,8 +24,7 @@
             </select>
         </div>
         <div class="form-group question-text">
-            <label class="form-label" for="question-text-id">Question</label>
-            <input
+            <textarea
                 class="form-control"
                 id="question-text-id"
                 type="text"
@@ -27,12 +34,12 @@
                 name="text"
                 #text="ngModel"
                 required
-            />
+                maxlength="300"
+            ></textarea>
             <small class="text-danger" *ngIf="isQuestionTextValid()">Entrez votre question</small>
         </div>
 
         <div class="form-group">
-            <label class="form-label" for="-id">Pointage:</label>
             <div class="input-group">
                 <input
                     class="form-control"
@@ -208,6 +215,7 @@
                         name="answer{{ choice.text }}"
                         required
                         #answer="ngModel"
+                        maxlength="75"
                     />
                     <div class="button-section">
                         <button

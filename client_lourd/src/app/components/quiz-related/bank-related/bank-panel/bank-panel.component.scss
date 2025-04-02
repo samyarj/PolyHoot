@@ -168,3 +168,10 @@ button {
     color: green;
     font-weight: bolder;
 }
+
+.custom-panel-container {
+    padding-top: 24px;
+    gap: 24px;
+    display: flex;
+    flex-direction: column;
+}

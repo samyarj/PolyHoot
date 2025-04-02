@@ -1,15 +1,12 @@
 $primary-color: #00115a;
 
 .form-question-container {
-    margin-top: 1.5rem;
-    margin-left: auto;
-    margin-right: auto;
     min-height: 50%;
     border: 3px dashed var(--tertiary-color);
     background: color-mix(in srgb, var(--primary-color) 70%, transparent);
     border-radius: 1rem;
     height: 100%;
-    width: 95%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -22,6 +19,32 @@ $primary-color: #00115a;
         justify-content: space-between;
         .question-text {
             width: calc(95% - 220px);
+            .form-control {
+                min-height: 40px;
+                max-height: 250px;
+                resize: none; /* Prevent manual resizing */
+                overflow-y: auto;
+                background: white;
+                &::-webkit-scrollbar {
+                    width: 4px;
+                    margin-top: 12px;
+                    margin-bottom: 12px;
+                }
+
+                &::-webkit-scrollbar-thumb {
+                    background: var(--secondary-color);
+                    border-radius: 12px;
+                    margin-top: 12px;
+                    margin-bottom: 12px;
+                }
+
+                &::-webkit-scrollbar-track {
+                    background: var(--tertiary-color);
+                    border-radius: 12px;
+                    margin-top: 12px;
+                    margin-bottom: 12px;
+                }
+            }
         }
         .question-score {
             width: 100px;
@@ -34,6 +57,10 @@ $primary-color: #00115a;
             font-size: medium;
             position: relative;
             top: 8%;
+
+            &:not([disabled]):hover {
+                cursor: pointer;
+            }
         }
     }
     label {
