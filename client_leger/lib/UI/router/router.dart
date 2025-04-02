@@ -24,6 +24,7 @@ import 'package:client_leger/UI/shop/shop-page.dart';
 import 'package:client_leger/UI/signup/signup_page.dart';
 import 'package:client_leger/backend-communication-services/report/report_service.dart';
 import 'package:client_leger/models/player_data.dart';
+import 'package:client_leger/providers/admin/admin-service.dart';
 import 'package:client_leger/providers/play/game_player_provider.dart';
 import 'package:client_leger/providers/play/join_game_provider.dart';
 import 'package:client_leger/providers/play/waiting_page_provider.dart';
@@ -198,6 +199,11 @@ final GoRouter router = GoRouter(
             GoRoute(
               path: Paths.adminUsers,
               builder: (context, state) => const AdminUsersPage(),
+              onExit: (context, state) async {
+                final container = ProviderScope.containerOf(context);
+                container.read(adminUsersProvider.notifier).stopListening();
+                return true;
+              },
             ),
             GoRoute(
               path: Paths.adminHistoryPolls,
@@ -227,7 +233,7 @@ final GoRouter router = GoRouter(
       final currentUserState = containerRef.read(user_provider.userProvider);
 
       if (_reportService.nbReport.value != null &&
-          _reportService.nbReport.value! > 2) {
+          _reportService.nbReport.value! >= 2) {
         AppLogger.e("User has been reported more than 2 times");
         _reportService.behaviourWarning(context);
         final reportState =

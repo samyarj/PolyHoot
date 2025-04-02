@@ -1,6 +1,7 @@
 import 'package:client_leger/UI/friend-system/friend-request-notification.dart';
 import 'package:client_leger/UI/friend-system/qr-code-widget.dart';
 import 'package:client_leger/UI/global/avatar_banner_widget.dart';
+import 'package:client_leger/UI/player-polls/player_polls_notification.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/models/enums.dart';
 import 'package:client_leger/models/user.dart';
@@ -337,26 +338,9 @@ class _AppBarRightSectionState extends State<AppBarRightSection> {
                     ),
                   ),
                 ),
-                IconButton(
-                  icon: Icon(
-                    FontAwesomeIcons.bullhorn,
-                    size: 18,
-                    color: _pollActive
-                        ? colorScheme.secondary
-                        : colorScheme.tertiary,
-                  ),
-                  constraints: BoxConstraints(
-                    minWidth: 36,
-                    minHeight: 36,
-                  ),
-                  padding: EdgeInsets.zero,
-                  onPressed: () {
-                    setState(() {
-                      _pollActive = !_pollActive;
-                      _notificationActive = false;
-                    });
-                  },
-                ),
+
+                // Poll notification button
+                PlayerPollsNotification(),
               ],
             ),
           ),

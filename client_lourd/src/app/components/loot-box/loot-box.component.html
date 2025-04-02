@@ -1,7 +1,7 @@
 <div class="container" (mouseenter)="toggleMove()" (mouseleave)="toggleMove()">
     <div class="presentation-div" [ngClass]="{ 'move-to-side': isMoved }">
         <div class="lootbox-image">{{ lootBoxContainer.image }}</div>
-        <div class="price" [ngClass]="{ 'text-moved': isMoved }">{{ lootBoxContainer.price }} COINS</div>
+        <div class="price" [ngClass]="{ 'text-moved': isMoved }">{{ lootBoxContainer.price }} PIÈCES</div>
     </div>
     <div class="interaction-div" [ngClass]="{ show: isMoved }">
         <div class="interaction-div-content">
@@ -123,7 +123,7 @@
             <div class="section-divider"></div>
             <div class="buy-zone-wrapper">
                 <div class="buy-zone">
-                    <button class="custom-button-medium" (click)="openFunction(id)">Ouvrir pour {{ lootBoxContainer.price }} coins</button>
+                    <button class="custom-button-medium" (click)="openFunction(id)">Ouvrir pour {{ lootBoxContainer.price }} pièces</button>
                 </div>
             </div>
         </div>

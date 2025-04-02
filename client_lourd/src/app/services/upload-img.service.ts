@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, switchMap } from 'rxjs';
+import { Observable, of, switchMap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from './auth/auth.service';
 
@@ -25,7 +25,8 @@ export class UploadImgService {
         return this.authService.token$.pipe(
             switchMap((token) => {
                 if (!token) {
-                    throw new Error('Authentication token is missing. Please log in.');
+                    // throw new Error('Authentication token is missing. Please log in.');
+                    return of({ message: '', imageUrl: '' });
                 }
 
                 const headers = new HttpHeaders({

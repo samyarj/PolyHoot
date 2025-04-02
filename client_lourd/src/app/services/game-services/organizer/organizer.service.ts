@@ -33,7 +33,7 @@ import { DEFAULT_QUESTION } from './organizer.constants';
 export class OrganizerService {
     alertSoundPlayer: SoundPlayer = new SoundPlayer(ALERT_SOUND_PATH);
     answersQRL: AnswerQRL[] = [];
-    currentQuestion: Question = { id: '0', points: 0, choices: [], type: QuestionType.QCM, text: '' };
+    currentQuestion: Question = { id: '0', points: 0, creator: '', choices: [], type: QuestionType.QCM, text: '' };
     gameInfo: GameInfo = { time: 0, currentQuestionIndex: 0, currentIndex: 0, playersInGame: 0 };
     gameModifiers: Modifiers = { paused: false, alertMode: false };
     gameStatus: GameStatus = GameStatus.WaitingForAnswers;

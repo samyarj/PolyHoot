@@ -13,7 +13,7 @@
                     (click)="canProceedToNextTab() && currentTab !== 1 ? (currentTab = 1) : null"
                 >
                     <span class="tab-number">2</span>
-                    <span class="tab-title">Montant des coins</span>
+                    <span class="tab-title">Montant des pièces</span>
                 </div>
                 <div
                     class="tab"
@@ -111,10 +111,10 @@
                                 min="1"
                                 step="1"
                             />
-                            <span class="coins-label">coins</span>
+                            <span class="coins-label">pièces</span>
                         </div>
                         <div class="balance-info">
-                            <p>Solde disponible: {{ userBalance }} coins</p>
+                            <p>Solde disponible: {{ userBalance }} pièces</p>
                         </div>
                     </div>
                     <div class="tab-navigation">
@@ -139,15 +139,15 @@
                         </div>
                         <div class="summary-item">
                             <span class="label">Montant:</span>
-                            <span class="value">{{ transferAmount }} coins</span>
+                            <span class="value">{{ transferAmount }} pièces</span>
                         </div>
                         <div class="summary-item" id="amount-after-transfer">
                             <span class="label">Solde après transfert:</span>
-                            <span class="value">{{ userBalance - transferAmount }} coins</span>
+                            <span class="value">{{ userBalance - transferAmount }} pièces</span>
                         </div>
                         <div class="summary-item total">
                             <span class="label">Total:</span>
-                            <span class="value">{{ transferAmount }} coins</span>
+                            <span class="value">{{ transferAmount }} pièces</span>
                         </div>
                     </div>
                     <div class="tab-navigation">

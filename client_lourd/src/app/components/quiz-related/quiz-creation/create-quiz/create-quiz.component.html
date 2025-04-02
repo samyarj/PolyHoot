@@ -111,7 +111,7 @@
     <button (click)="emptyQuizAndRedirect()" class="custom-button-cancel-medium">Annuler</button>
     <button
         class="custom-button-medium"
-        [ngClass]="{ 'custom-button-disabled-medium': !gameForm.valid || !validateQuiz() }"
+        [ngClass]="{ 'custom-button-medium-disabled': !gameForm.valid || !validateQuiz() }"
         [disabled]="!gameForm.valid || !validateQuiz()"
         (click)="submitQuizEvent()"
     >
