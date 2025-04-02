@@ -28,7 +28,6 @@ export const MOCK_QUIZZES = [
                 ],
             },
         ],
-        visibility: true,
     },
     {
         title: 'Les bases de CSS',
@@ -197,7 +196,6 @@ export const MOCK_QUIZZES = [
                 ],
             },
         ],
-        visibility: true,
     },
     {
         title: 'Les bases de Python',

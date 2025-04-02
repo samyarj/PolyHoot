@@ -57,10 +57,6 @@ export class AdminPageService {
         return this.quizService.deleteQuizById(id);
     }
 
-    toggleQuizVisibility(id: string): Observable<Quiz[]> {
-        return this.quizService.toggleQuizVisibility(id);
-    }
-
     createQuiz(quiz: Quiz): Observable<Quiz[]> {
         return this.quizService.createQuiz(quiz);
     }

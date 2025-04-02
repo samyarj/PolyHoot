@@ -10,27 +10,6 @@
                 <button id="edit" mat-icon-button (click)="goToEdit(quiz.id)" matTooltip="Modifier" matTooltipClass="custom-tooltip">
                     <i class="fa-solid fa-pen-to-square"></i>
                 </button>
-                <button
-                    class="visibility"
-                    mat-icon-button
-                    (click)="toggleVisibility(quiz.id)"
-                    *ngIf="quiz.visibility; else notVisible"
-                    matTooltip="Cacher le jeu dans la page de création de partie"
-                    matTooltipClass="custom-tooltip"
-                >
-                    <i class="fa-solid fa-eye"></i>
-                </button>
-                <ng-template #notVisible>
-                    <button
-                        class="visibility"
-                        mat-icon-button
-                        (click)="toggleVisibility(quiz.id)"
-                        matTooltip="Afficher le jeu dans la page de création de partie"
-                        matTooltipClass="custom-tooltip"
-                    >
-                        <i class="fa-solid fa-eye-slash"></i>
-                    </button>
-                </ng-template>
             </div>
         </div>
     </div>

@@ -7,5 +7,4 @@ export interface Quiz {
     lastModification: string;
     duration: number;
     questions: Question[];
-    visibility?: boolean;
 }

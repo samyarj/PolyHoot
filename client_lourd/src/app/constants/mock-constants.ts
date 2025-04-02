@@ -14,7 +14,6 @@ export const MOCK_POP_UP_QUIZ: Quiz = {
         { text: 'What is React?', type: QuestionType.QCM, points: 30, creator: '' },
         { text: 'Who built React?', type: QuestionType.QCM, points: 30, creator: '' },
     ],
-    visibility: true,
     id: '1234',
     lastModification: 'null',
 };
@@ -25,7 +24,6 @@ export const EMPTY_QUIZ: Quiz = {
     lastModification: '',
     duration: 0,
     questions: [],
-    visibility: false,
 };
 
 export const EMPTY_QUIZ_GAME_CLIENT: Quiz = {
@@ -179,7 +177,6 @@ export const MOCK_QUIZ: Quiz = {
             choices: [],
         },
     ],
-    visibility: false,
     id: '1234',
     lastModification: 'null',
 };
@@ -219,7 +216,6 @@ export const MOCK_QUIZZES: Quiz[] = [
                 lastModified: new Date().toString(),
             },
         ],
-        visibility: true,
     },
     {
         id: 'quiz2',
@@ -255,7 +251,6 @@ export const MOCK_QUIZZES: Quiz[] = [
                 lastModified: new Date().toString(),
             },
         ],
-        visibility: true,
     },
     {
         id: 'quiz3',
@@ -291,7 +286,6 @@ export const MOCK_QUIZZES: Quiz[] = [
                 lastModified: new Date().toString(),
             },
         ],
-        visibility: true,
     },
 ];
 

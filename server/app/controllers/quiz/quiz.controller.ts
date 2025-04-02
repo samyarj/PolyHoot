@@ -113,23 +113,6 @@ export class QuizController {
         }
     }
 
-    @ApiOkResponse({ description: 'Quiz visibility toggled' })
-    @ApiNotFoundResponse({ description: 'Quiz not found' })
-    @Patch('/toggle-visibility/:id')
-    async toggleQuizVisibility(@Param('id') id: string, @Res() response: Response) {
-        try {
-            await this.quizService.toggleQuizVisibility(id);
-            const updatedQuizzes = await this.quizService.getAllQuizzes();
-            response.status(HttpStatus.OK).json(updatedQuizzes);
-        } catch (error) {
-            if (error.status === HttpStatus.NOT_FOUND) {
-                response.status(HttpStatus.NOT_FOUND).send({ message: error.message });
-            } else {
-                response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: ERROR.INTERNAL_SERVER_ERROR });
-            }
-        }
-    }
-
     @Post('autofill')
     @ApiOkResponse({ description: 'Question generated successfully' })
     @ApiBadRequestResponse({ description: 'Invalid question type' })

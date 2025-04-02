@@ -37,10 +37,6 @@ export class Quiz {
     @ApiProperty({ type: [Question], description: 'A list of questions for the quiz' })
     @Prop({ type: [questionSchema], default: [] })
     questions: Types.Array<Question>;
-
-    @ApiProperty({ description: 'The visibility of the quiz', required: false })
-    @Prop()
-    visibility?: boolean;
 }
 
 export const quizSchema = SchemaFactory.createForClass(Quiz);
