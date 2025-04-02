@@ -163,9 +163,11 @@ export class QuestionFormComponent implements OnChanges {
                     this.question.image = response.imageUrl;
                     const fileInput = event.target as HTMLInputElement;
                     if (fileInput) fileInput.value = ''; // Réinitialise l'input file
+                    this.isChangingPicture = false;
                 },
                 error: (error) => {
                     this.toastr.error(`Erreur lors du téléversement : ${error.message}`);
+                    this.isChangingPicture = false;
                 },
             });
         }
