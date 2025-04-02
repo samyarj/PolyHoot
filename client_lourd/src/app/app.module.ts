@@ -92,6 +92,7 @@ import { ReportService } from './services/report-service';
 import { HeaderNavigationService } from './services/ui-services/header-navigation.service';
 import { ThemeService } from './services/ui-services/theme/theme.service';
 import { SocketClientService } from './services/websocket-services/general/socket-client-manager.service';
+import { AnswerPollComponent } from './pages/admin-pages/poll-related/answer-poll/answer-poll.component';
 
 /**
  * Main module that is used in main.ts.
@@ -160,6 +161,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         PollAdminPopInComponent,
         NotificationsComponent,
         QrCodePopInComponent,
+        AnswerPollComponent,
     ],
     providers: [
         AuthService,
