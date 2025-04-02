@@ -14,25 +14,6 @@ export class PublishedPollController {
         private readonly userService: UserService,
     ) {}
 
-    /* @ApiOkResponse({
-        description: 'Returns all published polls',
-        type: PublishedPoll,
-        isArray: true,
-    })
-    @Get()
-    async getAllPublishedPolls(@Res() response: Response) {
-        try {
-            const publishedPolls = await this.publishedPollService.getAllPublishedPolls();
-            response.status(HttpStatus.OK).json(publishedPolls);
-        } catch (error) {
-            if (error.status === HttpStatus.NOT_FOUND) {
-                response.status(HttpStatus.NOT_FOUND).send({ message: error.message });
-            } else {
-                response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: ERROR.INTERNAL_SERVER_ERROR });
-            }
-        }
-    } */
-
     @ApiOkResponse({
         description: 'Get published poll by ID',
         type: PublishedPoll,
@@ -61,8 +42,7 @@ export class PublishedPollController {
     async deleteExpiredPolls(@Res() response: Response) {
         try {
             await this.publishedPollService.deleteExpiredPolls();
-            //const updatedPublishedPolls = await this.publishedPollService.getAllPublishedPolls();
-            response.status(HttpStatus.OK).send(); //json(updatedPublishedPolls);
+            response.status(HttpStatus.OK).send();
         } catch (error) {
             if (error.status === HttpStatus.NOT_FOUND) {
                 response.status(HttpStatus.NOT_FOUND).send({ message: error.message });

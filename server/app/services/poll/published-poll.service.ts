@@ -74,19 +74,7 @@ export class PublishedPollService implements OnModuleInit {
 
         return pollData;
     }
-    /* async expirePublishedPoll(id: string): Promise<PublishedPoll> {
-        const pollRef = this.firestore.collection('publishedPolls').doc(id);
-        const pollDoc = await pollRef.get();
 
-        if (!pollDoc.exists) {
-            throw new NotFoundException(ERROR.POLL.ID_NOT_FOUND);
-        }
-
-        await pollRef.update({ expired: true });
-
-        const updatedPollData = pollDoc.data() as PublishedPoll;
-        return updatedPollData;
-    } */
     //Pas idéal mais meilleur endroit pour maintenant
     onModuleInit() {
         setInterval(() => this.checkAndUpdateExpiredStatus(), 1000); // Vérifie toutes les secondes
