@@ -15,7 +15,7 @@ export class PollController {
     constructor(
         private readonly pollService: PollService,
         private readonly publishedPollService: PublishedPollService,
-    ) {}
+    ) { }
 
     @ApiOkResponse({
         description: 'Get poll by ID',
@@ -114,7 +114,7 @@ export class PollController {
     @ApiNotFoundResponse({
         description: 'Poll not found',
     })
-    @Delete('/:id')
+    @Delete('/delete/:id')
     async deletePollById(@Param('id') id: string, @Res() response: Response) {
         try {
             await this.pollService.deletePollById(id);

@@ -1,5 +1,6 @@
 import 'package:client_leger/UI/router/router.dart';
 import 'package:client_leger/providers/theme_provider.dart';
+import 'package:client_leger/push-notif-api/firebase_api_push_notif.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await Firebase.initializeApp();
+    await FirebasePushApi().initNotifications();
     AppLogger.i("Firebase initialized");
   } catch (e) {
     AppLogger.e("Firebase initialization failed: $e");

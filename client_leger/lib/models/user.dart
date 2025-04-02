@@ -1,5 +1,6 @@
 import 'package:client_leger/models/game-log-entry-model.dart';
 import 'package:client_leger/models/stats-related/stats.dart';
+import 'package:client_leger/utilities/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class User {
@@ -19,7 +20,7 @@ class User {
   final int? nWins;
   final int? nbBan;
   final int? nbReport;
-  final DateTime? nextDailyFree; // Added
+  final Timestamp? nextDailyFree; // Added
   final int? pity;
   final List<String>? playedGameLogs;
   final String? role;
@@ -57,7 +58,13 @@ class User {
     required this.pollsAnswered,
   });
 
+/* sometimes date is received like this 1899-12-31T05:00:00.000Z,
+sometimes Timestamp from firebase (easiest)
+or sometimes a map
+*/
+
   factory User.fromJson(Map<String, dynamic> json) {
+    AppLogger.e("json : ${json['nextDailyFree']}");
     return User(
       avatarEquipped: json['avatarEquipped'] as String?,
       borderEquipped: json['borderEquipped'] as String?,
@@ -90,9 +97,13 @@ class User {
       nWins: json['nWins'] as int?,
       nbBan: json['nbBan'] as int?,
       nbReport: json['nbReport'] as int?,
-      nextDailyFree: json['nextDailyFree'] != null // Added
-          ? DateTime.fromMillisecondsSinceEpoch(
-              json['nextDailyFree'].millisecondsSinceEpoch)
+      nextDailyFree: json['nextDailyFree'] != null
+          ? json['nextDailyFree'] is Timestamp
+              ? json['nextDailyFree'] as Timestamp
+              : json['nextDailyFree'] is String
+                  ? parseIsoToTimestamp(json['nextDailyFree'])
+                  : Timestamp(json['nextDailyFree']['_seconds'],
+                      json['nextDailyFree']['_nanoseconds'])
           : null,
       pity: json['pity'] as int?,
       playedGameLogs: (json['playedGameLogs'] as List<dynamic>?)
@@ -134,4 +145,9 @@ class PartialUser {
       isAdmin: data['role'] == 'player' ? false : true,
     );
   }
+}
+
+Timestamp parseIsoToTimestamp(String isoString) {
+  DateTime dateTime = DateTime.parse(isoString);
+  return Timestamp.fromDate(dateTime);
 }

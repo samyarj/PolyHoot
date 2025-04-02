@@ -12,7 +12,7 @@ export class PublishedPollController {
     constructor(
         private readonly publishedPollService: PublishedPollService,
         private readonly userService: UserService,
-    ) {}
+    ) { }
 
     @ApiOkResponse({
         description: 'Get published poll by ID',
@@ -40,6 +40,7 @@ export class PublishedPollController {
     })
     @Delete('delete')
     async deleteExpiredPolls(@Res() response: Response) {
+        console.log("deleteExpiredPolls");
         try {
             await this.publishedPollService.deleteExpiredPolls();
             response.status(HttpStatus.OK).send();

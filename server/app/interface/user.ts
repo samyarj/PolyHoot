@@ -48,4 +48,5 @@ export interface User {
     pity?: number; // Pity counter
     nextDailyFree?: Date; // Next date where user can get daily free
     pollsAnswered?: string[]
+    fcmToken: string; // Firebase Cloud Messaging token (for push notifications)
 }
