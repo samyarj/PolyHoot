@@ -3,10 +3,49 @@ p,
 .mb-3,
 a {
     color: var(--text-color);
+
+    br {
+        color: var(--text-color);
+    }
 }
 
 .mb-4 {
     font-weight: bold;
+}
+
+.avatars-label {
+    width: 100%;
+    text-align: center;
+}
+
+.avatars {
+    position: relative;
+    width: 100%;
+    height: 5rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+
+    .avatar-option {
+        position: relative;
+        width: 18%;
+        aspect-ratio: 1 / 1;
+        border-radius: 100%;
+
+        &:hover {
+            cursor: pointer;
+        }
+        .avatar-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 100%;
+        }
+
+        &.selected {
+            box-shadow: 0 0 15px var(--tertiary-color);
+        }
+    }
 }
 
 .sign-up-container {

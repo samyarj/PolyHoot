@@ -10,9 +10,10 @@ import { AuthService } from '@app/services/auth/auth.service';
 })
 export class LoginFormComponent {
     loginForm: FormGroup;
-    errorMessage: string = '';
     isSubmitting: boolean = false;
-
+    errorMessage: string = '';
+    selectedAvatar: string = '';
+    defaultAvatars: string[] = [];
     constructor(
         private fb: FormBuilder,
         private authService: AuthService,

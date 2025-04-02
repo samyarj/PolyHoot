@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EMAIL_REGEX, PASSWORD_MIN_LENGTH, USERNAME_REGEX } from '@app/constants/constants';
 import { User } from '@app/interfaces/user';
+import { UploadImgService } from '@app/services/upload-img.service';
+import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from 'src/app/services/auth/auth.service';
 
 @Component({
@@ -10,7 +12,7 @@ import { AuthService } from 'src/app/services/auth/auth.service';
     templateUrl: './sign-up-form.component.html',
     styleUrls: ['./sign-up-form.component.scss'],
 })
-export class SignUpFormComponent implements OnInit {
+export class SignUpFormComponent implements OnInit, OnDestroy {
     signUpForm: FormGroup;
     errorMessage: string = '';
     successMessage: string = '';
@@ -24,18 +26,46 @@ export class SignUpFormComponent implements OnInit {
     isUsernameTaken: boolean = false;
     isEmailTaken: boolean = false;
     passwordsMatch: boolean = false;
+    selectedAvatar: string = '';
+    defaultAvatars: string[] = [];
 
+    private destroy$ = new Subject<void>();
     constructor(
         private fb: FormBuilder,
         private authService: AuthService,
         private route: ActivatedRoute,
         private router: Router,
-    ) {}
+        private uploadImgService: UploadImgService,
+    ) {
+        this.loadDefaultAvatars();
+    }
 
     ngOnInit(): void {
         this.initializeForm();
     }
 
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    loadDefaultAvatars() {
+        this.uploadImgService
+            .getDefaultAvatars()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (response) => {
+                    this.defaultAvatars = response.avatars;
+                },
+                error: (error) => {
+                    console.error('Error loading default avatars:', error);
+                },
+            });
+    }
+
+    selectAvatar(avatarUrl: string) {
+        if (this.selectedAvatar !== avatarUrl) this.selectedAvatar = avatarUrl;
+    }
     /**
      * Handle normal sign-up form submission
      */
@@ -48,7 +78,7 @@ export class SignUpFormComponent implements OnInit {
         this.isLoading = true;
         this.signUpForm.disable();
 
-        this.authService.signUp(username, email, password).subscribe({
+        this.authService.signUp(username, email, password, this.selectedAvatar).subscribe({
             next: (user) => this.handleUserSuccess(user),
             error: () => {
                 this.isLoading = false;
@@ -145,7 +175,8 @@ export class SignUpFormComponent implements OnInit {
             this.isTypingEmail ||
             this.isUsernameTaken ||
             this.isEmailTaken ||
-            !this.passwordsMatch
+            !this.passwordsMatch ||
+            this.selectedAvatar === ''
         );
     }
 

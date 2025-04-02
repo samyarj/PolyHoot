@@ -132,6 +132,22 @@
             >
         </div>
 
+        <div class="form-group mb-3">
+            <hr />
+            <div *ngIf="selectedAvatar === ''" class="avatars-label">Veuillez sélectionner un avatar par défaut.</div>
+            <div class="avatars">
+                <div
+                    *ngFor="let avatar of defaultAvatars"
+                    class="avatar-option"
+                    [class.selected]="avatar === selectedAvatar"
+                    (click)="selectAvatar(avatar)"
+                >
+                    <img [src]="avatar" alt="Avatar par défaut" class="avatar-image" />
+                </div>
+            </div>
+            <hr />
+        </div>
+
         <!-- Submit Button -->
         <div class="form-group position-relative">
             <button
