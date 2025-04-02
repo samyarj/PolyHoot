@@ -100,7 +100,7 @@ export class PollPushNotifService implements OnModuleInit, OnModuleDestroy {
                         // Send personalized notifications per device
                         const notifications = Array.from(deviceUsersMap.entries()).map(([token, names]) => {
                             const nameList = names.join(", ");
-                            const title = `Salut ${nameList}! Ici PolyHoot!`;
+                            const title = `Salut ${nameList} ! Ici PolyHoot !`;
                             const body = `Nouveau message dans ${channelId}: ${newMessage.message}`;
                             return this.sendNotification(token, title, body);
                         });
@@ -153,7 +153,7 @@ export class PollPushNotifService implements OnModuleInit, OnModuleDestroy {
                         // Send notifications per device
                         const notifications = Array.from(deviceUsersMap.entries()).map(([token, names]) => {
                             const nameList = names.join(", ");
-                            const title = `Salut ${nameList}! Ici PolyHoot!`;
+                            const title = `Salut ${nameList} ! Ici PolyHoot !`;
                             const body = `Nouveau message dans le Global Chat: ${newMessage.message}`;
                             return this.sendNotification(token, title, body);
                         });
@@ -201,7 +201,7 @@ export class PollPushNotifService implements OnModuleInit, OnModuleDestroy {
         this.logger.log(`Will send push notifications to this number of mobile clients: ${uniqueTokens.size}`);
 
         const notifications = Array.from(uniqueTokens).map(token =>
-            this.sendNotification(token, 'Polyhoot veut ton opinion !', `Nouveau sondage disponible: ${pollTitle}`)
+            this.sendNotification(token, 'PolyHoot veut ton opinion !', `Nouveau sondage disponible: ${pollTitle}`)
         );
 
         await Promise.all(notifications);
@@ -231,7 +231,7 @@ export class PollPushNotifService implements OnModuleInit, OnModuleDestroy {
         this.logger.log("Poll expired. Will send push notifications to this number of mobile clients:", uniqueTokens.size);
 
         const notifications = Array.from(uniqueTokens).map(token =>
-            this.sendNotification(token, 'Les statistiques sont prêtes!', `sondage expiré: ${pollTitle}`)
+            this.sendNotification(token, 'Les statistiques sont prêtes!', `Sondage expiré: ${pollTitle}`)
         );
 
         await Promise.all(notifications);
