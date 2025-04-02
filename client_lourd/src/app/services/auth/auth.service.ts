@@ -29,7 +29,9 @@ import { environment } from 'src/environments/environment';
 })
 export class AuthService {
     private readonly baseUrl = `${environment.serverUrl}/users`;
-    private readonly MILLISECONDS_PER_MINUTE = 60 * 1000;
+    private readonly SECONDS_PER_MINUTE = 60;
+    private readonly MILLISECONDS_PER_SECOND = 1000;
+    private readonly MILLISECONDS_PER_MINUTE = this.SECONDS_PER_MINUTE * this.MILLISECONDS_PER_SECOND;
     private userBS: BehaviorSubject<User | null> = new BehaviorSubject<User | null>(null);
     private googleProvider = new GoogleAuthProvider();
     private loadingTokenBS = new BehaviorSubject<boolean>(false);
@@ -140,32 +142,21 @@ export class AuthService {
         this.isAuthenticating = true;
         return this.signInWithGoogleSDK().pipe(
             switchMap((userCredential) =>
-                this.isUserOnline(userCredential.user.uid).pipe(
-                    switchMap((isOnline) => {
-                        if (isOnline) {
-                            return from(this.auth.signOut()).pipe(
-                                switchMap(() => throwError(() => new Error("L'utilisateur est déjà connecté sur un autre appareil."))),
-                            );
-                        }
-                        return this.updateUserProfile(userCredential.user, {
-                            displayName: userCredential.user.displayName,
-                        }).pipe(
-                            switchMap(() =>
-                                this.isUserBanned(userCredential.user.uid).pipe(
-                                    switchMap(({ isBanned, message }) => {
-                                        if (isBanned) {
-                                            return from(this.auth.signOut()).pipe(switchMap(() => throwError(() => new Error(message))));
-                                        }
-                                        return this.handleAuthAndFetchUser(userCredential, `${this.baseUrl}/signin-google`, 'POST');
-                                    }),
-                                ),
-                            ),
-                        );
-                    }),
+                from(userCredential.user.getIdToken()).pipe(
+                    switchMap((idToken) =>
+                        this.http.post<User>(`${this.baseUrl}/google-auth`, { idToken }).pipe(
+                            tap((user) => {
+                                if (user && user.uid) {
+                                    this.socketClientService.send(ConnectEvents.IdentifyClient, user.uid);
+                                    this.clientIsIdentified = true;
+                                }
+                            }),
+                            finalize(() => (this.isAuthenticating = false)),
+                            handleErrorsGlobally(this.injector),
+                        ),
+                    ),
                 ),
             ),
-            finalize(() => (this.isAuthenticating = false)),
-            handleErrorsGlobally(this.injector),
         );
     }
 

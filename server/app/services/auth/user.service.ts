@@ -12,7 +12,7 @@ export class UserService {
     private usersSocketIdMap = new Map<string, string>();
     private readonly logger = new Logger(UserService.name);
 
-    constructor(private readonly cloudinaryService: CloudinaryService) { }
+    constructor(private readonly cloudinaryService: CloudinaryService) {}
 
     addUserToMap(socketId: string, uid: string) {
         if (!this.isUserInMap(socketId)) {
@@ -245,6 +245,27 @@ export class UserService {
             return userDoc.isOnline || false; // Return true/false based on the `isOnline` field
         } catch (error) {
             throw new Error("Échec de la vérification du statut en ligne de l'utilisateur.");
+        }
+    }
+
+    async verifyGoogleToken(idToken: string): Promise<{ uid: string; email: string; displayName: string }> {
+        try {
+            const decodedToken = await this.adminAuth.verifyIdToken(idToken);
+            const userRecord = await this.adminAuth.getUser(decodedToken.uid);
+
+            // Verify that the token is from Google
+            const isGoogleProvider = userRecord.providerData.some((provider) => provider.providerId === 'google.com');
+            if (!isGoogleProvider) {
+                throw new Error('Invalid authentication provider');
+            }
+
+            return {
+                uid: decodedToken.uid,
+                email: decodedToken.email || '',
+                displayName: userRecord.displayName || '',
+            };
+        } catch (error) {
+            throw new Error('Invalid or expired Google token');
         }
     }
 
