@@ -1,6 +1,6 @@
 $primary-color: #00115a;
-$modified-primary-color: #00115aaa;
-$second-color: #5cb85c;
+$modified-primary-color: green;
+$second-color: green;
 $qrl-color: #f0c33b;
 // $question-qcm-color: #198038;
 $question-qcm-color: #2a9152;
@@ -11,25 +11,37 @@ $question-qrl-color-hover: #15395b;
 
 .question-panel {
     margin: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px var(--tertiary-color);
     mat-expansion-panel {
+        padding: 0px;
         &:not(.mat-expanded):hover {
             mat-expansion-panel-header {
                 mat-icon {
                     font-size: 25px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    align-self: center;
+                    text-align: center;
                 }
             }
         }
 
-        background: linear-gradient(to right, lighten($modified-primary-color, 60%), lighten($second-color, 60%));
-        color: black;
+        background: radial-gradient(ellipse 130% 80% at bottom, var(--secondary-color) 0%, var(--primary-color) 40%);
+        color: var(--text-color);
 
         mat-expansion-panel-header {
+            position: relative;
             color: white;
             border: 3px solid var(--tertiary-color);
             border-radius: 5px;
             margin-right: 0;
-            align-items: center;
+            display: flex;
+            justify-content: flex-start;
             padding: 30px 10px;
+            height: 100%;
+            width: 100%;
 
             mat-panel-title {
                 margin-left: 10px;
@@ -42,12 +54,33 @@ $question-qrl-color-hover: #15395b;
                 font-size: medium;
                 margin-top: 5px;
                 color: white;
+                overflow-y: auto;
+                height: 100%;
+                &::-webkit-scrollbar {
+                    width: 4px;
+                    height: 95%;
+                    z-index: 999;
+                }
+
+                &::-webkit-scrollbar-thumb {
+                    background: var(--tertiary-color);
+                    border-radius: 10px;
+                }
+
+                &::-webkit-scrollbar-track {
+                    background: color-mix(in srgb, var(--secondary-color) 50%, transparent);
+                    border-radius: 10px;
+                    backdrop-filter: blur(5px);
+                }
             }
 
             mat-icon {
-                font-size: x-large;
-                margin-right: 8px;
+                font-size: 25px;
+                display: flex;
                 align-items: center;
+                justify-content: center;
+                align-self: center;
+                text-align: center;
             }
         }
         transition: all 0.2s ease-in-out;
@@ -74,13 +107,24 @@ $question-qrl-color-hover: #15395b;
 }
 
 .question-and-score {
+    width: 100%;
     display: flex;
     justify-content: space-between;
+
+    & > p:first-child {
+        width: 70%;
+    }
+
+    & > p:nth-child(2) {
+        width: 25%;
+        text-align: right;
+    }
 }
 
 .question {
     font-size: large;
     margin-top: 15px;
+    width: 100%;
 }
 
 .answer-choices {
@@ -96,32 +140,22 @@ $question-qrl-color-hover: #15395b;
 .buttons {
     display: flex;
     justify-content: space-between;
-    margin-top: 20px;
+    margin-top: 10px;
     font-size: large;
 }
 
 button {
-    background-color: $primary-color;
-    color: white;
     transition: transform 0.3s ease;
-    border-color: transparent;
-    border-radius: 10px;
-
+    padding: 0.75rem;
     &:hover {
-        background-color: lighten($primary-color, 50%);
         transform: scale(1.1);
     }
 }
 
 .custom-button {
-    background-color: $primary-color;
-    color: white;
     transition: transform 0.3s ease;
-    border-color: transparent;
-    border-radius: 5px;
 
     &:hover {
-        background-color: lighten($primary-color, 50%);
         transform: scale(1.1);
     }
 }
@@ -133,4 +167,11 @@ button {
 .choice-check {
     color: green;
     font-weight: bolder;
+}
+
+.custom-panel-container {
+    padding-top: 24px;
+    gap: 24px;
+    display: flex;
+    flex-direction: column;
 }

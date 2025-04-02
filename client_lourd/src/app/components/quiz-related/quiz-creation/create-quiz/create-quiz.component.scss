@@ -3,11 +3,10 @@ $modified-primary-color: #00115aaa;
 $question-qcm-color: #2a9152;
 $question-qrl-color: #194e80;
 
-.container {
+.container-general {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    align-items: stretch;
 
     &::-webkit-scrollbar {
         width: 8px; // Adjust width of scrollbar
@@ -25,13 +24,18 @@ $question-qrl-color: #194e80;
     }
 }
 
+.question-form {
+    width: 98%;
+}
 .forms-container {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    width: 70%;
+    width: 76%;
 }
-
+.no-question-info {
+    color: var(--text-color);
+}
 .created-question-container {
     display: flex;
     flex-direction: column;

@@ -30,37 +30,41 @@
             </mat-panel-description>
         </mat-expansion-panel-header>
 
-        <ng-template #viewMode>
-            <div class="question">
-                <div class="question-and-score">
-                    <p>Question : {{ question.text }}</p>
-                    <p>Score : {{ question.points }} pts</p>
+        <div class="custom-panel-body">
+            <ng-template #viewMode>
+                <div class="question">
+                    <div class="question-and-score">
+                        <p>Question : {{ question.text }}</p>
+                        <p>Score : {{ question.points }} pts</p>
+                    </div>
+                    <p *ngIf="question.type === 'QCM'">Réponses :</p>
+                    <ul class="answer-choices">
+                        <li *ngFor="let choice of question.choices; let i = index">
+                            {{ choice.text }} <mat-icon class="choice-check" *ngIf="choice.isCorrect">check</mat-icon>
+                        </li>
+                    </ul>
                 </div>
-                <p *ngIf="question.type === 'QCM'">Réponses :</p>
-                <ul class="answer-choices">
-                    <li *ngFor="let choice of question.choices; let i = index">
-                        {{ choice.text }} <mat-icon class="choice-check" *ngIf="choice.isCorrect">check</mat-icon>
-                    </li>
-                </ul>
-            </div>
-            <div class="buttons">
-                <button (click)="saveQuestionOnEdit()"><mat-icon>edit</mat-icon></button>
-                <button (click)="deleteQuestion()"><mat-icon>delete</mat-icon></button>
-            </div>
-        </ng-template>
+                <div class="buttons">
+                    <button class="custom-button custom-width" (click)="saveQuestionOnEdit()"><mat-icon>edit</mat-icon></button>
+                    <button class="custom-button custom-width" (click)="deleteQuestion()"><mat-icon>delete</mat-icon></button>
+                </div>
+            </ng-template>
 
-        <ng-container *ngIf="isEditMode; else viewMode">
-            <app-question-form [question]="question" [showButton]="false" (emptyQuestion)="emptyQuestion($event)"></app-question-form>
-            <div class="buttons">
-                <button *ngIf="!expanded" class="btn custom-button custom-width" (click)="cancelEdit()">Annuler</button>
-                <button *ngIf="!expanded" [disabled]="!validQuestion()" class="btn custom-button custom-width" (click)="modifyQuestion()">
-                    Modifier la question
-                </button>
-                <button *ngIf="expanded" class="btn custom-button custom-width" (click)="cancelAdd()">Annuler</button>
-                <button *ngIf="expanded" class="btn custom-button custom-width" (click)="addQuestion()" [disabled]="!validQuestion()">
-                    Ajouter la question
-                </button>
-            </div>
-        </ng-container>
+            <ng-container *ngIf="isEditMode; else viewMode">
+                <div class="custom-panel-container">
+                    <app-question-form [question]="question" [showButton]="false" (emptyQuestion)="emptyQuestion($event)"></app-question-form>
+                    <div class="buttons">
+                        <button *ngIf="!expanded" class="custom-button" (click)="cancelEdit()">Annuler</button>
+                        <button *ngIf="!expanded" [disabled]="!validQuestion()" class="custom-button" (click)="modifyQuestion()">
+                            Modifier la question
+                        </button>
+                        <button *ngIf="expanded" class="custom-button" (click)="cancelAdd()">Annuler</button>
+                        <button *ngIf="expanded" class="custom-button" (click)="addQuestion()" [disabled]="!validQuestion()">
+                            Ajouter la question
+                        </button>
+                    </div>
+                </div>
+            </ng-container>
+        </div>
     </mat-expansion-panel>
 </div>
