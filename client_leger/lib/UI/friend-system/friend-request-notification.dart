@@ -85,7 +85,7 @@ class _FriendRequestNotificationState
         children: [
           IconButton(
             icon: Icon(Icons.notifications),
-            iconSize: 18,
+            iconSize: 24,
             color:
                 widget.isActive ? colorScheme.secondary : colorScheme.tertiary,
             constraints: BoxConstraints(

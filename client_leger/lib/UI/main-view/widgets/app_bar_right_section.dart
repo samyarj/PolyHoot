@@ -1,6 +1,7 @@
 import 'package:client_leger/UI/friend-system/friend-request-notification.dart';
 import 'package:client_leger/UI/friend-system/qr-code-widget.dart';
 import 'package:client_leger/UI/global/avatar_banner_widget.dart';
+import 'package:client_leger/UI/main-view/chat_message_notif/chat_messages_notif.dart';
 import 'package:client_leger/UI/player-polls/player_polls_notification.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/models/enums.dart';
@@ -318,6 +319,18 @@ class _AppBarRightSectionState extends State<AppBarRightSection> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                ChatMessagesNotification(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: SizedBox(
+                    height: 24,
+                    child: VerticalDivider(
+                      color: colorScheme.tertiary,
+                      thickness: 1.5,
+                      width: 10,
+                    ),
+                  ),
+                ),
                 FriendRequestNotification(
                   onTap: () {
                     setState(() {

@@ -431,10 +431,9 @@ class _PlayerPollsNotificationState
                       child: Stack(
                         children: [
                           Container(
-                            padding: EdgeInsets.all(13),
                             child: Icon(
                               FontAwesomeIcons.bullhorn,
-                              size: 18,
+                              size: 20,
                               color: _menuOpen || hasPolls
                                   ? colorScheme.tertiary
                                   : colorScheme.secondary,
