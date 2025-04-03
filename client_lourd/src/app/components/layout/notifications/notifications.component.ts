@@ -173,8 +173,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                 if (docSnapshot.exists()) {
                     const data = docSnapshot.data() as User;
                     subscriber.next({ ...data, uid: docSnapshot.id });
-                } else {
-                    subscriber.error(new Error("L'utilisateur n'existe pas."));
                 }
             });
 
