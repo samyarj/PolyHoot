@@ -28,9 +28,16 @@ export class AuthController {
     @Post('create-user')
     async createUser(@Req() request: AuthenticatedRequest, @Body() body: { fcmToken?: string; avatarURL?: string }, @Res() response: Response) {
         const fcmToken = body?.fcmToken || null;
+        const avatarURL = body?.avatarURL || null;
         this.logger.log(`Attempting to create user: ${request.user.email} with FCM Token: ${fcmToken}`);
         try {
-            const user = await this.userService.createUserInFirestore(request.user.uid, request.user.displayName, request.user.email, fcmToken);
+            const user = await this.userService.createUserInFirestore(
+                request.user.uid,
+                request.user.displayName,
+                request.user.email,
+                fcmToken,
+                avatarURL,
+            );
             this.logger.log(`User successfully created: ${user.email}`);
             response.status(HttpStatus.CREATED).json(user);
         } catch (error) {
@@ -173,6 +180,42 @@ export class AuthController {
             response.status(HttpStatus.OK).send({ message: 'Déconnexion réussie.' });
         } catch (error) {
             response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
+        }
+    }
+
+    @ApiOkResponse({ description: 'Google authentication successful' })
+    @ApiBadRequestResponse({ description: 'Invalid request' })
+    @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+    @Post('google-auth')
+    async googleAuth(@Body() body: { idToken: string }, @Res() response: Response) {
+        try {
+            const { idToken } = body;
+            if (!idToken) {
+                return response.status(HttpStatus.BAD_REQUEST).json({ message: 'ID token is required' });
+            }
+
+            // Verify the Google ID token
+            const decodedToken = await this.userService.verifyGoogleToken(idToken);
+            const { uid, email, displayName } = decodedToken;
+
+            // Check if user is banned
+            const { isBanned, message } = await this.userService.getReportState(uid);
+            if (isBanned) {
+                return response.status(HttpStatus.FORBIDDEN).json({ message });
+            }
+
+            // Check if user is already online
+            const isOnline = await this.userService.isUserOnline(email);
+            if (isOnline) {
+                return response.status(HttpStatus.CONFLICT).json({ message: "L'utilisateur est déjà connecté sur un autre appareil." });
+            }
+
+            // Handle Google sign in
+            const user = await this.userService.signInWithGoogle(uid, email, displayName);
+            response.status(HttpStatus.OK).json(user);
+        } catch (error) {
+            this.logger.error(`Google authentication failed: ${error.message}`);
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: error.message || "Échec de l'authentification Google" });
         }
     }
 

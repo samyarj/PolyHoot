@@ -9,7 +9,6 @@ let server;
 //let serverPort;
 
 // Start a local server to serve the app
-// Start a local server to serve the app
 async function startServer() {
     console.log('Starting local server...');
     const expressApp = express();
@@ -111,6 +110,7 @@ app.on('before-quit', shutdown);
 
 // Close when all windows are closed
 app.on('window-all-closed', function () {
+    // On macOS specific close process
     if (process.platform !== 'darwin') {
         if (server) {
             console.log('Closing server...');

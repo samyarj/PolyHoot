@@ -95,6 +95,7 @@ import { ReportService } from './services/report-service';
 import { HeaderNavigationService } from './services/ui-services/header-navigation.service';
 import { ThemeService } from './services/ui-services/theme/theme.service';
 import { SocketClientService } from './services/websocket-services/general/socket-client-manager.service';
+
 /**
  * Main module that is used in main.ts.
  * All automatically generated components will appear in this module.
