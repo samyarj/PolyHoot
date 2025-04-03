@@ -18,7 +18,7 @@ export class AuthController {
     constructor(
         private readonly userService: UserService,
         private readonly logger: Logger,
-    ) { }
+    ) {}
 
     @UseGuards(AuthGuard)
     @ApiCreatedResponse({ description: 'User successfully created' })
@@ -26,7 +26,7 @@ export class AuthController {
     @ApiBadRequestResponse({ description: 'Validation error or bad request' })
     @ApiInternalServerErrorResponse({ description: 'Internal server error' })
     @Post('create-user')
-    async createUser(@Req() request: AuthenticatedRequest, @Body() body: { fcmToken?: string }, @Res() response: Response) {
+    async createUser(@Req() request: AuthenticatedRequest, @Body() body: { fcmToken?: string; avatarURL?: string }, @Res() response: Response) {
         const fcmToken = body?.fcmToken || null;
         this.logger.log(`Attempting to create user: ${request.user.email} with FCM Token: ${fcmToken}`);
         try {

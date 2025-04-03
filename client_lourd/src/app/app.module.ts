@@ -52,6 +52,7 @@ import { ErrorInterceptor } from './interceptors/error.interceptor';
 import { AppRoutingModule } from './modules/app-routing.module';
 import { ActionLogsPageComponent } from './pages/action-logs-page/action-logs-page.component';
 import { PlayerInfoPageComponent } from './pages/admin-pages/player-info-page/player-info-page.component';
+import { AnswerPollComponent } from './pages/admin-pages/poll-related/answer-poll/answer-poll.component';
 import { ConsultPollPageComponent } from './pages/admin-pages/poll-related/consult-poll-page/consult-poll-page.component';
 import { CreatePollPageComponent } from './pages/admin-pages/poll-related/create-poll-page/create-poll-page.component';
 import { HistoryPollPageComponent } from './pages/admin-pages/poll-related/history-poll-page/history-poll-page.component';
@@ -94,7 +95,6 @@ import { ReportService } from './services/report-service';
 import { HeaderNavigationService } from './services/ui-services/header-navigation.service';
 import { ThemeService } from './services/ui-services/theme/theme.service';
 import { SocketClientService } from './services/websocket-services/general/socket-client-manager.service';
-
 /**
  * Main module that is used in main.ts.
  * All automatically generated components will appear in this module.
@@ -162,6 +162,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         PollAdminPopInComponent,
         NotificationsComponent,
         QrCodePopInComponent,
+        AnswerPollComponent,
     ],
     providers: [
         AuthService,

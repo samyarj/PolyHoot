@@ -84,12 +84,14 @@ export class AuthService {
     getReportService() {
         return this.reportService;
     }
-    signUp(username: string, email: string, password: string): Observable<User> {
+    signUp(username: string, email: string, password: string, avatarURL: string): Observable<User> {
         this.isSigningUp = true;
         return this.createUser(email, password).pipe(
-            switchMap((userCredential) => this.updateUserProfile(userCredential.user, { displayName: username }).pipe(map(() => userCredential))),
             switchMap((userCredential) =>
-                this.handleAuthAndFetchUser(userCredential, `${this.baseUrl}/create-user`, 'POST').pipe(
+                this.updateUserProfile(userCredential.user, { displayName: username, photoURL: avatarURL }).pipe(map(() => userCredential)),
+            ),
+            switchMap((userCredential) =>
+                this.handleAuthAndFetchUser(userCredential, `${this.baseUrl}/create-user`, 'POST', avatarURL).pipe(
                     tap((user) => {
                         // Store the user right away to prevent logout
                         this.userBS.next(user);
@@ -274,7 +276,12 @@ export class AuthService {
         });
     }
 
-    private handleAuthAndFetchUser(userCredential: UserCredential, endpoint: string, method: 'GET' | 'POST' = 'GET'): Observable<User> {
+    private handleAuthAndFetchUser(
+        userCredential: UserCredential,
+        endpoint: string,
+        method: 'GET' | 'POST' = 'GET',
+        avatarURL?: string,
+    ): Observable<User> {
         return from(userCredential.user.getIdToken()).pipe(
             switchMap((idToken) => {
                 const options = { headers: { Authorization: `Bearer ${idToken}` } };
@@ -285,7 +292,7 @@ export class AuthService {
                     case 'GET':
                         return this.http.get<User>(endpoint, options);
                     case 'POST':
-                        return this.http.post<User>(endpoint, {}, options);
+                        return this.http.post<User>(endpoint, { avatarURL }, options);
                     default:
                         throw new Error(`Unsupported HTTP method: ${method}`);
                 }

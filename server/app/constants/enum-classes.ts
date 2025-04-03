@@ -86,7 +86,7 @@ export enum GameEvents {
     WaitingForCorrection = 'waitingForCorrection',
     PlayerSubmitted = 'playerSubmitted',
     GetCurrentGames = 'getCurrentGames',
-    // GetCurrentPlayers = 'getCurrentPlayers',
+    GetCurrentPlayers = 'getCurrentPlayers',
 }
 
 export enum JoinEvents {
@@ -98,7 +98,7 @@ export enum JoinEvents {
     CanJoin = 'canJoinGame',
     JoinSuccess = 'onJoinGameSuccess',
     LobbyCreated = 'lobbyCreated',
-    PlayerJoined ='playerjoined',
+    PlayerJoined = 'playerjoined',
 }
 
 export enum JoinErrors {

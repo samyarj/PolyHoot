@@ -13,6 +13,7 @@ import { Observer } from 'rxjs';
 })
 export class LootBoxPageComponent {
     lootBoxes: LootBoxContainer[] = [];
+    isClaimingBox: boolean = false;
     private lootBoxesObserver: Partial<Observer<LootBoxContainer[]>> = {
         next: (lootBoxes: LootBoxContainer[]) => {
             this.lootBoxes = lootBoxes;
@@ -34,33 +35,46 @@ export class LootBoxPageComponent {
     }
 
     openBox(id: number) {
-        this.lootBoxService.openBox(id).subscribe({
-            next: (reward: Reward | null | boolean) => {
-                if (reward === null) {
-                    this.matdialog.open(ErrorDialogComponent, {
-                        width: '400px',
-                        panelClass: 'custom-container',
-                        data: { message: "Vous n'avez pas assez d'argent pour vous procurer cette Loot Box.", reloadOnClose: false },
-                    });
-                } else if (reward === false) {
-                    this.matdialog.open(ErrorDialogComponent, {
-                        width: '400px',
-                        panelClass: 'custom-container',
-                        data: {
-                            message: "Vous possèdez déjà l'item obtenu. Vous recevrez le prix de la lootBox en retour dans votre compte.",
-                            reloadOnClose: false,
-                        },
-                    });
-                } else if (reward !== true) {
-                    // to remove stupid type deduction error.
-                    this.matdialog.open(LootBoxWinDialogComponent, {
-                        data: reward,
-                        backdropClass: `backdrop-dialog-${reward.rarity}`,
-                        panelClass: 'custom-container',
-                    });
-                    this.lootBoxService.getBoxes().subscribe(this.lootBoxesObserver);
-                }
-            },
-        });
+        if (!this.isClaimingBox) {
+            this.isClaimingBox = true;
+            this.lootBoxService.openBox(id).subscribe({
+                next: (reward: Reward | null | boolean) => {
+                    if (reward === null) {
+                        const dialogRef = this.matdialog.open(ErrorDialogComponent, {
+                            width: '400px',
+                            panelClass: 'custom-container',
+                            data: { message: "Vous n'avez pas assez d'argent pour vous procurer cette Loot Box.", reloadOnClose: false },
+                        });
+
+                        dialogRef.afterClosed().subscribe(() => {
+                            this.isClaimingBox = false;
+                        });
+                    } else if (reward === false) {
+                        const dialogRef = this.matdialog.open(ErrorDialogComponent, {
+                            width: '400px',
+                            panelClass: 'custom-container',
+                            data: {
+                                message: "Vous possèdez déjà l'item obtenu. Vous recevrez le prix de la lootBox en retour dans votre compte.",
+                                reloadOnClose: false,
+                            },
+                        });
+                        dialogRef.afterClosed().subscribe(() => {
+                            this.isClaimingBox = false;
+                        });
+                    } else if (reward !== true) {
+                        // to remove stupid type deduction error.
+                        const dialogRef = this.matdialog.open(LootBoxWinDialogComponent, {
+                            data: reward,
+                            backdropClass: `backdrop-dialog-${reward.rarity}`,
+                            panelClass: 'custom-container',
+                        });
+                        dialogRef.afterClosed().subscribe(() => {
+                            this.isClaimingBox = false;
+                        });
+                        this.lootBoxService.getBoxes().subscribe(this.lootBoxesObserver);
+                    }
+                },
+            });
+        }
     }
 }
