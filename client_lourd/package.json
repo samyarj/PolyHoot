@@ -13,8 +13,7 @@
         "lint": "ng lint --format stylish",
         "lint:fix": "npm run lint -- --fix",
         "start:electron": "rimraf ./build && ng build --base-href ./ && electron .",
-        "build:electron": "electron-packager ./electron-build Client --asar --overwrite --out=./build",
-        "redeploy": "npm run build -- --base-href ./ && node scripts/package-electron.js"
+        "build:electron": "npm run build -- --base-href ./ && node scripts/package-electron.js"
     },
     "private": true,
     "dependencies": {
