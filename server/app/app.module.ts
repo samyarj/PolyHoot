@@ -41,7 +41,7 @@ import { QuestionService } from './services/question/question.service';
 import { QuizAutofillService } from './services/quiz-autofill/quiz-autofill.service';
 import { QuizService } from './services/quiz/quiz.service';
 import { ShopService } from './services/shop.service';
-import { PollPushNotifService } from './services/push-notif/poll-push-notif.service';
+import { PushNotifService } from './services/push-notif/push-notif.service';
 
 @Module({
     imports: [
@@ -83,7 +83,7 @@ import { PollPushNotifService } from './services/push-notif/poll-push-notif.serv
         ShopService,
         PollService,
         PublishedPollService,
-        PollPushNotifService,
+        PushNotifService,
         QuizAutofillService,
     ],
 

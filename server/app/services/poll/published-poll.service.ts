@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */ // Mongo utilise des attributs avec un underscore
 import { ERROR } from '@app/constants/error-messages';
 import { PublishedPoll } from '@app/model/schema/poll/published-poll.schema';
-import { PollPushNotifService } from '@app/services/push-notif/poll-push-notif.service';
+import { PushNotifService } from '@app/services/push-notif/push-notif.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 
@@ -9,7 +9,7 @@ import * as admin from 'firebase-admin';
 export class PublishedPollService /*implements OnModuleInit*/ {
     private firestore = admin.firestore();
 
-    constructor(private readonly pushNotifService: PollPushNotifService) { }
+    constructor(private readonly pushNotifService: PushNotifService) { }
 
     async createPublishedPoll(poll: PublishedPoll): Promise<PublishedPoll> {
         const pollRef = this.firestore.collection('publishedPolls').doc(poll.id);
