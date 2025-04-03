@@ -18,7 +18,7 @@ import { AppComponent } from '@app/pages/app/app.component';
 import { GamePageComponent } from '@app/pages/game-related/game-page/game-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { WINDOW } from '@app/services/general-services/window.token';
-import { QRCodeComponent } from 'angularx-qrcode';
+import { QRCodeModule } from 'angularx-qrcode';
 import { NgChartsModule } from 'ng2-charts';
 import { ToastrModule } from 'ngx-toastr';
 import { environment } from 'src/environments/environment';
@@ -84,6 +84,8 @@ import { AuthService } from './services/auth/auth.service';
 import { QuestionService } from './services/back-end-communication-services/question-service/question.service';
 import { QuizService } from './services/back-end-communication-services/quiz-service/quiz.service';
 import { FirebaseChatService } from './services/chat-services/firebase/firebase-chat.service';
+import { EnvironmentService } from './services/environment/environment.service';
+import { FirebaseInitService } from './services/environment/firebase-init.service';
 import { FriendSystemService } from './services/friend-system.service'; // Import the service
 import { FrenchPaginatorIntlService } from './services/general-services/french-paginator/french-paginator-intl.service';
 import { InventoryService } from './services/general-services/inventory.service';
@@ -172,6 +174,8 @@ import { SocketClientService } from './services/websocket-services/general/socke
         HeaderNavigationService,
         FriendSystemService,
         ReportService,
+        EnvironmentService,
+        FirebaseInitService,
         { provide: WINDOW, useValue: window },
         { provide: MatPaginatorIntl, useClass: FrenchPaginatorIntlService },
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
@@ -191,7 +195,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         MatExpansionModule,
         MatIconModule,
         NgChartsModule,
-        QRCodeComponent,
+        QRCodeModule,
         provideFirebaseApp(() => initializeApp(environment.firebase)),
         provideAuth(() => getAuth()),
         provideFirestore(() => getFirestore()),

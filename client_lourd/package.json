@@ -12,8 +12,9 @@
         "coverage": "ng test --code-coverage --source-map=true",
         "lint": "ng lint --format stylish",
         "lint:fix": "npm run lint -- --fix",
-        "start:electron": "ng build --base-href ./ && electron .",
-        "build:electron": "ng build --base-href ./ && electron-packager . --asar --ignore=/node_modules --ignore=/.angular --ignore=/e2e --ignore=/src --overwrite --out=./build"
+        "start:electron": "rimraf ./build && ng build --base-href ./ && electron .",
+        "build:electron": "electron-packager ./electron-build Client --asar --overwrite --out=./build",
+        "redeploy": "npm run build -- --base-href ./ && node scripts/package-electron.js"
     },
     "private": true,
     "dependencies": {
@@ -28,16 +29,16 @@
         "@angular/platform-browser": "16.1.8",
         "@angular/platform-browser-dynamic": "16.1.8",
         "@angular/router": "16.1.8",
-        "@techiediaries/ngx-qrcode": "^9.1.0",
         "@types/file-saver-es": "^2.0.3",
-        "angularx-qrcode": "^19.0.0",
+        "angularx-qrcode": "^16.0.2",
         "bootstrap": "^5.3.3",
         "chart.js": "^4.4.0",
+        "express": "^5.1.0",
         "file-saver-es": "^2.0.5",
         "ng-animate": "^2.0.1",
         "ng2-charts": "^5.0.4",
-        "ngx-qrcode2": "^9.0.0",
         "ngx-toastr": "^19.0.0",
+        "portfinder": "^1.0.35",
         "rxjs": "7.8.1",
         "socket.io-client": "4.7.2",
         "tslib": "2.4.0",
@@ -56,6 +57,7 @@
         "@types/file-saver-es": "^2.0.3",
         "@types/jasmine": "^4.3.5",
         "@types/node": "20.4.8",
+        "@types/qrcode": "^1.5.5",
         "@types/uuid": "^9.0.8",
         "@typescript-eslint/eslint-plugin": "^6.2.1",
         "@typescript-eslint/parser": "^6.2.1",
@@ -76,6 +78,7 @@
         "karma-jasmine": "5.1.0",
         "karma-jasmine-html-reporter": "2.1.0",
         "prettier": "3.0.1",
+        "rimraf": "^6.0.1",
         "typescript": "4.9.5",
         "uuid": "^9.0.1"
     }

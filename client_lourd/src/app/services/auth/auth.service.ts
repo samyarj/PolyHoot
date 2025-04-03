@@ -17,12 +17,14 @@ import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ConnectEvents } from '@app/constants/enum-class';
 import { User } from '@app/interfaces/user';
+import { EnvironmentService } from '@app/services/environment/environment.service';
 import { ReportService } from '@app/services/report-service';
 import { handleErrorsGlobally } from '@app/utils/rxjs-operators';
 import { collection, getDocs, onSnapshot, query, runTransaction, where } from '@firebase/firestore';
-import { User as FirebaseUser, onIdTokenChanged, sendPasswordResetEmail } from 'firebase/auth';
+import { User as FirebaseUser, getAuth, onIdTokenChanged, sendPasswordResetEmail } from 'firebase/auth';
 import { BehaviorSubject, catchError, finalize, from, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
+// eslint-disable-next-line no-restricted-imports
 
 @Injectable({
     providedIn: 'root',
@@ -54,6 +56,7 @@ export class AuthService {
         private firestore: Firestore,
         private socketClientService: SocketClientService,
         private reportService: ReportService,
+        private environmentService: EnvironmentService, // @Inject(WINDOW) private window: Window,
     ) {
         this.user$.subscribe({
             next: (user: User | null) => {
@@ -424,13 +427,10 @@ export class AuthService {
     private signOutAndClearSession(): void {
         this.tokenBS.next(null);
         this.socketClientService.disconnect();
-
         from(this.auth.signOut())
             .pipe(
                 handleErrorsGlobally(this.injector),
-                finalize(() => {
-                    this.clearSession();
-                }),
+                finalize(() => this.clearSession()),
             )
             .subscribe();
     }
@@ -487,10 +487,71 @@ export class AuthService {
     }
 
     private signInWithGoogleSDK(): Observable<UserCredential> {
+        // Configure provider with additional settings
+        this.googleProvider = new GoogleAuthProvider();
         this.googleProvider.setCustomParameters({
-            prompt: 'select_account', // Forces Google to show the account selection screen
+            prompt: 'select_account',
         });
-        return from(signInWithPopup(this.auth, this.googleProvider));
+
+        // If we're in Electron, we need special handling
+        if (this.environmentService.isElectron) {
+            console.log('Running in Electron environment, using special auth flow');
+
+            return new Observable<UserCredential>((observer) => {
+                // Open the popup within Electron with proper parameters
+                signInWithPopup(this.auth, this.googleProvider)
+                    .then((result) => {
+                        observer.next(result);
+                        observer.complete();
+                    })
+                    .catch((error) => {
+                        console.error('Google sign-in error:', error);
+
+                        // Log specific error information
+                        switch (error.code) {
+                            case 'auth/unauthorized-domain': {
+                                console.error('Unauthorized domain. Check Firebase Console settings.');
+
+                                break;
+                            }
+                            case 'auth/popup-closed-by-user': {
+                                console.error('Popup was closed by the user before completing the sign-in.');
+
+                                break;
+                            }
+                            case 'auth/popup-blocked': {
+                                console.error('Popup was blocked by the browser.');
+
+                                break;
+                            }
+                            // No default
+                        }
+
+                        observer.error(error);
+                    });
+            });
+        } else {
+            // Standard web flow
+            return from(signInWithPopup(this.auth, this.googleProvider));
+        }
+    }
+
+    // Add this method to your service to help with Electron-specific issues
+    private forceInitializeAuth(): void {
+        // For Electron environments, we might need to force the auth system to initialize properly
+        if (this.environmentService.isElectron) {
+            const auth = getAuth();
+            if (auth) {
+                console.log('Force-initializing Firebase Auth for Electron environment');
+                // Sometimes just accessing the auth object helps initialize it properly
+                auth.useDeviceLanguage();
+            }
+        }
+    }
+
+    // Call this in ngOnInit or in your constructor after other initialization
+    initializeAuth(): void {
+        this.forceInitializeAuth();
     }
 
     private createUser(email: string, password: string): Observable<UserCredential> {
