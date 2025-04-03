@@ -127,8 +127,8 @@ class _PlayerPollsNotificationState
                       ),
                       if (true) // si nouveau messages
                         Positioned(
-                          right: 6,
-                          bottom: 19,
+                          right: 8,
+                          bottom: 23,
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
@@ -136,8 +136,8 @@ class _PlayerPollsNotificationState
                               borderRadius: BorderRadius.circular(10),
                             ),
                             constraints: const BoxConstraints(
-                              minWidth: 12,
-                              minHeight: 12,
+                              minWidth: 9,
+                              minHeight: 9,
                             ),
                           ),
                         ),
