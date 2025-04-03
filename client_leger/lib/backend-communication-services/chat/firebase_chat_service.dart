@@ -235,8 +235,10 @@ class FirebaseChatService {
     }
   }
 
-  Stream<List<ChatChannel>> fetchAllChannels(String currentUserUid) {
-    if (FirebaseAuth.instance.currentUser == null) return Stream.value([]);
+  Stream<List<ChatChannel>> fetchAllChannels(String? currentUserUid) {
+    if (FirebaseAuth.instance.currentUser == null || currentUserUid == null) {
+      return Stream.value([]);
+    }
 
     return _chatChannelsCollection.snapshots().asyncMap((snapshot) async {
       if (FirebaseAuth.instance.currentUser == null) return [];
@@ -248,9 +250,10 @@ class FirebaseChatService {
     });
   }
 
-  joinChannel(String currentUserUid, String channel) async {
-    if (FirebaseAuth.instance.currentUser == null) return;
-
+  joinChannel(String? currentUserUid, String channel) async {
+    if (FirebaseAuth.instance.currentUser == null || currentUserUid == null) {
+      return;
+    }
     try {
       final channelRef = _chatChannelsCollection.doc(channel);
       await channelRef.update({
@@ -262,8 +265,10 @@ class FirebaseChatService {
     }
   }
 
-  quitChannel(String currentUserUid, String channel) async {
-    if (FirebaseAuth.instance.currentUser == null) return [];
+  quitChannel(String? currentUserUid, String channel) async {
+    if (FirebaseAuth.instance.currentUser == null || currentUserUid == null) {
+      return [];
+    }
 
     try {
       final channelRef = _chatChannelsCollection.doc(channel);

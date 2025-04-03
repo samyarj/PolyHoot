@@ -29,7 +29,7 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   late ChannelManager _channelManager;
-  late Timestamp? lastMessageDate; // Track last message date for pagination
+  Timestamp? lastMessageDate; // Track last message date for pagination
   List<ChatMessage> _allMessagesDisplayed = [];
   bool isLoadingInitialMessages = true;
   StreamSubscription<List<ChatMessage>>? _messagesSubscription;

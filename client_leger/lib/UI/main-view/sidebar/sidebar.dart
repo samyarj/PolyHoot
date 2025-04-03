@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'package:client_leger/UI/chat/chatwindow.dart';
 import 'package:client_leger/UI/chat/ingame_chatwindow.dart';
 import 'package:client_leger/UI/main-view/sidebar/channels.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
+import 'package:client_leger/business/channel_manager.dart';
+import 'package:client_leger/models/chat_channels.dart';
 import 'package:client_leger/models/user.dart' as user_model;
 import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
@@ -20,9 +23,11 @@ class _SideBarState extends ConsumerState<SideBar>
     with TickerProviderStateMixin {
   late TabController _tabController;
   final socketManager = WebSocketManager.instance;
+  final _channelManager = ChannelManager();
+  StreamSubscription<List<ChatChannel>>? _chatChannelsSubscription;
+  final ValueNotifier<List<ChatChannel>> _channelsNotifier = ValueNotifier([]);
 
-  final ValueNotifier<String?> _recentChannelNotifier =
-      ValueNotifier<String?>(null);
+  String? _recentChannel;
 
   void _updateTabController() {
     final currentRoomId = socketManager.currentRoomIdNotifier.value;
@@ -44,6 +49,12 @@ class _SideBarState extends ConsumerState<SideBar>
     _tabController =
         TabController(length: tabLength, vsync: this, initialIndex: 0);
     socketManager.currentRoomIdNotifier.addListener(_updateTabController);
+
+    _chatChannelsSubscription =
+        _channelManager.fetchAllChannels(widget.user?.uid).listen((channels) {
+      _channelsNotifier.value = channels;
+    });
+
     super.initState();
   }
 
@@ -52,24 +63,15 @@ class _SideBarState extends ConsumerState<SideBar>
     if (socketManager.currentRoomIdNotifier.value == null) {
       index--;
     }
-    _recentChannelNotifier.value = channel;
+    _recentChannel = channel;
     _tabController.animateTo(index);
-  }
-
-  String? _getRecentChannel() {
-    // edge case: if the recent channel gets deleted by user
-    return _recentChannelNotifier.value;
-  }
-
-  void _nullifyRecentChannel() {
-    // edge case: if the recent channel gets deleted by user
-    _recentChannelNotifier.value = null;
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     socketManager.currentRoomIdNotifier.removeListener(_updateTabController);
+    _chatChannelsSubscription?.cancel();
     super.dispose();
   }
 
@@ -129,10 +131,18 @@ class _SideBarState extends ConsumerState<SideBar>
   Widget _buildRecentChat() {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return ValueListenableBuilder<String?>(
-      valueListenable: _recentChannelNotifier,
-      builder: (context, recentChannel, child) {
-        if (recentChannel == null) {
+    return ValueListenableBuilder<List<ChatChannel>>(
+      valueListenable: _channelsNotifier,
+      builder: (context, channels, _) {
+        final isRecentChannelValid = _recentChannel != null &&
+            channels.any((channel) =>
+                channel.name == _recentChannel && channel.isUserInChannel);
+
+        if (isRecentChannelValid) {
+          AppLogger.i("Recent channel is valid: $_recentChannel");
+          return ChatWindow(channel: _recentChannel!);
+        } else {
+          _recentChannel = null;
           return Center(
             child: Text(
               'Aucun canal courant.',
@@ -140,7 +150,6 @@ class _SideBarState extends ConsumerState<SideBar>
             ),
           );
         }
-        return ChatWindow(channel: recentChannel);
       },
     );
   }
@@ -148,8 +157,8 @@ class _SideBarState extends ConsumerState<SideBar>
   Widget _buildChannels() {
     return Channels(
       onChannelPicked: _changeTabAndChannel,
-      getRecentChannel: _getRecentChannel,
-      nullifyRecentChannel: _nullifyRecentChannel,
+      channelsNotifier: _channelsNotifier,
+      userUid: widget.user?.uid,
     );
   }
 }
