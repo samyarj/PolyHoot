@@ -202,16 +202,10 @@ export class QuestionFormComponent implements OnChanges {
                 )
                 .subscribe({
                     next: (response: any) => {
-                        let generatedQuestion: Question = {
-                            type: this.questionType,
-                            points: 10,
-                            text: '',
-                        };
-
                         switch (this.questionType) {
                             case QuestionType.QCM: {
-                                generatedQuestion = {
-                                    ...generatedQuestion,
+                                this.question = {
+                                    ...this.question,
                                     text: response.Question,
                                     choices: Object.entries(response.Choix).map(([key, value]) => ({
                                         text: value as string,
@@ -221,15 +215,15 @@ export class QuestionFormComponent implements OnChanges {
                                 break;
                             }
                             case QuestionType.QRL: {
-                                generatedQuestion = {
-                                    ...generatedQuestion,
+                                this.question = {
+                                    ...this.question,
                                     text: response.Question,
                                 };
                                 break;
                             }
                             case QuestionType.QRE: {
-                                generatedQuestion = {
-                                    ...generatedQuestion,
+                                this.question = {
+                                    ...this.question,
                                     text: response.Question,
                                     qreAttributes: {
                                         goodAnswer: response['Bonne réponse'],
@@ -241,7 +235,6 @@ export class QuestionFormComponent implements OnChanges {
                                 break;
                             }
                         }
-                        this.question = generatedQuestion;
                         this.isGeneratedQuestion = true;
                         this.toastr.success('Question générée avec succès');
                         this.isCallingAI = false;
@@ -279,6 +272,10 @@ export class QuestionFormComponent implements OnChanges {
                         this.temporaryQuestionText = response.reformulatedQuestion;
                         // this.toastr.success('Question reformulée avec succès');
                         this.isCallingAI = false;
+                        if (!this.showButton) {
+                            if (this.question.type !== QuestionType.QCM) delete this.question['choices'];
+                            this.questionSubmitted.emit(this.question);
+                        }
                     },
                     error: (error) => {
                         // this.toastr.error('Erreur lors de la reformulation de la question');
@@ -293,11 +290,19 @@ export class QuestionFormComponent implements OnChanges {
     acceptReformulation(): void {
         this.question.text = this.temporaryQuestionText;
         this.isReformulating = false;
+        if (!this.showButton) {
+            if (this.question.type !== QuestionType.QCM) delete this.question['choices'];
+            this.questionSubmitted.emit(this.question);
+        }
         // this.toastr.success('Reformulation acceptée');
     }
 
     rejectReformulation(): void {
         this.isReformulating = false;
+        if (!this.showButton) {
+            if (this.question.type !== QuestionType.QCM) delete this.question['choices'];
+            this.questionSubmitted.emit(this.question);
+        }
         // this.toastr.info('Reformulation rejetée');
     }
 
