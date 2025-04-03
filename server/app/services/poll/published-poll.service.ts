@@ -2,14 +2,13 @@
 import { ERROR } from '@app/constants/error-messages';
 import { PublishedPoll } from '@app/model/schema/poll/published-poll.schema';
 import { PollPushNotifService } from '@app/services/push-notif/poll-push-notif.service';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 
 @Injectable()
-export class PublishedPollService /*implements OnModuleInit*/ {
+export class PublishedPollService implements OnModuleInit {
     private firestore = admin.firestore();
-
-    constructor(private readonly pushNotifService: PollPushNotifService) { }
+    constructor(private readonly pushNotifService: PollPushNotifService) {}
 
     async createPublishedPoll(poll: PublishedPoll): Promise<PublishedPoll> {
         const pollRef = this.firestore.collection('publishedPolls').doc(poll.id);
@@ -79,22 +78,42 @@ export class PublishedPollService /*implements OnModuleInit*/ {
         return pollData;
     }
     //Pas idéal mais meilleur endroit pour maintenant
-    /* onModuleInit() {
-        setInterval(() => this.checkAndUpdateExpiredStatus(), 1000); // Vérifie toutes les secondes
+    onModuleInit() {
+        this.scheduleMinutelyCheck();
+    }
+
+    private scheduleMinutelyCheck() {
+        this.checkAndUpdateExpiredStatus(); //direct en arrivant
+        const now = new Date();
+        const secondsUntilNextMinute = 60 - now.getSeconds();
+        const millisUntilNextMinute = secondsUntilNextMinute * 1000 - now.getMilliseconds();
+
+        setTimeout(() => {
+            this.checkAndUpdateExpiredStatus(); // Exécute à la prochaine minute pile
+            setInterval(() => this.checkAndUpdateExpiredStatus(), 60 * 1000); // Puis toutes les minutes
+        }, millisUntilNextMinute);
     }
 
     private async checkAndUpdateExpiredStatus(): Promise<void> {
-        const currentDate = new Date();
-        const snapshot = await this.firestore.collection('publishedPolls').get();
-        snapshot.forEach(async (doc) => {
-            const poll = doc.data() as PublishedPoll;
+        const now = new Date();
+        const snapshot = await this.firestore.collection('publishedPolls').where('expired', '==', false).get();
+        const batch = this.firestore.batch();
+        snapshot.forEach((doc) => {
+            const poll = doc.data();
             const pollEndDate = new Date(poll.endDate);
-            if (pollEndDate <= currentDate && !poll.expired) {
-                console.log('Poll expired:', poll.title);
-                await doc.ref.update({ expired: true });
-                console.log('Poll expired and updated in Firestore:');
-                await this.pushNotifService.onPublishedPollExpired(poll.title);
+            console.log(`Données du sondage:`, {
+                id: doc.id,
+                endDateStocké: poll.endDate,
+                endDateInterprété: pollEndDate.toISOString(),
+                maintenantEST: now.toISOString(),
+            });
+
+            // 3. Comparaison
+            if (pollEndDate <= now) {
+                batch.update(doc.ref, { expired: true });
             }
         });
-    } */
+
+        await batch.commit();
+    }
 }
