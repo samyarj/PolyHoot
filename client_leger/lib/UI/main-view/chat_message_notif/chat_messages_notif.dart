@@ -22,17 +22,6 @@ class _ChatMessagesNotificationState
       GlobalKey<PopupMenuButtonState>();
   int _previousTotalUnreadMessages = 0;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  dispose() {
-    ref.read(messageNotifProvider.notifier).dispose();
-    super.dispose();
-  }
-
   void _forceChatNotifMenuRebuild() {
     // so that the list of popup menu items is updated on live when menu is open
     AppLogger.e("Forcing menu rebuild");

@@ -32,7 +32,7 @@ class MessageNotifState {
 
 class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  // SoundPlayer owlSoundPlayer = SoundPlayer();
+  SoundPlayer owlSoundPlayer = SoundPlayer();
 
   final Map<String, StreamSubscription> _subscriptions =
       {}; // key: channelId, value: subscription
@@ -66,7 +66,8 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
         for (final change in snapshot.docChanges) {
           if (change.type == DocumentChangeType.added &&
               change.doc.data()?['uid'] != getUserUid()) {
-            // _playSound();
+            owlSoundPlayer.stop();
+            _playSound();
             final int newCount = (state.unreadMessages["globalChat"] ?? 0) + 1;
             state = state.copyWith(unreadMessages: {
               ...state.unreadMessages,
@@ -156,7 +157,8 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
             for (final change in messagesSnapshot.docChanges) {
               if (change.type == DocumentChangeType.added &&
                   change.doc.data()?['uid'] != getUserUid()) {
-                // _playSound();
+                owlSoundPlayer.stop();
+                _playSound();
                 final int newCount =
                     (state.unreadMessages[channel.id] ?? 0) + 1;
                 state = state.copyWith(unreadMessages: {
@@ -171,11 +173,11 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
     });
   }
 
-  // Future<void> _playSound() async {
-  //   await owlSoundPlayer.play(
-  //     source: HOOT_SOUND_PATH,
-  //   );
-  // }
+  Future<void> _playSound() async {
+    await owlSoundPlayer.play(
+      source: HOOT_SOUND_PATH,
+    );
+  }
 
   void markChatAsRead(String? channelId) {
     if (channelId == null) {
@@ -203,7 +205,7 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
   @override
   void dispose() {
     AppLogger.e("Disposing message notif provider");
-    // owlSoundPlayer.stop();
+     owlSoundPlayer.stop();
     _chatChannelsSub?.cancel();
     for (final subscription in _subscriptions.values) {
       subscription.cancel();
