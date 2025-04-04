@@ -20,7 +20,7 @@
                     }"
                 ></i>
                 {{ question.lastModified | date: 'yyyy-MM-dd HH:mm:ss' }}
-                {{question.creator}}
+                {{ question.creator }}
             </mat-panel-title>
 
             <mat-icon *ngIf="!panelOpenState">more_vert</mat-icon>
@@ -52,16 +52,20 @@
 
             <ng-container *ngIf="isEditMode; else viewMode">
                 <div class="custom-panel-container">
-                    <app-question-form [question]="question" [showButton]="false" (emptyQuestion)="emptyQuestion($event)"></app-question-form>
+                    <app-question-form
+                        [question]="question"
+                        [showButton]="false"
+                        (emptyQuestion)="emptyQuestion($event)"
+                        (questionSubmitted)="onQuestionSubmitted($event)"
+                    ></app-question-form>
                     <div class="buttons">
                         <button *ngIf="!expanded" class="custom-button" (click)="cancelEdit()">Annuler</button>
                         <button *ngIf="!expanded" [disabled]="!validQuestion()" class="custom-button" (click)="modifyQuestion()">
                             Modifier la question
                         </button>
                         <button *ngIf="expanded" class="custom-button" (click)="cancelAdd()">Annuler</button>
-                        <button *ngIf="expanded" class="custom-button" (click)="addQuestion()" [disabled]="!validQuestion()">
-                            Ajouter la question
-                        </button>
+                        <!--[disabled]="!validQuestion()" -->
+                        <button *ngIf="expanded" class="custom-button" (click)="addQuestion()">Ajouter la question</button>
                     </div>
                 </div>
             </ng-container>

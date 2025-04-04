@@ -66,6 +66,7 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
     selectAvatar(avatarUrl: string) {
         if (this.selectedAvatar !== avatarUrl) this.selectedAvatar = avatarUrl;
     }
+
     /**
      * Handle normal sign-up form submission
      */
