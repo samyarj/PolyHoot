@@ -20,6 +20,9 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(adminUsersProvider.notifier).startListening();
+    });
     AppLogger.i("AdminUsersPage initialized");
   }
 

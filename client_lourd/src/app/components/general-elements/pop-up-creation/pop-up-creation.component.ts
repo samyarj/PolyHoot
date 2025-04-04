@@ -74,12 +74,8 @@ export class PopUpCreationComponent {
         if (id) {
             this.quizService.getQuizById(id).subscribe({
                 next: (quiz: Quiz) => {
-                    if (quiz.visibility) {
-                        this.data.quiz = quiz;
-                        this.isQuizValid = true;
-                    } else {
-                        this.errorMessage = 'Le jeu a été caché aux utilisateurs!';
-                    }
+                    this.data.quiz = quiz;
+                    this.isQuizValid = true;
                 },
                 error: (httpErrorResponse: HttpErrorResponse) => {
                     this.errorMessage = "Le jeu n'existe plus. Message erreur: " + httpErrorResponse.message;

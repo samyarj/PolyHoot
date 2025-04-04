@@ -17,12 +17,14 @@ import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ConnectEvents } from '@app/constants/enum-class';
 import { User } from '@app/interfaces/user';
+import { EnvironmentService } from '@app/services/environment/environment.service';
 import { ReportService } from '@app/services/report-service';
 import { handleErrorsGlobally } from '@app/utils/rxjs-operators';
 import { collection, getDocs, onSnapshot, query, runTransaction, where } from '@firebase/firestore';
-import { User as FirebaseUser, onIdTokenChanged, sendPasswordResetEmail } from 'firebase/auth';
+import { User as FirebaseUser, getAuth, onIdTokenChanged, sendPasswordResetEmail } from 'firebase/auth';
 import { BehaviorSubject, catchError, finalize, from, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
+// eslint-disable-next-line no-restricted-imports
 
 @Injectable({
     providedIn: 'root',
@@ -54,10 +56,11 @@ export class AuthService {
         private firestore: Firestore,
         private socketClientService: SocketClientService,
         private reportService: ReportService,
+        private environmentService: EnvironmentService, // @Inject(WINDOW) private window: Window,
     ) {
         this.user$.subscribe({
             next: (user: User | null) => {
-                if (user && user.nbReport !== undefined && user.nbReport > 2) {
+                if (user && user.nbReport !== undefined && user.nbReport >= 2) {
                     this.reportService.behaviourWarning();
                     this.reportService.getReportState(user.uid).subscribe({
                         next: (value: { message: string; isBanned: boolean }) => {
@@ -81,12 +84,14 @@ export class AuthService {
     getReportService() {
         return this.reportService;
     }
-    signUp(username: string, email: string, password: string): Observable<User> {
+    signUp(username: string, email: string, password: string, avatarURL: string): Observable<User> {
         this.isSigningUp = true;
         return this.createUser(email, password).pipe(
-            switchMap((userCredential) => this.updateUserProfile(userCredential.user, { displayName: username }).pipe(map(() => userCredential))),
             switchMap((userCredential) =>
-                this.handleAuthAndFetchUser(userCredential, `${this.baseUrl}/create-user`, 'POST').pipe(
+                this.updateUserProfile(userCredential.user, { displayName: username, photoURL: avatarURL }).pipe(map(() => userCredential)),
+            ),
+            switchMap((userCredential) =>
+                this.handleAuthAndFetchUser(userCredential, `${this.baseUrl}/create-user`, 'POST', avatarURL).pipe(
                     tap((user) => {
                         // Store the user right away to prevent logout
                         this.userBS.next(user);
@@ -271,7 +276,12 @@ export class AuthService {
         });
     }
 
-    private handleAuthAndFetchUser(userCredential: UserCredential, endpoint: string, method: 'GET' | 'POST' = 'GET'): Observable<User> {
+    private handleAuthAndFetchUser(
+        userCredential: UserCredential,
+        endpoint: string,
+        method: 'GET' | 'POST' = 'GET',
+        avatarURL?: string,
+    ): Observable<User> {
         return from(userCredential.user.getIdToken()).pipe(
             switchMap((idToken) => {
                 const options = { headers: { Authorization: `Bearer ${idToken}` } };
@@ -282,7 +292,7 @@ export class AuthService {
                     case 'GET':
                         return this.http.get<User>(endpoint, options);
                     case 'POST':
-                        return this.http.post<User>(endpoint, {}, options);
+                        return this.http.post<User>(endpoint, { avatarURL }, options);
                     default:
                         throw new Error(`Unsupported HTTP method: ${method}`);
                 }
@@ -484,7 +494,71 @@ export class AuthService {
     }
 
     private signInWithGoogleSDK(): Observable<UserCredential> {
-        return from(signInWithPopup(this.auth, this.googleProvider));
+        // Configure provider with additional settings
+        this.googleProvider = new GoogleAuthProvider();
+        this.googleProvider.setCustomParameters({
+            prompt: 'select_account',
+        });
+
+        // If we're in Electron, we need special handling
+        if (this.environmentService.isElectron) {
+            console.log('Running in Electron environment, using special auth flow');
+
+            return new Observable<UserCredential>((observer) => {
+                // Open the popup within Electron with proper parameters
+                signInWithPopup(this.auth, this.googleProvider)
+                    .then((result) => {
+                        observer.next(result);
+                        observer.complete();
+                    })
+                    .catch((error) => {
+                        console.error('Google sign-in error:', error);
+
+                        // Log specific error information
+                        switch (error.code) {
+                            case 'auth/unauthorized-domain': {
+                                console.error('Unauthorized domain. Check Firebase Console settings.');
+
+                                break;
+                            }
+                            case 'auth/popup-closed-by-user': {
+                                console.error('Popup was closed by the user before completing the sign-in.');
+
+                                break;
+                            }
+                            case 'auth/popup-blocked': {
+                                console.error('Popup was blocked by the browser.');
+
+                                break;
+                            }
+                            // No default
+                        }
+
+                        observer.error(error);
+                    });
+            });
+        } else {
+            // Standard web flow
+            return from(signInWithPopup(this.auth, this.googleProvider));
+        }
+    }
+
+    // Add this method to your service to help with Electron-specific issues
+    private forceInitializeAuth(): void {
+        // For Electron environments, we might need to force the auth system to initialize properly
+        if (this.environmentService.isElectron) {
+            const auth = getAuth();
+            if (auth) {
+                console.log('Force-initializing Firebase Auth for Electron environment');
+                // Sometimes just accessing the auth object helps initialize it properly
+                auth.useDeviceLanguage();
+            }
+        }
+    }
+
+    // Call this in ngOnInit or in your constructor after other initialization
+    initializeAuth(): void {
+        this.forceInitializeAuth();
     }
 
     private createUser(email: string, password: string): Observable<UserCredential> {

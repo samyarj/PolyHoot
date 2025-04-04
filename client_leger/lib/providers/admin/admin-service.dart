@@ -5,7 +5,6 @@ import 'package:client_leger/backend-communication-services/firend-system/friend
 import 'package:client_leger/models/user.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final adminUsersProvider =
@@ -43,7 +42,6 @@ class AdminUsersState {
 
 class AdminUsersNotifier extends StateNotifier<AdminUsersState> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final firebase_auth.FirebaseAuth _auth = firebase_auth.FirebaseAuth.instance;
   StreamSubscription<QuerySnapshot>? _usersSubscription;
 
   AdminUsersNotifier()
@@ -52,13 +50,17 @@ class AdminUsersNotifier extends StateNotifier<AdminUsersState> {
           isLoading: true,
           errorMessage: '',
           searchTerm: '',
-        )) {
-    AppLogger.i("AdminUsersNotifier initialized");
-    _setupListeners();
+        )) {}
+
+  void startListening() {
+    AppLogger.i("AdminUsersNotifier restarting listeners");
+    _listenToUsers();
   }
 
-  void _setupListeners() {
-    _listenToUsers();
+  void stopListening() {
+    _usersSubscription?.cancel();
+    _usersSubscription = null;
+    AppLogger.i("AdminUsersNotifier stopped listening");
   }
 
   void _listenToUsers() {
@@ -77,6 +79,13 @@ class AdminUsersNotifier extends StateNotifier<AdminUsersState> {
               .map((doc) {
                 try {
                   final data = doc.data();
+
+                  if (data.isEmpty) {
+                    // we should not enter here, but just in case
+                    AppLogger.e("User data is empty for doc: ${doc.id}");
+                    return null;
+                  }
+
                   final user = User.fromJson(data);
 
                   return UserWithId(
@@ -181,6 +190,7 @@ class AdminUsersNotifier extends StateNotifier<AdminUsersState> {
   @override
   void dispose() {
     _usersSubscription?.cancel();
+    _usersSubscription = null;
     AppLogger.i("AdminUsersNotifier disposed");
     super.dispose();
   }

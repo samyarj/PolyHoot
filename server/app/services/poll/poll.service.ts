@@ -60,7 +60,6 @@ export class PollService {
             isPublished: updatePollDto.isPublished,
             questions: updatePollDto.questions.map((question) => ({
                 ...question,
-                // Si nécessaire, ajoutez des propriétés manquantes pour correspondre au type Question
             })),
         };
         await pollRef.update(updatePayload);

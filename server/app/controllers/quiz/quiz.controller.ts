@@ -2,6 +2,7 @@ import { ERROR } from '@app/constants/error-messages';
 import { CreateQuizDto } from '@app/model/dto/quiz/create-quiz.dto';
 import { UpdateQuizDto } from '@app/model/dto/quiz/update-quiz.dto';
 import { Quiz } from '@app/model/schema/quiz/quiz';
+import { QuizAutofillService } from '@app/services/quiz-autofill/quiz-autofill.service';
 import { QuizService } from '@app/services/quiz/quiz.service';
 import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Res } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
@@ -10,7 +11,10 @@ import { Response } from 'express';
 @ApiTags('Quizzes')
 @Controller('quizzes')
 export class QuizController {
-    constructor(private readonly quizService: QuizService) {}
+    constructor(
+        private readonly quizService: QuizService,
+        private readonly quizAutofillService: QuizAutofillService,
+    ) {}
 
     @ApiOkResponse({
         description: 'Returns all quizzes',
@@ -109,20 +113,29 @@ export class QuizController {
         }
     }
 
-    @ApiOkResponse({ description: 'Quiz visibility toggled' })
-    @ApiNotFoundResponse({ description: 'Quiz not found' })
-    @Patch('/toggle-visibility/:id')
-    async toggleQuizVisibility(@Param('id') id: string, @Res() response: Response) {
+    @Post('autofill')
+    @ApiOkResponse({ description: 'Question generated successfully' })
+    @ApiBadRequestResponse({ description: 'Invalid question type' })
+    async generateQuestion(@Body() body: { type: string }, @Res() res: Response) {
         try {
-            await this.quizService.toggleQuizVisibility(id);
-            const updatedQuizzes = await this.quizService.getAllQuizzes();
-            response.status(HttpStatus.OK).json(updatedQuizzes);
+            const question = await this.quizAutofillService.generateQuestion(body.type);
+            return res.status(HttpStatus.OK).json(question);
         } catch (error) {
-            if (error.status === HttpStatus.NOT_FOUND) {
-                response.status(HttpStatus.NOT_FOUND).send({ message: error.message });
-            } else {
-                response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: ERROR.INTERNAL_SERVER_ERROR });
-            }
+            return res.status(HttpStatus.BAD_REQUEST).json({ message: ERROR.QUIZ.FAILED_TO_CREATE });
+        }
+    }
+
+    @ApiOkResponse({ description: 'Reformulated question' })
+    @ApiBadRequestResponse({ description: 'Invalid question' })
+    @Post('/reformulate-question')
+    async reformulateQuestion(@Body('question') question: string, @Res() response: Response) {
+        try {
+            const reformulatedQuestion = await this.quizAutofillService.reformulateQuestion(question);
+            response.status(HttpStatus.OK).json({ reformulatedQuestion });
+        } catch (error) {
+            response.status(HttpStatus.BAD_REQUEST).send({
+                message: error.message || ERROR.INTERNAL_SERVER_ERROR,
+            });
         }
     }
 }

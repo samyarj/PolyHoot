@@ -119,7 +119,7 @@ export class CoinFlipService {
         const dialogRef = this.matdialog.open(ConfirmationDialogComponent, {
             width: WIDTH_SIZE,
             panelClass: 'custom-container',
-            data: `Voulez vous miser la somme de : ${this.betAmount} coins?`,
+            data: `Voulez vous miser la somme de : ${this.betAmount} pièces?`,
         });
 
         dialogRef.afterClosed().subscribe((result) => {
@@ -137,7 +137,7 @@ export class CoinFlipService {
                                     panelClass: 'custom-container',
                                     data: {
                                         message:
-                                            'Vous ne pouvez pas parier plus de coins que ceux détenus ou bien parier en dehors de la phase de mise!',
+                                            'Vous ne pouvez pas parier plus de pièces que celles détenues ou bien parier en dehors de la phase de mise!',
                                         reloadOnClose: false,
                                     },
                                 });
@@ -148,7 +148,7 @@ export class CoinFlipService {
                     this.matdialog.open(ErrorDialogComponent, {
                         width: WIDTH_SIZE,
                         panelClass: 'custom-container',
-                        data: { message: 'Vous ne pouvez pas parier 0 coins.', reloadOnClose: false },
+                        data: { message: 'Vous ne pouvez pas parier 0 pièces.', reloadOnClose: false },
                     });
                 } else if (this.gameState !== CoinFlipGameState.BettingPhase) {
                     this.errorOutsideBettingPhase();

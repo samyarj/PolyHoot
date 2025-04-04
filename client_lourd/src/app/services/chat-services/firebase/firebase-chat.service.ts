@@ -104,6 +104,7 @@ export class FirebaseChatService {
                     avatar:
                         users[msg.uid]?.avatarEquipped || 'https://res.cloudinary.com/dtu6fkkm9/image/upload/v1737478954/default-avatar_qcaycl.jpg',
                     banner: users[msg.uid]?.borderEquipped,
+                    isAdmin: users[msg.uid]?.role === 'player' ? false : true,
                 }));
 
                 // 🔥 Ensure messages are sorted correctly using `Timestamp`
@@ -158,6 +159,7 @@ export class FirebaseChatService {
                     username: users[msg.uid]?.username || 'Unknown',
                     avatar: users[msg.uid]?.avatarEquipped || 'assets/default-avatar.png',
                     banner: users[msg.uid]?.borderEquipped,
+                    isAdmin: users[msg.uid]?.role === 'player' ? false : true,
                 }));
 
                 // 🔥 **Ensure messages are always in ascending order**
@@ -189,6 +191,7 @@ export class FirebaseChatService {
                         username: data?.username,
                         avatarEquipped: data?.avatarEquipped,
                         borderEquipped: data?.borderEquipped,
+                        role: data?.role,
                     };
                 },
                 toFirestore: () => ({}),

@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:client_leger/backend-communication-services/environment.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
+import 'package:client_leger/environment_config.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -20,7 +19,7 @@ class UploadImgService {
 
   UploadImgService._internal();
 
-  final String baseUrl = '${Environment.serverUrl}/upload-img';
+  final String baseUrl = '${EnvironmentConfig.serverUrl}/upload-img';
 
   // Maximum file size in bytes (10 MB)
   static const int MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -176,7 +175,7 @@ class UploadImgService {
       }
 
       final response = await http.post(
-          Uri.parse('${Environment.serverUrl}/users/update-avatar'),
+          Uri.parse('${EnvironmentConfig.serverUrl}/users/update-avatar'),
           headers: {
             'Content-Type': 'application/json',
             'authorization': 'Bearer $token'

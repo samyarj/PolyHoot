@@ -22,6 +22,11 @@ export class CreateQuestionDto {
     @Max(MAX_POINTS)
     points: number;
 
+    @ApiProperty()
+    @IsString()
+    @IsOptional()
+    creator?: string;
+
     @ApiProperty({ type: [ChoiceDto] })
     @IsOptional()
     @IsArray()

@@ -1,6 +1,10 @@
 <div class="notification-container">
     <button class="notification-button" (click)="toggleNotifications()">
-        <i class="fa-solid fa-bell"></i>
+        <i *ngIf="notifications.length === 0" class="fa-solid fa-bullhorn"></i>
+        <div *ngIf="notifications.length > 0" class="notification-icon-container">
+            <i class="fa-solid fa-bullhorn"></i>
+            <div class="notification-bubble"></div>
+        </div>
     </button>
     <div class="dropdown-menu" [ngClass]="{ show: showNotifications }">
         <!-- Dropdown Header -->

@@ -34,7 +34,6 @@ export class QuizHandlerService {
     }
 
     prepareQuizBeforeSubmit(): void {
-        this.quiz.visibility = false;
         this.quiz.lastModification = new Date().toString();
         this.quiz.questions.forEach((question) => delete question[ID]);
         delete this.quiz[ID];

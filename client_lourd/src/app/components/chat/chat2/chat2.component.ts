@@ -1,6 +1,8 @@
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Timestamp } from '@angular/fire/firestore';
-import { MAX_CHAR, MESSAGES_LIMIT } from '@app/constants/constants';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationDialogComponent } from '@app/components/general-elements/confirmation-dialog/confirmation-dialog.component';
+import { MAX_CHAR, MESSAGES_LIMIT, WIDTH_SIZE } from '@app/constants/constants';
 import { FirebaseChatMessage } from '@app/interfaces/chat-message';
 import { AuthService } from '@app/services/auth/auth.service';
 import { ToastrService } from 'ngx-toastr';
@@ -24,38 +26,45 @@ export class Chat2Component implements OnChanges {
     constructor(
         private authService: AuthService,
         private toastr: ToastrService,
+        private matdialog: MatDialog,
     ) {}
 
     get user() {
         return this.authService.user$;
     }
 
-    reportUser(uid: string) {
-        this.authService
-            .getReportService()
-            .reportPlayer(uid)
-            .subscribe({
-                next: (value: boolean | null) => {
-                    switch (value) {
-                        case true: {
-                            this.toastr.success('Merci pour votre contribution à la bonne atmosphère du jeu. Le joueur est signalé.');
+    reportUser(uid: string, username: string | undefined) {
+        const dialogRef = this.matdialog.open(ConfirmationDialogComponent, {
+            width: WIDTH_SIZE,
+            panelClass: 'custom-container',
+            data: `Voulez-vous signaler ${username}?`,
+        });
 
-                            break;
-                        }
-                        case false: {
-                            this.toastr.info('Vous avez déjà signalé cet utilisateur.');
-
-                            break;
-                        }
-                        case null: {
-                            this.toastr.info('Vous ne pouvez pas signaler un administrateur.');
-
-                            break;
-                        }
-                        // No default
-                    }
-                },
-            });
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                this.authService
+                    .getReportService()
+                    .reportPlayer(uid)
+                    .subscribe({
+                        next: (value: boolean | null) => {
+                            switch (value) {
+                                case true: {
+                                    this.toastr.success('Merci pour votre contribution à la bonne atmosphère du jeu. Le joueur est signalé.');
+                                    break;
+                                }
+                                case false: {
+                                    this.toastr.info('Vous avez déjà signalé ce joueur.');
+                                    break;
+                                }
+                                case null: {
+                                    this.toastr.info('Vous ne pouvez pas signaler un administrateur.');
+                                    break;
+                                }
+                            }
+                        },
+                    });
+            }
+        });
     }
 
     /**

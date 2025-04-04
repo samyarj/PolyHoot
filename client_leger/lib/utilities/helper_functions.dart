@@ -5,13 +5,21 @@ import 'package:toastification/toastification.dart';
 
 void showToast(
   BuildContext context,
-  String message, {
+  String title, {
   ToastificationType type = ToastificationType.info,
   Duration duration = const Duration(seconds: 3),
+  String? description,
 }) {
   toastification.show(
     context: context,
-    title: Text(message),
+    title: Text(
+      title,
+      style: TextStyle(fontSize: 14),
+    ),
+    description: description == null
+        ? null
+        : Text(description, style: TextStyle(fontSize: 14)),
+    // pour les longs textes on met dans description car le titre est limité
     type: type,
     autoCloseDuration: duration,
     alignment: Alignment.topCenter,
@@ -111,4 +119,23 @@ ColorScheme getThemeColorScheme(AppTheme theme) {
     default:
       return AppThemes.darkTheme.colorScheme;
   }
+}
+
+String formatDate(String? dateString) {
+  if (dateString == null) return "Non spécifiée";
+
+  try {
+    // Parse the date
+    DateTime dateTime = DateTime.parse(dateString);
+
+    // Format date and time with "à" in French
+    return "${dateTime.year}-${_twoDigits(dateTime.month)}-${_twoDigits(dateTime.day)} à ${_twoDigits(dateTime.hour)}:${_twoDigits(dateTime.minute)}";
+  } catch (e) {
+    return dateString; // Fallback to original string if parsing fails
+  }
+}
+
+// Helper method to ensure two-digit formatting
+String _twoDigits(int n) {
+  return n.toString().padLeft(2, '0');
 }

@@ -303,6 +303,29 @@ export class SideBarComponent implements OnDestroy {
 
                 await this.firebaseChatService.createChannel(this.newChannelName.trim());
                 await this.firebaseChatService.joinChannel(this.newChannelName.trim());
+
+                // Add the new channel to the channels array with isUserInChannel set to true
+                const newChannel: ChatChannel = {
+                    name: this.newChannelName.trim(),
+                    isUserInChannel: true,
+                };
+
+                // Update the channels array to ensure the new channel is marked as one the user is a member of
+                this.channels = this.channels.map((channel) => {
+                    if (channel.name === this.newChannelName.trim()) {
+                        return { ...channel, isUserInChannel: true };
+                    }
+                    return channel;
+                });
+
+                // If the channel doesn't exist in the array yet, add it
+                if (!this.channels.some((channel) => channel.name === this.newChannelName.trim())) {
+                    this.channels = [...this.channels, newChannel];
+                }
+
+                // Force a refresh of the channels to ensure the UI is updated
+                this.channels = [...this.channels];
+
                 this.selectedChannel = this.newChannelName.trim();
                 this.selectedChannelMessages = []; // Clear the messages array
                 this.selectedChannelMessagesLoading = true; // Set loading state
@@ -327,6 +350,15 @@ export class SideBarComponent implements OnDestroy {
             this.isWorkingWithChannel = true;
             try {
                 await this.firebaseChatService.joinChannel(channel);
+
+                // Update the channel's isUserInChannel property
+                this.channels = this.channels.map((c) => {
+                    if (c.name === channel) {
+                        return { ...c, isUserInChannel: true };
+                    }
+                    return c;
+                });
+
                 this.selectedChannel = channel;
                 this.selectedChannelMessages = []; // Clear the messages array
                 this.selectedChannelMessagesLoading = true; // Set loading state
@@ -351,7 +383,6 @@ export class SideBarComponent implements OnDestroy {
                 event.stopPropagation();
                 await this.firebaseChatService.deleteChannel(channel);
                 this.channels = this.channels.filter((c) => c.name !== channel);
-                this.joinedChannels = this.joinedChannels.filter((c) => c !== channel);
 
                 // If the deleted channel is the currently selected channel, clear the selected channel
                 if (this.selectedChannel === channel) {
@@ -373,7 +404,14 @@ export class SideBarComponent implements OnDestroy {
             try {
                 event.stopPropagation();
                 await this.firebaseChatService.quitChannel(channel);
-                this.joinedChannels = this.joinedChannels.filter((c) => c !== channel);
+
+                // Update the channel's isUserInChannel property
+                this.channels = this.channels.map((c) => {
+                    if (c.name === channel) {
+                        return { ...c, isUserInChannel: false };
+                    }
+                    return c;
+                });
 
                 // If the quit channel is the currently selected channel, clear the selected channel
                 if (this.selectedChannel === channel) {
@@ -400,11 +438,16 @@ export class SideBarComponent implements OnDestroy {
     }
 
     filteredJoinedChannels(): string[] {
-        return this.joinedChannels.filter((channel) => channel.toLowerCase().includes(this.searchTerm.toLowerCase()));
+        return this.channels
+            .filter((channel) => channel.isUserInChannel)
+            .map((channel) => channel.name)
+            .filter((channelName) => channelName.toLowerCase().includes(this.searchTerm.toLowerCase()));
     }
 
     filteredChannels(): ChatChannel[] {
-        return this.channels.filter((channel) => channel.name.toLowerCase().includes(this.searchTerm.toLowerCase()));
+        return this.channels
+            .filter((channel) => !channel.isUserInChannel)
+            .filter((channel) => channel.name.toLowerCase().includes(this.searchTerm.toLowerCase()));
     }
 
     toggleSearchInput(): void {
@@ -530,7 +573,7 @@ export class SideBarComponent implements OnDestroy {
                 this.selectedChannelMessagesLoading = false;
                 // Redirect to another tab or handle the UI update as needed
                 const tab1 = document.querySelector('[href="#tab1"]') as HTMLElement;
-                if (tab1) {
+                if (tab1 && this.activeTab === 3) {
                     tab1.click();
                 }
             } else {

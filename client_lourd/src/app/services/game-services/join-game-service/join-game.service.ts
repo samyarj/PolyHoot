@@ -182,6 +182,7 @@ export class JoinGameService {
 
     private handleBannedName() {
         this.socketService.on(JoinErrors.BannedName, () => {
+            this.isJoiningGame = false;
             this.popUpMessage = 'Vous avez été banni de cette partie, vous ne pouvez pas la rejoindre.';
             this.showPopUp();
         });

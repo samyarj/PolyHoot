@@ -1,5 +1,6 @@
 import 'package:client_leger/models/game-log-entry-model.dart';
 import 'package:client_leger/models/stats-related/stats.dart';
+import 'package:client_leger/utilities/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class User {
@@ -19,7 +20,7 @@ class User {
   final int? nWins;
   final int? nbBan;
   final int? nbReport;
-  final DateTime? nextDailyFree; // Added
+  final Timestamp? nextDailyFree; // Added
   final int? pity;
   final List<String>? playedGameLogs;
   final String? role;
@@ -27,6 +28,7 @@ class User {
   final String uid;
   final Timestamp? unBanDate;
   final String username;
+  final List<String> pollsAnswered; // the list of poll id answered by user
 
   User({
     required this.avatarEquipped,
@@ -53,9 +55,16 @@ class User {
     required this.uid,
     required this.unBanDate,
     required this.username,
+    required this.pollsAnswered,
   });
 
+/* sometimes date is received like this 1899-12-31T05:00:00.000Z,
+sometimes Timestamp from firebase (easiest)
+or sometimes a map
+*/
+
   factory User.fromJson(Map<String, dynamic> json) {
+    AppLogger.e("json : ${json['nextDailyFree']}");
     return User(
       avatarEquipped: json['avatarEquipped'] as String?,
       borderEquipped: json['borderEquipped'] as String?,
@@ -64,6 +73,11 @@ class User {
       cxnLogs: (json['cxnLogs'] as List<dynamic>?)
           ?.map((e) => e as Map<String, dynamic>)
           .toList(),
+      pollsAnswered: json['pollsAnswered'] == null
+          ? []
+          : (json['pollsAnswered'] as List<dynamic>)
+              .map((e) => e as String)
+              .toList(),
       email: json['email'] as String,
       friendRequests: (json['friendRequests'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -83,9 +97,13 @@ class User {
       nWins: json['nWins'] as int?,
       nbBan: json['nbBan'] as int?,
       nbReport: json['nbReport'] as int?,
-      nextDailyFree: json['nextDailyFree'] != null // Added
-          ? DateTime.fromMillisecondsSinceEpoch(
-              json['nextDailyFree'].millisecondsSinceEpoch)
+      nextDailyFree: json['nextDailyFree'] != null
+          ? json['nextDailyFree'] is Timestamp
+              ? json['nextDailyFree'] as Timestamp
+              : json['nextDailyFree'] is String
+                  ? parseIsoToTimestamp(json['nextDailyFree'])
+                  : Timestamp(json['nextDailyFree']['_seconds'],
+                      json['nextDailyFree']['_nanoseconds'])
           : null,
       pity: json['pity'] as int?,
       playedGameLogs: (json['playedGameLogs'] as List<dynamic>?)
@@ -108,9 +126,11 @@ class PartialUser {
   final String? username;
   final String? avatarEquipped;
   final String? borderEquipped;
+  final bool isAdmin;
 
   PartialUser(
       {required this.uid,
+      required this.isAdmin,
       this.avatarEquipped,
       this.borderEquipped,
       this.username});
@@ -122,16 +142,12 @@ class PartialUser {
       avatarEquipped: data['avatarEquipped'],
       borderEquipped: data['borderEquipped'],
       username: data['username'],
+      isAdmin: data['role'] == 'player' ? false : true,
     );
   }
+}
 
-  // Convert to Map (for Firestore or JSON serialization)
-  Map<String, dynamic> toMap() {
-    return {
-      'uid': uid,
-      'avatarEquipped': avatarEquipped,
-      'borderEquipped': borderEquipped,
-      'username': username,
-    };
-  }
+Timestamp parseIsoToTimestamp(String isoString) {
+  DateTime dateTime = DateTime.parse(isoString);
+  return Timestamp.fromDate(dateTime);
 }

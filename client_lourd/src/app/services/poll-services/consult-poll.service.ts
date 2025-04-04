@@ -56,7 +56,7 @@ export class ConsultPollService {
 
     // Supprimer un sondage
     deletePollById(id: string): Observable<void> {
-        return this.http.delete<void>(`${this.baseUrl}/delete/${id}`).pipe(
+        return this.http.delete<void>(`${this.baseUrl}/${id}`).pipe(
             catchError((error) => {
                 console.error(`❌ Erreur lors de la suppression du sondage ${id}:`, error);
                 return this.messageHandler.handleHttpError(error);
@@ -65,8 +65,8 @@ export class ConsultPollService {
     }
 
     // Publier un sondage
-    publishPoll(poll: Poll): Observable<{ polls: Poll[]; publishedPolls: PublishedPoll[] }> {
-        return this.http.patch<{ polls: Poll[]; publishedPolls: PublishedPoll[] }>(`${this.baseUrl}/publish`, poll).pipe(
+    publishPoll(poll: Poll): Observable<void> {
+        return this.http.patch<void>(`${this.baseUrl}/publish`, poll).pipe(
             catchError((error) => {
                 console.error('❌ Erreur lors de la publication du sondage', error);
                 return this.messageHandler.handleHttpError(error);

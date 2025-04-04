@@ -2,15 +2,22 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
+import 'package:client_leger/backend-communication-services/chat/firebase_chat_service.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
+import 'package:client_leger/backend-communication-services/report/report_service.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
+import 'package:client_leger/models/report/report_state.dart';
 import 'package:client_leger/models/user.dart' as user_model;
+import 'package:client_leger/push-notif-api/firebase_api_push_notif.dart';
+import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:toastification/toastification.dart';
 
 // User state provider
 final userProvider =
@@ -24,7 +31,10 @@ ValueNotifier<bool> isLoggedIn = ValueNotifier<bool>(false);
 class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
   StreamSubscription<DocumentSnapshot>? _userDocSubscription;
   StreamSubscription<User?>? _tokenSubscription;
+  final ReportService _reportService = ReportService();
+  final FirebaseChatService _firebaseChatService = FirebaseChatService();
   String? currentToken;
+  final FirebasePushApi _firebasePushApi = FirebasePushApi();
 
   AuthNotifier() : super(const AsyncValue.loading()) {
     fetchUser();
@@ -85,10 +95,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
   }
 
   void setupUserDocListener(String uid) {
-    // Cancel any existing subscription
     _userDocSubscription?.cancel();
 
-    // Listen to the user document
     _userDocSubscription = FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
@@ -98,6 +106,14 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
         final userData = docSnapshot.data() as Map<String, dynamic>;
         final user = user_model.User.fromJson(userData);
         state = AsyncValue.data(user);
+
+        if (user.nbReport != _reportService.nbReport.value ||
+            _reportService.nbReport.value == null) {
+          AppLogger.w(
+              "User report count changed: ${_reportService.nbReport.value} -> ${user.nbReport}");
+          _reportService.nbReport.value = user.nbReport;
+        }
+
         isLoggedIn.value = true;
         WebSocketManager.instance.playerName = user.username;
         AppLogger.d("User data updated in real-time: ${user.username}");
@@ -112,23 +128,42 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
 
   // Create a new user
   Future<void> createAndFetchUser(
-      UserCredential userCredential, String endpoint) async {
+      UserCredential userCredential, String endpoint,
+      {bool isLogin = false}) async {
     state = const AsyncValue.loading();
     try {
       final idToken = await userCredential.user?.getIdToken();
-      final headers = {'Authorization': 'Bearer $idToken'};
+      final headers = {
+        'Authorization': 'Bearer $idToken',
+        'Content-Type': 'application/json',
+      };
+      final http.Response response;
 
-      final http.Response response =
-          await http.post(Uri.parse(endpoint), headers: headers);
+      if (isLogin) {
+        response = await http.post(Uri.parse(endpoint), headers: headers);
+      } else {
+        final fcmToken =
+            await _firebasePushApi.onSignUp(userCredential.user?.uid ?? '');
+        final body = jsonEncode({'fcmToken': fcmToken});
+        AppLogger.e("body is $body");
+        response =
+            await http.post(Uri.parse(endpoint), headers: headers, body: body);
+      }
 
       if (response.statusCode == 201) {
         final userJson = jsonDecode(response.body);
         final user = user_model.User.fromJson(userJson);
         state = AsyncValue.data(user);
         isLoggedIn.value = true;
+        if (isLogin) {
+          await _firebasePushApi.onLogin();
+        } else {
+          _firebasePushApi.setupFcmTokenListener();
+        }
         WebSocketManager.instance.playerName = user.username;
+
         if (userCredential.user != null) {
-          listenToTokenChanges(); // it will call  connect socket
+          listenToTokenChanges();
           setupUserDocListener(userCredential.user!.uid);
         }
       } else {
@@ -142,24 +177,59 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
     }
   }
 
-  Future<void> signIn(String identifier, String password) async {
+  Future<void> signIn(
+      String identifier, String password, BuildContext context) async {
     state = const AsyncValue.loading();
     try {
       AppLogger.d("Signing in...");
       final email = await auth_service.getEmailFromIdentifier(identifier);
 
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
+      final reportState = await isUserBanned(userCredential.user?.uid);
+
+      if (reportState != null && reportState.isBanned) {
+        await FirebaseAuth.instance.signOut();
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showToast(
+            context,
+            reportState.message,
+            type: ToastificationType.error,
+            duration: const Duration(seconds: 5),
+          );
+        });
+
+        state = const AsyncValue.data(null);
+
+        return;
+      }
+
       await fetchUser();
       isLoggedIn.value = true;
+      await _firebasePushApi.onLogin();
     } catch (e, stack) {
       AppLogger.e("Sign-in error: $e");
       state = AsyncValue.error(e, stack);
       isLoggedIn.value = false;
       throw Exception(getCustomError(e));
+    }
+  }
+
+  Future<ReportState?> isUserBanned(String? uid) async {
+    if (uid == null) {
+      return null;
+    }
+    try {
+      final reportState = await _reportService.getReportState(uid);
+      return reportState;
+    } catch (e) {
+      AppLogger.e("Error fetching report state: $e");
+      return ReportState(isBanned: false, message: "");
     }
   }
 
@@ -184,15 +254,52 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
     }
   }
 
-  Future<void> signWithGoogle({bool isLogin = true}) async {
+  Future<void> signWithGoogle(
+      {bool isLogin = true, BuildContext? context}) async {
     state = const AsyncValue.loading();
     try {
       AppLogger.d("Signing in with Google...");
 
-      await auth_service.signInWithGoogle(isLogin: isLogin);
+      final userCredential =
+          await auth_service.signInWithGoogle(isLogin: isLogin);
 
-      await fetchUser();
-      isLoggedIn.value = true;
+      if (isLogin && context != null) {
+        final reportState = await isUserBanned(userCredential.user?.uid);
+
+        if (reportState != null && reportState.isBanned) {
+          AppLogger.w(
+              "User is banned: ${reportState.message}, will terminate sign in process");
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            await FirebaseAuth.instance.signOut();
+            await GoogleSignIn().signOut();
+            showToast(
+              context,
+              reportState.message,
+              type: ToastificationType.error,
+              duration: const Duration(seconds: 5),
+            );
+          });
+          state = const AsyncValue.data(null);
+
+          return;
+        }
+      }
+
+      if (isLogin && userCredential.user?.email != null) {
+        final bool isOnline =
+            await auth_service.isUserOnline(userCredential.user!.email!);
+        if (isOnline) throw Exception("Vous êtes déjà connecté ailleurs.");
+      }
+
+      if (!isLogin) {
+        AppLogger.d("about to update profile");
+        await userCredential.user!
+            .updateProfile(displayName: userCredential.user?.displayName);
+      }
+
+      // attention, si le compte existe déjà, le backend ne va pas créer un nouveau user et le fcm ne sera pas écrit dans la bd
+      await createAndFetchUser(userCredential, auth_service.googleSignInUrl,
+          isLogin: isLogin);
     } catch (e, stack) {
       AppLogger.e("Google sign-in error: $e");
       state = AsyncValue.error(e, stack);
@@ -275,18 +382,24 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       }
 
       // Sign out regardless of whether the Firestore update succeeded
-      await FirebaseAuth.instance.signOut();
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await FirebaseAuth.instance.signOut();
+      });
 
       // Update state
       state = const AsyncValue.data(null);
       WebSocketManager.instance.disconnectFromSocket();
       isLoggedIn.value = false;
+      _reportService.resetParam();
+      _firebaseChatService.clearUserDetailsCache();
     } catch (e, stack) {
       AppLogger.e("Logout error: $e");
 
       // Even if there's an error, try to sign out and clean up state
       try {
-        await FirebaseAuth.instance.signOut();
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          await FirebaseAuth.instance.signOut();
+        });
       } catch (_) {
         // Ignore any error here
       }
@@ -294,6 +407,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       state = const AsyncValue.data(null);
       WebSocketManager.instance.disconnectFromSocket();
       isLoggedIn.value = false;
+      _reportService.resetParam();
+      _firebaseChatService.clearUserDetailsCache();
 
       throw Exception(getCustomError(e));
     }

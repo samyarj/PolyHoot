@@ -15,12 +15,12 @@
             class="chat-message user otherUser"
         >
             <div class="chat-header">
-                <app-avatar-banner [avatarUrl]="chatmessage.avatar" [bannerUrl]="chatmessage.banner" class="chat-avatar"> </app-avatar-banner>
+                <app-avatar-banner [avatarUrl]="chatmessage.avatar" [bannerUrl]="chatmessage.border" class="chat-avatar"> </app-avatar-banner>
                 <span class="chat-username">{{ chatmessage.author }}</span>
                 <div
                     *ngIf="(user | async)?.username !== chatmessage.author && chatmessage.uid"
                     class="report-button"
-                    (click)="reportUser(chatmessage.uid)"
+                    (click)="reportUser(chatmessage.uid, chatmessage.author)"
                     matTooltip="Signaler"
                     matTooltipClass="custom-tooltip"
                 >

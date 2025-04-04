@@ -1,6 +1,7 @@
 import 'package:client_leger/UI/friend-system/friend-request-notification.dart';
 import 'package:client_leger/UI/friend-system/qr-code-widget.dart';
 import 'package:client_leger/UI/global/avatar_banner_widget.dart';
+import 'package:client_leger/UI/player-polls/player_polls_notification.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/models/enums.dart';
 import 'package:client_leger/models/user.dart';
@@ -140,7 +141,6 @@ class _AppBarRightSectionState extends State<AppBarRightSection> {
                             height: 1,
                             color: colorScheme.tertiary.withOpacity(0.5)),
                       ),
-                      // Regular menu items
                       PopupMenuItem<int>(
                         value: 2,
                         child: Row(
@@ -237,29 +237,26 @@ class _AppBarRightSectionState extends State<AppBarRightSection> {
                           bottomLeft: Radius.circular(6),
                         ),
                       ),
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2), // Reduced vertical padding
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           AvatarBannerWidget(
                             avatarUrl: user?.avatarEquipped,
                             bannerUrl: user?.borderEquipped,
-                            size: 36, // Slightly smaller
+                            size: 36,
                             avatarFit: BoxFit.cover,
                           ),
                           SizedBox(width: 8),
                           Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment:
-                                MainAxisAlignment.center, // Center vertically
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 user?.username ?? 'Guest',
                                 style: TextStyle(
-                                  fontSize: 15, // Slightly smaller
+                                  fontSize: 15,
                                   fontWeight: FontWeight.bold,
                                   color: colorScheme.onPrimary,
                                 ),
@@ -267,7 +264,7 @@ class _AppBarRightSectionState extends State<AppBarRightSection> {
                               Text(
                                 'Coins: ${user?.coins ?? 0}',
                                 style: TextStyle(
-                                  fontSize: 13, // Slightly smaller
+                                  fontSize: 13,
                                   color: colorScheme.onPrimary,
                                 ),
                               ),
@@ -341,26 +338,9 @@ class _AppBarRightSectionState extends State<AppBarRightSection> {
                     ),
                   ),
                 ),
-                IconButton(
-                  icon: Icon(
-                    FontAwesomeIcons.bullhorn,
-                    size: 18,
-                    color: _pollActive
-                        ? colorScheme.secondary
-                        : colorScheme.tertiary,
-                  ),
-                  constraints: BoxConstraints(
-                    minWidth: 36,
-                    minHeight: 36,
-                  ),
-                  padding: EdgeInsets.zero,
-                  onPressed: () {
-                    setState(() {
-                      _pollActive = !_pollActive;
-                      _notificationActive = false;
-                    });
-                  },
-                ),
+
+                // Poll notification button
+                PlayerPollsNotification(),
               ],
             ),
           ),

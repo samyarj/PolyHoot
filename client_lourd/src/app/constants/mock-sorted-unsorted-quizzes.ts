@@ -35,7 +35,6 @@ export const MOCK_UNSORTED_QUIZZES = [
                 ],
             },
         ],
-        visibility: true,
     },
     {
         title: 'Les bases de CSS',
@@ -54,7 +53,6 @@ export const MOCK_UNSORTED_QUIZZES = [
                 ],
             },
         ],
-        visibility: true,
     },
     {
         title: 'Les bases de Python',
@@ -179,7 +177,6 @@ export const MOCK_SORTED_QUIZZES = [
                 ],
             },
         ],
-        visibility: true,
     },
     {
         title: 'Les bases de CSS',
@@ -198,7 +195,6 @@ export const MOCK_SORTED_QUIZZES = [
                 ],
             },
         ],
-        visibility: true,
     },
     {
         title: 'Concepts du développement web',

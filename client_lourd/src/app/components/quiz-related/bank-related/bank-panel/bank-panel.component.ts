@@ -34,7 +34,9 @@ export class BankPanelComponent {
         this.originalQuestion = JSON.parse(JSON.stringify(this.question));
         this.isEditMode = true;
     }
-
+    onQuestionSubmitted(newQuestion: Question): void {
+        this.question = newQuestion;
+    }
     cancelEdit() {
         this.question.type = this.originalQuestion.type;
         this.question.text = this.originalQuestion.text;
@@ -47,6 +49,7 @@ export class BankPanelComponent {
     }
 
     validQuestion(): boolean {
+        console.log(this.question);
         return this.questionValidationService.isQuestionValid(this.question);
     }
 

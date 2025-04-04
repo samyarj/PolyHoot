@@ -21,4 +21,5 @@ class Paths {
 
   static const String adminHome = '/admin_home';
   static const String adminUsers = '/admin_users';
+  static const String adminHistoryPolls = '/admin_history_polls';
 }
