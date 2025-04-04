@@ -88,6 +88,7 @@ export class PushNotifService implements OnModuleInit, OnModuleDestroy {
                         usersSnapshot.forEach(userDoc => {
                             const user = userDoc.data();
                             if (user.fcmToken && user.uid !== newMessage.uid && user.isOnline === true) {
+                                this.logger.debug(`User online with FCM token found: ${user.username}`);
                                 deviceUserMap.set(user.fcmToken, user.username);
                             }
                         });
@@ -137,6 +138,7 @@ export class PushNotifService implements OnModuleInit, OnModuleDestroy {
                         usersSnapshot.forEach(userDoc => {
                             const user = userDoc.data();
                             if (user.fcmToken && user.uid !== newMessage.uid && user.isOnline === true) {
+                                this.logger.debug(`User online with FCM token found: ${user.username}`);
                                 deviceUserMap.set(user.fcmToken, user.username);
                             }
                         });
@@ -167,7 +169,7 @@ export class PushNotifService implements OnModuleInit, OnModuleDestroy {
                 notification: { title, body },
             });
         } catch (error) {
-            this.logger.error("Error sending notification:", error);
+            this.logger.error(`Error sending notification: ${error} to ${token}`);
         }
     }
 
@@ -185,6 +187,7 @@ export class PushNotifService implements OnModuleInit, OnModuleDestroy {
         filteredUsers.forEach((userDoc) => {
             const user = userDoc.data();
             if (user.fcmToken && user.isOnline === true) {
+                this.logger.debug(`User online with FCM token found: ${user.username}`);
                 deviceUserMap.set(user.fcmToken, user.username);
             }
         });
@@ -212,6 +215,7 @@ export class PushNotifService implements OnModuleInit, OnModuleDestroy {
         filteredUsers.forEach((userDoc) => {
             const user = userDoc.data();
             if (user.fcmToken && user.isOnline === true) {
+                this.logger.debug(`User online with FCM token found: ${user.username}`);
                 deviceUserMap.set(user.fcmToken, user.username);
             }
         });

@@ -106,12 +106,16 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
         }
       }
 
+      AppLogger.e("going to iterate through channelsSnapshot");
+
       for (final channel in channelsSnapshot.docs) {
         final channelData = channel.data();
         final String channelId = channel.id; // channel name
+        AppLogger.e("in the loop channelId: $channelId");
 
         if (!channelData['users'].contains(getUserUid())) {
           //to do, if user was in the channel before and left, do cleanup
+          AppLogger.e("User is not in channel $channelId, we return");
           if (_subscriptions.containsKey(channel.id)) {
             AppLogger.e(
                 "User left channel ${channel.id}, cancelling subscription");
@@ -125,10 +129,11 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
               state = state.copyWith(unreadMessages: updatedUnread);
             }
           }
-          return;
+          continue;
         }
 
         // user is in channel
+        AppLogger.e("User is in channel $channelId");
 
         // if user joined channels for the first time and there are previous messages => do not count
         if (!state.unreadMessages.containsKey(channelId) &&

@@ -353,7 +353,7 @@ class _PlayerPollsNotificationState
                                       color: Theme.of(context)
                                           .colorScheme
                                           .onSurface,
-                                      fontSize: 14,
+                                      fontSize: 16,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -433,9 +433,9 @@ class _PlayerPollsNotificationState
                           Icon(
                             FontAwesomeIcons.bullhorn,
                             size: 18,
-                            color: _menuOpen || hasPolls
-                                ? colorScheme.tertiary
-                                : colorScheme.secondary,
+                            color: _menuOpen
+                                ? colorScheme.secondary
+                                : colorScheme.tertiary,
                           ),
                           if (hasPolls && !_menuOpen)
                             Positioned(

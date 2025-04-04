@@ -1,7 +1,4 @@
-import 'package:client_leger/UI/global/themed_progress_indicator.dart';
-import 'package:client_leger/models/polls/published-poll-model.dart';
 import 'package:client_leger/providers/messages/messages_notif_provider.dart';
-import 'package:client_leger/providers/user_provider.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,11 +11,17 @@ class ChatMessagesNotification extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<ChatMessagesNotification> createState() =>
-      _PlayerPollsNotificationState();
+      _ChatMessagesNotificationState();
 }
 
-class _PlayerPollsNotificationState
+class _ChatMessagesNotificationState
     extends ConsumerState<ChatMessagesNotification> {
+  bool _menuOpen = false;
+  bool _isForcingMenuRebuild = false;
+  final GlobalKey<PopupMenuButtonState> _popupMenuKey =
+      GlobalKey<PopupMenuButtonState>();
+  int _previousTotalUnreadMessages = 0;
+
   @override
   void initState() {
     super.initState();
@@ -26,9 +29,22 @@ class _PlayerPollsNotificationState
 
   @override
   dispose() {
-    AppLogger.i("Disposing message notif provider");
     ref.read(messageNotifProvider.notifier).dispose();
     super.dispose();
+  }
+
+  void _forceChatNotifMenuRebuild() {
+    // so that the list of popup menu items is updated on live when menu is open
+    AppLogger.e("Forcing menu rebuild");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_popupMenuKey.currentState != null) {
+        Navigator.of(_popupMenuKey.currentContext!)
+            .pop(); // Close the menu if open
+        _popupMenuKey.currentState?.showButtonMenu(); // Show it again
+        _isForcingMenuRebuild = true;
+        _menuOpen = true;
+      }
+    });
   }
 
   @override
@@ -38,6 +54,18 @@ class _PlayerPollsNotificationState
     final colorScheme = Theme.of(context).colorScheme;
 
     int totalUnreadMessages = messageNotifNotifier.getTotalUnreadMessages();
+
+    if (totalUnreadMessages != _previousTotalUnreadMessages && _menuOpen) {
+      _forceChatNotifMenuRebuild();
+    }
+    _previousTotalUnreadMessages = totalUnreadMessages;
+
+    String lastChannel = messageNotifState.unreadMessages.entries
+        .lastWhere(
+          (entry) => entry.value > 0,
+          orElse: () => MapEntry<String, int>('', 0),
+        )
+        .key;
 
     return Stack(
       children: [
@@ -55,23 +83,36 @@ class _PlayerPollsNotificationState
               color: colorScheme.surface,
             ),
           ),
-          child: PopupMenuButton<PublishedPoll>(
+          child: PopupMenuButton<String>(
             initialValue: null,
             tooltip: 'Notifications de messages',
             position: PopupMenuPosition.under,
             offset: const Offset(0, 8),
-            onCanceled: () {},
-            onOpened: () {},
+            key: _popupMenuKey,
+            onCanceled: () {
+              if (_isForcingMenuRebuild) {
+                _isForcingMenuRebuild = false;
+                return;
+              }
+              setState(() {
+                _menuOpen = false;
+              });
+            },
+            onOpened: () {
+              setState(() {
+                _menuOpen = true;
+              });
+            },
             itemBuilder: (context) {
               AppLogger.e("Building menu items");
               return [
-                PopupMenuItem<PublishedPoll>(
+                PopupMenuItem<String>(
                   enabled: false,
                   height: 56,
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Center(
                     child: Text(
-                      'Messages',
+                      'Nouveaux Messages',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,
@@ -81,7 +122,7 @@ class _PlayerPollsNotificationState
                     ),
                   ),
                 ),
-                PopupMenuItem<PublishedPoll>(
+                PopupMenuItem<String>(
                   enabled: false,
                   height: 1,
                   padding: EdgeInsets.zero,
@@ -92,34 +133,73 @@ class _PlayerPollsNotificationState
                         Theme.of(context).colorScheme.tertiary.withOpacity(0.3),
                   ),
                 ),
-                PopupMenuItem<PublishedPoll>(
-                  enabled: false,
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Center(
-                          child: totalUnreadMessages == 0
-                              ? Text(
-                                  "Aucun nouveau message",
-                                  style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.onSurface,
-                                    fontSize: 16,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                )
-                              : Text(
-                                  "$totalUnreadMessages nouveaux messages",
-                                  style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.onSurface,
-                                    fontSize: 16,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                )),
-                    ],
+                if (totalUnreadMessages == 0)
+                  PopupMenuItem<String>(
+                    enabled: false,
+                    padding: EdgeInsets.all(16),
+                    child: Center(
+                        child: Text(
+                      "Aucun nouveau message",
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 16,
+                      ),
+                      textAlign: TextAlign.center,
+                    )),
                   ),
-                ),
+                if (totalUnreadMessages > 0)
+                  ...messageNotifState.unreadMessages.entries
+                      .where((entry) => entry.value > 0)
+                      .expand(
+                        (entry) => [
+                          PopupMenuItem<String>(
+                            enabled: false,
+                            padding: EdgeInsets.all(16),
+                            child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    entry.key == "globalChat"
+                                        ? "General"
+                                        : entry.key,
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                      fontSize: 16,
+                                    ),
+                                    textAlign: TextAlign.start,
+                                  ),
+                                  Text(
+                                    "+${entry.value}",
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                      fontSize: 16,
+                                    ),
+                                    textAlign: TextAlign.start,
+                                  ),
+                                ]),
+                          ),
+                          if (lastChannel.isNotEmpty &&
+                              entry.key != lastChannel)
+                            PopupMenuItem<String>(
+                              enabled: false,
+                              height: 1,
+                              padding: EdgeInsets.zero,
+                              child: Divider(
+                                height: 1,
+                                thickness: 1,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .tertiary
+                                    .withOpacity(0.3),
+                              ),
+                            ),
+                        ],
+                      )
               ];
             },
             child: Container(
@@ -133,23 +213,32 @@ class _PlayerPollsNotificationState
                     child: Icon(
                       FontAwesomeIcons.solidMessage,
                       size: 20,
-                      color: colorScheme.secondary,
+                      color: _menuOpen
+                          ? colorScheme.secondary
+                          : colorScheme.tertiary,
                     ),
                   ),
                   if (totalUnreadMessages > 0)
                     Positioned(
-                      right: 8,
-                      bottom: 23,
+                      right: totalUnreadMessages > 99 ? 1 : 8,
+                      bottom: 18,
                       child: Container(
-                        padding: const EdgeInsets.all(4),
+                        padding: const EdgeInsets.all(3),
                         decoration: BoxDecoration(
+                          shape: BoxShape.circle,
                           color: Colors.red,
-                          borderRadius: BorderRadius.circular(10),
                         ),
                         constraints: const BoxConstraints(
-                          minWidth: 9,
-                          minHeight: 9,
+                          minWidth: 18,
+                          minHeight: 18,
                         ),
+                        child: Text(
+                            "${totalUnreadMessages > 99 ? '99+' : totalUnreadMessages}",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                            textAlign: TextAlign.center),
                       ),
                     ),
                 ],

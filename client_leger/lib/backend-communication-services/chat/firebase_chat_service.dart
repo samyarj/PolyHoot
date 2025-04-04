@@ -164,7 +164,6 @@ class FirebaseChatService {
           // Check if the user details are already cached
           if (_userDetailsCache.containsKey(uid)) {
             userDetails[uid] = _userDetailsCache[uid]!;
-            AppLogger.w("User details for $uid fetched from cache");
           } else if (FirebaseAuth.instance.currentUser != null) {
             final userDoc = await _usersCollection.doc(uid).get();
             if (userDoc.exists) {
