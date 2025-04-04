@@ -6,6 +6,7 @@ import 'package:client_leger/backend-communication-services/socket/websocketmana
 import 'package:client_leger/business/channel_manager.dart';
 import 'package:client_leger/models/chat_channels.dart';
 import 'package:client_leger/models/user.dart' as user_model;
+import 'package:client_leger/providers/messages/messages_notif_provider.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -125,6 +126,9 @@ class _SideBarState extends ConsumerState<SideBar>
   }
 
   Widget _buildGeneralChat() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(messageNotifProvider.notifier).markChatAsRead("globalChat");
+    });
     return ChatWindow(channel: "General");
   }
 
@@ -140,6 +144,12 @@ class _SideBarState extends ConsumerState<SideBar>
 
         if (isRecentChannelValid) {
           AppLogger.i("Recent channel is valid: $_recentChannel");
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref
+                .read(messageNotifProvider.notifier)
+                .markChatAsRead(_recentChannel);
+          });
+
           return ChatWindow(channel: _recentChannel!);
         } else {
           _recentChannel = null;

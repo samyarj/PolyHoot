@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:client_leger/utilities/logger.dart';
 
 const String ALERT_SOUND_PATH = "sounds/alert_sound.mp3";
+const String HOOT_SOUND_PATH = "sounds/owl.mp3";
 const double ALERT_SOUND_INTENSITY_DECREMENTATION = 0.01;
 const Duration ALERT_SOUND_DECREASE_INTERVAL = Duration(milliseconds: 200);
 const double DEFAULT_VOLUME = 0.5;
@@ -30,7 +31,7 @@ class SoundPlayer {
     }
   }
 
-  Future<void> play() async {
+  Future<void> play({String source = ALERT_SOUND_PATH}) async {
     // Don't play if already playing
     if (_isPlaying) {
       AppLogger.i("Sound is already playing, ignoring play request");
@@ -60,7 +61,7 @@ class SoundPlayer {
       _isPlaying = true;
       AppLogger.i("Playing alert sound at volume $_volume");
 
-      await _audioPlayer?.setSource(AssetSource(ALERT_SOUND_PATH));
+      await _audioPlayer?.setSource(AssetSource(source));
       await _audioPlayer?.setVolume(_volume);
       await _audioPlayer?.resume();
 
