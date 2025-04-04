@@ -111,6 +111,7 @@ const routes: Routes = [
             { path: 'modifyPoll/:id', component: CreatePollPageComponent, canActivate: [authGuardAdmin] },
             { path: 'history', component: HistoryPollPageComponent, canActivate: [authGuardAdmin] },
             { path: 'history/:id', component: HistoryPollPageComponent, canActivate: [authGuardAdmin] },
+            { path: 'history/:id', component: HistoryPollPageComponent, canActivate: [authGuardAdmin] },
         ],
     },
 ];

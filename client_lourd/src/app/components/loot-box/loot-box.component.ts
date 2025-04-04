@@ -10,6 +10,7 @@ export class LootBoxComponent {
     @Input() openFunction!: (id: number) => void;
     @Input() id!: number;
     @Input() lootBoxContainer!: LootBoxContainer;
+    @Input() isClaimingBox!: boolean;
     isMoved = false;
     rewardRarity = RewardRarity; // to use enum in HTML
     rewardType = RewardType;

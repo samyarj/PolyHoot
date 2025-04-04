@@ -235,19 +235,19 @@
                             <div *ngIf="filteredJoinedChannels().length === 0" class="no-channels-message">
                                 <p>Vous n'avez rejoint aucun canal. Veuillez en rejoindre un.</p>
                             </div>
-                            <div *ngFor="let channel of filteredJoinedChannels()" (click)="selectChannel(channel)" class="my-channels">
-                                <div>{{ channel }}</div>
+                            <div *ngFor="let channelName of filteredJoinedChannels()" (click)="selectChannel(channelName)" class="my-channels">
+                                <div>{{ channelName }}</div>
                                 <div class="channel-buttons">
                                     <button
                                         [disabled]="this.isWorkingWithChannel"
-                                        (click)="quitChannel(channel, $event)"
+                                        (click)="quitChannel(channelName, $event)"
                                         class="leave-channel-button"
                                     >
                                         <i class="fa-solid fa-right-from-bracket"></i>
                                     </button>
                                     <button
                                         [disabled]="this.isWorkingWithChannel"
-                                        (click)="deleteChannel(channel, $event)"
+                                        (click)="deleteChannel(channelName, $event)"
                                         class="delete-channel-button"
                                     >
                                         <i class="fa-solid fa-trash"></i>

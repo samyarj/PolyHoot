@@ -220,6 +220,7 @@ export class GameGateway {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         const isLocked = game.toggleGameLock();
+        console.log('isLocked', isLocked);
         this.server.to(roomId).emit(GameEvents.AlertLockToggled, isLocked);
         this.server.emit(GameEvents.LobbyToggledLock, { isLocked, roomId });
     }

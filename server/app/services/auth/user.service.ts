@@ -12,7 +12,7 @@ export class UserService {
     private usersSocketIdMap = new Map<string, string>();
     private readonly logger = new Logger(UserService.name);
 
-    constructor(private readonly cloudinaryService: CloudinaryService) { }
+    constructor(private readonly cloudinaryService: CloudinaryService) {}
 
     addUserToMap(socketId: string, uid: string) {
         if (!this.isUserInMap(socketId)) {
@@ -75,7 +75,7 @@ export class UserService {
     }
 
     // Sign up a new user and return user data with token
-    async createUserInFirestore(uid: string, username: string, email: string, fcmToken?: string): Promise<User> {
+    async createUserInFirestore(uid: string, username: string, email: string, fcmToken?: string, avatarURL?: string): Promise<User> {
         // Check if the username or email already exists in Firestore
         const usernameExists = await this.isUsernameTaken(username);
         const { emailExists } = await this.isEmailTaken(email);
@@ -88,7 +88,7 @@ export class UserService {
             uid,
             username,
             email,
-            avatarEquipped: DEFAULT_AVATAR_URL,
+            avatarEquipped: avatarURL ? avatarURL : DEFAULT_AVATAR_URL,
             role: 'player',
             fcmToken: fcmToken ? fcmToken : '', // Ensure fcmToken is not null or undefined
         };
