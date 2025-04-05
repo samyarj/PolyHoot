@@ -362,83 +362,98 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                 valueListenable:
                                     _inGameChatManager.quickRepliesNotifier,
                                 builder: (context, quickReplies, _) {
-                                  return Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                  return Column(
                                     children: [
-                                      Icon(
-                                        Icons.chevron_left,
-                                        color: colorScheme.secondary
-                                            .withAlpha(200),
-                                      ),
-                                      Container(
-                                        width: 325,
-                                        alignment: Alignment.center,
-                                        child: SingleChildScrollView(
-                                          scrollDirection: Axis.horizontal,
-                                          child: Row(
-                                            spacing: 8.0,
-                                            children: [
-                                              for (final reply in quickReplies)
-                                                ElevatedButton(
-                                                  style: ButtonStyle(
-                                                    padding:
-                                                        WidgetStateProperty.all(
-                                                      EdgeInsets.symmetric(
-                                                          horizontal: 16,
-                                                          vertical: 8),
-                                                    ),
-                                                    backgroundColor:
-                                                        WidgetStateProperty.all(
-                                                      Theme.of(context)
-                                                          .colorScheme
-                                                          .secondary
-                                                          .withAlpha(
-                                                              200), // Background color
-                                                    ),
-                                                    shape:
-                                                        WidgetStateProperty.all(
-                                                      RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                                50), // Rounded corners
-                                                        side: BorderSide(
-                                                          color: colorScheme
-                                                              .onPrimary
-                                                              .withAlpha(200),
-                                                          width: 3,
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          if (quickReplies.isNotEmpty)
+                                            Icon(
+                                              Icons.chevron_left,
+                                              color: colorScheme.secondary
+                                                  .withAlpha(200),
+                                            ),
+                                          Container(
+                                            width: 325,
+                                            alignment: Alignment.center,
+                                            child: SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              child: Row(
+                                                spacing: 8.0,
+                                                children: [
+                                                  for (final reply
+                                                      in quickReplies)
+                                                    ElevatedButton(
+                                                      style: ButtonStyle(
+                                                        padding:
+                                                            WidgetStateProperty
+                                                                .all(
+                                                          EdgeInsets.symmetric(
+                                                              horizontal: 16,
+                                                              vertical: 8),
+                                                        ),
+                                                        backgroundColor:
+                                                            WidgetStateProperty
+                                                                .all(
+                                                          Theme.of(context)
+                                                              .colorScheme
+                                                              .secondary
+                                                              .withAlpha(
+                                                                  200), // Background color
+                                                        ),
+                                                        shape:
+                                                            WidgetStateProperty
+                                                                .all(
+                                                          RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        50), // Rounded corners
+                                                            side: BorderSide(
+                                                              color: colorScheme
+                                                                  .onPrimary
+                                                                  .withAlpha(
+                                                                      200),
+                                                              width: 3,
+                                                            ),
+                                                          ),
                                                         ),
                                                       ),
+                                                      onPressed: () {
+                                                        _textController.text =
+                                                            reply;
+                                                        sendMessage();
+                                                      },
+                                                      child: Text(
+                                                        reply,
+                                                        style: TextStyle(
+                                                            fontSize: 16,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .colorScheme
+                                                                .onTertiary),
+                                                      ),
                                                     ),
-                                                  ),
-                                                  onPressed: () {
-                                                    _textController.text =
-                                                        reply;
-                                                    sendMessage();
-                                                  },
-                                                  child: Text(
-                                                    reply,
-                                                    style: TextStyle(
-                                                        fontSize: 16,
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .onTertiary),
-                                                  ),
-                                                ),
-                                            ],
+                                                ],
+                                              ),
+                                            ),
                                           ),
-                                        ),
+                                          if (quickReplies.isNotEmpty)
+                                            Icon(
+                                              Icons.chevron_right,
+                                              color: colorScheme.secondary
+                                                  .withAlpha(200),
+                                            ),
+                                        ],
                                       ),
-                                      Icon(
-                                        Icons.chevron_right,
-                                        color: colorScheme.secondary
-                                            .withAlpha(200),
-                                      ),
+                                      quickReplies.isNotEmpty
+                                          ? SizedBox(height: 8)
+                                          : SizedBox(height: 56),
                                     ],
                                   );
                                 },
                               ),
-                              SizedBox(height: 8),
                               TapRegion(
                                 onTapOutside: (_) =>
                                     FocusScope.of(context).unfocus(),
