@@ -56,9 +56,9 @@ class InGameChatService {
       _userDetails = {};
       AppLogger.w("reset timer and messages");
       inGameChatMessagesNotifier.value = [];
-      quickRepliesNotifier.value = [];
       quickRepliesTimer?.cancel();
       quickRepliesTimer = null;
+      quickRepliesNotifier.value = [];
     }
   }
 
