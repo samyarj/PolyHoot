@@ -2,6 +2,7 @@
 
 # compiled output
 /dist
+
 /tmp
 /out-tsc
 /.angular/cache
@@ -10,6 +11,7 @@
 
 # Electron build 
 /build
+/electron-build
 
 # dependencies
 /node_modules

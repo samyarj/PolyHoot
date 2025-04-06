@@ -27,6 +27,7 @@ export class Player {
     uid: string;
     equippedAvatar: string;
     equippedBorder: string;
+    lastAnswerCorrect: boolean;
 
     constructor(name: string, isOrganizer: boolean, @ConnectedSocket() client: Socket, user: User) {
         this.name = name;
@@ -46,6 +47,7 @@ export class Player {
         this.uid = user.uid;
         this.equippedAvatar = user.avatarEquipped;
         this.equippedBorder = user.borderEquipped;
+        this.lastAnswerCorrect = null;
     }
 
     prepareForNextQuestion() {
@@ -58,6 +60,7 @@ export class Player {
 
     updatePlayerPoints(currentQuestion: Question) {
         const correct = this.verifyIfAnswersCorrect(currentQuestion);
+        this.lastAnswerCorrect = correct;
         if (correct) {
             if (this.isFirst) this.points += currentQuestion.points * BONUS_MULTIPLIER;
             else if (this.exactAnswer) this.points += currentQuestion.points * BONUS_MULTIPLIER;

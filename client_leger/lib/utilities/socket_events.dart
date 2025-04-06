@@ -140,7 +140,9 @@ enum ChatEvents {
   MessageAdded('messageAdded'),
   GetHistory('getHistory'),
   RoomLeft('roomLeft'),
-  ChatStatusChange('chatStatusChange');
+  ChatStatusChange('chatStatusChange'),
+  QuickRepliesGenerated('quick_replies_generated'),
+  RequestQuickReplies('request_quick_replies');
 
   final String value;
   const ChatEvents(this.value);

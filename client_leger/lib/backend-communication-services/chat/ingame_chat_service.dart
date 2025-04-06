@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:client_leger/backend-communication-services/chat/firebase_chat_service.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/ingame_chat_messages.dart';
@@ -23,9 +24,19 @@ class InGameChatService {
   final inGameChatMessagesNotifier = ValueNotifier<List<InGameChatMessage>>([]);
 
   String? currentRoomId;
+  Timer? quickRepliesTimer;
+
+  final quickRepliesNotifier = ValueNotifier<List<String>>([]);
 
   factory InGameChatService() {
     return _instance;
+  }
+
+  requestQuickReplies() {
+    if (_socketManager.roomId != null) {
+      _socketManager
+          .webSocketSender(ChatEvents.RequestQuickReplies.value, {_username});
+    }
   }
 
   void reset() {
@@ -36,14 +47,28 @@ class InGameChatService {
           "Resetting InGameChatService because we're not in a game anymore");
       _socketManager.socket?.off(ChatEvents.RoomLeft.value);
       _socketManager.socket?.off(ChatEvents.MessageAdded.value);
+      _socketManager.socket?.off(ChatEvents.QuickRepliesGenerated.value);
       currentRoomId = null;
       _username = "";
       _avatar = null;
       _border = null;
       _uid = null;
       _userDetails = {};
+      AppLogger.w("reset timer and messages");
       inGameChatMessagesNotifier.value = [];
+      quickRepliesTimer?.cancel();
+      quickRepliesTimer = null;
+      quickRepliesNotifier.value = [];
     }
+  }
+
+  void startQuickRepliesInterval() {
+    quickRepliesTimer = Timer.periodic(
+      const Duration(seconds: 8),
+      (timer) {
+        requestQuickReplies();
+      },
+    );
   }
 
   void setUserInfosAndInitialize(
@@ -61,6 +86,10 @@ class InGameChatService {
       currentRoomId = _socketManager.roomId;
       configureChatSocketFeatures();
       getHistory();
+      if (quickRepliesTimer == null) {
+        AppLogger.i("Starting quick replies timer");
+        startQuickRepliesInterval();
+      }
     }
   }
 
@@ -123,6 +152,17 @@ class InGameChatService {
 
   void configureChatSocketFeatures() {
     AppLogger.i("configuring ChatSocketFeatures");
+
+    _socketManager.webSocketReceiver(ChatEvents.QuickRepliesGenerated.value,
+        (quickReplies) {
+      try {
+        List<String> replies = quickReplies.cast<String>();
+        quickRepliesNotifier.value = replies;
+      } catch (e) {
+        AppLogger.e("Error parsing quick replies: $e");
+      }
+    });
+
     _socketManager.webSocketReceiver(ChatEvents.MessageAdded.value,
         (newMessage) async {
       final message = InGameChatMessage.fromJson(newMessage);

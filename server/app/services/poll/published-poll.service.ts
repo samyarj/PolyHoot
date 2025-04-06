@@ -113,7 +113,6 @@ export class PublishedPollService implements OnModuleInit {
                 batch.update(doc.ref, { expired: true });
             }
         });
-
         await batch.commit();
     }
 }

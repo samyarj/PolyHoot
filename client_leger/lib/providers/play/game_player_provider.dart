@@ -1,3 +1,4 @@
+import 'package:client_leger/backend-communication-services/chat/ingame_chat_service.dart';
 import 'package:client_leger/classes/sound_player.dart';
 import 'package:client_leger/models/enums.dart';
 import 'package:client_leger/models/player_data.dart';
@@ -96,6 +97,7 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
   final WebSocketManager _socketManager = WebSocketManager.instance;
   SoundPlayer alertSoundPlayer = SoundPlayer();
   List<PlayerData> resultPlayerList = [];
+  final ingameChatService = InGameChatService();
 
   GamePlayerNotifier()
       : super(GamePlayerState(
@@ -215,6 +217,9 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
       if (isExactAnswer) {
         feedback = ChoiceFeedback.Exact;
       }
+
+      // request quick replies when receiving correction from server
+      ingameChatService.requestQuickReplies();
 
       state = state.copyWith(
         playerPoints: points,

@@ -38,6 +38,7 @@ import { LootBoxService } from './services/lootbox/lootbox.service';
 import { PollService } from './services/poll/poll.service';
 import { PublishedPollService } from './services/poll/published-poll.service';
 import { QuestionService } from './services/question/question.service';
+import { QuickReplyService } from './services/quick-reply/quick-reply.service';
 import { QuizAutofillService } from './services/quiz-autofill/quiz-autofill.service';
 import { QuizService } from './services/quiz/quiz.service';
 import { ShopService } from './services/shop.service';
@@ -83,6 +84,7 @@ import { PollPushNotifService } from './services/push-notif/poll-push-notif.serv
         ShopService,
         PollService,
         PublishedPollService,
+        QuickReplyService,
         PollPushNotifService,
         QuizAutofillService,
     ],

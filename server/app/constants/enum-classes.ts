@@ -5,6 +5,8 @@ export enum ChatEvents {
     GetHistory = 'getHistory',
     RoomLeft = 'roomLeft',
     ChatStatusChange = 'chatStatusChange',
+    QuickRepliesGenerated = 'quick_replies_generated',
+    RequestQuickReplies = 'request_quick_replies',
 }
 export enum QuestionType {
     QCM = 'QCM',
@@ -98,7 +100,7 @@ export enum JoinEvents {
     CanJoin = 'canJoinGame',
     JoinSuccess = 'onJoinGameSuccess',
     LobbyCreated = 'lobbyCreated',
-    PlayerJoined ='playerjoined',
+    PlayerJoined = 'playerjoined',
 }
 
 export enum JoinErrors {

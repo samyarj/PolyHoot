@@ -248,27 +248,6 @@ export class UserService {
         }
     }
 
-    async verifyGoogleToken(idToken: string): Promise<{ uid: string; email: string; displayName: string }> {
-        try {
-            const decodedToken = await this.adminAuth.verifyIdToken(idToken);
-            const userRecord = await this.adminAuth.getUser(decodedToken.uid);
-
-            // Verify that the token is from Google
-            const isGoogleProvider = userRecord.providerData.some((provider) => provider.providerId === 'google.com');
-            if (!isGoogleProvider) {
-                throw new Error('Invalid authentication provider');
-            }
-
-            return {
-                uid: decodedToken.uid,
-                email: decodedToken.email || '',
-                displayName: userRecord.displayName || '',
-            };
-        } catch (error) {
-            throw new Error('Invalid or expired Google token');
-        }
-    }
-
     async updateUserCoins(uid: string, bet: number): Promise<boolean> {
         const userRef = await this.firestore.collection('users').doc(uid);
         const userDoc = await userRef.get();
