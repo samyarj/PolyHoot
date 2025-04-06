@@ -49,7 +49,6 @@ export class BankPanelComponent {
     }
 
     validQuestion(): boolean {
-        console.log(this.question);
         return this.questionValidationService.isQuestionValid(this.question);
     }
 

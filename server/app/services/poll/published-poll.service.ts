@@ -101,13 +101,6 @@ export class PublishedPollService implements OnModuleInit {
         snapshot.forEach((doc) => {
             const poll = doc.data();
             const pollEndDate = new Date(poll.endDate);
-            console.log(`Données du sondage:`, {
-                id: doc.id,
-                endDateStocké: poll.endDate,
-                endDateInterprété: pollEndDate.toISOString(),
-                maintenantEST: now.toISOString(),
-            });
-
             // 3. Comparaison
             if (pollEndDate <= now) {
                 batch.update(doc.ref, { expired: true });

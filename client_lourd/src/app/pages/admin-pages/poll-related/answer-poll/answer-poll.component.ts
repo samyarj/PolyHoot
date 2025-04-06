@@ -46,13 +46,7 @@ export class AnswerPollComponent implements OnInit, OnDestroy {
         this.user = this.authService.getUser();
     }
     ngOnInit(): void {
-        /* this.data.pollStatus$.pipe(takeUntil(this.destroy$)).subscribe((currentPoll) => {
-            if (currentPoll?.expired) {
-                this.dialogRef.close('expired');
-            }
-        }); */
         const pollId = this.route.snapshot.paramMap.get('id');
-        console.log('pollId: ', pollId);
         this.historyPublishedPollService
             .watchPublishedPolls()
             .pipe(
@@ -75,6 +69,7 @@ export class AnswerPollComponent implements OnInit, OnDestroy {
             });
     }
     ngOnDestroy(): void {
+        this.resetPoll();
         this.destroy$.next();
         this.destroy$.complete();
     }
@@ -104,7 +99,6 @@ export class AnswerPollComponent implements OnInit, OnDestroy {
         }
     }
     onSubmit(): void {
-        // this.dialogRef.close(this.playerAnswer);
         if (this.user && this.user.uid && this.poll.id) {
             this.http.patch(`${environment.serverUrl}/published-polls/${this.user.uid}/addPollsAnswered/`, { id: this.poll.id }).subscribe({
                 error: (error) => {
@@ -112,18 +106,25 @@ export class AnswerPollComponent implements OnInit, OnDestroy {
                 },
             });
         }
+        this.http.patch<PublishedPoll[]>(`${environment.serverUrl}/published-polls/${this.poll.id}`, this.playerAnswer).subscribe({
+            error: (error) => {
+                console.error("Erreur lors de l'envoi du résultat:", error);
+            },
+        });
+        this.toastr.success('Sondage complété!');
+        this.router.navigate(['/']);
     }
 
     onClose(): void {
         this.router.navigate(['/']);
     }
-    /*  private updateUserPollsAnswered(id: string | undefined) {
-        if (this.user && this.user.uid && id) {
-            this.http.patch(`${environment.serverUrl}/published-polls/${this.user.uid}/addPollsAnswered/`, { id }).subscribe({
-                error: (error) => {
-                    console.error('Erreur lors de la mise à jour de pollsAnswered:', error);
-                },
-            });
-        }
-    } */
+    private resetPoll() {
+        this.state = PollState.NotStarted;
+        this.currentIndex = 0;
+        this.selectedChoice = NO_SELECTION;
+        this.currentQuestion = {} as Question;
+        this.playerAnswer = [];
+        this.errorMessage = null;
+        this.poll = EMPTY_PUBLISHED_POLL;
+    }
 }

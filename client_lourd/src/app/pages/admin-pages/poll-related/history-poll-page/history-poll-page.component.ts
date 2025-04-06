@@ -63,7 +63,14 @@ export class HistoryPollPageComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         // S'abonner aux changements dans les sondages publiés
         this.publishedPollsSubscription = this.historyPublishedPollService.watchPublishedPolls().subscribe((publishedPolls) => {
-            this.publishedPolls = publishedPolls.filter((poll) => poll.expired);
+            this.publishedPolls = publishedPolls
+                .filter((poll) => poll.expired)
+                .sort((a, b) => {
+                    // Convertir les dates en timestamps pour comparaison
+                    const dateA = new Date(a.endDate!).getTime();
+                    const dateB = new Date(b.endDate!).getTime();
+                    return dateA - dateB; // Tri ascendant (plus petite date en premier)
+                });
             this.initRouteListener();
         });
     }

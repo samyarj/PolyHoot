@@ -29,7 +29,6 @@ export class LoginFormComponent {
             password: ['', Validators.required],
         });
         this.loginForm.valueChanges.subscribe(() => {
-            console.log('test');
             this.cdr.detectChanges();
         });
     }

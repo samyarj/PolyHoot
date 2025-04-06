@@ -40,7 +40,6 @@ export class PublishedPollController {
     })
     @Delete('delete')
     async deleteExpiredPolls(@Res() response: Response) {
-        console.log("deleteExpiredPolls");
         try {
             await this.publishedPollService.deleteExpiredPolls();
             response.status(HttpStatus.OK).send();
@@ -75,7 +74,6 @@ export class PublishedPollController {
     @ApiBadRequestResponse({ description: 'Bad request' })
     @Patch('/:uid/addPollsAnswered/')
     async updatePollsAnswered(@Param('uid') uid: string, @Body('id') id: string, @Res() response: Response) {
-        console.log("rentré avec uid ", uid, " et poll.id ", id)
         try {
             await this.userService.addPollAnswered(uid, id);
             response.status(HttpStatus.OK).json({ message: 'Poll ID ajouté à pollsAnswered avec succès' });
