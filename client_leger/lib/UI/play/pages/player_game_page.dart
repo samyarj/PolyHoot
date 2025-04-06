@@ -250,6 +250,10 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
                         TapRegion(
                           onTapOutside: (_) => FocusScope.of(context).unfocus(),
                           child: TextField(
+                            textInputAction: TextInputAction.done,
+                            onSubmitted: (value) {
+                              FocusScope.of(context).unfocus();
+                            },
                             controller: _QRLanswerController,
                             maxLength: MAX_CHARACTERS,
                             enabled: !isSubmissionDisabled(playerGameState),
