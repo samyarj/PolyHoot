@@ -27,8 +27,7 @@ class _SideBarState extends ConsumerState<SideBar>
   final _channelManager = ChannelManager();
   StreamSubscription<List<ChatChannel>>? _chatChannelsSubscription;
   final ValueNotifier<List<ChatChannel>> _channelsNotifier = ValueNotifier([]);
-
-  String? _recentChannel;
+  late final MessageNotifNotifier _notifier;
 
   void _updateTabController() {
     final currentRoomId = socketManager.currentRoomIdNotifier.value;
@@ -56,6 +55,8 @@ class _SideBarState extends ConsumerState<SideBar>
       _channelsNotifier.value = channels;
     });
 
+    _notifier = ref.read(messageNotifProvider.notifier);
+
     super.initState();
   }
 
@@ -64,7 +65,7 @@ class _SideBarState extends ConsumerState<SideBar>
     if (socketManager.currentRoomIdNotifier.value == null) {
       index--;
     }
-    _recentChannel = channel;
+    _notifier.recentChannel = channel;
     _tabController.animateTo(index);
   }
 
@@ -138,21 +139,22 @@ class _SideBarState extends ConsumerState<SideBar>
     return ValueListenableBuilder<List<ChatChannel>>(
       valueListenable: _channelsNotifier,
       builder: (context, channels, _) {
-        final isRecentChannelValid = _recentChannel != null &&
+        final isRecentChannelValid = _notifier.recentChannel != null &&
             channels.any((channel) =>
-                channel.name == _recentChannel && channel.isUserInChannel);
+                channel.name == _notifier.recentChannel &&
+                channel.isUserInChannel);
 
         if (isRecentChannelValid) {
-          AppLogger.i("Recent channel is valid: $_recentChannel");
+          AppLogger.i("Recent channel is valid: ${_notifier.recentChannel} ");
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ref
                 .read(messageNotifProvider.notifier)
-                .markChatAsRead(_recentChannel);
+                .markChatAsRead(_notifier.recentChannel);
           });
 
-          return ChatWindow(channel: _recentChannel!);
+          return ChatWindow(channel: _notifier.recentChannel!);
         } else {
-          _recentChannel = null;
+          _notifier.recentChannel = null;
           return Center(
             child: Text(
               'Aucun canal courant.',

@@ -6,6 +6,7 @@ import 'package:client_leger/backend-communication-services/error-handlers/globa
 import 'package:client_leger/backend-communication-services/report/report_service.dart';
 import 'package:client_leger/business/channel_manager.dart';
 import 'package:client_leger/models/chat_message.dart';
+import 'package:client_leger/providers/messages/messages_notif_provider.dart';
 import 'package:client_leger/providers/user_provider.dart';
 import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
@@ -33,6 +34,7 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
   List<ChatMessage> _allMessagesDisplayed = [];
   bool isLoadingInitialMessages = true;
   StreamSubscription<List<ChatMessage>>? _messagesSubscription;
+  late final MessageNotifNotifier _notifier;
   bool _isSending = false;
   final ReportService _reportService = ReportService();
 
@@ -41,6 +43,11 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
     _channelManager = ChannelManager();
 
     _subscribeToMessages();
+
+    _notifier = ref.read(messageNotifProvider.notifier);
+
+    _notifier.currentDisplayedChannel =
+        widget.channel == "General" ? "globalChat" : widget.channel;
 
     super.initState();
   }
@@ -100,6 +107,7 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
   void dispose() {
     _textController.dispose();
     _messagesSubscription?.cancel();
+    _notifier.currentDisplayedChannel = null;
     super.dispose();
   }
 

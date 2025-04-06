@@ -33,6 +33,11 @@ class MessageNotifState {
 class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   SoundPlayer owlSoundPlayer = SoundPlayer();
+  String?
+      currentDisplayedChannel; // le channel displayed présentement pour ne pas envoyer de notif!
+  String?
+      recentChannel; /* ca n'a pas rapport avec la feature de notif, c'est juste pour se 
+      souvenir du channel le plus recent quand on collapse la sidebar et on l'ouvre de nouveau */
 
   final Map<String, StreamSubscription> _subscriptions =
       {}; // key: channelId, value: subscription
@@ -65,7 +70,8 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
 
         for (final change in snapshot.docChanges) {
           if (change.type == DocumentChangeType.added &&
-              change.doc.data()?['uid'] != getUserUid()) {
+              change.doc.data()?['uid'] != getUserUid() &&
+              currentDisplayedChannel != 'globalChat') {
             owlSoundPlayer.stop();
             _playSound();
             final int newCount = (state.unreadMessages["globalChat"] ?? 0) + 1;
@@ -156,7 +162,8 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
             }
             for (final change in messagesSnapshot.docChanges) {
               if (change.type == DocumentChangeType.added &&
-                  change.doc.data()?['uid'] != getUserUid()) {
+                  change.doc.data()?['uid'] != getUserUid() &&
+                  currentDisplayedChannel != channelId) {
                 owlSoundPlayer.stop();
                 _playSound();
                 final int newCount =
@@ -205,7 +212,7 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
   @override
   void dispose() {
     AppLogger.e("Disposing message notif provider");
-     owlSoundPlayer.stop();
+    owlSoundPlayer.stop();
     _chatChannelsSub?.cancel();
     for (final subscription in _subscriptions.values) {
       subscription.cancel();
