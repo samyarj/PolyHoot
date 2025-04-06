@@ -14,7 +14,7 @@
                                 placeholder="Entrez le titre du sondage"
                                 name="title"
                                 required
-                                maxlength="30"
+                                maxlength="40"
                                 #title="ngModel"
                             />
                             <small class="text-danger">
@@ -58,6 +58,7 @@
                                 placeholder="Entrez votre question."
                                 name="text"
                                 #text="ngModel"
+                                maxlength="60"
                                 required
                             />
                             <small class="text-danger" *ngIf="isQuestionTextEmpty()">Entrez votre question</small>
@@ -78,6 +79,7 @@
                                         name="answer{{ choice.text }}"
                                         required
                                         #answer="ngModel"
+                                        maxlength="50"
                                     />
                                     <div class="button-section">
                                         <button

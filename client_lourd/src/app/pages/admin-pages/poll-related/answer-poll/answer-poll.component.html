@@ -12,7 +12,7 @@
             <strong>Questions:</strong>
             <ol class="questions-list">
                 <li class="question-list-element" *ngFor="let question of poll.questions">
-                    <span>{{ question.text + ' : ' + question.type }}</span>
+                    <span>{{ question.text }}</span>
                 </li>
             </ol>
         </div>
@@ -49,30 +49,3 @@
     </button>
     <button *ngIf="state === 'finished'" class="custom-button-big" (click)="onSubmit()">Soumettre vos réponses</button>
 </div>
-
-<!--  <div class="poll-container">
-    <div *ngIf="state === PollState.NotStarted" class="start-screen">
-        <h2>{{ poll.title }}</h2>
-        <button (click)="startPoll()">Commencer le sondage</button>
-    </div>
-
-    <div *ngIf="state === PollState.Started" class="question-screen">
-        <h3>Question {{ currentIndex + 1 }}/{{ poll.questions.length }}</h3>
-        <p>{{ currentQuestion?.text }}</p>
-        
-        <div *ngFor="let choice of currentQuestion?.choices; let i = index" 
-             class="choice" 
-             [class.selected]="selectedChoice === i"
-             (click)="selectChoice(i)">
-            {{ choice.text }}
-        </div>
-        
-        <button (click)="nextQuestion()">Suivant</button>
-    </div>
-
-    <div *ngIf="state === PollState.Finished" class="finish-screen">
-        <h2>Merci d'avoir participé!</h2>
-        <button (click)="onSubmit()">Soumettre les réponses</button>
-        <button (click)="onClose()">Annuler</button>
-    </div>
-</div> -->
