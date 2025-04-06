@@ -353,7 +353,7 @@ class _PlayerPollsNotificationState
                                       color: Theme.of(context)
                                           .colorScheme
                                           .onSurface,
-                                      fontSize: 14,
+                                      fontSize: 16,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -430,20 +430,17 @@ class _PlayerPollsNotificationState
                       alignment: Alignment.center,
                       child: Stack(
                         children: [
-                          Container(
-                            padding: EdgeInsets.all(13),
-                            child: Icon(
-                              FontAwesomeIcons.bullhorn,
-                              size: 18,
-                              color: _menuOpen || hasPolls
-                                  ? colorScheme.tertiary
-                                  : colorScheme.secondary,
-                            ),
+                          Icon(
+                            FontAwesomeIcons.bullhorn,
+                            size: 18,
+                            color: _menuOpen
+                                ? colorScheme.secondary
+                                : colorScheme.tertiary,
                           ),
                           if (hasPolls && !_menuOpen)
                             Positioned(
-                              right: 12,
-                              bottom: 6,
+                              right: -1,
+                              bottom: 0,
                               child: Container(
                                 padding: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(
@@ -451,8 +448,8 @@ class _PlayerPollsNotificationState
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 constraints: const BoxConstraints(
-                                  minWidth: 9,
-                                  minHeight: 9,
+                                  minWidth: 7,
+                                  minHeight: 7,
                                 ),
                               ),
                             ),

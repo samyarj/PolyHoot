@@ -6,6 +6,7 @@ import 'package:client_leger/backend-communication-services/error-handlers/globa
 import 'package:client_leger/backend-communication-services/report/report_service.dart';
 import 'package:client_leger/business/channel_manager.dart';
 import 'package:client_leger/models/chat_message.dart';
+import 'package:client_leger/providers/messages/messages_notif_provider.dart';
 import 'package:client_leger/providers/user_provider.dart';
 import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
@@ -29,20 +30,32 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   late ChannelManager _channelManager;
-  late Timestamp? lastMessageDate; // Track last message date for pagination
+  Timestamp? lastMessageDate; // Track last message date for pagination
   List<ChatMessage> _allMessagesDisplayed = [];
   bool isLoadingInitialMessages = true;
   StreamSubscription<List<ChatMessage>>? _messagesSubscription;
+  late final MessageNotifNotifier _notifier;
   bool _isSending = false;
   final ReportService _reportService = ReportService();
 
   @override
   void initState() {
+    super.initState();
+
+    _notifier = ref.read(messageNotifProvider.notifier);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final firestoreChannelName =
+          widget.channel == "General" ? "globalChat" : widget.channel;
+
+      _notifier.currentDisplayedChannel = firestoreChannelName;
+
+      _notifier.markChatAsRead(firestoreChannelName);
+    });
+
     _channelManager = ChannelManager();
 
     _subscribeToMessages();
-
-    super.initState();
   }
 
   void _subscribeToMessages() {

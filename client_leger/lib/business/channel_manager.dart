@@ -21,15 +21,15 @@ class ChannelManager {
     return _firebaseChatService.getMessages(channel);
   }
 
-  Stream<List<ChatChannel>> fetchAllChannels(String currentUserUid) {
+  Stream<List<ChatChannel>> fetchAllChannels(String? currentUserUid) {
     return _firebaseChatService.fetchAllChannels(currentUserUid);
   }
 
-  Future<void> joinChannel(String currentUserUid, String channel) async {
+  Future<void> joinChannel(String? currentUserUid, String channel) async {
     await _firebaseChatService.joinChannel(currentUserUid, channel);
   }
 
-  Future<void> quitChannel(String currentUserUid, String channel) async {
+  Future<void> quitChannel(String? currentUserUid, String channel) async {
     await _firebaseChatService.quitChannel(currentUserUid, channel);
   }
 

@@ -99,6 +99,7 @@ flutter:
         - assets/welcome-page-bg.png
         - assets/default-avatar.png
         - assets/sounds/alert_sound.mp3
+        - assets/sounds/owl.mp3
 
     # An image asset can refer to one or more resolution-specific "variants", see
     # https://flutter.dev/to/resolution-aware-images

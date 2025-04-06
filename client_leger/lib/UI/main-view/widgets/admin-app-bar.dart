@@ -1,5 +1,6 @@
 import 'package:client_leger/UI/global/avatar_banner_widget.dart';
 import 'package:client_leger/UI/admin/polls-statistics/widgets/admin_poll_notification.dart';
+import 'package:client_leger/UI/main-view/chat_message_notif/chat_messages_notif.dart';
 import 'package:client_leger/models/user.dart';
 import 'package:flutter/material.dart';
 
@@ -173,7 +174,6 @@ class _AdminAppBarRightSectionState extends State<AdminAppBarRightSection> {
           ),
           SizedBox(width: 16),
 
-          // Poll notification button
           Container(
             height: 46,
             decoration: BoxDecoration(
@@ -183,7 +183,24 @@ class _AdminAppBarRightSectionState extends State<AdminAppBarRightSection> {
                 width: 2,
               ),
             ),
-            child: AdminPollNotification(),
+            child: Row(
+              children: [
+                ChatMessagesNotification(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: SizedBox(
+                    height: 24,
+                    child: VerticalDivider(
+                      color: colorScheme.tertiary,
+                      thickness: 1.5,
+                      width: 10,
+                    ),
+                  ),
+                ),
+                // Poll notification button
+                AdminPollNotification(),
+              ],
+            ),
           ),
         ],
       ),

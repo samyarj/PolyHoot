@@ -19,7 +19,7 @@ class ChannelSearch extends StatefulWidget {
   final List<ChatChannel> filteredChannels; // filtered by parent
   final Future<void> Function(String) onDeleteChannel;
   final Function(String) filterChannels; // parent callback
-  final String currentUserUid;
+  final String? currentUserUid;
   final String currentQuery;
 
   @override
