@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { authGuard, authGuardAdmin, authGuardPlayer } from '@app/guards/auth.guard';
 import { ActionLogsPageComponent } from '@app/pages/action-logs-page/action-logs-page.component';
 import { PlayerInfoPageComponent } from '@app/pages/admin-pages/player-info-page/player-info-page.component';
+import { AnswerPollComponent } from '@app/pages/admin-pages/poll-related/answer-poll/answer-poll.component';
 import { ConsultPollPageComponent } from '@app/pages/admin-pages/poll-related/consult-poll-page/consult-poll-page.component';
 import { CreatePollPageComponent } from '@app/pages/admin-pages/poll-related/create-poll-page/create-poll-page.component';
 import { HistoryPollPageComponent } from '@app/pages/admin-pages/poll-related/history-poll-page/history-poll-page.component';
@@ -111,9 +112,9 @@ const routes: Routes = [
             { path: 'modifyPoll/:id', component: CreatePollPageComponent, canActivate: [authGuardAdmin] },
             { path: 'history', component: HistoryPollPageComponent, canActivate: [authGuardAdmin] },
             { path: 'history/:id', component: HistoryPollPageComponent, canActivate: [authGuardAdmin] },
-            { path: 'history/:id', component: HistoryPollPageComponent, canActivate: [authGuardAdmin] },
         ],
     },
+    { path: 'polls/answerPoll/:id', component: AnswerPollComponent, canActivate: [authGuardPlayer] },
 ];
 
 @NgModule({

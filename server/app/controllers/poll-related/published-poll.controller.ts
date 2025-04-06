@@ -40,7 +40,6 @@ export class PublishedPollController {
     })
     @Delete('delete')
     async deleteExpiredPolls(@Res() response: Response) {
-        console.log("deleteExpiredPolls");
         try {
             await this.publishedPollService.deleteExpiredPolls();
             response.status(HttpStatus.OK).send();

@@ -23,7 +23,6 @@ export class PollPlayerPopInComponent implements OnInit, OnDestroy {
     selectedChoice: number = NO_SELECTION;
     errorMessage: string | null = null;
     poll: Poll;
-    isQuizValid: boolean = false;
     playerAnswer: number[] = [];
     private destroy$ = new Subject<void>();
     // eslint-disable-next-line max-params

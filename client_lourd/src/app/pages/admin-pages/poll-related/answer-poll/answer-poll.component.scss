@@ -1,0 +1,313 @@
+.popin-container {
+    position: relative;
+    padding: 30px;
+    background: linear-gradient(to bottom, var(--primary-color), var(--primary-color), var(--secondary-color));
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    padding-top: 130px;
+    .popin-header {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        color: var(--text-color);
+        position: relative;
+        height: 10%;
+
+        .poll-title {
+            position: absolute;
+            left: 50%;
+            font-size: 2.5rem;
+            transform: translateX(-50%);
+            font-weight: bolder;
+            color: var(--text-color);
+            text-align: center;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .close-button {
+            border-radius: 30px;
+            border: 2px solid var(--tertiary-color);
+            background: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: var(--text-color);
+            justify-self: end;
+        }
+    }
+
+    .popin-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        height: 80%;
+        aspect-ratio: 1 / 1;
+        border-radius: 30px;
+        background: color-mix(in srgb, var(--primary-color) 50%, transparent);
+        box-shadow: 0px 0px 10px color-mix(in srgb, var(--tertiary-color) 80%, transparent);
+        padding: 30px;
+        .poll-description {
+            height: 20%;
+            width: 100%;
+            padding: 25px;
+            color: var(--text-color);
+            font-size: 2rem;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            overflow-y: auto;
+            line-height: 1.2;
+
+            &::-webkit-scrollbar {
+                width: 4px;
+                height: 95%;
+                z-index: 999;
+                margin-top: 30px;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background: var(--tertiary-color);
+                border-radius: 10px;
+                margin-top: 30px;
+            }
+
+            &::-webkit-scrollbar-track {
+                background: color-mix(in srgb, var(--secondary-color) 50%, transparent);
+                border-radius: 10px;
+                backdrop-filter: blur(5px);
+                margin-top: 30px;
+            }
+        }
+
+        .poll-questions {
+            padding: 25px;
+            padding-right: 0px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            color: var(--text-color);
+            height: 80%;
+            width: 100%;
+            strong {
+                height: 6%;
+                width: 100%;
+                font-size: 1.7rem;
+            }
+            .questions-list {
+                position: relative;
+                height: 80%;
+                width: 100%;
+                overflow-y: auto;
+                color: var(--text-color);
+                margin: 0px;
+            }
+
+            li {
+                font-size: 1.3rem;
+                margin: 0px 0px 10px 0;
+                word-break: break-word;
+                overflow-wrap: break-word;
+            }
+            li::marker {
+                font-weight: bold;
+                color: var(--text-color);
+            }
+
+            .questions-list::-webkit-scrollbar {
+                width: 4px;
+                height: 95%;
+                z-index: 999;
+            }
+
+            .questions-list::-webkit-scrollbar-thumb {
+                background: var(--tertiary-color);
+                border-radius: 10px;
+            }
+
+            .questions-list::-webkit-scrollbar-track {
+                background: color-mix(in srgb, var(--secondary-color) 50%, transparent);
+                border-radius: 10px;
+                backdrop-filter: blur(5px);
+            }
+        }
+
+        .poll-content-final {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: 100%;
+            width: 100%;
+            font-size: 2.2rem;
+            color: var(--text-color);
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+        .poll-content {
+            display: flex;
+            gap: 5px;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            height: 100%;
+            width: 100%;
+
+            .question-text {
+                height: calc(60% - 5px);
+                word-break: break-word;
+                overflow-wrap: break-word;
+                padding: 15px;
+                width: 100%;
+                border-top-left-radius: 25px;
+                border-top-right-radius: 25px;
+                border-top: 5px solid color-mix(in srgb, var(--secondary-color) 20%, transparent);
+                border-right: 5px solid color-mix(in srgb, var(--secondary-color) 20%, transparent);
+                border-left: 5px solid color-mix(in srgb, var(--secondary-color) 20%, transparent);
+
+                overflow-y: auto;
+                color: var(--text-color);
+                font-size: 2rem;
+                line-height: 1.2;
+
+                > div {
+                    width: 100%;
+                    display: grid;
+                    place-items: center;
+                    min-height: 100%;
+                    text-align: center;
+                }
+            }
+            .question-text::-webkit-scrollbar {
+                width: 4px;
+                height: 95%;
+                z-index: 999;
+                margin-top: 25px;
+            }
+
+            .question-text::-webkit-scrollbar-thumb {
+                background: var(--tertiary-color);
+                border-radius: 10px;
+                margin-top: 25px;
+            }
+
+            .question-text::-webkit-scrollbar-track {
+                background: color-mix(in srgb, var(--secondary-color) 50%, transparent);
+                border-radius: 10px;
+                backdrop-filter: blur(5px);
+                margin-top: 25px;
+            }
+            .qcm-content {
+                height: 40%;
+                width: 100%;
+                border-bottom-right-radius: 20px;
+                border-bottom-left-radius: 20px;
+                display: grid;
+                padding: 2.5px;
+                grid-template-columns: repeat(2, calc(50%));
+                grid-template-rows: repeat(2, calc(50%));
+                background-color: color-mix(in srgb, var(--secondary-color) 20%, transparent);
+                .multiple-choice {
+                    margin: 2.5px;
+                    color: var(--text-color);
+                    box-shadow: 0 0 5px var(--tertiary-color);
+                    display: flex;
+                    padding: 5px;
+                    text-align: center;
+                    justify-content: center;
+                    font-size: 1.5rem;
+                    line-height: 1;
+                    overflow-y: auto;
+                    transition:
+                        color 0.2s ease-in-out,
+                        background-color 0.2s ease-in-out;
+
+                    > div {
+                        word-break: break-word;
+                        overflow-wrap: break-word;
+                        width: 100%;
+                        display: grid;
+                        place-items: center;
+                        min-height: 100%;
+                        text-align: center;
+                    }
+                    &.selected {
+                        background-color: var(--text-color) !important;
+                        font-weight: 500 !important;
+                        color: var(--primary-color) !important;
+                        border: 2px solid var(--primary-color) !important;
+                        box-shadow: 0 0 5px var(--text-color) !important;
+                    }
+                }
+
+                .multiple-choice:hover {
+                    cursor: pointer;
+                }
+
+                .multiple-choice::-webkit-scrollbar {
+                    width: 4px;
+                    height: 95%;
+                    z-index: 999;
+                    margin-bottom: 30px;
+                }
+
+                .multiple-choice::-webkit-scrollbar-thumb {
+                    background: var(--tertiary-color);
+                    border-radius: 10px;
+                    margin-bottom: 30px;
+                }
+
+                .multiple-choice::-webkit-scrollbar-track {
+                    background: color-mix(in srgb, var(--secondary-color) 50%, transparent);
+                    border-radius: 10px;
+                    backdrop-filter: blur(5px);
+                    margin-bottom: 30px;
+                }
+            }
+
+            .multiple-choice:nth-child(3) {
+                border-bottom-left-radius: 20px;
+            }
+
+            .multiple-choice:nth-child(4) {
+                border-bottom-right-radius: 20px;
+            }
+
+            .multiple-choice:nth-child(1):nth-last-child(2) {
+                grid-row: span 2;
+                height: calc(100% - 5px);
+                border-radius: 0 0 0 20px; // Left border radius
+            }
+
+            .multiple-choice:nth-child(2):nth-last-child(1) {
+                grid-row: span 2;
+                height: calc(100% - 5px);
+                border-radius: 0 0 20px 0; // Right border radius
+            }
+
+            .multiple-choice:nth-child(3):nth-last-child(1) {
+                grid-column: span 2;
+                width: calc(100% - 5px); // Full width, substracting margin
+                border-radius: 0 0 20px 20px; // Bottom rounded corners
+            }
+        }
+    }
+}
+
+.close-button:hover {
+    background: var(--secondary-color);
+    color: var(--primary-color);
+    border: 2px solid var(--tertiary-color);
+}
+
+.close-button:hover {
+    background: var(--secondary-color) !important;
+    color: var(--primary-color) !important;
+    border: 2px solid var(--tertiary-color) !important;
+}

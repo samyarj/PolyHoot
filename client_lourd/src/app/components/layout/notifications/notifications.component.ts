@@ -1,16 +1,12 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { doc, Firestore, onSnapshot } from '@angular/fire/firestore';
-import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { PollPlayerPopInComponent } from '@app/components/general-elements/poll-related/poll-player-pop-in/poll-player-pop-in.component';
 import { AppRoute } from '@app/constants/enum-class';
 import { PublishedPoll } from '@app/interfaces/poll';
 import { User } from '@app/interfaces/user'; // Assurez-vous d'importer l'interface User
 import { AuthService } from '@app/services/auth/auth.service';
 import { HistoryPublishedPollService } from '@app/services/poll-services/history-poll.service';
-import { ToastrService } from 'ngx-toastr';
-import { combineLatest, filter, map, Observable, Subject, Subscription, take, takeUntil } from 'rxjs';
+import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -24,14 +20,11 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     notifications: { title: string; poll: PublishedPoll }[] = [];
     user: User | null;
     private publishedPollsSubscription: Subscription;
-    private userSubscription: Subscription;
+    // private userSubscription: Subscription;
     private destroy$ = new Subject<void>();
     private combinedSubscription: Subscription;
 
     constructor(
-        private dialog: MatDialog,
-        private toastr: ToastrService,
-        private http: HttpClient,
         private historyPublishedPollService: HistoryPublishedPollService,
         private authService: AuthService,
         private firestore: Firestore, // Injectez Firestore
@@ -93,7 +86,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         // Se désabonner des observables
         if (this.publishedPollsSubscription) this.publishedPollsSubscription.unsubscribe();
-        if (this.userSubscription) this.userSubscription.unsubscribe();
+        // if (this.userSubscription) this.userSubscription.unsubscribe();
         this.destroy$.next();
         this.destroy$.complete();
         if (this.combinedSubscription) {
@@ -106,7 +99,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     }
 
     openPollAnswer(poll: PublishedPoll) {
-        const dialogRef = this.dialog.open(PollPlayerPopInComponent, {
+        /* const dialogRef = this.dialog.open(PollPlayerPopInComponent, {
             backdropClass: 'quiz-info-popup',
             panelClass: 'custom-container',
             data: {
@@ -148,14 +141,17 @@ export class NotificationsComponent implements OnInit, OnDestroy {
             } else {
                 this.toastr.warning('Complétion du sondage annulée');
             }
-        });
+        }); */
+        console.log(`${environment.serverUrl}/polls/answerPoll/${poll.id}`);
+        this.router.navigate([`/polls/answerPoll/${poll.id}`]);
+        this.showNotifications = false;
     }
     goToStats(poll: PublishedPoll) {
         this.router.navigate([AppRoute.POLLSHISTORY + poll.id]);
         this.showNotifications = false;
     }
 
-    private updateUserPollsAnswered(id: string | undefined) {
+    /* private updateUserPollsAnswered(id: string | undefined) {
         if (this.user && this.user.uid && id) {
             this.http.patch(`${environment.serverUrl}/published-polls/${this.user.uid}/addPollsAnswered/`, { id }).subscribe({
                 error: (error) => {
@@ -163,7 +159,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                 },
             });
         }
-    }
+    } */
 
     // Fonction pour surveiller les changements d'un utilisateur
     private watchUser(uid: string): Observable<User> {
