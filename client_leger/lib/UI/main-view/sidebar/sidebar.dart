@@ -1,8 +1,12 @@
+import 'dart:async';
 import 'package:client_leger/UI/chat/chatwindow.dart';
 import 'package:client_leger/UI/chat/ingame_chatwindow.dart';
 import 'package:client_leger/UI/main-view/sidebar/channels.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
+import 'package:client_leger/business/channel_manager.dart';
+import 'package:client_leger/models/chat_channels.dart';
 import 'package:client_leger/models/user.dart' as user_model;
+import 'package:client_leger/providers/messages/messages_notif_provider.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,9 +24,10 @@ class _SideBarState extends ConsumerState<SideBar>
     with TickerProviderStateMixin {
   late TabController _tabController;
   final socketManager = WebSocketManager.instance;
-
-  final ValueNotifier<String?> _recentChannelNotifier =
-      ValueNotifier<String?>(null);
+  final _channelManager = ChannelManager();
+  StreamSubscription<List<ChatChannel>>? _chatChannelsSubscription;
+  final ValueNotifier<List<ChatChannel>> _channelsNotifier = ValueNotifier([]);
+  late final MessageNotifNotifier _notifier;
 
   void _updateTabController() {
     final currentRoomId = socketManager.currentRoomIdNotifier.value;
@@ -39,12 +44,19 @@ class _SideBarState extends ConsumerState<SideBar>
 
   @override
   void initState() {
+    super.initState();
     final currentRoomId = socketManager.currentRoomIdNotifier.value;
     final tabLength = currentRoomId != null ? 4 : 3;
     _tabController =
         TabController(length: tabLength, vsync: this, initialIndex: 0);
     socketManager.currentRoomIdNotifier.addListener(_updateTabController);
-    super.initState();
+
+    _chatChannelsSubscription =
+        _channelManager.fetchAllChannels(widget.user?.uid).listen((channels) {
+      _channelsNotifier.value = channels;
+    });
+
+    _notifier = ref.read(messageNotifProvider.notifier);
   }
 
   void _changeTabAndChannel(int index, String channel) {
@@ -52,25 +64,17 @@ class _SideBarState extends ConsumerState<SideBar>
     if (socketManager.currentRoomIdNotifier.value == null) {
       index--;
     }
-    _recentChannelNotifier.value = channel;
+    _notifier.recentChannel = channel;
     _tabController.animateTo(index);
-  }
-
-  String? _getRecentChannel() {
-    // edge case: if the recent channel gets deleted by user
-    return _recentChannelNotifier.value;
-  }
-
-  void _nullifyRecentChannel() {
-    // edge case: if the recent channel gets deleted by user
-    _recentChannelNotifier.value = null;
   }
 
   @override
   void dispose() {
+    super.dispose();
+    _notifier.currentDisplayedChannel = null;
     _tabController.dispose();
     socketManager.currentRoomIdNotifier.removeListener(_updateTabController);
-    super.dispose();
+    _chatChannelsSubscription?.cancel();
   }
 
   @override
@@ -129,10 +133,21 @@ class _SideBarState extends ConsumerState<SideBar>
   Widget _buildRecentChat() {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return ValueListenableBuilder<String?>(
-      valueListenable: _recentChannelNotifier,
-      builder: (context, recentChannel, child) {
-        if (recentChannel == null) {
+    return ValueListenableBuilder<List<ChatChannel>>(
+      valueListenable: _channelsNotifier,
+      builder: (context, channels, _) {
+        final isRecentChannelValid = _notifier.recentChannel != null &&
+            channels.any((channel) =>
+                channel.name == _notifier.recentChannel &&
+                channel.isUserInChannel);
+
+        if (isRecentChannelValid) {
+          AppLogger.i("Recent channel is valid: ${_notifier.recentChannel} ");
+
+          return ChatWindow(channel: _notifier.recentChannel!);
+        } else {
+          _notifier.recentChannel = null;
+          _notifier.currentDisplayedChannel = null;
           return Center(
             child: Text(
               'Aucun canal courant.',
@@ -140,7 +155,6 @@ class _SideBarState extends ConsumerState<SideBar>
             ),
           );
         }
-        return ChatWindow(channel: recentChannel);
       },
     );
   }
@@ -148,8 +162,8 @@ class _SideBarState extends ConsumerState<SideBar>
   Widget _buildChannels() {
     return Channels(
       onChannelPicked: _changeTabAndChannel,
-      getRecentChannel: _getRecentChannel,
-      nullifyRecentChannel: _nullifyRecentChannel,
+      channelsNotifier: _channelsNotifier,
+      userUid: widget.user?.uid,
     );
   }
 }

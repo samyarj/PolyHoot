@@ -1,28 +1,26 @@
 import 'dart:async';
 import 'package:client_leger/UI/confirmation/confirmation_dialog.dart';
 import 'package:client_leger/UI/confirmation/confirmation_messages.dart';
-import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/main-view/sidebar/channel_search.dart';
-import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/business/channel_manager.dart';
 import 'package:client_leger/models/chat_channels.dart';
-import 'package:client_leger/providers/user_provider.dart';
+import 'package:client_leger/providers/messages/messages_notif_provider.dart';
 import 'package:client_leger/utilities/logger.dart';
-import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class Channels extends ConsumerStatefulWidget {
-  const Channels(
-      {super.key,
-      required this.onChannelPicked,
-      required this.getRecentChannel,
-      required this.nullifyRecentChannel});
+  const Channels({
+    super.key,
+    required this.onChannelPicked,
+    required this.channelsNotifier,
+    required this.userUid,
+  });
 
   final Function(int, String) onChannelPicked;
-  final String? Function() getRecentChannel;
-  final void Function() nullifyRecentChannel;
+  final ValueNotifier<List<ChatChannel>> channelsNotifier;
+  final String? userUid;
 
   @override
   ConsumerState<Channels> createState() => _ChannelsState();
@@ -33,80 +31,60 @@ class _ChannelsState extends ConsumerState<Channels> {
   List<ChatChannel> userChannels = [];
   List<ChatChannel> joinableChannels = [];
   List<ChatChannel> _filteredChannels = [];
-  StreamSubscription<List<ChatChannel>>? _channelsSubscription;
+  List<ChatChannel> _previousJoinableChannels = [];
   String currentQuery = "";
 
   @override
   void initState() {
-    _filteredChannels = joinableChannels;
     super.initState();
+    ref.read(messageNotifProvider.notifier).currentDisplayedChannel = null;
+    AppLogger.e("setting current displayed channel to null");
   }
 
   Future<void> onDeleteChannel(String channel) async {
     await channelManager.deleteChannel(channel);
-    if (widget.getRecentChannel() == channel) {
-      widget.nullifyRecentChannel();
+  }
+
+  bool areEquals(List<ChatChannel> list1, List<ChatChannel> list2) {
+    if (list1.length != list2.length) return false;
+    for (int i = 0; i < list1.length; i++) {
+      if (list1[i].name != list2[i].name) return false;
     }
+    return true;
   }
 
   void _filterChannels(String query) {
-    setState(() {
-      AppLogger.i("Filtering channels with query: $query");
-      if (query != currentQuery) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (query != currentQuery ||
+          !areEquals(_previousJoinableChannels, joinableChannels)) {
         currentQuery = query;
-      }
-      _filteredChannels = joinableChannels
-          .where((channel) =>
-              channel.name.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-    });
-  }
+        _previousJoinableChannels = joinableChannels;
+        setState(() {
+          AppLogger.i("Filtering channels with query: $query");
 
-  _subscribeToChannels(String currentUserUid) {
-    if (_channelsSubscription != null) return;
-    try {
-      AppLogger.i("subscribing to channels");
-      _channelsSubscription =
-          channelManager.fetchAllChannels(currentUserUid).listen((newChannels) {
-        // it is the whole updated list of channels everytime
-        AppLogger.i("in the channels subscription callback");
-
-        userChannels =
-            newChannels.where((channel) => channel.isUserInChannel).toList();
-
-        joinableChannels =
-            newChannels.where((channel) => !channel.isUserInChannel).toList();
-
-        _filterChannels(currentQuery);
-      }, onError: (error) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          showErrorDialog(context, getCustomError(error));
+          _filteredChannels = joinableChannels
+              .where((channel) =>
+                  channel.name.toLowerCase().contains(query.toLowerCase()))
+              .toList();
         });
-      });
-    } catch (e) {
-      // if the exception is not thrown in the stream
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showErrorDialog(context, e.toString());
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    AppLogger.w("in the dispose method of channels");
-    _channelsSubscription?.cancel();
-    super.dispose();
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    AppLogger.i("in the build method of channels");
     final colorScheme = Theme.of(context).colorScheme;
-    final userState = ref.read(userProvider);
 
-    return userState.when(
-      data: (user) {
-        _subscribeToChannels(user!.uid);
+    return ValueListenableBuilder(
+      valueListenable: widget.channelsNotifier,
+      builder: (context, channels, _) {
+        userChannels =
+            channels.where((channel) => channel.isUserInChannel).toList();
+
+        joinableChannels =
+            channels.where((channel) => !channel.isUserInChannel).toList();
+
+        _filterChannels(currentQuery);
 
         return DefaultTabController(
           length: 2,
@@ -135,11 +113,12 @@ class _ChannelsState extends ConsumerState<Channels> {
                 Expanded(
                   child: TabBarView(
                     children: [
-                      _buildUserChannels(userChannels, user.uid, colorScheme),
+                      _buildUserChannels(
+                          userChannels, widget.userUid, colorScheme),
                       ChannelSearch(
                         filteredChannels: _filteredChannels,
                         onDeleteChannel: onDeleteChannel,
-                        currentUserUid: user.uid,
+                        currentUserUid: widget.userUid,
                         filterChannels: _filterChannels,
                         currentQuery: currentQuery,
                       ),
@@ -151,18 +130,10 @@ class _ChannelsState extends ConsumerState<Channels> {
           ),
         );
       },
-      loading: () => Center(child: ThemedProgressIndicator()),
-      error: (error, stack) => Center(
-        child: Text(
-          getCustomError(
-            error,
-          ),
-        ),
-      ),
     );
   }
 
-  _buildUserChannels(List<ChatChannel> userChannels, String currentUserUid,
+  _buildUserChannels(List<ChatChannel> userChannels, String? currentUserUid,
       ColorScheme colorScheme) {
     if (userChannels.isEmpty) {
       return Center(

@@ -64,7 +64,8 @@ class FirebasePushApi {
     String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
     if (userId.isNotEmpty &&
         (newFcmToken != _fcmToken || currentUserId != userId)) {
-      AppLogger.w("Setting FCM token to: $newFcmToken for userId: $userId");
+      AppLogger.w(
+          "Setting FCM token to: $newFcmToken for userId: $userId in firestore");
       _fcmToken = newFcmToken;
       currentUserId = userId;
       try {
@@ -82,7 +83,11 @@ class FirebasePushApi {
 
 // so that the server always has access to up-to-date fcmToken to send push notifications
   void setupFcmTokenListener() {
-    if (_fcmTokenSubscription != null) return;
+    if (_fcmTokenSubscription != null) {
+      AppLogger.w("Cancelling previous FCM token listener");
+      _fcmTokenSubscription?.cancel();
+      _fcmTokenSubscription = null;
+    }
     AppLogger.w("Setting up FCM token listener");
     _fcmTokenSubscription =
         FirebaseMessaging.instance.onTokenRefresh.listen((newFCMToken) async {

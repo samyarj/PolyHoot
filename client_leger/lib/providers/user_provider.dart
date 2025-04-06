@@ -126,7 +126,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
     });
   }
 
-  // Create a new user
+  // Create a new user sign up normal ET sign up with google
   Future<void> createAndFetchUser(
       UserCredential userCredential, String endpoint,
       {bool isLogin = false}) async {

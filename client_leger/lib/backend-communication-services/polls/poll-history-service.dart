@@ -45,7 +45,6 @@ class PollHistoryService extends ChangeNotifier {
   }
 
   List<PublishedPoll> get playerPolls {
-    AppLogger.w("WE ARE GETTING PLAYERPOLLS");
     return _publishedPolls.where((poll) {
       return !poll.expired && !playerPollsAnsweredCache.contains(poll.id);
     }).toList()
