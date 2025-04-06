@@ -112,6 +112,7 @@ export class PublishedPollService implements OnModuleInit {
             // 3. Comparaison
             if (pollEndDate <= now) {
                 batch.update(doc.ref, { expired: true });
+                this.pushNotifService.onPublishedPollExpired(poll.title);
             }
         });
         await batch.commit();
