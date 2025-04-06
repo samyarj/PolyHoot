@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:audioplayers/audioplayers.dart';
 import 'package:client_leger/utilities/logger.dart';
 
@@ -10,20 +9,38 @@ const Duration ALERT_SOUND_DECREASE_INTERVAL = Duration(milliseconds: 200);
 const double DEFAULT_VOLUME = 0.5;
 
 class SoundPlayer {
+  static final SoundPlayer _instance = SoundPlayer._internal();
+
+  SoundPlayer._internal() {
+    AppLogger.w("_internal SoundPlayer instance");
+
+    if (_isInitialized) {
+      AppLogger.i("SoundPlayer already initialized");
+      return;
+    }
+    _initializePlayer();
+  }
+
+  factory SoundPlayer() {
+    return _instance;
+  }
+
   AudioPlayer? _audioPlayer;
   Timer? _timer;
   double _volume = DEFAULT_VOLUME;
   bool _isInitialized = false;
   bool _isPlaying = false;
-
-  SoundPlayer() {
-    _initializePlayer();
-  }
+  StreamSubscription<void>? _completionSubscription;
 
   Future<void> _initializePlayer() async {
     try {
       _audioPlayer = AudioPlayer();
       _isInitialized = true;
+      // Setup completion listener
+      _audioPlayer?.onPlayerComplete.listen((event) {
+        AppLogger.i("Sound completed naturally");
+        _isPlaying = false;
+      });
       AppLogger.i("AudioPlayer initialized successfully");
     } catch (e) {
       AppLogger.e("Failed to initialize AudioPlayer: $e");
@@ -65,12 +82,6 @@ class SoundPlayer {
       await _audioPlayer?.setVolume(_volume);
       await _audioPlayer?.resume();
 
-      // Setup completion listener
-      _audioPlayer?.onPlayerComplete.listen((event) {
-        AppLogger.i("Sound completed naturally");
-        _isPlaying = false;
-      });
-
       _timer = Timer.periodic(ALERT_SOUND_DECREASE_INTERVAL, (timer) {
         _handleSoundIntensity();
       });
@@ -109,10 +120,12 @@ class SoundPlayer {
 
   void dispose() {
     try {
+      AppLogger.w("Disposing SoundPlayer");
       stop();
       _audioPlayer?.dispose();
       _audioPlayer = null;
       _isInitialized = false;
+      _completionSubscription?.cancel(); // Clean up the listener
     } catch (e) {
       AppLogger.e("Error disposing SoundPlayer: $e");
     }

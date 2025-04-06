@@ -72,7 +72,6 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
           if (change.type == DocumentChangeType.added &&
               change.doc.data()?['uid'] != getUserUid() &&
               currentDisplayedChannel != 'globalChat') {
-            owlSoundPlayer.stop();
             _playSound();
             final int newCount = (state.unreadMessages["globalChat"] ?? 0) + 1;
             state = state.copyWith(unreadMessages: {
@@ -164,7 +163,6 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
               if (change.type == DocumentChangeType.added &&
                   change.doc.data()?['uid'] != getUserUid() &&
                   currentDisplayedChannel != channelId) {
-                owlSoundPlayer.stop();
                 _playSound();
                 final int newCount =
                     (state.unreadMessages[channel.id] ?? 0) + 1;

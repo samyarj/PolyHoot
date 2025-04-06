@@ -44,6 +44,7 @@ class _SideBarState extends ConsumerState<SideBar>
 
   @override
   void initState() {
+    super.initState();
     final currentRoomId = socketManager.currentRoomIdNotifier.value;
     final tabLength = currentRoomId != null ? 4 : 3;
     _tabController =
@@ -56,8 +57,6 @@ class _SideBarState extends ConsumerState<SideBar>
     });
 
     _notifier = ref.read(messageNotifProvider.notifier);
-
-    super.initState();
   }
 
   void _changeTabAndChannel(int index, String channel) {
@@ -71,10 +70,11 @@ class _SideBarState extends ConsumerState<SideBar>
 
   @override
   void dispose() {
+    super.dispose();
+    _notifier.currentDisplayedChannel = null;
     _tabController.dispose();
     socketManager.currentRoomIdNotifier.removeListener(_updateTabController);
     _chatChannelsSubscription?.cancel();
-    super.dispose();
   }
 
   @override
@@ -127,9 +127,6 @@ class _SideBarState extends ConsumerState<SideBar>
   }
 
   Widget _buildGeneralChat() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(messageNotifProvider.notifier).markChatAsRead("globalChat");
-    });
     return ChatWindow(channel: "General");
   }
 
@@ -146,15 +143,11 @@ class _SideBarState extends ConsumerState<SideBar>
 
         if (isRecentChannelValid) {
           AppLogger.i("Recent channel is valid: ${_notifier.recentChannel} ");
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref
-                .read(messageNotifProvider.notifier)
-                .markChatAsRead(_notifier.recentChannel);
-          });
 
           return ChatWindow(channel: _notifier.recentChannel!);
         } else {
           _notifier.recentChannel = null;
+          _notifier.currentDisplayedChannel = null;
           return Center(
             child: Text(
               'Aucun canal courant.',

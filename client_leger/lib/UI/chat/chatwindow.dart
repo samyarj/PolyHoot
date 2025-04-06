@@ -40,16 +40,22 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
 
   @override
   void initState() {
-    _channelManager = ChannelManager();
-
-    _subscribeToMessages();
+    super.initState();
 
     _notifier = ref.read(messageNotifProvider.notifier);
 
-    _notifier.currentDisplayedChannel =
-        widget.channel == "General" ? "globalChat" : widget.channel;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final firestoreChannelName =
+          widget.channel == "General" ? "globalChat" : widget.channel;
 
-    super.initState();
+      _notifier.currentDisplayedChannel = firestoreChannelName;
+
+      _notifier.markChatAsRead(firestoreChannelName);
+    });
+
+    _channelManager = ChannelManager();
+
+    _subscribeToMessages();
   }
 
   void _subscribeToMessages() {
@@ -107,7 +113,6 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
   void dispose() {
     _textController.dispose();
     _messagesSubscription?.cancel();
-    _notifier.currentDisplayedChannel = null;
     super.dispose();
   }
 

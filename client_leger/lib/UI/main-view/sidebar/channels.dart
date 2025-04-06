@@ -4,11 +4,13 @@ import 'package:client_leger/UI/confirmation/confirmation_messages.dart';
 import 'package:client_leger/UI/main-view/sidebar/channel_search.dart';
 import 'package:client_leger/business/channel_manager.dart';
 import 'package:client_leger/models/chat_channels.dart';
+import 'package:client_leger/providers/messages/messages_notif_provider.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class Channels extends StatefulWidget {
+class Channels extends ConsumerStatefulWidget {
   const Channels({
     super.key,
     required this.onChannelPicked,
@@ -21,16 +23,23 @@ class Channels extends StatefulWidget {
   final String? userUid;
 
   @override
-  State<Channels> createState() => _ChannelsState();
+  ConsumerState<Channels> createState() => _ChannelsState();
 }
 
-class _ChannelsState extends State<Channels> {
+class _ChannelsState extends ConsumerState<Channels> {
   final ChannelManager channelManager = ChannelManager();
   List<ChatChannel> userChannels = [];
   List<ChatChannel> joinableChannels = [];
   List<ChatChannel> _filteredChannels = [];
   List<ChatChannel> _previousJoinableChannels = [];
   String currentQuery = "";
+
+  @override
+  void initState() {
+    super.initState();
+    ref.read(messageNotifProvider.notifier).currentDisplayedChannel = null;
+    AppLogger.e("setting current displayed channel to null");
+  }
 
   Future<void> onDeleteChannel(String channel) async {
     await channelManager.deleteChannel(channel);
