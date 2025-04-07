@@ -1,11 +1,13 @@
-import { GameEvents, GameState, JoinErrors, JoinEvents, TimerEvents } from '@app/constants/enum-classes';
+import { ChatEvents, GameEvents, GameState, JoinErrors, JoinEvents, TimerEvents } from '@app/constants/enum-classes';
 import { WsAuthGuard } from '@app/guards/auth/auth.guard';
 import { AuthenticatedSocket } from '@app/interface/authenticated-request';
 import { User } from '@app/interface/user';
 import { Quiz } from '@app/model/schema/quiz/quiz';
 import { UserService } from '@app/services/auth/user.service';
+import { ChatService } from '@app/services/chat/chat.service';
 import { GameManagerService } from '@app/services/game-manager/game-manager.service';
 import { HistoryManagerService } from '@app/services/history-manager/history-manager.service';
+import { ChatMessage } from '@common/chat-message';
 import { PlayerResult } from '@common/partial-player';
 import { UseGuards } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
@@ -18,6 +20,7 @@ export class GameGateway {
     server: Server;
 
     constructor(
+        private chatService: ChatService,
         private gameManager: GameManagerService,
         private historyManager: HistoryManagerService,
         private userService: UserService,
@@ -230,6 +233,7 @@ export class GameGateway {
             game.bannedNames.push(playerName.toLowerCase());
             const player = game.players.find((player) => player.name === playerName);
             player.socket.emit(GameEvents.PlayerBanned);
+            this.sendDisconnectMessage(player.name, roomId);
             game.removePlayer(playerName);
             this.gameManager.socketRoomsMap.delete(player.socket);
         }
@@ -289,5 +293,15 @@ export class GameGateway {
                 this.historyManager.saveGameRecordToDB(roomId, results);
             }
         }
+    }
+    private sendDisconnectMessage(playerName: string, roomId: string) {
+        const systemMessage: ChatMessage = {
+            message: `${playerName} a été banni`,
+            author: 'System',
+            date: new Date(),
+        };
+        const chatData = { message: systemMessage, roomId, playerName };
+        this.chatService.addMessage(chatData.message, chatData.roomId);
+        this.server.to(roomId).emit(ChatEvents.RoomLeft, chatData);
     }
 }
