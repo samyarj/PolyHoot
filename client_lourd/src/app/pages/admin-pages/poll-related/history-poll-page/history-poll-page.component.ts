@@ -69,7 +69,7 @@ export class HistoryPollPageComponent implements OnInit, OnDestroy {
                     // Convertir les dates en timestamps pour comparaison
                     const dateA = new Date(a.endDate!).getTime();
                     const dateB = new Date(b.endDate!).getTime();
-                    return dateA - dateB; // Tri ascendant (plus petite date en premier)
+                    return dateB - dateA; // Tri ascendant (plus petite date en premier)
                 });
             this.initRouteListener();
         });
