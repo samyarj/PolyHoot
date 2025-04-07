@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { FirebaseChatMessage } from '@app/interfaces/chat-message';
 import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
-import { ChatChannel, chatChannelFromJson } from '@app/services/chat-services/chat-channels';
+import { ChatChannel } from '@app/services/chat-services/chat-channels';
 import { ChatEvents } from '@app/services/chat-services/chat-events';
 import { ChatService } from '@app/services/chat-services/chat.service';
 import { FirebaseChatService } from '@app/services/chat-services/firebase/firebase-chat.service';
@@ -70,23 +70,25 @@ export class SideBarComponent implements OnDestroy {
         this.user$ = this.authService.user$;
         // Subscribe to live chat messages for the global chat
         this.subscribeToGlobalMessages();
-        // Subscribe to chat channels
-        this.channelsSubscription = this.firebaseChatService.fetchAllChannels().subscribe({
-            next: (channels) => {
-                const currentUserId = this.authService.getUser()?.uid || '';
-                this.channels = channels.map((channel) => chatChannelFromJson(channel, currentUserId));
-            },
-            error: (err) => {
-                console.error('Error while fetching channels:', err);
-            },
-        });
 
-        // Subscribe to user data to get joined channels and set up real-time updates
+        // Subscribe to user data and channels
         this.userSubscription = this.authService.user$.subscribe((user) => {
             if (user) {
                 this.userUID = user.uid;
-                this.joinedChannels = user.joinedChannels || [];
                 this.setupRealtimeUserUpdates(user.uid);
+
+                // Subscribe to chat channels only after we have the user ID
+                if (this.channelsSubscription) {
+                    this.channelsSubscription.unsubscribe();
+                }
+                this.channelsSubscription = this.firebaseChatService.fetchAllChannels().subscribe({
+                    next: (channels) => {
+                        this.channels = channels;
+                    },
+                    error: (err) => {
+                        console.error('Error while fetching channels:', err);
+                    },
+                });
             }
         });
 
@@ -351,17 +353,10 @@ export class SideBarComponent implements OnDestroy {
             try {
                 await this.firebaseChatService.joinChannel(channel);
 
-                // Update the channel's isUserInChannel property
-                this.channels = this.channels.map((c) => {
-                    if (c.name === channel) {
-                        return { ...c, isUserInChannel: true };
-                    }
-                    return c;
-                });
-
                 this.selectedChannel = channel;
                 this.selectedChannelMessages = []; // Clear the messages array
                 this.selectedChannelMessagesLoading = true; // Set loading state
+
                 // Switch to the third tab
                 const tab3 = document.querySelector('[href="#tab3"]') as HTMLElement;
                 if (tab3) {

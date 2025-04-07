@@ -23,7 +23,7 @@ import { MESSAGES_LIMIT } from '@app/constants/constants';
 import { FirebaseChatMessage } from '@app/interfaces/chat-message';
 import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
-import { ChatChannel, chatChannelFromJson } from '@app/services/chat-services/chat-channels';
+import { ChatChannel } from '@app/services/chat-services/chat-channels';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -227,11 +227,6 @@ export class FirebaseChatService {
             };
 
             await setDoc(channelDocRef, newChannelData);
-
-            const userDocRef = doc(this.usersCollection, user.uid);
-            await updateDoc(userDocRef, {
-                joinedChannels: arrayUnion(channel),
-            });
         } catch (error) {
             console.error('Error creating channel:', error);
             throw new Error('Failed to create channel.');
@@ -242,9 +237,12 @@ export class FirebaseChatService {
         return new Observable<ChatChannel[]>((observer) => {
             const currentUserId = this.authService.getUser()?.uid || '';
             const unsubscribe = onSnapshot(this.chatChannelsCollection, (snapshot) => {
-                const channels: ChatChannel[] = snapshot.docs.map((doc) => {
-                    const data = doc.data();
-                    return chatChannelFromJson(data, currentUserId);
+                const channels: ChatChannel[] = snapshot.docs.map((docSnapshot) => {
+                    const data = docSnapshot.data();
+                    return {
+                        name: docSnapshot.id,
+                        isUserInChannel: (data.users || []).includes(currentUserId),
+                    };
                 });
                 observer.next(channels);
             });
@@ -262,16 +260,10 @@ export class FirebaseChatService {
 
             const currentUserUid = user.uid;
             const channelDocRef = doc(this.chatChannelsCollection, channel);
-            const userDocRef = doc(this.usersCollection, currentUserUid);
 
             // Add the user to the channel's user list
             await updateDoc(channelDocRef, {
                 users: arrayUnion(currentUserUid),
-            });
-
-            // Add the channel to the user's joinedChannels list
-            await updateDoc(userDocRef, {
-                joinedChannels: arrayUnion(channel),
             });
         } catch (error) {
             console.error('Error joining channel:', error);
@@ -289,16 +281,9 @@ export class FirebaseChatService {
             const currentUserUid = user.uid;
             const channelDocRef = doc(this.chatChannelsCollection, channel);
 
-            const userDocRef = doc(this.usersCollection, currentUserUid);
-
             // Remove the user from the channel's user list
             await updateDoc(channelDocRef, {
                 users: arrayRemove(currentUserUid),
-            });
-
-            // Remove the channel from the user's joinedChannels list
-            await updateDoc(userDocRef, {
-                joinedChannels: arrayRemove(channel),
             });
         } catch (error) {
             console.error('Error quitting channel:', error);
