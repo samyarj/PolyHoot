@@ -45,7 +45,6 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     math = Math;
     gameLogs: GameLogEntry[];
     logs: CnxLogEntry[];
-    private destroy$ = new Subject<void>();
     // Constants for username validation
     readonly usernamePattern: string = USERNAME_REGEX.source;
     readonly maxUsernameLength: number = USERNAME_MAX_LENGTH;
@@ -60,6 +59,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     totalActions: number = 0;
     lastLogin: string = 'N/A';
 
+    private destroy$ = new Subject<void>();
     private readonly baseUrl = `${environment.serverUrl}/users`;
     private readonly usernameCheckDebounceTime = 500; // milliseconds
     private usernameInput$ = new Subject<void>();
@@ -95,7 +95,9 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     loadLogs() {
         const user = this.authService.getUser();
         this.logs = user?.cxnLogs ?? [];
+        this.logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
         this.gameLogs = user?.gameLogs ?? [];
+        this.gameLogs.sort((a, b) => new Date(b.endTime || 0).getTime() - new Date(a.endTime || 0).getTime());
         for (const log of this.gameLogs) {
             let gameTime = 0;
             if (log.endTime && log.startTime) {
@@ -288,6 +290,10 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         }
     }
 
+    onUsernameInput(): void {
+        this.usernameInput$.next();
+    }
+
     private loadDefaultAvatars() {
         this.uploadImgService
             .getDefaultAvatars()
@@ -322,9 +328,5 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         // Calculate the absolute difference in milliseconds and convert to seconds
         // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         return Math.floor(Math.abs(date2.getTime() - date1.getTime()) / 1000);
-    }
-
-    onUsernameInput(): void {
-        this.usernameInput$.next();
     }
 }
