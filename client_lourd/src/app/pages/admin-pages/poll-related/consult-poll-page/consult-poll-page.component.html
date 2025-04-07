@@ -22,13 +22,13 @@
                                 <span class="label">Description :</span><span>{{ poll.description }}</span>
                             </div>
                             <div class="poll-actions">
-                                <button *ngIf="!poll.isPublished" (click)="goToEdit(poll.id)">
+                                <button *ngIf="!poll.isPublished" (click)="goToEdit(poll.id)" matTooltip="Modifier" matTooltipClass="custom-tooltip">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button *ngIf="!poll.isPublished" (click)="delete(poll.id)">
+                                <button *ngIf="!poll.isPublished" (click)="delete(poll.id)" matTooltip="Supprimer" matTooltipClass="custom-tooltip">
                                     <i class="fas fa-trash"></i>
                                 </button>
-                                <button (click)="consultPoll(poll)">
+                                <button (click)="consultPoll(poll)" matTooltip="Consulter et publier" matTooltipClass="custom-tooltip">
                                     <i class="fa-solid fa-upload"></i>
                                 </button>
                             </div>

@@ -31,7 +31,7 @@ export class QrCodePopInComponent implements OnInit {
 
     updateQRColors() {
         const computedStyles = getComputedStyle(document.documentElement);
-        this.colorDark = computedStyles.getPropertyValue('--secondary-color').trim() || '#000000';
+        this.colorDark = computedStyles.getPropertyValue('--text-color').trim() || '#000000';
     }
 
     onClose(): void {
