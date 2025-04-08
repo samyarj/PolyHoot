@@ -1,5 +1,6 @@
 import 'package:client_leger/providers/messages/messages_notif_provider.dart';
 import 'package:client_leger/utilities/logger.dart';
+import 'package:client_leger/utilities/socket_events.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -151,7 +152,9 @@ class _ChatMessagesNotificationState
                                   Text(
                                     entry.key == "globalChat"
                                         ? "General"
-                                        : entry.key,
+                                        : entry.key == inGameChat
+                                            ? "Partie"
+                                            : entry.key,
                                     style: TextStyle(
                                       color: Theme.of(context)
                                           .colorScheme

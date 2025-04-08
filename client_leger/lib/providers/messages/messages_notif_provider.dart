@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:client_leger/classes/sound_player.dart';
 import 'package:client_leger/utilities/logger.dart';
+import 'package:client_leger/utilities/socket_events.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,6 +55,17 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
 
   String? getUserUid() {
     return FirebaseAuth.instance.currentUser?.uid;
+  }
+
+  void onIngameMessageReceived() {
+    if (currentDisplayedChannel != inGameChat) {
+      _playSound();
+      final int newCount = (state.unreadMessages[inGameChat] ?? 0) + 1;
+      state = state.copyWith(unreadMessages: {
+        ...state.unreadMessages,
+        inGameChat: newCount,
+      });
+    }
   }
 
   void _listenForNewMessages() {

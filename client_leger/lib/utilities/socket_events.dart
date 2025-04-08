@@ -147,3 +147,5 @@ enum ChatEvents {
   final String value;
   const ChatEvents(this.value);
 }
+
+const String inGameChat = 'inGameChat1324';
