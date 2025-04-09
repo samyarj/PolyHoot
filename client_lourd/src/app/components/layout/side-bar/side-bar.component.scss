@@ -89,6 +89,10 @@
     width: 75px;
     border-radius: 50%;
     transition: transform 0.2s ease;
+    margin-right: 15px;
+    &:hover {
+        cursor: pointer;
+    }
 }
 
 .avatar.dropdown-toggle::after {
@@ -96,7 +100,7 @@
 }
 
 .avatar:hover {
-    transform: scale(1.1);
+    transform: scale(1.01);
 }
 
 .dropdown-avatar {
