@@ -111,8 +111,8 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
   }
 
   Future signUp() async {
-    await isUsernameTaken(_usernameController.text.trim());
-    await isEmailTaken(_emailController.text.trim());
+    await isUsernameTaken(_usernameController.text.trim().toLowerCase());
+    await isEmailTaken(_emailController.text.trim().toLowerCase());
 
     if (_usernameError != null || _emailError != null) {
       return;
@@ -160,9 +160,10 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
     if (value == null || value.isEmpty) {
       return 'Un pseudonyme est requis.';
     }
-    final usernameRegex = RegExp(r'^[a-zA-Z0-9._]{3,14}$');
+    final usernameRegex = RegExp(r'^[a-z0-9]{3,14}$');
+
     if (!usernameRegex.hasMatch(value)) {
-      return "Le nom d'utilisateur doit comporter entre 3 et 14 caractères et ne peut contenir que des lettres, des chiffres, des points, des underscores ou des tirets.";
+      return "Le nom d'utilisateur doit comporter entre 3 et 14 caractères et ne peut contenir que des lettres ou des chiffres sans espaces.";
     }
 
     return null;

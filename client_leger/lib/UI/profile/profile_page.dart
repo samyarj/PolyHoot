@@ -121,7 +121,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     });
 
     // Filter input in real-time
-    final filteredValue = value.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '');
+    final filteredValue = value.replaceAll(RegExp(r'[^a-z0-9]'), '');
+
     if (filteredValue != value) {
       _usernameController.value = TextEditingValue(
         text: filteredValue,
