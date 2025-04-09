@@ -174,6 +174,21 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
         }
       }
 
+      final List<String> toRemoveFromReadMessages = [];
+
+      // if a channel gets deleted we need to remove it from the read messages
+      for (final channel
+          in chatNotifPersistenceService.readMessagesCache.keys) {
+        if (!currentChannelIds.contains(channel) && channel != 'globalChat') {
+          toRemoveFromReadMessages.add(channel);
+        }
+      }
+
+      for (final channel in toRemoveFromReadMessages) {
+        await chatNotifPersistenceService
+            .removeChannelFromReadMessages(channel);
+      }
+
       AppLogger.w("going to iterate through channelsSnapshot");
 
       for (final channel in channelsSnapshot.docs) {
