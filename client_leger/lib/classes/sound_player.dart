@@ -114,7 +114,9 @@ class SoundPlayer {
         stop();
       }
     } else {
-      stop();
+      if (_isPlaying) {
+        stop(); // Only stop once
+      }
     }
   }
 

@@ -118,6 +118,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
         isLoggedIn.value = true;
         WebSocketManager.instance.playerName = user.username;
         AppLogger.d("User data updated in real-time: ${user.username}");
+
+        // for the chat notifs
       } else {
         throw Exception("User document not found in Firestore");
       }
@@ -143,15 +145,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       if (isLogin) {
         response = await http.post(Uri.parse(endpoint), headers: headers);
       } else {
-        // Use provided body or create one with just FCM token
-        final requestBody = body ??
-            jsonEncode({
-              'fcmToken': await _firebasePushApi
-                  .onSignUp(userCredential.user?.uid ?? '')
-            });
-
-        response = await http.post(Uri.parse(endpoint),
-            headers: headers, body: requestBody);
+        final fcmToken =
+            await _firebasePushApi.onSignUp(userCredential.user?.uid ?? '');
+        final body = jsonEncode({'fcmToken': fcmToken});
+        response =
+            await http.post(Uri.parse(endpoint), headers: headers, body: body);
       }
 
       if (response.statusCode == 201) {
