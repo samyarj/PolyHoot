@@ -236,6 +236,12 @@ export class Game {
             const client = this.players.find((player) => player.name === dataPlayer.playerName);
             client.socket.emit(GameEvents.PlayerPointsUpdate, { points: dataPlayer.points, isFirst: false, exactAnswer: false });
             this.organizer.socket.emit(GameEvents.OrganizerPointsUpdate, { name: dataPlayer.playerName, points: dataPlayer.points });
+            let wasCorrect = client.points < dataPlayer.points;
+            const newStats = {
+                nQuestions: 1,
+                nGoodAnswers: wasCorrect ? 1 : 0,
+            };
+            this.userService.updateStats(client.uid, newStats);
             client.points = dataPlayer.points;
         });
     }
@@ -262,6 +268,18 @@ export class Game {
         targetedPlayer.currentChoices = answerData.choiceSelected;
         targetedPlayer.qreAnswer = answerData.qreAnswer;
         const isCorrect = targetedPlayer.verifyIfAnswersCorrect(this.quiz.questions[this.currentQuestionIndex]);
+
+        if (
+            this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QCM ||
+            this.quiz.questions[this.currentQuestionIndex].type === QuestionType.QRE
+        ) {
+            const newStats = {
+                nQuestions: 1,
+                nGoodAnswers: isCorrect ? 1 : 0,
+            };
+            this.userService.updateStats(targetedPlayer.uid, newStats);
+        }
+
         if (!isCorrect) {
             targetedPlayer.isFirst = false;
             this.checkAndPrepareForNextQuestion();
@@ -345,6 +363,13 @@ export class Game {
         this.players.forEach((player: Player) => {
             const currentQuestion = this.quiz.questions[this.currentQuestionIndex];
             if (currentQuestion.type === QuestionType.QCM || currentQuestion.type === QuestionType.QRE) {
+                if (!player.submitted) {
+                    const newStats = {
+                        nQuestions: 1,
+                        nGoodAnswers: 0,
+                    };
+                    this.userService.updateStats(player.uid, newStats);
+                }
                 player.updatePlayerPoints(this.quiz.questions[this.currentQuestionIndex]);
                 player.socket.emit(GameEvents.PlayerPointsUpdate, {
                     points: player.points,
