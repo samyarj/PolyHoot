@@ -55,22 +55,18 @@ export class PushNotifService implements OnModuleInit, OnModuleDestroy {
             return; // Avoid duplicate listeners
         }
 
-        this.logger.log(`Listening for new messages in channel: ${channelId}`);
-
         this.firstSnapshotFlags.set(channelId, true);
 
         const unsubscribe = this.firestore.collection(`chatChannels/${channelId}/messages`)
             .orderBy('date', 'asc')
             .onSnapshot(snapshot => {
                 if (this.firstSnapshotFlags.get(channelId)) {
-                    this.logger.debug("Skipping first snapshot for channel:", channelId);
                     this.firstSnapshotFlags.set(channelId, false);
                     return;
                 }
                 snapshot.docChanges().forEach(async change => {
                     if (change.type === 'added') {
                         const newMessage = change.doc.data();
-                        this.logger.log(`New message in ${channelId}: ${newMessage.message}`);
 
                         // Fetch users in the channel
                         const channelDoc = await this.firestore.collection('chatChannels').doc(channelId).get();
@@ -112,22 +108,18 @@ export class PushNotifService implements OnModuleInit, OnModuleDestroy {
     }
 
     listenToGlobalChat() {
-        this.logger.log("Listening for new messages in global chat...");
-
         this.firstSnapshotFlags.set('globalChat', true);
 
         const unsubscribe = this.firestore.collection('globalChat')
             .orderBy('date', 'asc')
             .onSnapshot(snapshot => {
                 if (this.firstSnapshotFlags.get('globalChat')) {
-                    this.logger.debug("Skipping first snapshot for channel:", 'globalChat');
                     this.firstSnapshotFlags.set('globalChat', false);
                     return;
                 }
                 snapshot.docChanges().forEach(async change => {
                     if (change.type === 'added') {
                         const newMessage = change.doc.data();
-                        this.logger.log(`New global message: ${newMessage.message}`);
 
                         // Fetch all users with an FCM token
                         const usersRef = this.firestore.collection('users');
@@ -169,14 +161,11 @@ export class PushNotifService implements OnModuleInit, OnModuleDestroy {
                 notification: { title, body },
             });
         } catch (error) {
-            this.logger.error(`Error sending notification: ${error} to ${token}`);
+            this.logger.debug(`Error sending notification: ${error} to ${token}`);
         }
     }
 
     async onNewPublishedPoll(pollTitle: string) {
-        // Fetch users who have FCM tokens
-        this.logger.debug("New published poll.");
-
         const usersRef = this.firestore.collection('users');
         const usersSnapshot = await usersRef.where('fcmToken', '!=', '').get();
 
@@ -202,8 +191,6 @@ export class PushNotifService implements OnModuleInit, OnModuleDestroy {
     }
 
     async onPublishedPollExpired(pollTitle: string) {
-        // Fetch users who have FCM tokens
-        this.logger.debug("Poll expired.");
 
         const usersRef = this.firestore.collection('users');
         const usersSnapshot = await usersRef.where('fcmToken', '!=', '').get();
@@ -220,7 +207,7 @@ export class PushNotifService implements OnModuleInit, OnModuleDestroy {
             }
         });
 
-        this.logger.log("Poll expired. Will send push notifications to this number of mobile clients:", deviceUserMap.size);
+        this.logger.log(`Poll expired. Will send push notifications to this number of mobile clients: ${deviceUserMap.size}`);
 
         const notifications = Array.from(deviceUserMap.entries()).map(([token, name]) =>
             this.sendNotification(token, `Salut ${name} ! Ici PolyHoot !`, `Sondage expiré: ${pollTitle}`)

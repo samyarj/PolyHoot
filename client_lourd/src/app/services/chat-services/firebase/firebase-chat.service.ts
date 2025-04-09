@@ -129,6 +129,8 @@ export class FirebaseChatService {
                     return dateA - dateB;
                 });
 
+                this.updateReadMessages(channel, messagesCache[messagesCache.length - 1]?.date);
+
                 observer.next([...messagesCache]); // ✅ Emit updated messages
             });
 
@@ -342,4 +344,32 @@ export class FirebaseChatService {
             throw new Error('Failed to delete channel.');
         }
     }
+
+    /**
+     * Update the last read message timestamp for a user in a specific channel. (Pour les notifs)
+     */
+    async updateReadMessages(channelId: string, lastRead: FieldValue | undefined): Promise<void> {
+        if (!lastRead) return;
+
+        const user = this.authService.getUser();
+        if (!user) {
+            return;
+        }
+
+        const channelName = channelId === 'General' ? 'globalChat' : channelId;
+
+        try {
+
+            const userDocRef = doc(this.usersCollection, user.uid);
+            await updateDoc(userDocRef, {
+                [`readMessages.${channelName}`]: lastRead,
+            });
+            console.warn(`Successfully updated ${channelId} to ${lastRead} in read messages`);
+        } catch (error) {
+            console.error('Error updating read messages: ', error);
+        }
+    }
+
+
+
 }

@@ -120,7 +120,7 @@ export class AuthService {
                                 } else {
                                     return this.isUserOnline(userCredential.user.uid).pipe(
                                         switchMap((isOnline) => {
-                                            if (isOnline) {
+                                            if (isOnline === true || isOnline === null) {
                                                 return from(this.auth.signOut()).pipe(
                                                     switchMap(() =>
                                                         throwError(() => new Error("L'utilisateur est déjà connecté sur un autre appareil.")),
@@ -147,7 +147,7 @@ export class AuthService {
             switchMap((userCredential) =>
                 this.isUserOnline(userCredential.user.uid).pipe(
                     switchMap((isOnline) => {
-                        if (isOnline) {
+                        if (isOnline === true || isOnline === null) {
                             return from(this.auth.signOut()).pipe(
                                 switchMap(() => throwError(() => new Error("L'utilisateur est déjà connecté sur un autre appareil."))),
                             );
@@ -448,9 +448,9 @@ export class AuthService {
         this.router.navigate(['/login']);
     }
 
-    private isUserOnline(uid: string | null): Observable<boolean> {
+    private isUserOnline(uid: string | null): Observable<boolean | null> {
         if (!uid) {
-            return of(false);
+            return of(null);
         }
 
         const usersCollection = collection(this.firestore, 'users');
@@ -463,7 +463,7 @@ export class AuthService {
                 const userDoc = querySnapshot.docs[0];
                 return userDoc.data()?.isOnline === true;
             }),
-            catchError(() => of(false)),
+            catchError(() => of(null)),
         );
     }
 

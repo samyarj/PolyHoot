@@ -3,6 +3,7 @@ import 'package:client_leger/environment_config.dart';
 import 'package:client_leger/models/report/report_state.dart';
 import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:client_leger/utilities/logger.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:toastification/toastification.dart';
@@ -21,6 +22,7 @@ class ReportService {
   final baseUrl = "${EnvironmentConfig.serverUrl}/report";
   bool isWarned = false;
   ValueNotifier<int?> nbReport = ValueNotifier<int?>(null);
+  ValueNotifier<Timestamp?> unBanDate = ValueNotifier<Timestamp?>(null);
 
   behaviourWarning(BuildContext context) {
     if (!isWarned) {
@@ -43,6 +45,7 @@ class ReportService {
   resetParam() {
     isWarned = false;
     nbReport.value = null;
+    unBanDate.value = null;
   }
 
   banInfo(String message, BuildContext context) {

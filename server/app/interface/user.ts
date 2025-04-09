@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export interface User {
     uid: string; // Primary Key
     username: string; // Must be unique
@@ -47,6 +49,7 @@ export interface User {
     isOnline?: boolean; // Online status
     pity?: number; // Pity counter
     nextDailyFree?: Date; // Next date where user can get daily free
-    pollsAnswered?: string[]
+    pollsAnswered?: string[];
     fcmToken: string; // Firebase Cloud Messaging token (for push notifications)
+    readMessages: Map<string, Timestamp>; // Map of string (key == channelName) and timestamp (value == date of most recent message seen by user)
 }

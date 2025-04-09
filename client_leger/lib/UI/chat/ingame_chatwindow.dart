@@ -4,9 +4,11 @@ import 'package:client_leger/UI/global/avatar_banner_widget.dart';
 import 'package:client_leger/backend-communication-services/chat/ingame_chat_service.dart';
 import 'package:client_leger/backend-communication-services/report/report_service.dart';
 import 'package:client_leger/models/ingame_chat_messages.dart';
+import 'package:client_leger/providers/messages/messages_notif_provider.dart';
 import 'package:client_leger/providers/user_provider.dart';
 import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:client_leger/utilities/logger.dart';
+import 'package:client_leger/utilities/socket_events.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,12 +28,21 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
   final FocusNode _focusNode = FocusNode();
   final InGameChatService _inGameChatManager = InGameChatService();
   final ReportService _reportService = ReportService();
+  late final MessageNotifNotifier _notifier;
 
   @override
   void initState() {
     final user = ref.read(userProvider).value!;
-    _inGameChatManager.setUserInfosAndInitialize(
-        user.username, user.uid, user.avatarEquipped, user.borderEquipped);
+    _notifier = ref.read(messageNotifProvider.notifier);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _notifier.currentDisplayedChannel = inGameChat;
+
+      _notifier.markChatAsRead(inGameChat);
+    });
+
+    _inGameChatManager.setUserInfosAndInitialize(user.username, user.uid,
+        user.avatarEquipped, user.borderEquipped, _notifier);
     super.initState();
   }
 
