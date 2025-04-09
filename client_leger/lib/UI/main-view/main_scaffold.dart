@@ -221,12 +221,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
                                 ),
 
                                 Spacer(),
-                                IconButton(
-                                  icon: Icon(Icons.person),
-                                  iconSize: 28,
-                                  color: colorScheme.tertiary,
-                                  onPressed: () => {},
-                                ),
+
                                 IconButton(
                                   icon: Icon(FontAwesomeIcons.clover),
                                   iconSize: 28,

@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/luck/lootbox/lootbox_coin_svg.dart';
 import 'package:client_leger/UI/luck/lootbox/lootbox_rarity_design.dart';
@@ -243,48 +244,102 @@ class _DailyfreeState extends State<Dailyfree> {
                         // ouvrir pour button
                         Divider(indent: 64, endIndent: 64, thickness: 2),
                         GestureDetector(
-                          onTap: dailyFree!.canClaim
+                          onTap: dailyFree!.canClaim && !_isOpeningDailyFree
                               ? () {
                                   openDailyFree();
                                 }
                               : null,
                           child: IntrinsicWidth(
-                            child: Container(
-                              margin: const EdgeInsets.only(top: 8),
-                              height: 50, // Fixed height for medium button
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16), // Padding for content
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primary, // Background color
-                                border: Border.all(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .tertiary, // Border color
-                                  width: 3,
+                            child: Opacity(
+                              opacity: dailyFree!.canClaim ? 1.0 : 0.6,
+                              child: Container(
+                                margin: const EdgeInsets.only(top: 8),
+                                height: 50,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 16),
+                                decoration: BoxDecoration(
+                                  color: dailyFree!.canClaim
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Color.alphaBlend(
+                                          Theme.of(context)
+                                              .colorScheme
+                                              .tertiary
+                                              .withOpacity(0.1),
+                                          Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                              .withOpacity(0.3)),
+                                  border: Border.all(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .tertiary
+                                        .withValues(
+                                            alpha: dailyFree!.canClaim
+                                                ? 0.8
+                                                : 0.3),
+                                    width: 3,
+                                  ),
+                                  borderRadius: BorderRadius.circular(50),
+                                  boxShadow: dailyFree!.canClaim
+                                      ? [
+                                          BoxShadow(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .tertiary
+                                                .withOpacity(0.3),
+                                            spreadRadius: 1,
+                                            blurRadius: 4,
+                                          ),
+                                        ]
+                                      : null,
                                 ),
-                                borderRadius: BorderRadius.circular(
-                                    50), // Rounded corners
-                              ),
-                              alignment: Alignment.center,
-                              child: _isOpeningDailyFree
-                                  ? ThemedProgressIndicator()
-                                  : Text(
-                                      dailyFree!.canClaim
-                                          ? "Reclamer le prix quotidien !"
-                                          : getDisplayedText(), // Button text
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary, // Text color
-                                        fontWeight: FontWeight.bold,
+                                alignment: Alignment.center,
+                                child: _isOpeningDailyFree
+                                    ? Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: colorScheme.onPrimary
+                                                  .withOpacity(0.8),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'Ouverture...',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: colorScheme.onPrimary
+                                                  .withOpacity(0.8),
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    : Text(
+                                        dailyFree!.canClaim
+                                            ? "Reclamer le prix quotidien !"
+                                            : getDisplayedText(),
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary
+                                              .withValues(
+                                                alpha: dailyFree!.canClaim
+                                                    ? 1.0
+                                                    : 0.75,
+                                              ),
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
+                              ),
                             ),
                           ),
-                        ),
+                        )
                       ],
                     ),
                   ),

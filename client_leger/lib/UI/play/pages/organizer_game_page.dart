@@ -52,6 +52,7 @@ class OrganizerGamePage extends ConsumerWidget {
       canPop: false,
       child: Scaffold(
         body: Container(
+          height: MediaQuery.of(context).size.height,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,

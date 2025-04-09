@@ -95,7 +95,7 @@
 
                 <!-- Tab 2: Amount -->
                 <div *ngIf="currentTab === 1" class="tab-content">
-                    <h2>Montant des coins</h2>
+                    <h2>Montant des pièces</h2>
                     <div class="amount-container">
                         <div class="recipient-info" *ngIf="selectedRecipient">
                             <h3>Destinataire sélectionné:</h3>
@@ -111,10 +111,10 @@
                                 min="1"
                                 step="1"
                             />
-                            <span class="coins-label">pièces</span>
+                            <span class="coins-label"><i class="fa-solid fa-coins"></i></span>
                         </div>
                         <div class="balance-info">
-                            <p>Solde disponible: {{ userBalance }} pièces</p>
+                            <p>Solde disponible: {{ userBalance }} <i class="fa-solid fa-coins"></i></p>
                         </div>
                     </div>
                     <div class="tab-navigation">
@@ -139,15 +139,15 @@
                         </div>
                         <div class="summary-item">
                             <span class="label">Montant:</span>
-                            <span class="value">{{ transferAmount }} pièces</span>
+                            <span class="value">{{ transferAmount }} <i class="fa-solid fa-coins"></i></span>
                         </div>
                         <div class="summary-item" id="amount-after-transfer">
                             <span class="label">Solde après transfert:</span>
-                            <span class="value">{{ userBalance - transferAmount }} pièces</span>
+                            <span class="value">{{ userBalance - transferAmount }} <i class="fa-solid fa-coins"></i></span>
                         </div>
                         <div class="summary-item total">
                             <span class="label">Total:</span>
-                            <span class="value">{{ transferAmount }} pièces</span>
+                            <span class="value">{{ transferAmount }} <i class="fa-solid fa-coins"></i></span>
                         </div>
                     </div>
                     <div class="tab-navigation">

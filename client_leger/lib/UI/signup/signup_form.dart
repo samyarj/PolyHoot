@@ -1,8 +1,10 @@
 import 'package:client_leger/UI/error/error_dialog.dart';
+import 'package:client_leger/UI/profile/widgets/avatar_grid_widget.dart';
 import 'package:client_leger/UI/router/routes.dart';
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
+import 'package:client_leger/backend-communication-services/upload-image/upload_img_service.dart';
 import 'package:client_leger/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,10 +44,13 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
 
   String? _usernameError;
   String? _emailError;
+  List<String> _defaultAvatars = [];
+  String? _selectedAvatar;
 
   @override
   void initState() {
     super.initState();
+    _loadDefaultAvatars();
 
     _usernameFocusNode.addListener(() {
       if (!_usernameFocusNode.hasFocus) {
@@ -83,6 +88,28 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
     });
   }
 
+  void _loadDefaultAvatars() async {
+    try {
+      final uploadImgService = UploadImgService();
+      final avatars = await uploadImgService.getDefaultAvatars();
+      if (mounted) {
+        setState(() {
+          _defaultAvatars = avatars;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        showErrorDialog(context, getCustomError(e));
+      }
+    }
+  }
+
+  void _selectAvatar(String avatarUrl) {
+    setState(() {
+      _selectedAvatar = avatarUrl;
+    });
+  }
+
   Future signUp() async {
     await isUsernameTaken(_usernameController.text.trim());
     await isEmailTaken(_emailController.text.trim());
@@ -93,9 +120,11 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
 
     try {
       await ref.read(userProvider.notifier).signUp(
-          _usernameController.text.trim(),
-          _emailController.text.trim(),
-          _passwordController.text.trim());
+            _usernameController.text.trim(),
+            _emailController.text.trim(),
+            _passwordController.text.trim(),
+            _selectedAvatar,
+          );
       if (!mounted) return;
     } catch (e) {
       if (!mounted) return;
@@ -251,176 +280,202 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
       shadowColor: accentColor.withAlpha(128),
     );
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              "Créer un compte",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: textColor,
-              ),
-            ),
-            const SizedBox(height: 15),
-
-            TextFormField(
-              key: _usernameFieldKey,
-              controller: _usernameController,
-              focusNode: _usernameFocusNode,
-              style: TextStyle(color: textColor, fontSize: 14),
-              cursorColor: accentColor,
-              decoration: getInputDecoration('Pseudonyme')
-                  .copyWith(errorText: _usernameError),
-              validator: validateUsername,
-            ),
-            const SizedBox(height: 10),
-
-            TextFormField(
-              key: _emailFieldKey,
-              controller: _emailController,
-              focusNode: _emailFocusNode,
-              style: TextStyle(color: textColor, fontSize: 14),
-              cursorColor: accentColor,
-              decoration:
-                  getInputDecoration('Email').copyWith(errorText: _emailError),
-              validator: validateEmail,
-            ),
-            const SizedBox(height: 10),
-
-            TextFormField(
-              key: _passwordFieldKey,
-              controller: _passwordController,
-              focusNode: _passwordFocusNode,
-              obscureText: true,
-              style: TextStyle(color: textColor, fontSize: 14),
-              cursorColor: accentColor,
-              decoration: getInputDecoration('Mot de passe'),
-              validator: validatePassword,
-            ),
-            const SizedBox(height: 10),
-
-            TextFormField(
-              key: _confirmPasswordFieldKey,
-              controller: _confirmPasswordController,
-              focusNode: _confirmPasswordFocusNode,
-              obscureText: true,
-              style: TextStyle(color: textColor, fontSize: 14),
-              cursorColor: accentColor,
-              decoration: getInputDecoration('Confirmer le mot de passe'),
-              validator: validateConfirmPassword,
-            ),
-            const SizedBox(height: 10),
-
-            // Sign Up button
-            SizedBox(
-              width: double.infinity,
-              height: 40,
-              child: ElevatedButton(
-                onPressed: userState is AsyncLoading
-                    ? null
-                    : () async {
-                        if (_formKey.currentState!.validate()) {
-                          await signUp();
-                        }
-                      },
-                style: customButtonStyle,
-                child: userState is AsyncLoading
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : const Text(
-                        'Créer un compte',
-                        style: TextStyle(fontSize: 16),
-                      ),
-              ),
-            ),
-            const SizedBox(height: 5),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Text(
-                    "Vous avez déjà un compte ? ",
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 12,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () => context.go(Paths.logIn),
-                    style: TextButton.styleFrom(
-                      minimumSize: Size.zero,
-                      padding: EdgeInsets.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: Text(
-                      "Se connecter",
-                      style: TextStyle(
-                        color: textColor,
-                        fontSize: 12,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 5),
-
-            // Divider
-            Row(
+    return TapRegion(
+      onTapOutside: (_) => FocusScope.of(context).unfocus(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
+        child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Expanded(child: Divider(color: textColor.withAlpha(128))),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Text(
-                    'ou',
-                    style: TextStyle(color: textColor, fontSize: 12),
+                Text(
+                  "Créer un compte",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
                   ),
                 ),
-                Expanded(child: Divider(color: textColor.withAlpha(128))),
+                const SizedBox(height: 15),
+
+                TextFormField(
+                  key: _usernameFieldKey,
+                  controller: _usernameController,
+                  focusNode: _usernameFocusNode,
+                  style: TextStyle(color: textColor, fontSize: 14),
+                  cursorColor: accentColor,
+                  decoration: getInputDecoration('Pseudonyme')
+                      .copyWith(errorText: _usernameError),
+                  validator: validateUsername,
+                ),
+                const SizedBox(height: 10),
+
+                TextFormField(
+                  key: _emailFieldKey,
+                  controller: _emailController,
+                  focusNode: _emailFocusNode,
+                  style: TextStyle(color: textColor, fontSize: 14),
+                  cursorColor: accentColor,
+                  decoration: getInputDecoration('Email')
+                      .copyWith(errorText: _emailError),
+                  validator: validateEmail,
+                ),
+                const SizedBox(height: 10),
+
+                TextFormField(
+                  key: _passwordFieldKey,
+                  controller: _passwordController,
+                  focusNode: _passwordFocusNode,
+                  obscureText: true,
+                  style: TextStyle(color: textColor, fontSize: 14),
+                  cursorColor: accentColor,
+                  decoration: getInputDecoration('Mot de passe'),
+                  validator: validatePassword,
+                ),
+                const SizedBox(height: 10),
+
+                TextFormField(
+                  key: _confirmPasswordFieldKey,
+                  controller: _confirmPasswordController,
+                  focusNode: _confirmPasswordFocusNode,
+                  obscureText: true,
+                  style: TextStyle(color: textColor, fontSize: 14),
+                  cursorColor: accentColor,
+                  decoration: getInputDecoration('Confirmer le mot de passe'),
+                  validator: validateConfirmPassword,
+                ),
+                const SizedBox(height: 30),
+
+                // Only show avatars if they've loaded
+                if (_defaultAvatars.isNotEmpty)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AvatarGridWidget(
+                        defaultAvatars: _defaultAvatars,
+                        selectedAvatar: _selectedAvatar,
+                        gridTitle: 'Sélectionner un avatar',
+                        onAvatarSelected: _selectAvatar,
+                      ),
+                      const SizedBox(height: 5),
+                    ],
+                  ),
+                const SizedBox(height: 25),
+
+                // Sign Up button
+                SizedBox(
+                  width: double.infinity,
+                  height: 42,
+                  child: ElevatedButton(
+                    onPressed: userState is AsyncLoading
+                        ? null
+                        : () async {
+                            if (_formKey.currentState!.validate()) {
+                              await signUp();
+                            }
+                          },
+                    style: customButtonStyle,
+                    child: userState is AsyncLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Center(
+                            child: const Text(
+                              'Créer un compte',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 5),
+
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        "Vous avez déjà un compte ? ",
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 12,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => context.go(Paths.logIn),
+                        style: TextButton.styleFrom(
+                          minimumSize: Size.zero,
+                          padding: EdgeInsets.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          "Se connecter",
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: 12,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 5),
+
+                // Divider
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: textColor.withAlpha(128))),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Text(
+                        'ou',
+                        style: TextStyle(color: textColor, fontSize: 12),
+                      ),
+                    ),
+                    Expanded(child: Divider(color: textColor.withAlpha(128))),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                // Google sign up button
+                SizedBox(
+                  width: double.infinity,
+                  height: 40,
+                  child: OutlinedButton.icon(
+                    onPressed:
+                        userState is AsyncLoading ? null : signUpWithGoogle,
+                    icon: const FaIcon(FontAwesomeIcons.google, size: 14),
+                    label: const Text(
+                      "S'inscrire avec Google",
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: textColor,
+                      side: BorderSide(color: textColor.withAlpha(128)),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
-
-            const SizedBox(height: 10),
-
-            // Google sign up button
-            SizedBox(
-              width: double.infinity,
-              height: 40,
-              child: OutlinedButton.icon(
-                onPressed: userState is AsyncLoading ? null : signUpWithGoogle,
-                icon: const FaIcon(FontAwesomeIcons.google, size: 14),
-                label: const Text(
-                  "S'inscrire avec Google",
-                  style: TextStyle(fontSize: 14),
-                ),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: textColor,
-                  side: BorderSide(color: textColor.withAlpha(128)),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
