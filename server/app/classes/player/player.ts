@@ -86,14 +86,6 @@ export class Player {
                 if (this.qreAnswer > maxTolerated || this.qreAnswer < minTolerated || this.submitted === false) correct = false;
             }
         }
-
-        // Update stats
-        this.stats.nQuestions++;
-        if (correct) {
-            this.stats.nGoodAnswers++;
-        }
-        this.stats.rightAnswerPercentage = (this.stats.nGoodAnswers / this.stats.nQuestions) * 100;
-
         return correct;
     }
 }

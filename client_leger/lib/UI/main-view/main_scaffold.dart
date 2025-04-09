@@ -1,5 +1,7 @@
 import 'package:client_leger/UI/error/error_dialog.dart';
+import 'package:client_leger/UI/friend-system/friend-request-notification.dart';
 import 'package:client_leger/UI/friend-system/friend-sidebar.dart';
+import 'package:client_leger/UI/main-view/chat_message_notif/chat_messages_notif.dart';
 import 'package:client_leger/UI/main-view/sidebar/sidebar.dart';
 import 'package:client_leger/UI/main-view/widgets/app_bar_right_section.dart';
 import 'package:client_leger/UI/router/routes.dart';
@@ -28,6 +30,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
   bool _isLoggingOut = false;
   final double sidebarWidth = 410;
   bool _isSidebarVisible = true;
+  bool _notificationActive = false;
 
   late AnimationController _animationController;
 
@@ -151,15 +154,57 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
                       : BoxDecoration(color: colorScheme.primary),
                 ),
                 title: isInGame
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Image.asset(
-                            'assets/logo.png',
-                            width: 40,
-                            height: 40,
+                    ? Row(
+                        children: [
+                          Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image.asset(
+                                'assets/logo.png',
+                                width: 40,
+                                height: 40,
+                              ),
+                            ),
                           ),
-                        ),
+                          Spacer(),
+                          Container(
+                            height: 46,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: colorScheme.tertiary,
+                                width: 2,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ChatMessagesNotification(),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: SizedBox(
+                                    height: 24,
+                                    child: VerticalDivider(
+                                      color: colorScheme.tertiary,
+                                      thickness: 1.5,
+                                      width: 10,
+                                    ),
+                                  ),
+                                ),
+                                FriendRequestNotification(
+                                  onTap: () {
+                                    setState(() {
+                                      _notificationActive =
+                                          !_notificationActive;
+                                    });
+                                  },
+                                  isActive: _notificationActive,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       )
                     : Row(
                         children: [
