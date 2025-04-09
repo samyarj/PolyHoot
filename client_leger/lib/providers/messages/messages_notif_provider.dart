@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:client_leger/backend-communication-services/chat/chat_notif_persistence_service.dart';
-import 'package:client_leger/classes/sound_player.dart';
+import 'package:client_leger/classes/hoot_sound_player.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:client_leger/utilities/socket_events.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -34,7 +34,7 @@ class MessageNotifState {
 
 class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  SoundPlayer owlSoundPlayer = SoundPlayer();
+  HootSoundPlayer owlSoundPlayer = HootSoundPlayer();
   final chatNotifPersistenceService = ChatNotifPersistenceService();
   String?
       currentDisplayedChannel; // le channel displayed présentement pour ne pas envoyer de notif!
@@ -266,9 +266,9 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
   }
 
   Future<void> _playSound() async {
-    await owlSoundPlayer.play(
-      source: HOOT_SOUND_PATH,
-    );
+    AppLogger.w("Playing sound");
+    owlSoundPlayer.stop();
+    await owlSoundPlayer.play();
   }
 
   void markChatAsRead(String? channelId) {
