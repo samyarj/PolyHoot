@@ -1,4 +1,4 @@
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp } from '@google-cloud/firestore';
 
 export interface User {
     uid: string; // Primary Key
@@ -51,5 +51,5 @@ export interface User {
     nextDailyFree?: Date; // Next date where user can get daily free
     pollsAnswered?: string[];
     fcmToken: string; // Firebase Cloud Messaging token (for push notifications)
-    readMessages: { [channelName: string]: Timestamp }; // Map of string (key == channelName) and timestamp (value == date of most recent message seen by user)
+    readMessages?: Record<string, Timestamp>; // Map of string (key == channelName) and timestamp (value == date of most recent message seen by user)
 }

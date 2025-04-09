@@ -13,7 +13,7 @@ export class UserService {
     private usersSocketIdMap = new Map<string, string>();
     private readonly logger = new Logger(UserService.name);
 
-    constructor(private readonly cloudinaryService: CloudinaryService) {}
+    constructor(private readonly cloudinaryService: CloudinaryService) { }
 
     addUserToMap(socketId: string, uid: string) {
         if (!this.isUserInMap(socketId)) {
@@ -94,7 +94,6 @@ export class UserService {
             fcmToken: fcmToken ? fcmToken : '', // Ensure fcmToken is not null or undefined
         };
 
-        //console.log(newUser);
         // Save the user data in Firestore
         try {
             await this.firestore.collection('users').doc(uid).set(newUser);
