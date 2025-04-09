@@ -24,8 +24,8 @@ class LuckPage extends StatelessWidget {
                 labelStyle: TextStyle(fontSize: 18),
                 indicatorSize: TabBarIndicatorSize.label,
                 tabs: [
-                  Tab(text: 'LootBox'),
-                  Tab(text: 'CoinFlip'),
+                  Tab(text: 'Coffres'),
+                  Tab(text: 'Pile ou Face'),
                   Tab(text: 'Prix Quotidien'),
                 ],
               ),

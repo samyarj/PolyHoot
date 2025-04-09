@@ -28,9 +28,12 @@ class FriendsListTab extends StatelessWidget {
 
     return Column(
       children: [
-        FriendSearchBar(
-          controller: friendSearchController,
-          colorScheme: colorScheme,
+        TapRegion(
+          onTapOutside: (_) => FocusScope.of(context).unfocus(),
+          child: FriendSearchBar(
+            controller: friendSearchController,
+            colorScheme: colorScheme,
+          ),
         ),
         Expanded(
           child: _buildFriendsListView(context),

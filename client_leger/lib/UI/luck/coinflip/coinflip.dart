@@ -36,7 +36,7 @@ class _CoinFlipPageState extends ConsumerState<CoinFlipPage> {
     });
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 0),
+      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 15),
       margin: const EdgeInsets.all(32.0),
       alignment: Alignment.center,
       decoration: BoxDecoration(

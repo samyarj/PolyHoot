@@ -4,11 +4,15 @@ class AvatarGridWidget extends StatelessWidget {
   final List<String> defaultAvatars;
   final String? selectedAvatar;
   final Function(String) onAvatarSelected;
+  final String gridTitle;
+  final bool isDisabled;
 
   const AvatarGridWidget({
     Key? key,
     required this.defaultAvatars,
     required this.selectedAvatar,
+    this.gridTitle = 'Avatars prédéfinis',
+    this.isDisabled = false,
     required this.onAvatarSelected,
   }) : super(key: key);
 
@@ -21,14 +25,13 @@ class AvatarGridWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Avatars prédéfinis',
+          gridTitle,
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             color: colorScheme.onPrimary,
           ),
         ),
-        const SizedBox(height: 6),
         // Compact grid with smaller avatars - using 4 columns instead of 3 to make them smaller
         GridView.builder(
           shrinkWrap: true,
@@ -43,7 +46,7 @@ class AvatarGridWidget extends StatelessWidget {
           itemBuilder: (context, index) {
             final avatar = defaultAvatars[index];
             return GestureDetector(
-              onTap: () => onAvatarSelected(avatar),
+              onTap: isDisabled ? null : () => onAvatarSelected(avatar),
               child: Container(
                 decoration: BoxDecoration(
                   border: Border.all(

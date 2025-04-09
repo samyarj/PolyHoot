@@ -263,7 +263,7 @@ class _AppBarRightSectionState extends State<AppBarRightSection> {
                                 ),
                               ),
                               Text(
-                                'Coins: ${user?.coins ?? 0}',
+                                'Pièces: ${user?.coins ?? 0}',
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: colorScheme.onPrimary,

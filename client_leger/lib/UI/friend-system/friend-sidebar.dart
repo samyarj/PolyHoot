@@ -47,11 +47,12 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
   StreamSubscription? _onlineStatusSubscription;
   StreamSubscription? _friendsListSubscription;
   Set<String> _removingUsers = {};
+  bool _isInitialBuild = true;
 
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(_onSearchChanged);
+    _searchController.addListener(_onSearchChangedDelayed);
     _friendSearchController.addListener(_onFriendSearchChanged);
     _subscribeToOnlineStatusUpdates();
     _subscribeToFriendsUpdates();
@@ -59,7 +60,7 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
 
   @override
   void dispose() {
-    _searchController.removeListener(_onSearchChanged);
+    _searchController.removeListener(_onSearchChangedDelayed);
     _searchController.dispose();
     _friendSearchController.removeListener(_onFriendSearchChanged);
     _friendSearchController.dispose();
@@ -130,12 +131,15 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
     );
   }
 
-  void _onSearchChanged() {
+  void _onSearchChangedDelayed() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
       if (_searchController.text != _searchTerm) {
         setState(() {
           _searchTerm = _searchController.text;
+          if (_searchTerm.isNotEmpty) {
+            _isSearchLoading = true;
+          }
         });
       }
     });
@@ -209,6 +213,19 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
+    if (_isInitialBuild) {
+      _isInitialBuild = false;
+    } else {
+      // Reset loading state if returning to this tab
+      if (_isSearchLoading && _searchTerm.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          setState(() {
+            _isSearchLoading = false;
+          });
+        });
+      }
+    }
 
     return Container(
       decoration: BoxDecoration(
@@ -312,6 +329,7 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
       if (!mounted) return;
       showToast(context, 'Demande d\'ami envoyée avec succès',
           type: ToastificationType.success);
+      _searchController.clear();
     } catch (e) {
       if (!mounted) return;
       showErrorDialog(context, e.toString());
