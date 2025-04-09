@@ -5,7 +5,7 @@
             <div class="grid">
                 <div *ngFor="let avatar of shop.avatars" class="square" (click)="submitBuy('avatar', avatar.link)">
                     <img [src]="avatar.link" alt="avatar" class="square-avatar" />
-                    <div class="price">{{ avatar.price }} pièces</div>
+                    <div class="price">{{ avatar.price }}&nbsp;<i class="fa-solid fa-coins"></i></div>
                 </div>
                 <!-- Add more avatars -->
             </div>
@@ -16,7 +16,7 @@
             <div class="grid">
                 <div *ngFor="let banner of shop.banners" class="square" (click)="submitBuy('banner', banner.link)">
                     <img [src]="banner.link" alt="avatar" class="square-banner" />
-                    <div class="price">{{ banner.price }} pièces</div>
+                    <div class="price">{{ banner.price }}&nbsp;<i class="fa-solid fa-coins"></i></div>
                 </div>
                 <!-- Add more borders -->
             </div>
@@ -29,7 +29,7 @@
                     <p>
                         {{ theme.link }}
                     </p>
-                    <div class="price">{{ theme.price }} pièces</div>
+                    <div class="price">{{ theme.price }}&nbsp;<i class="fa-solid fa-coins"></i></div>
                 </div>
             </div>
             <p *ngIf="shop.themes.length === 0">Vous detenez déjà tous les thèmes de la boutique!</p>
