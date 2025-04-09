@@ -21,7 +21,7 @@ Future<void> main() async {
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
+    //DeviceOrientation.landscapeRight,
   ]);
 
   await initializeDateFormatting('fr_CA', null);

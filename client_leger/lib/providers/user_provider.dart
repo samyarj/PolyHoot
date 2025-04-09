@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
 import 'package:client_leger/backend-communication-services/chat/firebase_chat_service.dart';
@@ -118,9 +119,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
         WebSocketManager.instance.playerName = user.username;
         AppLogger.d("User data updated in real-time: ${user.username}");
 
-        // for the chat notifs   
-
-
+        // for the chat notifs
       } else {
         throw Exception("User document not found in Firestore");
       }
@@ -133,7 +132,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
   // Create a new user sign up normal ET sign up with google
   Future<void> createAndFetchUser(
       UserCredential userCredential, String endpoint,
-      {bool isLogin = false}) async {
+      {bool isLogin = false, String? body}) async {
     state = const AsyncValue.loading();
     try {
       final idToken = await userCredential.user?.getIdToken();
@@ -236,7 +235,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
     }
   }
 
-  Future<void> signUp(String username, String email, String password) async {
+  Future<void> signUp(
+      String username, String email, String password, String? avatarURL) async {
     state = const AsyncValue.loading();
     AppLogger.d("Signing up...");
     final userCredential =
@@ -246,13 +246,22 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
     );
     try {
       await userCredential.user!.updateProfile(displayName: username);
-      await createAndFetchUser(userCredential, auth_service.createUserUrl);
+
+      // Create body with FCM token and avatar URL
+      final fcmToken =
+          await _firebasePushApi.onSignUp(userCredential.user?.uid ?? '');
+      final body = jsonEncode({
+        'fcmToken': fcmToken,
+        'avatarURL': avatarURL, // Add this line
+      });
+
+      await createAndFetchUser(userCredential, auth_service.createUserUrl,
+          body: body);
     } catch (e, stack) {
       AppLogger.e("Sign-up error: $e");
       state = AsyncValue.error(e, stack);
       isLoggedIn.value = false;
-      await userCredential.user
-          ?.delete(); // on annule la creation du compte avec FireBase
+      await userCredential.user?.delete();
       rethrow;
     }
   }
