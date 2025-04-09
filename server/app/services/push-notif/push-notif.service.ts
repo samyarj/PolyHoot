@@ -35,6 +35,7 @@ export class PushNotifService implements OnModuleInit, OnModuleDestroy {
                     } else if (change.type === 'removed') {
                         this.logger.log(`Channel deleted: ${channelId}`);
                         this.unsubscribeFromChannel(channelId);
+                        // TODO: remove the channel from the map of each user that has it (not related to push notif service but to take advantage of the listener)
                     }
                 });
             });

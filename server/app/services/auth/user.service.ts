@@ -4,6 +4,7 @@ import { CloudinaryService } from '@app/modules/cloudinary/cloudinary.service';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { UserCredential } from 'firebase/auth';
+import { Timestamp } from 'firebase/firestore';
 
 @Injectable()
 export class UserService {
@@ -12,7 +13,7 @@ export class UserService {
     private usersSocketIdMap = new Map<string, string>();
     private readonly logger = new Logger(UserService.name);
 
-    constructor(private readonly cloudinaryService: CloudinaryService) {}
+    constructor(private readonly cloudinaryService: CloudinaryService) { }
 
     addUserToMap(socketId: string, uid: string) {
         if (!this.isUserInMap(socketId)) {
@@ -461,6 +462,7 @@ export class UserService {
             pity: userDoc.pity || 0,
             nextDailyFree: userDoc.nextDailyFree || new Date(),
             fcmToken: userDoc.fcmToken || '',
+            readMessages: userDoc.readMessages || new Map([['globalChat', Timestamp.fromMillis(0)]]),
         };
     }
 

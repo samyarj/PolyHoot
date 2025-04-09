@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:client_leger/UI/confirmation/confirmation_dialog.dart';
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/global/avatar_banner_widget.dart';
+import 'package:client_leger/backend-communication-services/chat/chat_notif_persistence_service.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/report/report_service.dart';
 import 'package:client_leger/business/channel_manager.dart';
@@ -9,6 +10,7 @@ import 'package:client_leger/models/chat_message.dart';
 import 'package:client_leger/providers/messages/messages_notif_provider.dart';
 import 'package:client_leger/providers/user_provider.dart';
 import 'package:client_leger/utilities/helper_functions.dart';
+import 'package:client_leger/utilities/logger.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,12 +33,14 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
   final FocusNode _focusNode = FocusNode();
   late ChannelManager _channelManager;
   Timestamp? lastMessageDate; // Track last message date for pagination
+  Timestamp? lastRead;
   List<ChatMessage> _allMessagesDisplayed = [];
   bool isLoadingInitialMessages = true;
   StreamSubscription<List<ChatMessage>>? _messagesSubscription;
   late final MessageNotifNotifier _notifier;
   bool _isSending = false;
   final ReportService _reportService = ReportService();
+  final chatNotifPersistenceService = ChatNotifPersistenceService();
 
   @override
   void initState() {
@@ -69,6 +73,8 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
         });
         if (_allMessagesDisplayed.isNotEmpty) {
           lastMessageDate = _allMessagesDisplayed.last.timestamp;
+          AppLogger.e("updating lastRead");
+          lastRead = _allMessagesDisplayed.first.timestamp;
         }
       }, onError: (error) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -110,10 +116,17 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
   }
 
   @override
-  void dispose() {
+  void dispose() async {
+    super.dispose();
     _textController.dispose();
     _messagesSubscription?.cancel();
-    super.dispose();
+    if (lastRead != null) {
+      final firestoreChannelName =
+          widget.channel == "General" ? "globalChat" : widget.channel;
+
+      await chatNotifPersistenceService.updateReadMessages(
+          firestoreChannelName, lastRead!);
+    }
   }
 
   void sendMessage() async {
