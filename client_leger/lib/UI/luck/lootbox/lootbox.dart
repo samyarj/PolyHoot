@@ -8,10 +8,12 @@ import 'package:client_leger/backend-communication-services/error-handlers/globa
 import 'package:client_leger/models/chance/lootbox_container.dart';
 import 'package:client_leger/models/enums.dart';
 import 'package:client_leger/providers/user_provider.dart';
+import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:toastification/toastification.dart';
 
 class LootBox extends ConsumerStatefulWidget {
   const LootBox({super.key});
@@ -62,11 +64,14 @@ class _LootBoxState extends ConsumerState<LootBox> {
         },
       );
       if (result == null && mounted) {
-        showErrorDialog(context,
-            "Vous n'avez pas assez d'argent pour vous procurer cette Loot Box.");
+        showToast(context, "Fonds insuffisants pour ouvrir ce coffre.",
+            type: ToastificationType.error,
+            duration: const Duration(seconds: 5));
       } else if (result == false && mounted) {
-        showErrorDialog(context,
-            "Vous possèdez déjà l'item obtenu. Vous recevrez le prix de la lootBox en retour dans votre compte.");
+        showToast(
+            context, "Objet déjà possédé ! Prix remboursé sur votre compte.",
+            type: ToastificationType.info,
+            duration: const Duration(seconds: 5));
       } else if (mounted) {
         openLootBoxWinDialog(result, context);
       }

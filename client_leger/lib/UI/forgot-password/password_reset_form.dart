@@ -157,88 +157,94 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
       shadowColor: accentColor.withAlpha(128),
     );
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              'Réinitialisation du mot de passe',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: textColor,
-              ),
-            ),
-            const SizedBox(height: 15),
-            Text(
-              "Veuillez entrer l'adresse e-mail que vous avez utilisée pour vous inscrire, et nous vous enverrons un lien pour réinitialiser votre mot de passe par e-mail.",
-              style: TextStyle(
-                fontSize: 14,
-                color: textColor,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            TextFormField(
-              key: _emailFieldKey,
-              controller: _emailController,
-              focusNode: _emailFocusNode,
-              style: TextStyle(color: textColor, fontSize: 14),
-              cursorColor: accentColor,
-              decoration:
-                  getInputDecoration('Email').copyWith(errorText: _emailError),
-              validator: validateEmail,
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              height: 40,
-              child: ElevatedButton(
-                onPressed: _isLoading || (_emailError != null)
-                    ? null
-                    : () {
-                        if (_formKey.currentState!.validate()) {
-                          submit(_emailController.text.trim());
-                        }
-                      },
-                style: customButtonStyle,
-                child: _isLoading
-                    ? SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : Text(
-                        'Réinitialiser mon mot de passe',
-                        style: TextStyle(fontSize: 16),
-                      ),
-              ),
-            ),
-            TextButton(
-              onPressed: () => context.go(Paths.logIn),
-              style: TextButton.styleFrom(
-                minimumSize: Size.zero,
-                padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(
-                'Retour à la page de connexion',
+    return TapRegion(
+      onTapOutside: (_) => FocusScope.of(context).unfocus(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                'Réinitialisation du mot de passe',
                 style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
                   color: textColor,
-                  fontSize: 12,
-                  decoration: TextDecoration.underline,
+                ),
+              ),
+              const SizedBox(height: 15),
+              Text(
+                "Veuillez entrer l'adresse e-mail que vous avez utilisée pour vous inscrire, et nous vous enverrons un lien pour réinitialiser votre mot de passe par e-mail.",
+                style: TextStyle(
+                  fontSize: 14,
+                  color: textColor,
                 ),
                 textAlign: TextAlign.center,
               ),
-            ),
-          ],
+              const SizedBox(height: 20),
+              TextFormField(
+                key: _emailFieldKey,
+                controller: _emailController,
+                focusNode: _emailFocusNode,
+                style: TextStyle(color: textColor, fontSize: 14),
+                cursorColor: accentColor,
+                decoration: getInputDecoration('Email')
+                    .copyWith(errorText: _emailError),
+                validator: validateEmail,
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: 42,
+                child: ElevatedButton(
+                  onPressed: _isLoading || (_emailError != null)
+                      ? null
+                      : () {
+                          if (_formKey.currentState!.validate()) {
+                            submit(_emailController.text.trim());
+                          }
+                        },
+                  style: customButtonStyle,
+                  child: _isLoading
+                      ? SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Center(
+                          child: Text(
+                            'Réinitialiser mon mot de passe',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                ),
+              ),
+              TextButton(
+                onPressed: () => context.go(Paths.logIn),
+                style: TextButton.styleFrom(
+                  minimumSize: Size.zero,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  'Retour à la page de connexion',
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 12,
+                    decoration: TextDecoration.underline,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

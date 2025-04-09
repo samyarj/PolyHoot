@@ -55,7 +55,7 @@ class _SignUpPageState extends State<SignUpPage>
                 const SizedBox(height: 15),
                 Container(
                   width: 450,
-                  height: screenHeight * 0.75,
+                  height: screenHeight * 0.7,
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primary.withAlpha(180),
@@ -71,7 +71,25 @@ class _SignUpPageState extends State<SignUpPage>
                       ),
                     ],
                   ),
-                  child: SignUpForm(),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(30),
+                    child: RawScrollbar(
+                      thumbColor: Theme.of(context)
+                          .colorScheme
+                          .secondary
+                          .withAlpha(204), // Fixed withValues to withAlpha
+                      radius: const Radius.circular(10), // Rounded corners
+                      thickness: 8, // Thickness of the scrollbar
+                      thumbVisibility: true, // Always show the scrollbar
+                      child: SingleChildScrollView(
+                        physics: const ClampingScrollPhysics(),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: SignUpForm(),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),

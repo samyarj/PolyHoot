@@ -14,7 +14,7 @@ class AvatarSelectionWidget extends StatelessWidget {
   final Function() onPickImage;
   final Function() onTakePhoto;
   final Function() onUploadImage;
-  final bool isUploading;
+  final bool isDisabled;
 
   const AvatarSelectionWidget({
     Key? key,
@@ -27,7 +27,7 @@ class AvatarSelectionWidget extends StatelessWidget {
     required this.onPickImage,
     required this.onTakePhoto,
     required this.onUploadImage,
-    required this.isUploading,
+    required this.isDisabled,
   }) : super(key: key);
 
   @override
@@ -57,10 +57,10 @@ class AvatarSelectionWidget extends StatelessWidget {
               Expanded(
                 flex: 6,
                 child: AvatarGridWidget(
-                  defaultAvatars: defaultAvatars,
-                  selectedAvatar: selectedAvatar,
-                  onAvatarSelected: onAvatarSelected,
-                ),
+                    defaultAvatars: defaultAvatars,
+                    selectedAvatar: selectedAvatar,
+                    onAvatarSelected: onAvatarSelected,
+                    isDisabled: isDisabled),
               ),
 
               const SizedBox(width: 8), // Reduced spacing
@@ -75,7 +75,7 @@ class AvatarSelectionWidget extends StatelessWidget {
                   onEquipAvatar: onEquipAvatar,
                   onUploadImage: onUploadImage,
                   onEditIconPressed: () => _showAvatarOptionsDialog(context),
-                  isUploading: isUploading,
+                  isUploading: isDisabled,
                 ),
               ),
             ],

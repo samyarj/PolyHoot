@@ -1,6 +1,7 @@
 import 'package:client_leger/UI/global/avatar_banner_widget.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/providers/play/waiting_page_provider.dart';
+import 'package:client_leger/utilities/confirmation_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -69,10 +70,14 @@ class PlayerInfoWidget extends ConsumerWidget {
             // Ban button (conditionally shown)
             socketManager.isOrganizer && player.name != "Organisateur"
                 ? ElevatedButton(
-                    onPressed: () {
-                      ref
-                          .read(waitingPageProvider.notifier)
-                          .banPlayer(player.name);
+                    onPressed: () async {
+                      final shouldBan =
+                          await confirmBanDialog(context, player.name);
+                      if (shouldBan) {
+                        ref
+                            .read(waitingPageProvider.notifier)
+                            .banPlayer(player.name);
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor:
@@ -96,9 +101,7 @@ class PlayerInfoWidget extends ConsumerWidget {
                       ),
                     ),
                   )
-                : const SizedBox(
-                    width:
-                        80), // Empty space to maintain alignment when no button
+                : const SizedBox(width: 80),
           ],
         ),
       ),

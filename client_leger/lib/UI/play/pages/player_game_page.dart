@@ -162,8 +162,8 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
                                   decoration: BoxDecoration(
                                     color: playerGameState.realShowAnswers
                                         ? (choice.isCorrect!
-                                            ? Colors.green
-                                            : Colors.red)
+                                            ? Color.fromRGBO(76, 175, 80, 0.85)
+                                            : Color.fromRGBO(244, 67, 54, 0.85))
                                         : isSelected
                                             ? colorScheme.tertiary
                                             : colorScheme.primary.withAlpha(
