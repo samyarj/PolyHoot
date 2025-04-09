@@ -115,17 +115,7 @@ export class GameGateway {
         const roomId = Array.from(client.rooms.values())[1];
         const game = this.gameManager.getGameByRoomId(roomId);
         if (game) {
-            const player = game.findTargetedPlayer(client);
-            const wasCorrect = game.finalizePlayerAnswer(client, answerData);
-
-            // Update user stats if they are authenticated
-            if (client.user?.uid) {
-                const newStats = {
-                    nQuestions: 1,
-                    nGoodAnswers: wasCorrect ? 1 : 0,
-                };
-                await this.userService.updateStats(client.user.uid, newStats);
-            }
+            game.finalizePlayerAnswer(client, answerData);
         }
     }
 
