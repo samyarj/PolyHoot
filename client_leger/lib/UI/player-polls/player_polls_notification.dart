@@ -430,27 +430,37 @@ class _PlayerPollsNotificationState
                       alignment: Alignment.center,
                       child: Stack(
                         children: [
-                          Icon(
-                            FontAwesomeIcons.bullhorn,
-                            size: 18,
-                            color: _menuOpen
-                                ? colorScheme.secondary
-                                : colorScheme.tertiary,
+                          Container(
+                            padding: EdgeInsets.all(13),
+                            child: Icon(
+                              FontAwesomeIcons.bullhorn,
+                              size: 18,
+                              color: _menuOpen
+                                  ? colorScheme.secondary
+                                  : colorScheme.tertiary,
+                            ),
                           ),
                           if (hasPolls && !_menuOpen)
                             Positioned(
-                              right: -1,
-                              bottom: 0,
+                              right: currentPlayerPolls.length > 99 ? 1 : 8,
+                              bottom: 18,
                               child: Container(
-                                padding: const EdgeInsets.all(4),
+                                padding: const EdgeInsets.all(3),
                                 decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
                                   color: Colors.red,
-                                  borderRadius: BorderRadius.circular(10),
                                 ),
                                 constraints: const BoxConstraints(
-                                  minWidth: 7,
-                                  minHeight: 7,
+                                  minWidth: 18,
+                                  minHeight: 18,
                                 ),
+                                child: Text(
+                                    "${currentPlayerPolls.length > 99 ? '99+' : currentPlayerPolls.length}",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                    ),
+                                    textAlign: TextAlign.center),
                               ),
                             ),
                         ],

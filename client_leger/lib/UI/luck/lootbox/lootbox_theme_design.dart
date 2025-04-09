@@ -44,7 +44,7 @@ Container getThemeContainer(ThemeData theme, String text) {
       style: TextStyle(
         color: theme.colorScheme.onPrimary, // Text color
         fontWeight: FontWeight.bold,
-        fontSize: 14,
+        fontSize: 11,
       ),
     ),
   );

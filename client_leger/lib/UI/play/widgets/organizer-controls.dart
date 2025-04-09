@@ -7,82 +7,96 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class OrganizerControls extends ConsumerWidget {
   const OrganizerControls({super.key});
 
+  // Define a fixed height for the entire widget
+  static const double _totalFixedHeight = 210.0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(organizerProvider);
     final notifier = ref.read(organizerProvider.notifier);
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // Status message
-        _buildStatusMessage(state, colorScheme),
-        const SizedBox(height: 12),
+    // Standard button spacing - no need for dynamic calculation now
+    const double buttonSpacing = 8.0;
 
-        // Control buttons in a column for the narrow space
-        Container(
-          width: double.infinity,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Pause/Resume button
-              _buildControlButton(
-                onPressed: state.gameStatus == GameStatus.WaitingForAnswers
-                    ? () => _safelyCallMethod(() => notifier.pauseGame())
-                    : null,
-                icon:
-                    state.gameModifiers.paused ? Icons.play_arrow : Icons.pause,
-                label: state.gameModifiers.paused ? 'Reprendre' : 'Pause',
-                color: state.gameModifiers.paused
-                    ? colorScheme.secondary
-                    : colorScheme.primary,
-                context: context,
+    return Container(
+      height: _totalFixedHeight,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Status message
+          _buildStatusMessage(state, colorScheme),
+          const SizedBox(height: 12.0),
+
+          // Control buttons in a column for the narrow space
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Pause/Resume button
+                  _buildControlButton(
+                    onPressed: state.gameStatus == GameStatus.WaitingForAnswers
+                        ? () => _safelyCallMethod(() => notifier.pauseGame())
+                        : null,
+                    icon: state.gameModifiers.paused
+                        ? Icons.play_arrow
+                        : Icons.pause,
+                    label: state.gameModifiers.paused ? 'Reprendre' : 'Pause',
+                    color: state.gameModifiers.paused
+                        ? colorScheme.secondary
+                        : colorScheme.primary,
+                    context: context,
+                  ),
+                  const SizedBox(height: buttonSpacing),
+
+                  // Alert button
+                  _buildControlButton(
+                    onPressed: state.gameStatus ==
+                                GameStatus.WaitingForAnswers &&
+                            !state.gameModifiers.alertMode &&
+                            ((state.currentQuestion.type == 'QCM' &&
+                                    state.gameInfo.time > 10) ||
+                                (state.currentQuestion.type == 'QRL' &&
+                                    state.gameInfo.time > 20))
+                        ? () =>
+                            _safelyCallMethod(() => notifier.startAlertMode())
+                        : null,
+                    icon: Icons.notifications_active,
+                    label: state.gameModifiers.alertMode &&
+                            state.gameStatus !=
+                                GameStatus.WaitingForNextQuestion
+                        ? 'EN ALERTE'
+                        : 'Alerte',
+                    color: Colors.red.withAlpha(204), // For 0.8 opacity
+                    context: context,
+                  ),
+                  const SizedBox(height: buttonSpacing),
+
+                  // Next question button (always visible, sometimes disabled)
+                  _buildControlButton(
+                    onPressed: state.gameStatus == GameStatus.CorrectionFinished
+                        ? () => notifier.nextQuestion()
+                        : state.gameStatus == GameStatus.GameFinished
+                            ? () => notifier.showResults()
+                            : null,
+                    icon: state.gameStatus == GameStatus.GameFinished
+                        ? Icons.leaderboard
+                        : Icons.navigate_next,
+                    label: state.gameStatus == GameStatus.GameFinished
+                        ? 'Résultats'
+                        : 'Prochaine question',
+                    color: colorScheme.secondary,
+                    context: context,
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-
-              // Alert button
-              _buildControlButton(
-                onPressed: state.gameStatus == GameStatus.WaitingForAnswers &&
-                        !state.gameModifiers.alertMode &&
-                        ((state.currentQuestion.type == 'QCM' &&
-                                state.gameInfo.time > 10) ||
-                            (state.currentQuestion.type == 'QRL' &&
-                                state.gameInfo.time > 20))
-                    ? () => _safelyCallMethod(() => notifier.startAlertMode())
-                    : null,
-                icon: Icons.notifications_active,
-                label: state.gameModifiers.alertMode &&
-                        state.gameStatus != GameStatus.WaitingForNextQuestion
-                    ? 'EN ALERTE'
-                    : 'Alerte',
-                color: Colors.red.withValues(alpha: 0.8),
-                context: context,
-              ),
-              const SizedBox(height: 8),
-
-              // Next question / Show results button
-              if (state.gameStatus == GameStatus.CorrectionFinished)
-                _buildControlButton(
-                  onPressed: () => notifier.nextQuestion(),
-                  icon: Icons.navigate_next,
-                  label: 'Prochaine question',
-                  color: colorScheme.secondary,
-                  context: context,
-                )
-              else if (state.gameStatus == GameStatus.GameFinished)
-                _buildControlButton(
-                  onPressed: () => notifier.showResults(),
-                  icon: Icons.leaderboard,
-                  label: 'Résultats',
-                  color: colorScheme.secondary,
-                  context: context,
-                ),
-            ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

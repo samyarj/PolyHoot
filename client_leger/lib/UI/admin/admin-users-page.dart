@@ -60,50 +60,54 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                Container(
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: colorScheme.tertiary, width: 2),
-                  ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  margin: const EdgeInsets.only(bottom: 16),
-                  child: Row(
-                    children: [
-                      Icon(Icons.search, color: colorScheme.tertiary),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: _searchController,
-                          focusNode: _searchFocusNode,
-                          decoration: InputDecoration(
-                            hintText: 'Rechercher un joueur...',
-                            border: InputBorder.none,
-                            hintStyle: TextStyle(
-                              color: colorScheme.onSurface.withOpacity(0.6),
+                TapRegion(
+                  onTapOutside: (_) => FocusScope.of(context).unfocus(),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(color: colorScheme.tertiary, width: 2),
+                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    child: Row(
+                      children: [
+                        Icon(Icons.search, color: colorScheme.tertiary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: _searchController,
+                            focusNode: _searchFocusNode,
+                            decoration: InputDecoration(
+                              hintText: 'Rechercher un joueur...',
+                              border: InputBorder.none,
+                              hintStyle: TextStyle(
+                                color: colorScheme.onSurface.withOpacity(0.6),
+                              ),
                             ),
+                            style: TextStyle(color: colorScheme.onSurface),
+                            onChanged: (value) {
+                              ref
+                                  .read(adminUsersProvider.notifier)
+                                  .setSearchTerm(value);
+                            },
                           ),
-                          style: TextStyle(color: colorScheme.onSurface),
-                          onChanged: (value) {
-                            ref
-                                .read(adminUsersProvider.notifier)
-                                .setSearchTerm(value);
-                          },
                         ),
-                      ),
-                      if (_searchController.text.isNotEmpty)
-                        IconButton(
-                          icon: Icon(Icons.clear, color: colorScheme.tertiary),
-                          onPressed: () {
-                            _searchController.clear();
-                            ref
-                                .read(adminUsersProvider.notifier)
-                                .setSearchTerm('');
-                            _searchFocusNode.unfocus();
-                          },
-                        ),
-                    ],
+                        if (_searchController.text.isNotEmpty)
+                          IconButton(
+                            icon:
+                                Icon(Icons.clear, color: colorScheme.tertiary),
+                            onPressed: () {
+                              _searchController.clear();
+                              ref
+                                  .read(adminUsersProvider.notifier)
+                                  .setSearchTerm('');
+                              _searchFocusNode.unfocus();
+                            },
+                          ),
+                      ],
+                    ),
                   ),
                 ),
                 // Fixed height container similar to GameLogsPage
