@@ -3,6 +3,7 @@ import 'package:client_leger/backend-communication-services/chat/firebase_chat_s
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/ingame_chat_messages.dart';
 import 'package:client_leger/models/user.dart';
+import 'package:client_leger/providers/messages/messages_notif_provider.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:client_leger/utilities/socket_events.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,7 @@ class InGameChatService {
 
   String? currentRoomId;
   Timer? quickRepliesTimer;
+  MessageNotifNotifier? _notifier;
 
   final quickRepliesNotifier = ValueNotifier<List<String>>([]);
 
@@ -43,7 +45,7 @@ class InGameChatService {
     if (currentRoomId == _socketManager.roomId && currentRoomId != null) {
       AppLogger.i("user changed channel tabs, not resetting InGameChatService");
     } else if (_socketManager.roomId == null) {
-      AppLogger.i(
+      AppLogger.w(
           "Resetting InGameChatService because we're not in a game anymore");
       _socketManager.socket?.off(ChatEvents.RoomLeft.value);
       _socketManager.socket?.off(ChatEvents.MessageAdded.value);
@@ -53,8 +55,8 @@ class InGameChatService {
       _avatar = null;
       _border = null;
       _uid = null;
+      _notifier = null;
       _userDetails = {};
-      AppLogger.w("reset timer and messages");
       inGameChatMessagesNotifier.value = [];
       quickRepliesTimer?.cancel();
       quickRepliesTimer = null;
@@ -72,7 +74,12 @@ class InGameChatService {
   }
 
   void setUserInfosAndInitialize(
-      String username, String? uid, String? avatar, String? border) {
+    String username,
+    String? uid,
+    String? avatar,
+    String? border,
+    MessageNotifNotifier notifier,
+  ) {
     if (currentRoomId == _socketManager.roomId && currentRoomId != null) {
       AppLogger.i(
           "user changed channel tabs, not initializing InGameChatService");
@@ -83,6 +90,7 @@ class InGameChatService {
       _avatar = avatar;
       _border = border;
       _uid = uid;
+      _notifier = notifier;
       currentRoomId = _socketManager.roomId;
       configureChatSocketFeatures();
       getHistory();
@@ -175,6 +183,8 @@ class InGameChatService {
         await attachUrlToMessage(message);
       }
 
+      _notifier?.onIngameMessageReceived();
+
       inGameChatMessagesNotifier.value = [
         message,
         ...inGameChatMessagesNotifier.value,
@@ -187,6 +197,9 @@ class InGameChatService {
         // you quit the chat
       } else {
         final message = InGameChatMessage.fromJson(chatData['message']);
+
+        _notifier?.onIngameMessageReceived();
+
         inGameChatMessagesNotifier.value = [
           message,
           ...inGameChatMessagesNotifier.value,

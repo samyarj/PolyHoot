@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { FirebaseChatMessage } from '@app/interfaces/chat-message';
 import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
-import { ChatChannel, chatChannelFromJson } from '@app/services/chat-services/chat-channels';
+import { ChatChannel } from '@app/services/chat-services/chat-channels';
 import { ChatEvents } from '@app/services/chat-services/chat-events';
 import { ChatService } from '@app/services/chat-services/chat.service';
 import { FirebaseChatService } from '@app/services/chat-services/firebase/firebase-chat.service';
@@ -27,13 +27,13 @@ export class SideBarComponent implements OnDestroy {
     user$: Observable<User | null>;
     userUID: string | null = null;
     friendRequests: { id: string; username: string; avatarEquipped?: string; borderEquipped?: string }[] = [];
-    private globalMessagesSubscription: Subscription;
-    private selectedChannelMessagesSubscription: Unsubscribe;
+    private messagesSubscription: Subscription | null = null;
     private channelsSubscription: Subscription;
     private userSubscription: Subscription;
     private friendRequestsSubscription: Subscription;
     private userDocSubscription: Unsubscribe;
-    private lastMessageDate: FieldPath;
+    private lastMessageDate: FieldPath | undefined;
+    private channelDeletedSubscription: Subscription;
     isFetchingOlderMessages: boolean = false;
     channels: ChatChannel[] = [];
     joinedChannels: string[] = [];
@@ -58,6 +58,8 @@ export class SideBarComponent implements OnDestroy {
     isWorkingWithChannel: boolean = false;
     @ViewChild('tab1Link') tab1Link: any;
     activeTab: number = 1;
+    deletionMessage: string = '';
+
     constructor(
         private authService: AuthService,
         private router: Router,
@@ -70,23 +72,49 @@ export class SideBarComponent implements OnDestroy {
         this.user$ = this.authService.user$;
         // Subscribe to live chat messages for the global chat
         this.subscribeToGlobalMessages();
-        // Subscribe to chat channels
-        this.channelsSubscription = this.firebaseChatService.fetchAllChannels().subscribe({
-            next: (channels) => {
-                const currentUserId = this.authService.getUser()?.uid || '';
-                this.channels = channels.map((channel) => chatChannelFromJson(channel, currentUserId));
-            },
-            error: (err) => {
-                console.error('Error while fetching channels:', err);
-            },
+
+        // Subscribe to channel deletion events
+        this.channelDeletedSubscription = this.firebaseChatService.channelDeleted$.subscribe((deletedChannel) => {
+            console.log('Channel deleted:', deletedChannel);
+            if (this.selectedChannel === deletedChannel) {
+                if (this.activeTab === 3) {
+                    this.deletionMessage = 'Le canal a été supprimé. Veuillez en sélectionner un autre ou en crée un nouveau.';
+                    setTimeout(() => {
+                        this.deletionMessage = '';
+                        // Show the noChannelSelected template
+                    }, 5000);
+                }
+                this.selectedChannel = null;
+                this.selectedChannelMessages = [];
+                this.selectedChannelMessagesLoading = false;
+                this.lastMessageDate = undefined;
+                if (this.messagesSubscription) {
+                    this.messagesSubscription.unsubscribe();
+                    this.messagesSubscription = null;
+                }
+            }
+            // Update channels list
+            this.channels = this.channels.filter((c) => c.name !== deletedChannel);
         });
 
-        // Subscribe to user data to get joined channels and set up real-time updates
+        // Subscribe to user data and channels
         this.userSubscription = this.authService.user$.subscribe((user) => {
             if (user) {
                 this.userUID = user.uid;
-                this.joinedChannels = user.joinedChannels || [];
                 this.setupRealtimeUserUpdates(user.uid);
+
+                // Subscribe to chat channels only after we have the user ID
+                if (this.channelsSubscription) {
+                    this.channelsSubscription.unsubscribe();
+                }
+                this.channelsSubscription = this.firebaseChatService.fetchAllChannels().subscribe({
+                    next: (channels) => {
+                        this.channels = channels;
+                    },
+                    error: (err) => {
+                        console.error('Error while fetching channels:', err);
+                    },
+                });
             }
         });
 
@@ -123,6 +151,13 @@ export class SideBarComponent implements OnDestroy {
 
     setActiveTab(tab: number) {
         this.activeTab = tab;
+        if (tab === 1) {
+            // Assuming tab 1 is the global chat
+            this.subscribeToGlobalMessages();
+        } else if (tab === 3 && this.selectedChannel) {
+            // Assuming tab 3 is the channel chat
+            this.subscribeToSelectedChannelMessages(this.selectedChannel);
+        }
     }
 
     handleChildAction() {
@@ -211,11 +246,8 @@ export class SideBarComponent implements OnDestroy {
 
     ngOnDestroy(): void {
         // Unsubscribe from messages observable to avoid memory leaks
-        if (this.globalMessagesSubscription) {
-            this.globalMessagesSubscription.unsubscribe();
-        }
-        if (this.selectedChannelMessagesSubscription) {
-            this.selectedChannelMessagesSubscription();
+        if (this.messagesSubscription) {
+            this.messagesSubscription.unsubscribe();
         }
         if (this.channelsSubscription) {
             this.channelsSubscription.unsubscribe();
@@ -238,6 +270,9 @@ export class SideBarComponent implements OnDestroy {
         if (this.chatEventsSubscription) {
             this.chatEventsSubscription.unsubscribe();
         }
+        if (this.channelDeletedSubscription) {
+            this.channelDeletedSubscription.unsubscribe();
+        }
 
         // Clean up online status listeners
         Object.values(this.onlineStatusSubscription).forEach((unsubscribe) => unsubscribe());
@@ -258,9 +293,17 @@ export class SideBarComponent implements OnDestroy {
         this.firebaseChatService.loadOlderMessages(this.selectedChannel, this.lastMessageDate).subscribe({
             next: (olderMessages) => {
                 if (olderMessages.length > 0) {
-                    // Merge older messages while maintaining order
-                    this.selectedChannelMessages = [...olderMessages, ...this.selectedChannelMessages];
-                    this.lastMessageDate = olderMessages[0].date; // Update last loaded message date
+                    // Ensure olderMessages are sorted ascending before prepending
+                    const sortedOlderMessages = [...olderMessages].sort((a, b) => {
+                        const dateA = (a.date as any)?.toMillis?.() || 0;
+                        const dateB = (b.date as any)?.toMillis?.() || 0;
+                        return dateA - dateB; // Oldest first
+                    });
+                    this.selectedChannelMessages = [...sortedOlderMessages, ...this.selectedChannelMessages];
+                    // Update lastMessageDate to the oldest message date from the newly loaded batch
+                    if (sortedOlderMessages.length > 0) {
+                        this.lastMessageDate = sortedOlderMessages[0].date;
+                    }
                 }
                 this.isFetchingOlderMessages = false;
             },
@@ -348,29 +391,33 @@ export class SideBarComponent implements OnDestroy {
     async selectChannel(channel: string): Promise<void> {
         if (!this.isWorkingWithChannel) {
             this.isWorkingWithChannel = true;
+            this.deletionMessage = ''; // Clear the deletion message
             try {
-                await this.firebaseChatService.joinChannel(channel);
-
-                // Update the channel's isUserInChannel property
-                this.channels = this.channels.map((c) => {
-                    if (c.name === channel) {
-                        return { ...c, isUserInChannel: true };
+                const tab3 = document.querySelector('[href="#tab3"]') as HTMLElement;
+                if (this.selectedChannel === channel) {
+                    // If the channel is already selected, switch to tab 3
+                    if (tab3) {
+                        tab3.click();
                     }
-                    return c;
-                });
+                    this.isWorkingWithChannel = false;
+                    return;
+                }
+
+                // Call joinChannel to ensure the user is added to the channel
+                await this.firebaseChatService.joinChannel(channel);
 
                 this.selectedChannel = channel;
                 this.selectedChannelMessages = []; // Clear the messages array
                 this.selectedChannelMessagesLoading = true; // Set loading state
+
                 // Switch to the third tab
-                const tab3 = document.querySelector('[href="#tab3"]') as HTMLElement;
                 if (tab3) {
                     tab3.click();
                 }
                 this.subscribeToSelectedChannelMessages(channel);
-                this.isWorkingWithChannel = false;
             } catch (error) {
                 console.error('Failed to join channel:', error);
+            } finally {
                 this.isWorkingWithChannel = false;
             }
         }
@@ -386,13 +433,28 @@ export class SideBarComponent implements OnDestroy {
 
                 // If the deleted channel is the currently selected channel, clear the selected channel
                 if (this.selectedChannel === channel) {
+                    console.log('Current activeTab:', this.activeTab); // Debug log
                     this.selectedChannel = null;
                     this.selectedChannelMessages = [];
                     this.selectedChannelMessagesLoading = false;
+                    this.lastMessageDate = undefined; // Reset pagination marker
+                    if (this.messagesSubscription) {
+                        // Unsubscribe if deleting the active channel
+                        this.messagesSubscription.unsubscribe();
+                        this.messagesSubscription = null;
+                    }
+                    // Redirect to global chat tab (tab1) only if currently on tab3
+                    if (this.activeTab === 3) {
+                        console.log('Redirecting to tab1...'); // Debug log
+                        this.setActiveTab(1);
+                        if (this.tab1Link) {
+                            this.tab1Link.nativeElement.click();
+                        }
+                    }
                 }
-                this.isWorkingWithChannel = false;
             } catch (error) {
                 console.error('Failed to delete channel:', error);
+            } finally {
                 this.isWorkingWithChannel = false;
             }
         }
@@ -405,7 +467,7 @@ export class SideBarComponent implements OnDestroy {
                 event.stopPropagation();
                 await this.firebaseChatService.quitChannel(channel);
 
-                // Update the channel's isUserInChannel property
+                // Update the channel's isUserInChannel property locally for immediate UI update
                 this.channels = this.channels.map((c) => {
                     if (c.name === channel) {
                         return { ...c, isUserInChannel: false };
@@ -418,10 +480,16 @@ export class SideBarComponent implements OnDestroy {
                     this.selectedChannel = null;
                     this.selectedChannelMessages = [];
                     this.selectedChannelMessagesLoading = false;
+                    this.lastMessageDate = undefined; // Reset pagination
+                    if (this.messagesSubscription) {
+                        // Unsubscribe if quitting active channel
+                        this.messagesSubscription.unsubscribe();
+                        this.messagesSubscription = null;
+                    }
                 }
-                this.isWorkingWithChannel = false;
             } catch (error) {
                 console.error('Failed to quit channel:', error);
+            } finally {
                 this.isWorkingWithChannel = false;
             }
         }
@@ -539,12 +607,13 @@ export class SideBarComponent implements OnDestroy {
 
     private subscribeToGlobalMessages(): void {
         // Unsubscribe from previous global messages observable to avoid memory leaks
-        if (this.globalMessagesSubscription) {
-            this.globalMessagesSubscription.unsubscribe();
+        if (this.messagesSubscription) {
+            // Check the messages subscription used for both global and channel
+            this.messagesSubscription.unsubscribe();
         }
 
         this.globalChatMessagesLoading = true;
-        this.globalMessagesSubscription = this.firebaseChatService.getMessages('General').subscribe({
+        this.messagesSubscription = this.firebaseChatService.getMessages('General').subscribe({
             next: (messages) => {
                 this.globalChatMessages = messages;
                 this.globalChatMessagesLoading = false;
@@ -557,41 +626,41 @@ export class SideBarComponent implements OnDestroy {
     }
 
     private subscribeToSelectedChannelMessages(channel: string): void {
-        // Unsubscribe from previous selected channel messages observable to avoid memory leaks
-        if (this.selectedChannelMessagesSubscription) {
-            this.selectedChannelMessagesSubscription();
+        // Unsubscribe from previous channel's messages
+        if (this.messagesSubscription) {
+            this.messagesSubscription.unsubscribe();
+            this.messagesSubscription = null; // Clear the reference
         }
 
         this.selectedChannelMessagesLoading = true;
-        const channelDocRef = doc(this.firebaseChatService.getChatChannelsCollection(), channel);
+        this.selectedChannelMessages = []; // Clear messages for the new channel
+        this.lastMessageDate = undefined; // Reset pagination
 
-        this.selectedChannelMessagesSubscription = onSnapshot(channelDocRef, (docSnapshot) => {
-            if (!docSnapshot.exists()) {
-                // Channel has been deleted
-                this.selectedChannel = null;
-                this.selectedChannelMessages = [];
+        // Subscribe to the message stream from the service
+        this.messagesSubscription = this.firebaseChatService.getMessages(channel).subscribe({
+            next: (messages) => {
+                this.selectedChannelMessages = messages; // Receives the full, sorted list
                 this.selectedChannelMessagesLoading = false;
-                // Redirect to another tab or handle the UI update as needed
-                const tab1 = document.querySelector('[href="#tab1"]') as HTMLElement;
-                if (tab1 && this.activeTab === 3) {
-                    tab1.click();
+
+                // Set lastMessageDate for pagination 'loadOlderMessages'
+                if (messages.length > 0) {
+                    // Sort ascending (oldest first) to get the correct date for 'startAfter'
+                    const sortedMessages = [...messages].sort((a, b) => {
+                        const dateA = (a.date as any)?.toMillis?.() || 0;
+                        const dateB = (b.date as any)?.toMillis?.() || 0;
+                        return dateA - dateB;
+                    });
+                    if (sortedMessages.length > 0) {
+                        this.lastMessageDate = sortedMessages[0].date;
+                    }
+                } else {
+                    this.lastMessageDate = undefined; // Reset if channel is empty
                 }
-            } else {
-                // Fetch messages if the channel still exists
-                this.firebaseChatService.getMessages(channel).subscribe({
-                    next: (messages) => {
-                        this.selectedChannelMessages = messages;
-                        if (messages.length > 0) {
-                            this.lastMessageDate = messages[0].date; // Track oldest message date
-                        }
-                        this.selectedChannelMessagesLoading = false;
-                    },
-                    error: (err) => {
-                        console.error('Error while fetching selected channel messages:', err);
-                        this.selectedChannelMessagesLoading = false;
-                    },
-                });
-            }
+            },
+            error: (err) => {
+                console.error(`Error while fetching messages for channel ${channel}:`, err);
+                this.selectedChannelMessagesLoading = false;
+            },
         });
     }
 

@@ -41,6 +41,9 @@ export class ChatService implements OnDestroy {
         if (!this.isRoomIdCurrent()) {
             this.getHistory();
             this.roomId = this.socketClientService.roomId;
+        } else if (this.socketClientService.roomId) {
+            // If we're rejoining the same game, still get the history to ensure we have all messages
+            this.getHistory();
         } else {
             this.allChatMessagesSource.next(this.allChatMessages);
         }

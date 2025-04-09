@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'package:client_leger/backend-communication-services/chat/chat_notif_persistence_service.dart';
 import 'package:client_leger/classes/sound_player.dart';
 import 'package:client_leger/utilities/logger.dart';
+import 'package:client_leger/utilities/socket_events.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,6 +35,7 @@ class MessageNotifState {
 class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   SoundPlayer owlSoundPlayer = SoundPlayer();
+  final chatNotifPersistenceService = ChatNotifPersistenceService();
   String?
       currentDisplayedChannel; // le channel displayed présentement pour ne pas envoyer de notif!
   String?
@@ -47,16 +50,73 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
   final Map<String, bool> _firstSnapshotFlags =
       {}; // Track first snapshot for each channel
 
-  MessageNotifNotifier() : super(MessageNotifState()) {
-    AppLogger.e("Initializing message notif provider");
-    _listenForNewMessages();
-  }
+  bool isInitialized = false;
+
+  MessageNotifNotifier() : super(MessageNotifState());
 
   String? getUserUid() {
     return FirebaseAuth.instance.currentUser?.uid;
   }
 
-  void _listenForNewMessages() {
+  void onIngameMessageReceived() {
+    if (currentDisplayedChannel != inGameChat) {
+      _playSound();
+      final int newCount = (state.unreadMessages[inGameChat] ?? 0) + 1;
+      state = state.copyWith(unreadMessages: {
+        ...state.unreadMessages,
+        inGameChat: newCount,
+      });
+    }
+  }
+
+  // Function to count unread messages in a specific channel -- for the first snapshot
+  // Appelé lorsqu'on démarre l'app -- pour restorer les bonnes notifications pour chaque channel
+  Future<void> checkUnreadMessages(
+      String channelId, QuerySnapshot snapshot) async {
+    // Get the last read timestamp for the specific channel from the cache
+    final Timestamp? lastReadTimestamp =
+        chatNotifPersistenceService.readMessagesCache[channelId];
+
+    if (lastReadTimestamp == null) {
+      // If no last read timestamp is found, return early (le user n'est pas abonné à ce channel)
+      return;
+    }
+
+    int unreadCount = 0;
+
+    // Iterate over the snapshot changes and count the unread messages
+    for (final change in snapshot.docChanges) {
+      if (change.type == DocumentChangeType.added) {
+        Map<String, dynamic> jsonMessage =
+            change.doc.data() as Map<String, dynamic>;
+
+        final Timestamp? messageTimestamp = jsonMessage['date'] != null
+            ? jsonMessage['date'] as Timestamp
+            : null;
+
+        // Compare the message timestamp with the last read timestamp
+        if (messageTimestamp != null &&
+            messageTimestamp.compareTo(lastReadTimestamp) > 0) {
+          unreadCount++;
+        }
+      }
+    }
+
+    // If there are unread messages, update the unread count
+    if (unreadCount > 0 && currentDisplayedChannel != channelId) {
+      final newCount = (state.unreadMessages[channelId] ?? 0) + unreadCount;
+      state = state.copyWith(unreadMessages: {
+        ...state.unreadMessages,
+        channelId: newCount,
+      });
+    }
+  }
+
+  void listenForNewMessages() {
+    if (isInitialized) {
+      return;
+    }
+    isInitialized = true;
     // Listen to global chat messages
     if (!_subscriptions.containsKey('globalChat')) {
       _firstSnapshotFlags['globalChat'] = true;
@@ -64,7 +124,9 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
           _firestore.collection('globalChat').snapshots().listen((snapshot) {
         if (_firstSnapshotFlags['globalChat'] == true) {
           _firstSnapshotFlags['globalChat'] = false;
-          AppLogger.e("Skipping first snapshot for global chat");
+          AppLogger.w(
+              "First snapshot for global chat, will check unread messages");
+          checkUnreadMessages('globalChat', snapshot);
           return;
         }
 
@@ -86,7 +148,7 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
     _chatChannelsSub = _firestore
         .collection('chatChannels')
         .snapshots()
-        .listen((channelsSnapshot) {
+        .listen((channelsSnapshot) async {
       AppLogger.e(
           "in the callback of channelsSnapshot listening to chatChannels collection");
 
@@ -112,19 +174,40 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
         }
       }
 
-      AppLogger.e("going to iterate through channelsSnapshot");
+      final List<String> toRemoveFromReadMessages = [];
+
+      // if a channel gets deleted we need to remove it from the read messages
+      for (final channel
+          in chatNotifPersistenceService.readMessagesCache.keys) {
+        if (!currentChannelIds.contains(channel) && channel != 'globalChat') {
+          toRemoveFromReadMessages.add(channel);
+        }
+      }
+
+      for (final channel in toRemoveFromReadMessages) {
+        await chatNotifPersistenceService
+            .removeChannelFromReadMessages(channel);
+      }
+
+      AppLogger.w("going to iterate through channelsSnapshot");
 
       for (final channel in channelsSnapshot.docs) {
         final channelData = channel.data();
         final String channelId = channel.id; // channel name
-        AppLogger.e("in the loop channelId: $channelId");
+        AppLogger.w("in the loop channelId: $channelId");
 
         if (!channelData['users'].contains(getUserUid())) {
           //to do, if user was in the channel before and left, do cleanup
-          AppLogger.e("User is not in channel $channelId, we return");
+          AppLogger.w("User is not in channel $channelId");
+
+          // user quit channel while being in the Léger OR the LOURD => make sure channelId is not in map of User doc (cleanup)
+          await chatNotifPersistenceService
+              .removeChannelFromReadMessages(channelId);
+
           if (_subscriptions.containsKey(channel.id)) {
             AppLogger.e(
                 "User left channel ${channel.id}, cancelling subscription");
+
             _subscriptions[channel.id]?.cancel();
             _subscriptions.remove(channel.id);
             _firstSnapshotFlags.remove(channel.id);
@@ -141,6 +224,9 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
         // user is in channel
         AppLogger.e("User is in channel $channelId");
 
+        // user joined channel while being in the Léger => make sure channelId is  in map of User doc (update)
+        await chatNotifPersistenceService.addChannelToReadMessages(channelId);
+
         // if user joined channels for the first time and there are previous messages => do not count
         if (!state.unreadMessages.containsKey(channelId) &&
             !_subscriptions.containsKey(channelId)) {
@@ -154,8 +240,9 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
               .snapshots()
               .listen((messagesSnapshot) {
             if (_firstSnapshotFlags[channelId] == true) {
-              AppLogger.i(
-                  "Skipping first snapshot for channel $channelId, user just joined!");
+              AppLogger.w(
+                  "First snapshot for $channelId, will check unread messages");
+              checkUnreadMessages(channelId, messagesSnapshot);
               _firstSnapshotFlags[channelId] = false;
               return;
             }
@@ -215,6 +302,8 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
     for (final subscription in _subscriptions.values) {
       subscription.cancel();
     }
+    chatNotifPersistenceService.clearReadMessagesCache();
+    isInitialized = false;
     super.dispose();
   }
 }

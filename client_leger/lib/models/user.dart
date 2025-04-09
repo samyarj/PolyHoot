@@ -29,6 +29,7 @@ class User {
   final Timestamp? unBanDate;
   final String username;
   final List<String> pollsAnswered; // the list of poll id answered by user
+  final Map<String, Timestamp> readMessages;
 
   User({
     required this.avatarEquipped,
@@ -56,6 +57,7 @@ class User {
     required this.unBanDate,
     required this.username,
     required this.pollsAnswered,
+    required this.readMessages,
   });
 
 /* sometimes date is received like this 1899-12-31T05:00:00.000Z,
@@ -64,7 +66,6 @@ or sometimes a map
 */
 
   factory User.fromJson(Map<String, dynamic> json) {
-    AppLogger.e("json : ${json['nextDailyFree']}");
     return User(
       avatarEquipped: json['avatarEquipped'] as String?,
       borderEquipped: json['borderEquipped'] as String?,
@@ -119,9 +120,27 @@ or sometimes a map
               : Timestamp(json['unBanDate']['_seconds'],
                   json['unBanDate']['_nanoseconds'])
           : null,
-
       username: json['username'] as String,
+      readMessages: getReadMessages(json['readMessages']),
     );
+  }
+}
+
+Map<String, Timestamp> getReadMessages(Map<String, dynamic>? jsonReadMessages) {
+  if (jsonReadMessages == null) {
+    return {};
+  } else {
+    Map<String, Timestamp> readMessages = {};
+    jsonReadMessages.forEach((key, value) {
+      if (value is Timestamp) {
+        readMessages[key] = value;
+      } else {
+        final valueMap = value as Map<String, dynamic>;
+        readMessages[key] = Timestamp(
+            valueMap['_seconds'] as int, valueMap['_nanoseconds'] as int);
+      }
+    });
+    return readMessages;
   }
 }
 
@@ -153,6 +172,7 @@ class PartialUser {
 }
 
 Timestamp parseIsoToTimestamp(String isoString) {
+  AppLogger.w("parseIsoToTimestamp: $isoString");
   DateTime dateTime = DateTime.parse(isoString);
   return Timestamp.fromDate(dateTime);
 }

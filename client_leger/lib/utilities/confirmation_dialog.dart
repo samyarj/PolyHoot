@@ -66,3 +66,33 @@ Future<bool> confirmDeleteHistoryDialog(BuildContext context) async {
       ) ??
       false;
 }
+
+Future<bool> confirmBanDialog(BuildContext context, String playerName) async {
+  return await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Confirmer le bannissement",
+              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+          content: Text(
+              "Êtes-vous sûr de vouloir Exclure $playerName de la partie ?"),
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text("Annuler",
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(
+                "Exclure",
+                style:
+                    TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+              ),
+            ),
+          ],
+        ),
+      ) ??
+      false;
+}

@@ -1,11 +1,10 @@
 // lib/UI/friend-system/user_search_results.dart
 import 'package:client_leger/UI/friend-system/user_search_item.dart';
 import 'package:client_leger/backend-communication-services/firend-system/friend-service.dart';
-import 'package:client_leger/models/user.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:flutter/material.dart';
 
-class UserSearchResults extends StatelessWidget {
+class UserSearchResults extends StatefulWidget {
   final String searchTerm;
   final Set<String> processingUsers;
   final Function(String) sendFriendRequest;
@@ -20,13 +19,32 @@ class UserSearchResults extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<UserSearchResults> createState() => _UserSearchResultsState();
+}
+
+class _UserSearchResultsState extends State<UserSearchResults> {
+  // Map to track if we've already seen a stream for this search term
+  static final Map<String, bool> _initialLoadComplete = {};
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return StreamBuilder<List<UserWithId>>(
-      stream: friendService.searchUsers(searchTerm),
+      stream: widget.friendService.searchUsers(widget.searchTerm),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        // Check if this is the initial load for this search term
+        final isInitialLoad =
+            !(_initialLoadComplete[widget.searchTerm] ?? false);
+
+        // If we have data, mark this search term as loaded
+        if (snapshot.hasData) {
+          _initialLoadComplete[widget.searchTerm] = true;
+        }
+
+        // Only show loading indicator if it's the first time loading this search term
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            isInitialLoad) {
           return const Center(child: ThemedProgressIndicator());
         }
 
@@ -56,8 +74,8 @@ class UserSearchResults extends StatelessWidget {
             final user = users[index];
             return UserSearchItem(
               user: user,
-              isProcessing: processingUsers.contains(user.user.uid),
-              sendFriendRequest: sendFriendRequest,
+              isProcessing: widget.processingUsers.contains(user.user.uid),
+              sendFriendRequest: widget.sendFriendRequest,
             );
           },
         );

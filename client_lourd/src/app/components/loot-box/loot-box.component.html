@@ -1,7 +1,7 @@
 <div class="container" (mouseenter)="toggleMove()" (mouseleave)="toggleMove()">
     <div class="presentation-div" [ngClass]="{ 'move-to-side': isMoved }">
         <div class="lootbox-image">{{ lootBoxContainer.image }}</div>
-        <div class="price" [ngClass]="{ 'text-moved': isMoved }">{{ lootBoxContainer.price }} PIÈCES</div>
+        <div class="price" [ngClass]="{ 'text-moved': isMoved }">{{ lootBoxContainer.price }}&nbsp;<i class="fa-solid fa-coins"></i></div>
     </div>
     <div class="interaction-div" [ngClass]="{ show: isMoved }">
         <div class="interaction-div-content">

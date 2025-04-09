@@ -57,7 +57,12 @@
             >
                 <i class="fa-solid fa-clover"></i>
             </li>
-            <li>Pièces: {{ user.coins }}</li>
+            <li matTooltipClass="custom-tooltip" matTooltip="Pièces">
+                <i class="fa-solid fa-coins"></i>&nbsp;
+                <p class="coins">
+                    {{ user.coins }}
+                </p>
+            </li>
         </ul>
     </nav>
 

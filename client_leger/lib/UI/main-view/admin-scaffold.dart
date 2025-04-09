@@ -195,60 +195,50 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(child: widget.statefulNavigationShell),
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: _toggleSidebarVisibility,
-                    child: Container(
-                      width: 24,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: colorScheme.secondary.withValues(alpha: 0.75),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(8),
-                          bottomLeft: Radius.circular(8),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 4,
-                            offset: Offset(-2, 0),
+              Container(
+                color: colorScheme.secondary.withValues(alpha: 0.75),
+                child: Row(
+                  children: [
+                    Transform.scale(
+                      scale: 2,
+                      child: GestureDetector(
+                        onTap: _toggleSidebarVisibility,
+                        child: Container(
+                          width: 24,
+                          height: 64,
+                          alignment: Alignment.center,
+                          child: Icon(
+                            _isSidebarVisible
+                                ? Icons.chevron_right_rounded
+                                : Icons.chevron_left_rounded,
+                            color: colorScheme.onTertiary,
                           ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Icon(
-                          _isSidebarVisible
-                              ? Icons.chevron_right
-                              : Icons.chevron_left,
-                          color: colorScheme.onPrimary,
-                          size: 28,
                         ),
                       ),
                     ),
-                  ),
 
-                  // Animated sidebar
-                  AnimatedContainer(
-                    duration: Duration(milliseconds: 300),
-                    width: _isSidebarVisible ? sidebarWidth : 0,
-                    curve: Curves.easeInOut,
-                    child: _isSidebarVisible
-                        ? LayoutBuilder(
-                            builder: (context, constraints) {
-                              // Only show sidebar if there's enough width
-                              if (constraints.maxWidth < 100) {
-                                // Threshold width for rendering
-                                return Container(color: colorScheme.primary);
-                              }
+                    // Animated sidebar
+                    AnimatedContainer(
+                      duration: Duration(milliseconds: 300),
+                      width: _isSidebarVisible ? sidebarWidth : 0,
+                      curve: Curves.easeInOut,
+                      child: _isSidebarVisible
+                          ? LayoutBuilder(
+                              builder: (context, constraints) {
+                                // Only show sidebar if there's enough width
+                                if (constraints.maxWidth < 100) {
+                                  // Threshold width for rendering
+                                  return Container(color: colorScheme.primary);
+                                }
 
-                              // Render the sidebar
-                              return SideBar(user: user);
-                            },
-                          )
-                        : null,
-                  ),
-                ],
+                                // Render the sidebar
+                                return SideBar(user: user);
+                              },
+                            )
+                          : null,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

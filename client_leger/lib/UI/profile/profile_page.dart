@@ -44,6 +44,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   bool _isTypingUsername = false;
   bool _isChangingUsername = false;
   bool _isUploading = false;
+  bool _isApplyingAvatar = false;
 
   // Timer for debouncing username checks
   Timer? _debounceTimer;
@@ -286,7 +287,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   void _selectAvatar(String avatarUrl) {
     setState(() {
-      _selectedFile = null; // Clear any selected file
+      _selectedFile = null;
       _selectedAvatar = avatarUrl;
     });
   }
@@ -297,6 +298,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     }
 
     try {
+      setState(() {
+        _isApplyingAvatar = true;
+      });
+
       await _uploadImgService.updateSelectedDefaultAvatar(_selectedAvatar!);
       final message = 'Avatar équipé avec succès !';
 
@@ -304,11 +309,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         setState(() {
           _currentAvatarUrl = _selectedAvatar!;
           _selectedAvatar = null;
+          _isApplyingAvatar = false;
         });
         showToast(context, message, type: ToastificationType.success);
       }
     } catch (e) {
       if (mounted) {
+        setState(() {
+          _isApplyingAvatar = false;
+        });
         showErrorDialog(context, getCustomError(e));
       }
     }
@@ -378,7 +387,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             selectedAvatar: _selectedAvatar,
                             currentAvatarUrl: _currentAvatarUrl,
                             selectedFile: _selectedFile,
-                            isUploading: _isUploading,
+                            isDisabled: _isUploading || _isApplyingAvatar,
                             onAvatarSelected: _selectAvatar,
                             onEquipAvatar: _equipSelectedAvatar,
                             onPickImage: _pickImage,
@@ -387,9 +396,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           ),
                         ),
 
-                        const SizedBox(height: 34), // Reduced spacing
+                        const SizedBox(height: 34),
 
-                        // Username Update with tertiary border
                         Container(
                           decoration: BoxDecoration(
                             border: Border.all(
@@ -398,7 +406,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             ),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          // No fixed height constraint on this container
                           child: UsernameFormWidget(
                             formKey: _formKey,
                             usernameController: _usernameController,
