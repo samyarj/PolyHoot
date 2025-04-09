@@ -29,7 +29,7 @@
                 </li>
             </ul>
         </div>
-        <app-notifications *ngIf="!isOnGamePage"></app-notifications>
+        <app-notifications *ngIf="!isOnGamePage" matTooltipClass="custom-tooltip" matTooltip="Notifications"></app-notifications>
     </div>
 
     <!--social menu -->
@@ -38,7 +38,7 @@
         <div class="social-menu-content">
             <ul class="friend-menu">
                 <li class="add-friend">
-                    <button class="add-friend-button" (click)="toggleSearchInput()">
+                    <button class="add-friend-button" (click)="toggleSearchInput()" matTooltipClass="custom-tooltip" matTooltip="Ajouter un ami">
                         <i class="fa-solid fa-user-plus"></i>
                     </button>
                 </li>
@@ -104,7 +104,7 @@
                     </div>
                 </div>
                 <li class="friend-list">
-                    <button class="friend-list-button" (click)="toggleFriendList()">
+                    <button class="friend-list-button" (click)="toggleFriendList()" matTooltipClass="custom-tooltip" matTooltip="Mes amis">
                         <i class="fa-solid fa-users"></i>
                     </button>
                 </li>
@@ -160,27 +160,63 @@
         <span class="chat-menu-title">CLAVARDAGE</span>
         <ul class="nav nav-tabs">
             <li class="nav-item">
-                <a #tab1Link class="nav-link active" data-bs-toggle="tab" href="#tab1" title="Canal de discussion global" (click)="setActiveTab(1)">
+                <a
+                    #tab1Link
+                    class="nav-link active"
+                    data-bs-toggle="tab"
+                    href="#tab1"
+                    matTooltipClass="custom-tooltip"
+                    matTooltip="Canal de discussion global"
+                    (click)="setActiveTab(1)"
+                >
                     <i class="fa-solid fa-globe"></i>
                 </a>
             </li>
             <li class="nav-item" *ngIf="isOnGamePage || isOnResultsPage">
-                <a class="nav-link" data-bs-toggle="tab" href="#tab2" title="Clavardage de partie" (click)="setActiveTab(2)">
+                <a
+                    class="nav-link"
+                    data-bs-toggle="tab"
+                    href="#tab2"
+                    matTooltipClass="custom-tooltip"
+                    matTooltip="Clavardage de partie"
+                    (click)="setActiveTab(2)"
+                >
                     <i class="fa-solid fa-gamepad"></i>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#tab3" title="Canal de discussion actuel" (click)="setActiveTab(3)">
+                <a
+                    class="nav-link"
+                    data-bs-toggle="tab"
+                    href="#tab3"
+                    matTooltipClass="custom-tooltip"
+                    matTooltip="Canal de discussion actuel"
+                    (click)="setActiveTab(3)"
+                >
                     <i class="fa-solid fa-comments"></i>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#tab4" title="Mes canaux de discussion" (click)="setActiveTab(4)">
+                <a
+                    class="nav-link"
+                    data-bs-toggle="tab"
+                    href="#tab4"
+                    matTooltipClass="custom-tooltip"
+                    matTooltip="Mes canaux de discussion"
+                    (click)="setActiveTab(4)"
+                >
                     <i class="fa-solid fa-table-list"></i>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#tab5" title="Créer un canal de discussion" (click)="setActiveTab(5)">
+                <a
+                    class="nav-link"
+                    data-bs-toggle="tab"
+                    href="#tab5"
+                    matTooltipClass="custom-tooltip"
+                    matTooltip="Créer un canal de discussion"
+                    (click)="setActiveTab(5)"
+                >
                     <i class="fa-solid fa-plus"></i>
                 </a>
             </li>

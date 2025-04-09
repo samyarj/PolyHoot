@@ -59,7 +59,7 @@
 .systemMessage {
     max-width: 100%;
     background: hsl(235, 26%, 42%);
-    color: var(--primary-color);
+    color: rgb(217, 213, 255);
     border-radius: 15px 15px 15px 15px;
     font-style: italic;
     word-wrap: break-word;
@@ -178,7 +178,7 @@ h2 {
 }
 
 #previous-messages::-webkit-scrollbar {
-    width: 13px;
+    width: 6px;
 }
 
 #previous-messages::-webkit-scrollbar-thumb {
@@ -239,7 +239,9 @@ div.time {
         }
     }
 }
-
+.dropdown-toggle {
+    cursor: pointer;
+}
 .chat-avatar {
     width: 30px;
     height: 30px;
