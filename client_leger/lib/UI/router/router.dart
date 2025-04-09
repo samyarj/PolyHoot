@@ -44,6 +44,7 @@ final GoRouter router = GoRouter(
   refreshListenable: Listenable.merge([
     user_provider.isLoggedIn,
     _reportService.nbReport,
+    _reportService.unBanDate,
   ]),
   initialLocation: Paths.play,
   navigatorKey: rootNavigatorKey,
@@ -232,9 +233,19 @@ final GoRouter router = GoRouter(
       final containerRef = ProviderScope.containerOf(context);
       final currentUserState = containerRef.read(user_provider.userProvider);
 
+      if (_reportService.unBanDate.value != null &&
+          _reportService.unBanDate.value!.toDate().isAfter(DateTime.now())) {
+        _reportService.banInfo(
+            "Vous êtes banni pendant les prochaines 15 minutes", context);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          containerRef.read(user_provider.userProvider.notifier).logout();
+        });
+        return null;
+      }
+
       if (_reportService.nbReport.value != null &&
           _reportService.nbReport.value! >= 2) {
-        AppLogger.e("User has been reported more than 2 times");
+        AppLogger.w("User has been reported more than 2 times");
         _reportService.behaviourWarning(context);
         final reportState =
             await _reportService.getReportState(currentUserState.value?.uid);
