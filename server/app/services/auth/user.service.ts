@@ -94,8 +94,13 @@ export class UserService {
             fcmToken: fcmToken ? fcmToken : '', // Ensure fcmToken is not null or undefined
         };
 
+        //console.log(newUser);
         // Save the user data in Firestore
-        await this.firestore.collection('users').doc(uid).set(newUser);
+        try {
+            await this.firestore.collection('users').doc(uid).set(newUser);
+        } catch (e) {
+            console.log(e);
+        }
 
         return newUser; // Return the created user object
     }
@@ -125,7 +130,8 @@ export class UserService {
             chars = 13;
             slicedUsername = slicedUsername.slice(0, chars);
         }
-        while (!this.isUsernameTaken(slicedUsername)) {
+
+        while (await this.isUsernameTaken(slicedUsername)) {
             slicedUsername = slicedUsername.slice(0, chars) + Math.floor(Math.random() * 10).toString();
         }
 
@@ -135,7 +141,9 @@ export class UserService {
     async isUsernameTaken(username: string): Promise<boolean> {
         const usersRef = this.firestore.collection('users');
         const querySnapshot = await usersRef.where('username', '==', username).get();
-        return !querySnapshot.empty;
+        const isUsernameTaken = !querySnapshot.empty;
+        console.log(isUsernameTaken);
+        return isUsernameTaken;
     }
 
     async isEmailTaken(email: string): Promise<{ emailExists: boolean; provider: string | null }> {
