@@ -203,8 +203,9 @@ class FriendService {
 
     return _firestore
         .collection('users')
-        .where('username', isGreaterThanOrEqualTo: searchTerm)
-        .where('username', isLessThanOrEqualTo: searchTerm + '\uf8ff')
+        .where('username', isGreaterThanOrEqualTo: searchTerm.toLowerCase())
+        .where('username',
+            isLessThanOrEqualTo: '${searchTerm.toLowerCase()}\uf8ff')
         .snapshots()
         .asyncMap((snapshot) async {
       if (snapshot.docs.isEmpty) return [];

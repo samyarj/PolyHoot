@@ -69,9 +69,10 @@ class AdminUsersNotifier extends StateNotifier<AdminUsersState> {
         ? _firestore.collection('users')
         : _firestore
             .collection('users')
-            .where('username', isGreaterThanOrEqualTo: state.searchTerm)
             .where('username',
-                isLessThanOrEqualTo: state.searchTerm + '\uf8ff');
+                isGreaterThanOrEqualTo: state.searchTerm.toLowerCase())
+            .where('username',
+                isLessThanOrEqualTo: '${state.searchTerm.toLowerCase()}\uf8ff');
     _usersSubscription = query.snapshots().listen(
       (snapshot) {
         try {
