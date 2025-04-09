@@ -205,6 +205,7 @@
             </div>
             <div class="tab-pane fade" id="tab3">
                 <h2>Canal : {{ selectedChannel }}</h2>
+                <div *ngIf="deletionMessage" class="deletion-message">{{ deletionMessage }}</div>
                 <ng-container *ngIf="selectedChannel; else noChannelSelected">
                     <app-chat2
                         [chatMessagesLoading]="selectedChannelMessagesLoading"
@@ -298,3 +299,12 @@
         </div>
     </div>
 </aside>
+
+<style>
+    .deletion-message {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: red;
+        margin-bottom: 10px;
+    }
+</style>

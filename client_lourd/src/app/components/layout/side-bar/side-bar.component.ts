@@ -33,6 +33,7 @@ export class SideBarComponent implements OnDestroy {
     private friendRequestsSubscription: Subscription;
     private userDocSubscription: Unsubscribe;
     private lastMessageDate: FieldValue | undefined;
+    private channelDeletedSubscription: Subscription;
     isFetchingOlderMessages: boolean = false;
     channels: ChatChannel[] = [];
     joinedChannels: string[] = [];
@@ -57,6 +58,8 @@ export class SideBarComponent implements OnDestroy {
     isWorkingWithChannel: boolean = false;
     @ViewChild('tab1Link') tab1Link: any;
     activeTab: number = 1;
+    deletionMessage: string = '';
+
     constructor(
         private authService: AuthService,
         private router: Router,
@@ -69,6 +72,30 @@ export class SideBarComponent implements OnDestroy {
         this.user$ = this.authService.user$;
         // Subscribe to live chat messages for the global chat
         this.subscribeToGlobalMessages();
+
+        // Subscribe to channel deletion events
+        this.channelDeletedSubscription = this.firebaseChatService.channelDeleted$.subscribe((deletedChannel) => {
+            console.log('Channel deleted:', deletedChannel);
+            if (this.selectedChannel === deletedChannel) {
+                if (this.activeTab === 3) {
+                    this.deletionMessage = 'Le canal a été supprimé. Veuillez en sélectionner un autre ou en crée un nouveau.';
+                    setTimeout(() => {
+                        this.deletionMessage = '';
+                        // Show the noChannelSelected template
+                    }, 5000);
+                }
+                this.selectedChannel = null;
+                this.selectedChannelMessages = [];
+                this.selectedChannelMessagesLoading = false;
+                this.lastMessageDate = undefined;
+                if (this.messagesSubscription) {
+                    this.messagesSubscription.unsubscribe();
+                    this.messagesSubscription = null;
+                }
+            }
+            // Update channels list
+            this.channels = this.channels.filter((c) => c.name !== deletedChannel);
+        });
 
         // Subscribe to user data and channels
         this.userSubscription = this.authService.user$.subscribe((user) => {
@@ -243,6 +270,9 @@ export class SideBarComponent implements OnDestroy {
         if (this.chatEventsSubscription) {
             this.chatEventsSubscription.unsubscribe();
         }
+        if (this.channelDeletedSubscription) {
+            this.channelDeletedSubscription.unsubscribe();
+        }
 
         // Clean up online status listeners
         Object.values(this.onlineStatusSubscription).forEach((unsubscribe) => unsubscribe());
@@ -361,6 +391,7 @@ export class SideBarComponent implements OnDestroy {
     async selectChannel(channel: string): Promise<void> {
         if (!this.isWorkingWithChannel) {
             this.isWorkingWithChannel = true;
+            this.deletionMessage = ''; // Clear the deletion message
             try {
                 const tab3 = document.querySelector('[href="#tab3"]') as HTMLElement;
                 if (this.selectedChannel === channel) {
@@ -371,6 +402,9 @@ export class SideBarComponent implements OnDestroy {
                     this.isWorkingWithChannel = false;
                     return;
                 }
+
+                // Call joinChannel to ensure the user is added to the channel
+                await this.firebaseChatService.joinChannel(channel);
 
                 this.selectedChannel = channel;
                 this.selectedChannelMessages = []; // Clear the messages array
@@ -399,6 +433,7 @@ export class SideBarComponent implements OnDestroy {
 
                 // If the deleted channel is the currently selected channel, clear the selected channel
                 if (this.selectedChannel === channel) {
+                    console.log('Current activeTab:', this.activeTab); // Debug log
                     this.selectedChannel = null;
                     this.selectedChannelMessages = [];
                     this.selectedChannelMessagesLoading = false;
@@ -407,6 +442,14 @@ export class SideBarComponent implements OnDestroy {
                         // Unsubscribe if deleting the active channel
                         this.messagesSubscription.unsubscribe();
                         this.messagesSubscription = null;
+                    }
+                    // Redirect to global chat tab (tab1) only if currently on tab3
+                    if (this.activeTab === 3) {
+                        console.log('Redirecting to tab1...'); // Debug log
+                        this.setActiveTab(1);
+                        if (this.tab1Link) {
+                            this.tab1Link.nativeElement.click();
+                        }
                     }
                 }
             } catch (error) {
