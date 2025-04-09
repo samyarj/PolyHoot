@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/global/header_title.dart';
 import 'package:client_leger/UI/profile/widgets/avatar_selection_widget.dart';
@@ -18,9 +17,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:toastification/toastification.dart';
 
 // Constants
-const String USERNAME_REGEX = r'^[a-zA-Z0-9._-]{3,20}$';
+const String USERNAME_REGEX = r'^[a-zA-Z0-9._-]{3,14}$';
 const int USERNAME_MIN_LENGTH = 3;
-const int USERNAME_MAX_LENGTH = 20;
+const int USERNAME_MAX_LENGTH = 14;
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -122,7 +121,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     });
 
     // Filter input in real-time
-    final filteredValue = value.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '');
+    final filteredValue = value.replaceAll(RegExp(r'[^a-z0-9]'), '');
+
     if (filteredValue != value) {
       _usernameController.value = TextEditingValue(
         text: filteredValue,
@@ -148,7 +148,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       return;
     }
 
-    final newUsername = _usernameController.text.trim();
+    final newUsername = _usernameController.text.trim().toLowerCase();
     if (newUsername.isEmpty || newUsername == _currentUsername) {
       return;
     }

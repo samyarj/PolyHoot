@@ -1,8 +1,13 @@
+import 'package:client_leger/backend-communication-services/chat/chat_notif_persistence_service.dart';
 import 'package:client_leger/providers/messages/messages_notif_provider.dart';
+import 'package:client_leger/providers/user_provider.dart';
 import 'package:client_leger/utilities/logger.dart';
+import 'package:client_leger/utilities/socket_events.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:collection/collection.dart';
 
 class ChatMessagesNotification extends ConsumerStatefulWidget {
   const ChatMessagesNotification({
@@ -21,6 +26,9 @@ class _ChatMessagesNotificationState
   final GlobalKey<PopupMenuButtonState> _popupMenuKey =
       GlobalKey<PopupMenuButtonState>();
   int _previousTotalUnreadMessages = 0;
+  final mapEquals = const DeepCollectionEquality().equals;
+  final chatNotifPersistenceService = ChatNotifPersistenceService();
+  Map<String, Timestamp>? _previousReadMessages;
 
   void _forceChatNotifMenuRebuild() {
     // so that the list of popup menu items is updated on live when menu is open
@@ -40,7 +48,30 @@ class _ChatMessagesNotificationState
   Widget build(BuildContext context) {
     final messageNotifNotifier = ref.read(messageNotifProvider.notifier);
     final messageNotifState = ref.watch(messageNotifProvider);
+    final userState = ref.watch(userProvider);
     final colorScheme = Theme.of(context).colorScheme;
+
+    AppLogger.e("in the build method of chatmessagesnotif");
+
+    userState.whenData((user) {
+      AppLogger.w("in the user callback");
+
+      final currentReadMessages = user?.readMessages;
+
+      if (!ref.read(messageNotifProvider.notifier).isInitialized &&
+          currentReadMessages != null) {
+        chatNotifPersistenceService.setReadMessagesCache(currentReadMessages);
+        _previousReadMessages = currentReadMessages;
+        ref.read(messageNotifProvider.notifier).listenForNewMessages();
+      }
+
+      // Compare the readMessages using mapEquals
+      if (currentReadMessages != null &&
+          !mapEquals(_previousReadMessages, currentReadMessages)) {
+        chatNotifPersistenceService.setReadMessagesCache(currentReadMessages);
+        _previousReadMessages = currentReadMessages;
+      }
+    });
 
     int totalUnreadMessages = messageNotifNotifier.getTotalUnreadMessages();
 
@@ -151,7 +182,9 @@ class _ChatMessagesNotificationState
                                   Text(
                                     entry.key == "globalChat"
                                         ? "General"
-                                        : entry.key,
+                                        : entry.key == inGameChat
+                                            ? "Partie"
+                                            : entry.key,
                                     style: TextStyle(
                                       color: Theme.of(context)
                                           .colorScheme

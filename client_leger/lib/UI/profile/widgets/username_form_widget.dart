@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 // Constants
-const String USERNAME_REGEX = r'^[a-zA-Z0-9._-]{3,20}$';
+const String USERNAME_REGEX = r'^[a-zA-Z0-9._-]{3,14}$';
 const int USERNAME_MIN_LENGTH = 3;
-const int USERNAME_MAX_LENGTH = 20;
+const int USERNAME_MAX_LENGTH = 14;
 
 class UsernameFormWidget extends StatelessWidget {
   final GlobalKey<FormState> formKey;

@@ -107,6 +107,9 @@ class _AppBarRightSectionState extends State<AppBarRightSection> {
                                 alignment: Alignment.center,
                                 child: Text(
                                   user?.username ?? 'Username',
+                                  softWrap: false, // Keeps text in one line
+                                  overflow: TextOverflow
+                                      .ellipsis, // Prevents text overflow
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: colorScheme.onSurface,
@@ -256,6 +259,8 @@ class _AppBarRightSectionState extends State<AppBarRightSection> {
                             children: [
                               Text(
                                 user?.username ?? 'Guest',
+                                softWrap: false,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
