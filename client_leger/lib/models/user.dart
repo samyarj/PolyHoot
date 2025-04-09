@@ -113,8 +113,13 @@ or sometimes a map
       stats:
           json['stats'] != null ? Stats.fromJson(json['stats']) : null, // Added
       uid: json['uid'] as String,
-      unBanDate:
-          json['unBanDate'] != null ? json['unBanDate'] as Timestamp : null,
+      unBanDate: json['unBanDate'] != null
+          ? json['unBanDate'] is Timestamp
+              ? json['unBanDate'] as Timestamp
+              : Timestamp(json['unBanDate']['_seconds'],
+                  json['unBanDate']['_nanoseconds'])
+          : null,
+
       username: json['username'] as String,
     );
   }

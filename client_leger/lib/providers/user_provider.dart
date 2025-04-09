@@ -114,6 +114,13 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
           _reportService.nbReport.value = user.nbReport;
         }
 
+        if (user.unBanDate != _reportService.unBanDate.value ||
+            _reportService.unBanDate.value == null) {
+          AppLogger.w(
+              "User unban date changed: ${_reportService.unBanDate.value} -> ${user.unBanDate}");
+          _reportService.unBanDate.value = user.unBanDate;
+        }
+
         isLoggedIn.value = true;
         WebSocketManager.instance.playerName = user.username;
         AppLogger.d("User data updated in real-time: ${user.username}");
