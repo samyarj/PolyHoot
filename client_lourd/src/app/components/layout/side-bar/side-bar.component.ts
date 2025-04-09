@@ -48,7 +48,7 @@ export class SideBarComponent implements OnDestroy {
     searchError: string = '';
     friends: { id: string; username: string; avatarEquipped?: string; borderEquipped?: string; isOnline?: boolean }[] = [];
     searchResults: { id: string; username: string; avatarEquipped?: string; borderEquipped?: string; isOnline?: boolean }[] = [];
-    private searchSubscription: Subscription;
+    private searchSubscription: Subscription | null = null;
     private onlineStatusSubscription: { [key: string]: () => void } = {};
 
     gameChatMessages: ChatMessage[] = [];
@@ -174,13 +174,42 @@ export class SideBarComponent implements OnDestroy {
             this.userDocSubscription();
         }
 
+        // Clean up existing friend listeners
+        Object.values(this.onlineStatusSubscription).forEach((unsubscribe) => unsubscribe());
+        this.onlineStatusSubscription = {};
+
         const userRef = doc(this.firestore, 'users', uid);
         this.userDocSubscription = onSnapshot(userRef, async (docSnapshot) => {
             if (docSnapshot.exists()) {
                 const userData = docSnapshot.data();
+                const prevFriendIds = this.friends.map((f) => f.id);
+                const prevRequestIds = this.friendRequests.map((r) => r.id);
 
                 // Update friend requests in real-time
                 if (userData.friendRequests) {
+                    // Set up real-time listeners for each friend request
+                    userData.friendRequests.forEach((id: string) => {
+                        const friendRef = doc(this.firestore, 'users', id);
+                        onSnapshot(friendRef, (friendDoc) => {
+                            if (friendDoc.exists()) {
+                                const friendData = friendDoc.data();
+                                // Update the friend request in the list
+                                this.friendRequests = this.friendRequests.map((request) => {
+                                    if (request.id === id) {
+                                        return {
+                                            ...request,
+                                            username: friendData.username || 'Unknown User',
+                                            avatarEquipped: friendData.avatarEquipped,
+                                            borderEquipped: friendData.borderEquipped,
+                                        };
+                                    }
+                                    return request;
+                                });
+                            }
+                        });
+                    });
+
+                    // Initial fetch of friend requests data
                     const friendRequestsData = await Promise.all(
                         userData.friendRequests.map(async (id: string) => {
                             const friendDoc = await getDoc(doc(this.firestore, 'users', id));
@@ -199,9 +228,16 @@ export class SideBarComponent implements OnDestroy {
                 }
 
                 // Update friends list in real-time
-                if (userData.friends) {
+                if (userData.friends && Array.isArray(userData.friends)) {
+                    // Make sure friends array is unique to prevent duplicates
+                    const uniqueFriendIds: string[] = [...new Set(userData.friends as string[])];
+
+                    // Set up real-time listeners for each friend's profile data
+                    this.setupFriendProfileListeners(uniqueFriendIds);
+
+                    // Initial fetch of friends data
                     const friendsData = await Promise.all(
-                        userData.friends.map(async (id: string) => {
+                        uniqueFriendIds.map(async (id: string) => {
                             const friendDoc = await getDoc(doc(this.firestore, 'users', id));
                             const friendData = friendDoc.data();
                             return {
@@ -213,18 +249,33 @@ export class SideBarComponent implements OnDestroy {
                             };
                         }),
                     );
-                    this.friends = friendsData;
 
-                    // Set up online status listeners for each friend
-                    this.setupOnlineStatusListeners(friendsData.map((friend) => friend.id));
+                    // Set the friends list with the unique data
+                    this.friends = friendsData;
                 } else {
                     this.friends = [];
+                }
+
+                // Check if friend list or friend requests changed and update search results if needed
+                const newFriendIds = this.friends.map((f) => f.id);
+                const newRequestIds = this.friendRequests.map((r) => r.id);
+                const friendsChanged =
+                    newFriendIds.length !== prevFriendIds.length ||
+                    newFriendIds.some((id) => !prevFriendIds.includes(id)) ||
+                    prevFriendIds.some((id) => !newFriendIds.includes(id));
+                const requestsChanged =
+                    newRequestIds.length !== prevRequestIds.length ||
+                    newRequestIds.some((id) => !prevRequestIds.includes(id)) ||
+                    prevRequestIds.some((id) => !newRequestIds.includes(id));
+
+                if (friendsChanged || requestsChanged) {
+                    this.updateSearchResults();
                 }
             }
         });
     }
 
-    private setupOnlineStatusListeners(friendIds: string[]) {
+    private setupFriendProfileListeners(friendIds: string[]): void {
         // Clean up existing listeners
         Object.values(this.onlineStatusSubscription).forEach((unsubscribe) => unsubscribe());
         this.onlineStatusSubscription = {};
@@ -236,9 +287,22 @@ export class SideBarComponent implements OnDestroy {
                 if (docSnapshot.exists()) {
                     const userData = docSnapshot.data();
                     const isOnline = userData.isOnline || false;
+                    const username = userData.username || 'Unknown User';
+                    const avatarEquipped = userData.avatarEquipped || '';
+                    const borderEquipped = userData.borderEquipped || '';
 
-                    // Update the friend's online status in the friends array
-                    this.friends = this.friends.map((friend) => (friend.id === friendId ? { ...friend, isOnline } : friend));
+                    // Update the friend's data in the friends array
+                    this.friends = this.friends.map((friend) =>
+                        friend.id === friendId
+                            ? {
+                                  ...friend,
+                                  isOnline,
+                                  username,
+                                  avatarEquipped,
+                                  borderEquipped,
+                              }
+                            : friend,
+                    );
                 }
             });
         });
@@ -524,6 +588,11 @@ export class SideBarComponent implements OnDestroy {
             this.searchError = '';
             this.searchQuery = '';
             this.searchResults = [];
+            // Unsubscribe from the search subscription if it exists
+            if (this.searchSubscription) {
+                this.searchSubscription.unsubscribe();
+                this.searchSubscription = null;
+            }
         }
     }
 
@@ -545,7 +614,7 @@ export class SideBarComponent implements OnDestroy {
         }
 
         try {
-            // Subscribe to real-time search results
+            // Subscribe to real-time search results - now fully filtered in the service
             this.searchSubscription = this.friendSystemService.searchUsers(searchTerm, this.userUID).subscribe({
                 next: (results) => {
                     this.searchResults = results;
@@ -716,6 +785,14 @@ export class SideBarComponent implements OnDestroy {
     async handleSendMessageToGame(message: string): Promise<void> {
         if (this.isOnGamePage) {
             this.chatService.sendMessageToRoom(message);
+        }
+    }
+
+    // Add this as a new method to update search results when friendship status changes
+    private updateSearchResults(): void {
+        if (this.showSearchInput && this.searchQuery && this.searchSubscription) {
+            // Re-trigger the search to update results
+            this.onSearchInputChange({ target: { value: this.searchQuery } });
         }
     }
 }
