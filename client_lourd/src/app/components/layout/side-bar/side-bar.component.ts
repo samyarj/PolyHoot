@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
 import { Component, OnDestroy, ViewChild } from '@angular/core';
-import { doc, FieldValue, Firestore, getDoc, onSnapshot, Unsubscribe } from '@angular/fire/firestore';
+import { doc, FieldPath, Firestore, getDoc, onSnapshot, Unsubscribe } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { FirebaseChatMessage } from '@app/interfaces/chat-message';
 import { User } from '@app/interfaces/user';
@@ -32,7 +32,7 @@ export class SideBarComponent implements OnDestroy {
     private userSubscription: Subscription;
     private friendRequestsSubscription: Subscription;
     private userDocSubscription: Unsubscribe;
-    private lastMessageDate: FieldValue | undefined;
+    private lastMessageDate: FieldPath | undefined;
     private channelDeletedSubscription: Subscription;
     isFetchingOlderMessages: boolean = false;
     channels: ChatChannel[] = [];
