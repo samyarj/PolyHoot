@@ -13,7 +13,7 @@ export class UserService {
     private usersSocketIdMap = new Map<string, string>();
     private readonly logger = new Logger(UserService.name);
 
-    constructor(private readonly cloudinaryService: CloudinaryService) { }
+    constructor(private readonly cloudinaryService: CloudinaryService) {}
 
     addUserToMap(socketId: string, uid: string) {
         if (!this.isUserInMap(socketId)) {
@@ -95,11 +95,7 @@ export class UserService {
         };
 
         // Save the user data in Firestore
-        try {
-            await this.firestore.collection('users').doc(uid).set(newUser);
-        } catch (e) {
-            console.log(e);
-        }
+        await this.firestore.collection('users').doc(uid).set(newUser);
 
         return newUser; // Return the created user object
     }
@@ -141,7 +137,6 @@ export class UserService {
         const usersRef = this.firestore.collection('users');
         const querySnapshot = await usersRef.where('username', '==', username).get();
         const isUsernameTaken = !querySnapshot.empty;
-        console.log(isUsernameTaken);
         return isUsernameTaken;
     }
 
