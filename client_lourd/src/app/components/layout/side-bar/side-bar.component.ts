@@ -81,7 +81,6 @@ export class SideBarComponent implements OnDestroy {
                     this.deletionMessage = 'Le canal a été supprimé. Veuillez en sélectionner un autre ou en crée un nouveau.';
                     setTimeout(() => {
                         this.deletionMessage = '';
-                        // Show the noChannelSelected template
                     }, 5000);
                 }
                 this.selectedChannel = null;
@@ -100,6 +99,9 @@ export class SideBarComponent implements OnDestroy {
         // Subscribe to user data and channels
         this.userSubscription = this.authService.user$.subscribe((user) => {
             if (user) {
+                // Clear deletion message on user change/login
+                this.deletionMessage = '';
+
                 this.userUID = user.uid;
                 this.setupRealtimeUserUpdates(user.uid);
 
@@ -110,11 +112,31 @@ export class SideBarComponent implements OnDestroy {
                 this.channelsSubscription = this.firebaseChatService.fetchAllChannels().subscribe({
                     next: (channels) => {
                         this.channels = channels;
+
+                        // If a selectedChannel exists, verify it's still valid
+                        if (this.selectedChannel) {
+                            const channelExists = channels.some((c) => c.name === this.selectedChannel && c.isUserInChannel);
+                            if (!channelExists) {
+                                this.selectedChannel = null;
+                                this.selectedChannelMessages = [];
+                                this.selectedChannelMessagesLoading = false;
+                            }
+                        }
                     },
                     error: (err) => {
                         console.error('Error while fetching channels:', err);
+                        // Don't show error messages for permission errors during authentication
+                        if (!(err.code === 'permission-denied' && err.name === 'FirebaseError')) {
+                            console.error('Error details:', err);
+                        }
                     },
                 });
+            } else {
+                // User logged out, clear relevant data
+                this.selectedChannel = null;
+                this.selectedChannelMessages = [];
+                this.channels = [];
+                this.deletionMessage = '';
             }
         });
 
@@ -151,6 +173,12 @@ export class SideBarComponent implements OnDestroy {
 
     setActiveTab(tab: number) {
         this.activeTab = tab;
+
+        // Clear deletion message when switching tabs
+        if (tab !== 3) {
+            this.deletionMessage = '';
+        }
+
         if (tab === 1) {
             // Assuming tab 1 is the global chat
             this.subscribeToGlobalMessages();
@@ -338,11 +366,22 @@ export class SideBarComponent implements OnDestroy {
             this.channelDeletedSubscription.unsubscribe();
         }
 
+        // Clear all messages and UI state
+        this.deletionMessage = '';
+        this.selectedChannel = null;
+        this.selectedChannelMessages = [];
+        this.globalChatMessages = [];
+
         // Clean up online status listeners
         Object.values(this.onlineStatusSubscription).forEach((unsubscribe) => unsubscribe());
     }
 
     logout(): void {
+        // Clear messages and state before logout
+        this.deletionMessage = '';
+        this.selectedChannel = null;
+        this.selectedChannelMessages = [];
+
         this.authService.logout();
         this.router.navigateByUrl('/login');
     }
