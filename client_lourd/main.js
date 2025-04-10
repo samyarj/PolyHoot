@@ -68,7 +68,7 @@ async function initWindow() {
         appWindow.loadURL(appUrl);
 
         // Enable developer tools
-        appWindow.webContents.openDevTools();
+        //appWindow.webContents.openDevTools();
 
         // Monitor console logs from renderer
         appWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
