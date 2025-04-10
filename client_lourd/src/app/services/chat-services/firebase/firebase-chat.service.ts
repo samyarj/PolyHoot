@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import {
     FieldValue,
     Firestore,
+    Unsubscribe,
     addDoc,
     arrayRemove,
     arrayUnion,
@@ -24,30 +25,69 @@ import { FirebaseChatMessage } from '@app/interfaces/chat-message';
 import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
 import { ChatChannel } from '@app/services/chat-services/chat-channels';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
 })
-export class FirebaseChatService {
+export class FirebaseChatService implements OnDestroy {
     private globalChatCollection = collection(this.firestore, 'globalChat');
     private chatChannelsCollection = collection(this.firestore, 'chatChannels'); // Firestore chat channels collection
     private usersCollection = collection(this.firestore, 'users'); // Firestore users collection
     private channelDeletedSubject = new Subject<string>();
+    private channelDeletionUnsubscribe: Unsubscribe | null = null;
+    private authSubscription: Subscription;
 
     constructor(
         private firestore: Firestore,
         private authService: AuthService,
     ) {
-        // Set up a listener for channel deletions
-        const channelsQuery = query(this.chatChannelsCollection);
-        onSnapshot(channelsQuery, (snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === 'removed') {
-                    this.channelDeletedSubject.next(change.doc.id);
-                }
-            });
+        // Subscribe to auth state changes to setup/cleanup listeners
+        this.authSubscription = this.authService.user$.subscribe((user) => {
+            this.cleanupChannelDeletionListener();
+            if (user) {
+                this.setupChannelDeletionListener();
+            }
         });
+    }
+
+    ngOnDestroy(): void {
+        this.cleanupChannelDeletionListener();
+        if (this.authSubscription) {
+            this.authSubscription.unsubscribe();
+        }
+    }
+
+    private cleanupChannelDeletionListener(): void {
+        if (this.channelDeletionUnsubscribe) {
+            this.channelDeletionUnsubscribe();
+            this.channelDeletionUnsubscribe = null;
+        }
+    }
+
+    private setupChannelDeletionListener(): void {
+        // Set up a listener for channel deletions only if not already listening
+        if (!this.channelDeletionUnsubscribe) {
+            const channelsQuery = query(this.chatChannelsCollection);
+            this.channelDeletionUnsubscribe = onSnapshot(
+                channelsQuery,
+                (snapshot) => {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === 'removed') {
+                            this.channelDeletedSubject.next(change.doc.id);
+                        }
+                    });
+                },
+                (error) => {
+                    // Ignore permission errors during auth transitions
+                    if (error?.code === 'permission-denied') {
+                        console.log('Permission error in channel deletion listener - auth state may be changing');
+                    } else {
+                        console.error('Error in channel deletion listener:', error);
+                    }
+                },
+            );
+        }
     }
 
     get channelDeleted$(): Observable<string> {
@@ -359,7 +399,6 @@ export class FirebaseChatService {
         const channelName = channelId === 'General' ? 'globalChat' : channelId;
 
         try {
-
             const userDocRef = doc(this.usersCollection, user.uid);
             await updateDoc(userDocRef, {
                 [`readMessages.${channelName}`]: lastRead,
@@ -369,7 +408,4 @@ export class FirebaseChatService {
             console.error('Error updating read messages: ', error);
         }
     }
-
-
-
 }

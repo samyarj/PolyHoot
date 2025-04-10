@@ -1076,13 +1076,12 @@ img.global-channels-icon {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px;
-    overflow-x: visible !important;
-    overflow-y: visible !important;
+    padding: 12px;
+    overflow: visible;
     border-bottom: 1px solid var(--tertiary-color);
-    &:hover {
-        // background-color: var(--secondary-color);
-    }
+    min-height: 60px;
+    line-height: 1.4;
+
     &:last-child {
         border-bottom: none;
     }
@@ -1091,23 +1090,29 @@ img.global-channels-icon {
         width: 48px;
         height: 48px;
         margin-right: 24px;
+        flex-shrink: 0;
     }
 
     .username {
         color: var(--tertiary-color);
         flex-grow: 1;
         margin-right: 10px;
+        padding: 4px 0;
+        overflow: visible;
+        white-space: normal;
+        word-wrap: break-word;
     }
 
     button {
         width: 40px;
-        aspect-ratio: 1 / 1;
+        height: 40px;
         background: var(--primary-color);
         border: none;
         color: var(--tertiary-color);
         cursor: pointer;
         border-radius: 500px;
         transition: all 0.2s ease;
+        flex-shrink: 0;
 
         &:hover {
             background: var(--tertiary-color);
