@@ -13,7 +13,7 @@ import 'package:toastification/toastification.dart';
 
 class WaitingPage extends ConsumerWidget {
   WaitingPage({super.key});
-  final socketManager = WebSocketManager.instance;
+  final socketManager = WebSocketManager();
 
   void requestLeaveWaitingPage(BuildContext context, WidgetRef ref) async {
     final shouldExit = await showExitConfirmationDialog(context);
@@ -229,7 +229,7 @@ class WaitingPage extends ConsumerWidget {
                                   final player =
                                       waitingState.playersInfo[index];
                                   final isOrganizer =
-                                      WebSocketManager.instance.isOrganizer;
+                                      WebSocketManager().isOrganizer;
 
                                   return PlayerInfoWidget(
                                     player: player,
@@ -406,7 +406,7 @@ class WaitingPage extends ConsumerWidget {
       final route =
           socketManager.isOrganizer ? '/play' : '/play/${Paths.joinGame}';
       GoRouter.of(context).go(route);
-      WebSocketManager.instance.isPlaying = false;
+      WebSocketManager().isPlaying = false;
     });
   }
 }

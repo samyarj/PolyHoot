@@ -22,7 +22,7 @@ class PlayerGamePage extends ConsumerStatefulWidget {
 }
 
 class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
-  final WebSocketManager _socketManager = WebSocketManager.instance;
+  final WebSocketManager _socketManager = WebSocketManager();
   bool shouldDisconnect = true;
   static const int MAX_CHARACTERS = 200;
   final TextEditingController _QRLanswerController = TextEditingController();

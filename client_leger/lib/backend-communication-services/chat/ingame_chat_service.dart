@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 
 class InGameChatService {
   InGameChatService._privateConstructor();
-  final WebSocketManager _socketManager = WebSocketManager.instance;
+  final WebSocketManager _socketManager = WebSocketManager();
   final FirebaseChatService _firebaseChatService = FirebaseChatService();
   late String _username;
   late String? _uid;

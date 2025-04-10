@@ -58,10 +58,11 @@ export class ConnectionGateway implements OnGatewayDisconnect {
     }
     /* Nous avons géré le cas où un organisateur ou un joueur ''refresh'' sa page
     contrairement à une deconnexion en utilisant les boutons à cet effet ou le retour arrière du navigateur
-    Appelé quand l'utilisateur fait close all sur le client léger
+    Appelé quand l'utilisateur fait close all sur le client léger ou quand il logout
     */
     handleDisconnect(client: Socket) {
         if (this.userService.isUserInMap(client.id)) {
+            console.log('AMELIE User disconnected');
             const clientUid = this.userService.getUserUidFromMap(client.id);
             if (clientUid) {
                 this.userService.logout(clientUid);

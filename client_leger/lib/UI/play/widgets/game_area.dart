@@ -87,7 +87,7 @@ class ImprovedGameArea extends ConsumerWidget {
               ),
               TextButton(
                 onPressed: () {
-                  WebSocketManager.instance.isPlaying = false;
+                  WebSocketManager().isPlaying = false;
                   Navigator.pop(context, true);
                 },
                 child: Text("Abandonner",

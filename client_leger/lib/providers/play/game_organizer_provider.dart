@@ -17,7 +17,7 @@ const TIME_TO_NEXT_ANSWER = 3000;
 
 final organizerProvider =
     StateNotifierProvider.autoDispose<OrganizerNotifier, OrganizerState>((ref) {
-  return OrganizerNotifier(WebSocketManager.instance);
+  return OrganizerNotifier(WebSocketManager());
 });
 
 class OrganizerState {

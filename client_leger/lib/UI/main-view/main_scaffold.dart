@@ -1,5 +1,4 @@
 import 'package:client_leger/UI/error/error_dialog.dart';
-import 'package:client_leger/UI/friend-system/friend-request-notification.dart';
 import 'package:client_leger/UI/friend-system/friend-sidebar.dart';
 import 'package:client_leger/UI/main-view/chat_message_notif/chat_messages_notif.dart';
 import 'package:client_leger/UI/main-view/sidebar/sidebar.dart';
@@ -30,7 +29,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
   bool _isLoggingOut = false;
   final double sidebarWidth = 410;
   bool _isSidebarVisible = true;
-  bool _notificationActive = false;
 
   late AnimationController _animationController;
 
@@ -122,7 +120,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
   Widget build(BuildContext context) {
     final userState = ref.watch(userProvider);
     final colorScheme = Theme.of(context).colorScheme;
-    final isInGame = WebSocketManager.instance.isPlaying;
+    final isInGame = WebSocketManager().isPlaying;
     return userState.when(
       data: (user) {
         return Scaffold(

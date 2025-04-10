@@ -53,7 +53,7 @@ class _JoinGameState extends ConsumerState<JoinGame> {
     ref.listen(joinGameProvider, (previous, next) {
       if (next.isJoined) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          WebSocketManager.instance.isPlaying = true;
+          WebSocketManager().isPlaying = true;
           GoRouter.of(context).go('${Paths.play}/${Paths.waitingPage}');
         });
       }

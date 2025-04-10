@@ -15,11 +15,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // If you're going to use other Firebase services in the background, such as Firestore,
   // make sure you call `initializeApp` before using other Firebase services.
   //  await Firebase.initializeApp();
-
-  AppLogger.w("Handling a background message: ${message.messageId}");
-  AppLogger.w("Title: ${message.notification?.title}");
-  AppLogger.w("Body: ${message.notification?.body}");
-  AppLogger.w("Payload: ${message.data}");
 }
 
 class FirebasePushApi {
@@ -41,6 +36,11 @@ class FirebasePushApi {
     return _fcmToken;
   }
 
+  emptyFcmToken() {
+    AppLogger.w("Emptying FCM token");
+    _fcmToken = '';
+  }
+
   String currentUserId = '';
 
   StreamSubscription<String>? _fcmTokenSubscription;
@@ -54,7 +54,7 @@ class FirebasePushApi {
   }
 
   Future<void> onLogin() async {
-    AppLogger.w("onLogin");
+    AppLogger.w("onLogin current token is $_fcmToken");
     final newFcmToken = await _firebaseMessaging.getToken() ?? '';
     await setAndSaveFcmToken(newFcmToken);
     setupFcmTokenListener();

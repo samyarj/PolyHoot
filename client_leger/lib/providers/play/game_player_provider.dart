@@ -94,7 +94,7 @@ class GamePlayerState {
 }
 
 class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
-  final WebSocketManager _socketManager = WebSocketManager.instance;
+  final WebSocketManager _socketManager = WebSocketManager();
   SoundPlayer alertSoundPlayer = SoundPlayer();
   List<PlayerData> resultPlayerList = [];
   final ingameChatService = InGameChatService();
