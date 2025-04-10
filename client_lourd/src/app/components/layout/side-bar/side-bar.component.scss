@@ -6,7 +6,7 @@
     position: fixed;
     right: 0;
     top: 0;
-    z-index: 2;
+    z-index: 5;
 }
 
 .menu-bar {
@@ -74,17 +74,36 @@
     flex-direction: row;
     align-items: center;
     padding: 10px;
+    padding-right: 0px;
+    z-index: 9999;
 }
 
 .username {
     color: var(--text-color);
     font-size: 1.5rem;
-    height: 2.5rem;
-    overflow: hidden;
     text-overflow: ellipsis;
     display: flex;
     flex-direction: row;
     align-items: center;
+    flex-grow: 1;
+}
+
+.username-divv {
+    display: flex;
+    align-items: center;
+    max-width: calc(100% - 90px);
+    height: 2.5rem;
+}
+
+.username-text {
+    color: var(--text-color);
+    font-size: 1.5rem;
+    max-width: 100%;
+    padding: 0.5rem 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: block;
 }
 
 .avatar {

@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, ViewChild } from '@angular/core';
 import { doc, FieldPath, Firestore, getDoc, onSnapshot, Unsubscribe } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { FirebaseChatMessage } from '@app/interfaces/chat-message';
@@ -68,6 +68,7 @@ export class SideBarComponent implements OnDestroy {
         private friendSystemService: FriendSystemService,
         private firestore: Firestore,
         private chatService: ChatService,
+        private cdr: ChangeDetectorRef,
     ) {
         this.user$ = this.authService.user$;
         // Subscribe to live chat messages for the global chat
@@ -78,7 +79,7 @@ export class SideBarComponent implements OnDestroy {
             console.log('Channel deleted:', deletedChannel);
             if (this.selectedChannel === deletedChannel) {
                 if (this.activeTab === 3) {
-                    this.deletionMessage = 'Le canal a été supprimé. Veuillez en sélectionner un autre ou en crée un nouveau.';
+                    this.deletionMessage = 'Le canal a été supprimé. Veuillez en sélectionner un autre ou en créer un nouveau.';
                     setTimeout(() => {
                         this.deletionMessage = '';
                     }, 5000);
@@ -171,7 +172,7 @@ export class SideBarComponent implements OnDestroy {
         return this.headerService.isOnResultsPage;
     }
 
-    setActiveTab(tab: number) {
+    setActiveTab(tab: number): void {
         this.activeTab = tab;
 
         // Clear deletion message when switching tabs
@@ -189,7 +190,15 @@ export class SideBarComponent implements OnDestroy {
     }
 
     handleChildAction() {
-        if (this.activeTab === 2) this.tab1Link.nativeElement.click();
+        if (this.activeTab === 2) {
+            if (this.tab1Link) {
+                setTimeout(() => {
+                    this.cdr.detectChanges();
+                    this.tab1Link.nativeElement.click();
+                    this.cdr.detectChanges();
+                });
+            }
+        }
     }
 
     getBoundHandleChildAction() {

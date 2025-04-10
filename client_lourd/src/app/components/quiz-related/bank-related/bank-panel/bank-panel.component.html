@@ -60,12 +60,26 @@
                     ></app-question-form>
                     <div class="buttons">
                         <button *ngIf="!expanded" class="custom-button" (click)="cancelEdit()">Annuler</button>
-                        <button *ngIf="!expanded" [disabled]="!validQuestion()" class="custom-button" (click)="modifyQuestion()">
+                        <button
+                            *ngIf="!expanded"
+                            [disabled]="!validQuestion()"
+                            class="custom-button"
+                            [ngClass]="{ 'custom-button-disabled': !validQuestion() }"
+                            (click)="modifyQuestion()"
+                        >
                             Modifier la question
                         </button>
                         <button *ngIf="expanded" class="custom-button" (click)="cancelAdd()">Annuler</button>
                         <!--[disabled]="!validQuestion()" -->
-                        <button *ngIf="expanded" class="custom-button" (click)="addQuestion()">Ajouter la question</button>
+                        <button
+                            *ngIf="expanded"
+                            class="custom-button"
+                            [disabled]="!validQuestion()"
+                            (click)="addQuestion()"
+                            [ngClass]="{ 'custom-button-disabled': !validQuestion() }"
+                        >
+                            Ajouter la question
+                        </button>
                     </div>
                 </div>
             </ng-container>
