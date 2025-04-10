@@ -62,7 +62,6 @@ export class ConnectionGateway implements OnGatewayDisconnect {
     */
     handleDisconnect(client: Socket) {
         if (this.userService.isUserInMap(client.id)) {
-            console.log('AMELIE User disconnected');
             const clientUid = this.userService.getUserUidFromMap(client.id);
             if (clientUid) {
                 this.userService.logout(clientUid);

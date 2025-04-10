@@ -64,7 +64,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       AppLogger.d("Fetching user...");
       final firebaseUser = FirebaseAuth.instance.currentUser;
 
-      AppLogger.d("Firebase user: $firebaseUser");
       if (firebaseUser == null) {
         state = const AsyncValue.data(null);
         _webSocketManager.playerName = null;

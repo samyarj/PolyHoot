@@ -4,6 +4,7 @@ import 'package:client_leger/models/polls/published-poll-model.dart';
 import 'package:client_leger/utilities/helper_functions.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class AdminPollNotification extends StatefulWidget {
   const AdminPollNotification({Key? key}) : super(key: key);
@@ -277,7 +278,7 @@ class _AdminPollNotificationState extends State<AdminPollNotification> {
                               ),
                             ),
                             Icon(
-                              Icons.notifications,
+                              FontAwesomeIcons.bullhorn,
                               color: colorScheme.tertiary,
                               size: 20,
                             ),
@@ -402,7 +403,7 @@ class _AdminPollNotificationState extends State<AdminPollNotification> {
                         Container(
                           padding: EdgeInsets.all(13),
                           child: Icon(
-                            Icons.notifications,
+                            FontAwesomeIcons.bullhorn,
                             size: 20,
                             color: _menuOpen || hasPolls
                                 ? colorScheme.secondary

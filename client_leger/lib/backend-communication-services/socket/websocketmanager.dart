@@ -13,7 +13,6 @@ final class WebSocketManager {
   }
 
   WebSocketManager._() {
-    AppLogger.e("in the WebSocketManager constructor");
     socket?.onDisconnect((_) {
       AppLogger.w("WebSocket disconnected, will empty fcmToken");
       firebasePushNotif.emptyFcmToken();

@@ -51,11 +51,7 @@ class _ChatMessagesNotificationState
     final userState = ref.watch(userProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
-    AppLogger.e("in the build method of chatmessagesnotif");
-
     userState.whenData((user) {
-      AppLogger.w("in the user callback");
-
       final currentReadMessages = user?.readMessages;
 
       if (!ref.read(messageNotifProvider.notifier).isInitialized &&

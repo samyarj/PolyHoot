@@ -50,7 +50,7 @@ class UserStatsAndLogsPage extends ConsumerWidget {
                   children: [
                     Center(
                       child: const AnimatedTitleWidget(
-                          title: 'Statistiques et logs'),
+                          title: 'Statistiques et logs', fontSize: 62),
                     ),
                     const SizedBox(height: 32),
                     Row(

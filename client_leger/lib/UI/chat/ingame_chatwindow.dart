@@ -469,6 +469,7 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                 onTapOutside: (_) =>
                                     FocusScope.of(context).unfocus(),
                                 child: TextField(
+                                  maxLength: 200,
                                   controller: _textController,
                                   focusNode: _focusNode,
                                   minLines: 1,
@@ -476,6 +477,8 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                   style:
                                       TextStyle(color: colorScheme.onSurface),
                                   decoration: InputDecoration(
+                                    counterStyle:
+                                        TextStyle(color: colorScheme.onPrimary),
                                     hintText: 'Écrivez un message...',
                                     filled: true,
                                     fillColor: colorScheme.surface,

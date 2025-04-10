@@ -33,20 +33,16 @@ export class UserService {
     }
 
     async removeUserFromMap(socketId: string) {
-        console.log("AMELIE: remove user from map");
         const uid = this.usersSocketIdMap.get(socketId);
         this.usersSocketIdMap.delete(socketId);
         if (uid) {
-            console.log("AMELIE: setting log to disconnect and about to call remove fcm token");
             this.setLog(uid, 'disconnect').catch((error) => console.error('Failed to log disconnection:', error));
             await this.removeFcmToken(uid).catch((error) => console.error('Failed to remove FCM token:', error));
             this.logger.log(`User ${uid} disconnected after losing socket connection`);
         }
     }
 
-    // make fcmToken to '' in user doc 
     async removeFcmToken(uid: string): Promise<void> {
-        console.log(`Removing FCM token for user ${uid}`);
         const userRef = this.firestore.collection('users').doc(uid);
         const userDoc = await userRef.get();
 
@@ -56,7 +52,7 @@ export class UserService {
 
         await userRef.update({ fcmToken: '' });
 
-        console.log(`Successfully removed FCM token for user ${uid}`);
+        this.logger.log(`Successfully removed FCM token for user ${uid}`);
     }
 
     async setLog(uid: string, action: 'connect' | 'disconnect'): Promise<void> {

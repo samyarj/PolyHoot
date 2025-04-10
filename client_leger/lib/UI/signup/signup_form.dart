@@ -163,7 +163,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
     final usernameRegex = RegExp(r'^[a-z0-9]{3,14}$');
 
     if (!usernameRegex.hasMatch(value)) {
-      return "Le nom d'utilisateur doit comporter entre 3 et 14 caractères et ne peut contenir que des lettres ou des chiffres sans espaces.";
+      return "Le nom d'utilisateur doit comporter entre 3 et 14 caractères et ne peut contenir que des lettres minuscules ou des chiffres sans espaces.";
     }
 
     return null;
@@ -305,6 +305,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
 
                 TextFormField(
                   key: _usernameFieldKey,
+                  maxLength: 14,
                   controller: _usernameController,
                   focusNode: _usernameFocusNode,
                   style: TextStyle(color: textColor, fontSize: 14),
