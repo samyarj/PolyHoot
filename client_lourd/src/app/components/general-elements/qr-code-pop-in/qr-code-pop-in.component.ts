@@ -23,6 +23,7 @@ export class QrCodePopInComponent implements OnInit {
             roomId: this.data.roomId,
             gameName: this.data.gameName,
         });
+        console.log(this.qrData);
     }
 
     ngOnInit(): void {

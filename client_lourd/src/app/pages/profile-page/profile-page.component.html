@@ -154,8 +154,7 @@
                         >
                             <p class="error" *ngIf="profileForm.get('username')?.hasError('required')">Le pseudonyme est requis.</p>
                             <p class="error" *ngIf="profileForm.get('username')?.hasError('pattern')">
-                                Le pseudonyme doit contenir entre 3 et 20 caractères et ne peut inclure que des lettres, des chiffres, des points, des
-                                underscores ou des tirets.
+                                Le pseudonyme doit contenir entre 3 et 14 caractères et ne peut inclure que des lettres minuscules ou des chiffres.
                             </p>
                             <p
                                 class="error"

@@ -54,9 +54,7 @@
         margin-bottom: 1.5rem;
         .custom-qr {
             height: 30vh !important; /* Set height */
-            width: auto; /* Maintain aspect ratio */
-            background: transparent !important; /* Transparent background */
-            color: var(--secondary-color) !important; /* Set QR code color */
+            width: 30vh !important; /* Maintain aspect ratio */
         }
     }
 }

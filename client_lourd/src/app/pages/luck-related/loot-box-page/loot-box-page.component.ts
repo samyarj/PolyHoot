@@ -43,7 +43,7 @@ export class LootBoxPageComponent {
                         const dialogRef = this.matdialog.open(ErrorDialogComponent, {
                             width: '400px',
                             panelClass: 'custom-container',
-                            data: { message: "Vous n'avez pas assez d'argent pour vous procurer cette Loot Box.", reloadOnClose: false },
+                            data: { message: "Vous n'avez pas assez d'argent pour vous procurer ce coffre.", reloadOnClose: false },
                         });
 
                         dialogRef.afterClosed().subscribe(() => {
@@ -54,7 +54,7 @@ export class LootBoxPageComponent {
                             width: '400px',
                             panelClass: 'custom-container',
                             data: {
-                                message: "Vous possèdez déjà l'item obtenu. Vous recevrez le prix de la lootBox en retour dans votre compte.",
+                                message: "Vous possèdez déjà l'item obtenu. Vous serez ramboursé le prix du coffre.",
                                 reloadOnClose: false,
                             },
                         });

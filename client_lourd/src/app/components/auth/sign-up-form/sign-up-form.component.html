@@ -25,8 +25,7 @@
                     Pseudonyme est requis.
                 </small>
                 <small *ngIf="signUpForm.get('username')?.hasError('pattern') && signUpForm.get('username')?.touched" class="text-danger">
-                    Le pseudonyme doit contenir entre 3 et 20 caractères et ne peut inclure que des lettres, des chiffres, des points, des underscores
-                    ou des tirets.
+                    Le pseudonyme doit contenir entre 3 et 14 caractères et ne peut inclure que des lettres minuscules ou des chiffres.
                 </small>
 
                 <small

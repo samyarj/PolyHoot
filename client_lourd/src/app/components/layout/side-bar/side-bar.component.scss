@@ -79,8 +79,12 @@
 .username {
     color: var(--text-color);
     font-size: 1.5rem;
+    height: 2.5rem;
     overflow: hidden;
     text-overflow: ellipsis;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 .avatar {
@@ -88,7 +92,7 @@
     width: 75px;
     border-radius: 50%;
     transition: transform 0.2s ease;
-    margin-right: 15px;
+    margin-right: 25px;
     &:hover {
         cursor: pointer;
     }
