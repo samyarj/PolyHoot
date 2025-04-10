@@ -12,7 +12,9 @@
                 [avatarUrl]="user.avatarEquipped"
                 [bannerUrl]="user.borderEquipped"
             ></app-avatar-banner>
-            <span class="username">{{ user.username }}</span>
+            <div class="username-divv">
+                <span class="username-text">{{ user.username }}</span>
+            </div>
             <ul class="dropdown-menu">
                 <!-- Dropdown Header -->
                 <li class="dropdown-header text-center">
@@ -319,7 +321,7 @@
                 <h2>Créer un canal de discussion</h2>
                 <div class="create-channel-form">
                     <form (submit)="createChannel()">
-                        <input type="text" [(ngModel)]="newChannelName" name="newChannelName" placeholder="Nom du canal" required />
+                        <input type="text" [(ngModel)]="newChannelName" name="newChannelName" placeholder="Nom du canal" required maxlength="20" />
                         <button
                             [disabled]="this.newChannelName === '' || this.isWorkingWithChannel"
                             [ngClass]="{ 'custom-button-disabled': this.newChannelName === '' }"

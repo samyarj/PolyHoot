@@ -121,15 +121,11 @@ export class QuestionFormComponent implements OnChanges {
 
     ngOnChanges() {
         if (this.question) {
-            if (this.question.text) {
-                this.questionType = this.question.type;
-                this.isTypeLocked = true;
-            } else {
-                this.question.type = this.questionType;
-                this.isTypeLocked = false;
-            }
+            this.questionType = this.question.type;
+            this.isTypeLocked = false;
         }
     }
+
     toleranceValid() {
         return this.questionValidationService.toleranceValid(this.question.qreAttributes);
     }
