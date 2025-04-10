@@ -13,7 +13,7 @@ export class UserService {
     private usersSocketIdMap = new Map<string, string>();
     private readonly logger = new Logger(UserService.name);
 
-    constructor(private readonly cloudinaryService: CloudinaryService) { }
+    constructor(private readonly cloudinaryService: CloudinaryService) {}
 
     addUserToMap(socketId: string, uid: string) {
         if (!this.isUserInMap(socketId)) {
@@ -108,7 +108,7 @@ export class UserService {
                 return await this.getUserByUid(uid);
             } else {
                 // User does not exist, create a new user in Firestore
-                const username = displayName || 'New User'; // Use display name or fallback
+                const username = await this.getNewGoogleUsername(displayName);
                 const newUser = await this.createUserInFirestore(uid, username, email, fcmToken);
                 return newUser;
             }
@@ -117,10 +117,27 @@ export class UserService {
         }
     }
 
+    async getNewGoogleUsername(username: string) {
+        let slicedUsername = username.trim().split(' ')[0].toLowerCase();
+        let chars = slicedUsername.length;
+
+        if (chars >= 14) {
+            chars = 13;
+            slicedUsername = slicedUsername.slice(0, chars);
+        }
+
+        while (await this.isUsernameTaken(slicedUsername)) {
+            slicedUsername = slicedUsername.slice(0, chars) + Math.floor(Math.random() * 10).toString();
+        }
+
+        return slicedUsername;
+    }
+
     async isUsernameTaken(username: string): Promise<boolean> {
         const usersRef = this.firestore.collection('users');
         const querySnapshot = await usersRef.where('username', '==', username).get();
-        return !querySnapshot.empty;
+        const isUsernameTaken = !querySnapshot.empty;
+        return isUsernameTaken;
     }
 
     async isEmailTaken(email: string): Promise<{ emailExists: boolean; provider: string | null }> {

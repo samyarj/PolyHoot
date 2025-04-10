@@ -33,7 +33,7 @@ export class AuthController {
         try {
             const user = await this.userService.createUserInFirestore(
                 request.user.uid,
-                request.user.displayName,
+                request.user.displayName.toLowerCase(),
                 request.user.email,
                 fcmToken,
                 avatarURL,
@@ -59,7 +59,12 @@ export class AuthController {
         const fcmToken = body?.fcmToken || null;
         this.logger.log(`Attempting Google sign-in for: ${request.user.email} with FCM Token: ${fcmToken}`);
         try {
-            const user = await this.userService.signInWithGoogle(request.user.uid, request.user.email, request.user.displayName, fcmToken);
+            const user = await this.userService.signInWithGoogle(
+                request.user.uid,
+                request.user.email,
+                request.user.displayName.toLowerCase(),
+                fcmToken,
+            );
             this.logger.log(`Google sign-in successful for: ${user.email}`);
             response.status(HttpStatus.CREATED).json(user);
         } catch (error) {

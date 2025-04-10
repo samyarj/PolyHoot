@@ -155,6 +155,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
                 ),
                 title: isInGame
                     ? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Center(
                             child: Padding(
@@ -166,42 +167,18 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
                               ),
                             ),
                           ),
-                          Spacer(),
-                          Container(
-                            height: 46,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: colorScheme.tertiary,
-                                width: 2,
+                          Padding(
+                            padding: const EdgeInsets.only(right:16.0),
+                            child: Container(
+                              height: 46,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: colorScheme.tertiary,
+                                  width: 2,
+                                ),
                               ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ChatMessagesNotification(),
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: SizedBox(
-                                    height: 24,
-                                    child: VerticalDivider(
-                                      color: colorScheme.tertiary,
-                                      thickness: 1.5,
-                                      width: 10,
-                                    ),
-                                  ),
-                                ),
-                                FriendRequestNotification(
-                                  onTap: () {
-                                    setState(() {
-                                      _notificationActive =
-                                          !_notificationActive;
-                                    });
-                                  },
-                                  isActive: _notificationActive,
-                                ),
-                              ],
+                              child:  ChatMessagesNotification(),
                             ),
                           ),
                         ],
