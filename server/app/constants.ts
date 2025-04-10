@@ -1,4 +1,4 @@
-import { Timestamp } from "firebase/firestore";
+import { Timestamp } from '@google-cloud/firestore';
 export const SEED_1 = 1000;
 export const BAN_DURATION_MS = 15 * 60 * 1000; // 15 minutes in milliseconds
 export const SEED_2 = 9000;
@@ -51,5 +51,5 @@ export const emptyUser = {
     pity: 0,
     nextDailyFree: new Date(0, 0, 0),
     fcmToken: '',
-    readMessages: new Map([['globalChat', Timestamp.fromMillis(0)]]),
+    readMessages: { globalChat: Timestamp.fromMillis(0) },
 };

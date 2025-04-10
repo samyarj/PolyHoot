@@ -1,16 +1,18 @@
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:client_leger/classes/sound_player.dart';
 import 'package:client_leger/utilities/logger.dart';
 
-const String ALERT_SOUND_PATH = "sounds/alert_sound.mp3";
+const String HOOT_SOUND_PATH = "sounds/owl.mp3";
 const double ALERT_SOUND_INTENSITY_DECREMENTATION = 0.01;
 const Duration ALERT_SOUND_DECREASE_INTERVAL = Duration(milliseconds: 200);
 const double DEFAULT_VOLUME = 0.5;
 
-class SoundPlayer {
-  static final SoundPlayer _instance = SoundPlayer._internal();
+class HootSoundPlayer {
+  static final HootSoundPlayer _instance = HootSoundPlayer._internal();
+  final SoundPlayer alertSoundPlayer = SoundPlayer();
 
-  SoundPlayer._internal() {
+  HootSoundPlayer._internal() {
     AppLogger.w("_internal SoundPlayer instance");
 
     if (_isInitialized) {
@@ -20,7 +22,7 @@ class SoundPlayer {
     _initializePlayer();
   }
 
-  factory SoundPlayer() {
+  factory HootSoundPlayer() {
     return _instance;
   }
 
@@ -28,18 +30,20 @@ class SoundPlayer {
   Timer? _timer;
   double _volume = DEFAULT_VOLUME;
   bool _isInitialized = false;
-  bool isPlaying = false;
+  bool _isPlaying = false;
   StreamSubscription<void>? _completionSubscription;
 
   Future<void> _initializePlayer() async {
     try {
-      _audioPlayer = AudioPlayer(playerId: 'alertPlayer');
+      _audioPlayer = AudioPlayer(playerId: 'owlPlayer');
       _isInitialized = true;
       // Setup completion listener
       _completionSubscription = _audioPlayer?.onPlayerComplete.listen((event) {
         AppLogger.i("Sound completed naturally");
-        isPlaying = false;
+        _isPlaying = false;
       });
+      await _audioPlayer!.setSource(AssetSource(HOOT_SOUND_PATH));
+      await _audioPlayer!.setReleaseMode(ReleaseMode.stop);
       AppLogger.i("AudioPlayer initialized successfully");
     } catch (e) {
       AppLogger.e("Failed to initialize AudioPlayer: $e");
@@ -47,9 +51,9 @@ class SoundPlayer {
     }
   }
 
-  Future<void> play({String source = ALERT_SOUND_PATH}) async {
+  Future<void> play() async {
     // Don't play if already playing
-    if (isPlaying) {
+    if (_isPlaying || alertSoundPlayer.isPlaying) {
       AppLogger.i("Sound is already playing, ignoring play request");
       return;
     }
@@ -74,9 +78,8 @@ class SoundPlayer {
       // Reset state and release resources before playing
       await _audioPlayer?.stop();
 
-      isPlaying = true;
+      _isPlaying = true;
       AppLogger.i("Playing alert sound at volume $_volume");
-      await _audioPlayer?.setSource(AssetSource(source));
 
       await _audioPlayer?.setVolume(_volume);
       await _audioPlayer?.resume();
@@ -88,16 +91,19 @@ class SoundPlayer {
       AppLogger.e("Error playing sound: $e");
       // Cancel any existing timer
       _timer?.cancel();
-      isPlaying = false;
+      _isPlaying = false;
     }
   }
 
   void stop() {
     try {
+      if (alertSoundPlayer.isPlaying) {
+        return;
+      }
       AppLogger.i("Stopping alert sound");
       _audioPlayer?.stop();
       _timer?.cancel();
-      isPlaying = false;
+      _isPlaying = false;
     } catch (e) {
       AppLogger.e("Error stopping sound: $e");
     }
@@ -113,7 +119,7 @@ class SoundPlayer {
         stop();
       }
     } else {
-      if (isPlaying) {
+      if (_isPlaying) {
         stop(); // Only stop once
       }
     }

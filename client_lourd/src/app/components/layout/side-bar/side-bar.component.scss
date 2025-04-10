@@ -70,17 +70,17 @@
 
 .avatar-container {
     display: flex;
-    width: 60%;
+    width: 75%;
     flex-direction: row;
     align-items: center;
     padding: 10px;
-    margin-left: 10%;
-    justify-content: space-between;
 }
 
 .username {
     color: var(--text-color);
     font-size: 1.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .avatar {
@@ -88,6 +88,10 @@
     width: 75px;
     border-radius: 50%;
     transition: transform 0.2s ease;
+    margin-right: 15px;
+    &:hover {
+        cursor: pointer;
+    }
 }
 
 .avatar.dropdown-toggle::after {
@@ -95,7 +99,7 @@
 }
 
 .avatar:hover {
-    transform: scale(1.1);
+    transform: scale(1.01);
 }
 
 .dropdown-avatar {
@@ -141,7 +145,9 @@
 
 //notification button
 .notification-container {
-    padding: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding: 10px;
     transition: all 0.2s ease-in-out;
     button {
         background: none;
