@@ -77,7 +77,9 @@
     margin-right: auto;
 
     .date-container {
-        color: rgb(217, 213, 255);
+        .time {
+            color: rgb(217, 213, 255);
+        }
     }
 }
 
