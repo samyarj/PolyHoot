@@ -6,7 +6,6 @@ import { Quiz } from '@app/model/schema/quiz/quiz';
 import { UserService } from '@app/services/auth/user.service';
 import { ChatService } from '@app/services/chat/chat.service';
 import { GameManagerService } from '@app/services/game-manager/game-manager.service';
-import { HistoryManagerService } from '@app/services/history-manager/history-manager.service';
 import { ChatMessage } from '@common/chat-message';
 import { PlayerResult } from '@common/partial-player';
 import { UseGuards } from '@nestjs/common';
@@ -22,7 +21,6 @@ export class GameGateway {
     constructor(
         private chatService: ChatService,
         private gameManager: GameManagerService,
-        private historyManager: HistoryManagerService,
         private userService: UserService,
     ) {}
 
@@ -200,10 +198,6 @@ export class GameGateway {
                     result: 'lose',
                 });
             }
-            // Only create the game record if this is the organizer
-            if (game.organizer.socket.id === client.id) {
-                this.historyManager.addGameRecord(game.quiz.title, roomId);
-            }
         }
     }
 
@@ -280,7 +274,6 @@ export class GameGateway {
 
                 this.server.to(roomId).emit(GameEvents.SendResults, results);
                 game.gameState = GameState.RESULTS;
-                this.historyManager.saveGameRecordToDB(roomId, results);
             }
         }
     }

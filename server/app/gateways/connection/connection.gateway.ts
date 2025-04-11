@@ -4,7 +4,6 @@ import { ChatEvents, ConnectEvents, DisconnectEvents, GameEvents, GameState } fr
 import { UserService } from '@app/services/auth/user.service';
 import { ChatService } from '@app/services/chat/chat.service';
 import { GameManagerService } from '@app/services/game-manager/game-manager.service';
-import { HistoryManagerService } from '@app/services/history-manager/history-manager.service';
 import { ChatMessage } from '@common/chat-message';
 import { ConnectedSocket, MessageBody, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
@@ -17,9 +16,8 @@ export class ConnectionGateway implements OnGatewayDisconnect {
     constructor(
         private chatService: ChatService,
         private gameManager: GameManagerService,
-        private historyManager: HistoryManagerService,
         private userService: UserService,
-    ) { }
+    ) {}
 
     @SubscribeMessage(ConnectEvents.IdentifyClient)
     handleIdentify(@MessageBody() uid: string, @ConnectedSocket() client: Socket) {
@@ -89,7 +87,6 @@ export class ConnectionGateway implements OnGatewayDisconnect {
         const game = this.gameManager.getGameByRoomId(roomId);
         const clientIds = this.server.sockets.adapter.rooms.get(roomId);
         if (game && game.gameState !== GameState.RESULTS) {
-            this.historyManager.removeGameRecord(roomId);
             this.disconnectOrganizerFromOtherPages(roomId, clientIds);
             client.emit(ChatEvents.RoomLeft);
         } else if (game && game.gameState === GameState.RESULTS) {
@@ -123,7 +120,7 @@ export class ConnectionGateway implements OnGatewayDisconnect {
         if (client) {
             const game = this.gameManager.getGameByRoomId(roomId);
             if (client.id === game.organizer.socket.id) {
-                this.sendDisconnectMessage('Organisateur', roomId);
+                this.sendDisconnectMessage("L'organisateur", roomId);
             } else {
                 const player = this.gameManager.getGameByRoomId(roomId).findTargetedPlayer(client);
                 if (player) {

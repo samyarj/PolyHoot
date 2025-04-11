@@ -138,6 +138,11 @@ export class UserService {
 
         if (chars >= 14) {
             chars = 13;
+            const fullUsername = slicedUsername.slice(0, 14);
+            const isUserTaken = await this.isUsernameTaken(fullUsername);
+            if (!isUserTaken) {
+                return fullUsername;
+            }
             slicedUsername = slicedUsername.slice(0, chars);
         }
 
