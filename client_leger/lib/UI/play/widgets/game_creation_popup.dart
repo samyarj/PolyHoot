@@ -243,7 +243,7 @@ class GameCreationPopup {
 
   static void _createGame(BuildContext context, Quiz quiz,
       {Function? onComplete}) {
-    final socket = WebSocketManager.instance;
+    final socket = WebSocketManager();
     AppLogger.i('Creating game with quiz: ${quiz.toJson()}');
 
     socket.webSocketSender(JoinEvents.Create.value, quiz.toJson(), (roomId) {

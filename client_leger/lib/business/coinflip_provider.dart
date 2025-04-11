@@ -55,7 +55,7 @@ class CoinflipState {
 }
 
 class CoinflipNotifier extends StateNotifier<CoinflipState> {
-  final WebSocketManager _socketManager = WebSocketManager.instance;
+  final WebSocketManager _socketManager = WebSocketManager();
 
   CoinflipNotifier()
       : super(CoinflipState(

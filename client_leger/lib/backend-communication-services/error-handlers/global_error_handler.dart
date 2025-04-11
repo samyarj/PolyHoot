@@ -82,9 +82,9 @@ String getFirebaseAuthError(FirebaseAuthException error) {
     case 'user-not-found':
       return "Une erreur est survenue avec l'authentification Firebase. Aucun utilisateur n'a été trouvé avec l'adresse e-mail fournie.";
     case 'wrong-password':
-      return "Une erreur est survenue avec l'authentification Firebase. Le mot de passe est incorrect. Veuillez réessayer.";
+      return "Les informations d'identification sont invalides. Veuillez vérifier vos données.";
     case 'invalid-credential':
-      return "Une erreur est survenue avec l'authentification Firebase. Les informations d'identification sont invalides. Veuillez vérifier vos données.";
+      return "Les informations d'identification sont invalides. Veuillez vérifier vos données.";
     default:
       return "Une erreur est survenue avec l'authentification Firebase.";
   }

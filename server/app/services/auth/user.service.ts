@@ -13,7 +13,7 @@ export class UserService {
     private usersSocketIdMap = new Map<string, string>();
     private readonly logger = new Logger(UserService.name);
 
-    constructor(private readonly cloudinaryService: CloudinaryService) {}
+    constructor(private readonly cloudinaryService: CloudinaryService) { }
 
     addUserToMap(socketId: string, uid: string) {
         if (!this.isUserInMap(socketId)) {
@@ -27,17 +27,32 @@ export class UserService {
         return this.usersSocketIdMap.has(socketId);
     }
 
+
     getUserUidFromMap(socketId: string): string | undefined {
         return this.usersSocketIdMap.get(socketId);
     }
 
-    removeUserFromMap(socketId: string) {
-        this.usersSocketIdMap.delete(socketId);
+    async removeUserFromMap(socketId: string) {
         const uid = this.usersSocketIdMap.get(socketId);
+        this.usersSocketIdMap.delete(socketId);
         if (uid) {
             this.setLog(uid, 'disconnect').catch((error) => console.error('Failed to log disconnection:', error));
+            await this.removeFcmToken(uid).catch((error) => console.error('Failed to remove FCM token:', error));
             this.logger.log(`User ${uid} disconnected after losing socket connection`);
         }
+    }
+
+    async removeFcmToken(uid: string): Promise<void> {
+        const userRef = this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+
+        if (!userDoc.exists) {
+            return;
+        }
+
+        await userRef.update({ fcmToken: '' });
+
+        this.logger.log(`Successfully removed FCM token for user ${uid}`);
     }
 
     async setLog(uid: string, action: 'connect' | 'disconnect'): Promise<void> {

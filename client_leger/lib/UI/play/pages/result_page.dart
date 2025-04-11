@@ -18,7 +18,7 @@ class ResultsPage extends ConsumerStatefulWidget {
 }
 
 class _ResultsPageState extends ConsumerState<ResultsPage> {
-  final WebSocketManager _socketManager = WebSocketManager.instance;
+  final WebSocketManager _socketManager = WebSocketManager();
   late final String _username;
   late final bool _isOrganizer;
   late final String _nameForDisconnect;

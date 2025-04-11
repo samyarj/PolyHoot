@@ -128,8 +128,8 @@ class _ChannelSearchState extends State<ChannelSearch> {
                             IconButton(
                               icon: Icon(
                                 Icons.add_circle,
-                                color: colorScheme.onPrimary,
                                 size: 30,
+                                color: colorScheme.onPrimary,
                               ),
                               onPressed: () async {
                                 await _channelManager.joinChannel(
@@ -173,9 +173,11 @@ class _ChannelSearchState extends State<ChannelSearch> {
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
+              maxLength: 20,
               style: TextStyle(color: colorScheme.onPrimary),
               controller: _textChannelController,
               decoration: InputDecoration(
+                counterStyle: TextStyle(color: colorScheme.onPrimary),
                 labelText: "Nom du nouveau canal",
                 labelStyle: TextStyle(color: colorScheme.onPrimary),
                 fillColor: colorScheme.surface.withValues(alpha: 0.3),

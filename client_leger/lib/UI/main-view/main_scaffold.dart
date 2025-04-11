@@ -1,5 +1,4 @@
 import 'package:client_leger/UI/error/error_dialog.dart';
-import 'package:client_leger/UI/friend-system/friend-request-notification.dart';
 import 'package:client_leger/UI/friend-system/friend-sidebar.dart';
 import 'package:client_leger/UI/main-view/chat_message_notif/chat_messages_notif.dart';
 import 'package:client_leger/UI/main-view/sidebar/sidebar.dart';
@@ -30,7 +29,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
   bool _isLoggingOut = false;
   final double sidebarWidth = 410;
   bool _isSidebarVisible = true;
-  bool _notificationActive = false;
 
   late AnimationController _animationController;
 
@@ -122,7 +120,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
   Widget build(BuildContext context) {
     final userState = ref.watch(userProvider);
     final colorScheme = Theme.of(context).colorScheme;
-    final isInGame = WebSocketManager.instance.isPlaying;
+    final isInGame = WebSocketManager().isPlaying;
     return userState.when(
       data: (user) {
         return Scaffold(
@@ -168,7 +166,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(right:16.0),
+                            padding: const EdgeInsets.only(right: 16.0),
                             child: Container(
                               height: 46,
                               decoration: BoxDecoration(
@@ -178,100 +176,90 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
                                   width: 2,
                                 ),
                               ),
-                              child:  ChatMessagesNotification(),
+                              child: ChatMessagesNotification(),
                             ),
                           ),
                         ],
                       )
                     : Row(
                         children: [
-                          Expanded(
-                            child: Row(
-                              children: [
-                                // Logo
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Image.asset(
-                                    'assets/logo.png',
-                                    width: 40,
-                                    height: 40,
-                                  ),
-                                ),
-
-                                TextButton(
-                                  onPressed: () => GoRouter.of(context)
-                                      .go('${Paths.play}/${Paths.joinGame}'),
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: colorScheme.tertiary,
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 8),
-                                  ),
-                                  child: Text(
-                                    'Jouer',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-
-                                SizedBox(
-                                  height: 24,
-                                  child: VerticalDivider(
-                                    color:
-                                        colorScheme.onPrimary.withOpacity(0.5),
-                                    thickness: 3,
-                                    width: 1,
-                                  ),
-                                ),
-
-                                TextButton(
-                                  onPressed: () =>
-                                      GoRouter.of(context).go(Paths.play),
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: colorScheme.tertiary,
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 8),
-                                  ),
-                                  child: Text(
-                                    'Accueil',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-
-                                Spacer(),
-
-                                IconButton(
-                                  icon: Icon(FontAwesomeIcons.clover),
-                                  iconSize: 28,
-                                  color: colorScheme.tertiary,
-                                  onPressed: () => context.go(Paths.luck),
-                                ),
-                                IconButton(
-                                  icon: SizedBox(
-                                    width: 34,
-                                    height: 34,
-                                    child: SvgPicture.string(
-                                      getInventorySvg(),
-                                      colorFilter: ColorFilter.mode(
-                                          colorScheme.tertiary,
-                                          BlendMode.srcIn),
-                                    ),
-                                  ),
-                                  color: colorScheme.tertiary,
-                                  onPressed: () => context.go(Paths.inventory),
-                                ),
-                                IconButton(
-                                  icon: Icon(FontAwesomeIcons.sackDollar),
-                                  iconSize: 28,
-                                  color: colorScheme.tertiary,
-                                  onPressed: () => context.go(Paths.shop),
-                                ),
-                              ],
+                          // Logo
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Image.asset(
+                              'assets/logo.png',
+                              width: 40,
+                              height: 40,
                             ),
+                          ),
+
+                          TextButton(
+                            onPressed: () => GoRouter.of(context)
+                                .go('${Paths.play}/${Paths.joinGame}'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: colorScheme.tertiary,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                            ),
+                            child: Text(
+                              'Jouer',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+
+                          SizedBox(
+                            height: 24,
+                            child: VerticalDivider(
+                              color: colorScheme.onPrimary.withOpacity(0.5),
+                              thickness: 3,
+                              width: 1,
+                            ),
+                          ),
+
+                          TextButton(
+                            onPressed: () =>
+                                GoRouter.of(context).go(Paths.play),
+                            style: TextButton.styleFrom(
+                              foregroundColor: colorScheme.tertiary,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                            ),
+                            child: Text(
+                              'Accueil',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Spacer(),
+                          IconButton(
+                            icon: Icon(FontAwesomeIcons.clover),
+                            iconSize: 28,
+                            color: colorScheme.tertiary,
+                            onPressed: () => context.go(Paths.luck),
+                          ),
+                          IconButton(
+                            icon: SizedBox(
+                              width: 34,
+                              height: 34,
+                              child: SvgPicture.string(
+                                getInventorySvg(),
+                                colorFilter: ColorFilter.mode(
+                                    colorScheme.tertiary, BlendMode.srcIn),
+                              ),
+                            ),
+                            color: colorScheme.tertiary,
+                            onPressed: () => context.go(Paths.inventory),
+                          ),
+                          IconButton(
+                            icon: Icon(FontAwesomeIcons.sackDollar),
+                            iconSize: 28,
+                            color: colorScheme.tertiary,
+                            onPressed: () => context.go(Paths.shop),
                           ),
                           SizedBox(
                             height: kToolbarHeight,
@@ -286,7 +274,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
                               sidebarWidth: sidebarWidth,
                               currentSidebar: _currentSidebar,
                               toggleSidebar: _toggleSidebar,
-                              logout: _logout)
+                              logout: _logout),
                         ],
                       ),
                 iconTheme: IconThemeData(color: colorScheme.onPrimary),

@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final waitingPageProvider =
     StateNotifierProvider.autoDispose<WaitingPageNotifier, WaitingPageState>(
         (ref) {
-  return WaitingPageNotifier(WebSocketManager.instance);
+  return WaitingPageNotifier(WebSocketManager());
 });
 
 class WaitingPageState {
@@ -172,7 +172,7 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
 
   void _getPlayerList() {
     _socketManager.webSocketSender(GameEvents.GetCurrentPlayers.value,
-        {"roomId": WebSocketManager.instance.roomId}, (data) {
+        {"roomId": WebSocketManager().roomId}, (data) {
       if (data is Map<String, dynamic> && data.containsKey('playersInfo')) {
         final List<PlayerDetails> updatedPlayers = (data['playersInfo'] as List)
             .map((player) =>

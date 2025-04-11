@@ -51,9 +51,9 @@ class AvatarGridWidget extends StatelessWidget {
                 decoration: BoxDecoration(
                   border: Border.all(
                     color: selectedAvatar == avatar
-                        ? colorScheme.tertiary
+                        ? colorScheme.secondary
                         : Colors.transparent,
-                    width: 2,
+                    width: 3,
                   ),
                   borderRadius: BorderRadius.circular(4),
                 ),

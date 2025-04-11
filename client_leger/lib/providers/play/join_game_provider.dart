@@ -55,7 +55,7 @@ class JoinGameState {
 }
 
 class JoinGameNotifier extends StateNotifier<JoinGameState> {
-  final WebSocketManager _socketManager = WebSocketManager.instance;
+  final WebSocketManager _socketManager = WebSocketManager();
 
   JoinGameNotifier()
       : super(JoinGameState(
@@ -160,7 +160,7 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
     });
 
     _socketManager.webSocketReceiver(JoinEvents.ValidId.value, (gameId) {
-      final playerName = WebSocketManager.instance.playerName;
+      final playerName = _socketManager.playerName;
       state = state.copyWith(
           gameIdValidated: true, wrongPin: false, popUpMessage: '');
       final data = {"gameId": gameId, "playerName": playerName};

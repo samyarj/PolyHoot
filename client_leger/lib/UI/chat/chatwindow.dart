@@ -483,9 +483,12 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                                   focusNode: _focusNode,
                                   minLines: 1,
                                   maxLines: null,
+                                  maxLength: 200,
                                   style:
                                       TextStyle(color: colorScheme.onSurface),
                                   decoration: InputDecoration(
+                                    counterStyle:
+                                        TextStyle(color: colorScheme.onPrimary),
                                     hintText: 'Écrivez un message...',
                                     filled: true,
                                     fillColor: colorScheme.surface,

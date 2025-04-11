@@ -58,7 +58,6 @@ class PollHistoryService extends ChangeNotifier {
   }
 
   void initializeStream() {
-    AppLogger.e("in initializeStream");
     _subscription?.cancel();
 
     _isLoading = true;
@@ -135,7 +134,6 @@ class PollHistoryService extends ChangeNotifier {
   // pour player -- quand il submit le poll
   sendAnsweredPlayerPoll(
       List<int> playerAnswer, String? pollId, String? userUid) async {
-        
     if (pollId == null || userUid == null) {
       return;
     }

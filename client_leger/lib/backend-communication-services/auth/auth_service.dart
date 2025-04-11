@@ -33,7 +33,7 @@ Future<String> getEmailFromIdentifier(String identifier) async {
 
   if (response.statusCode != 200) {
     throw Exception(
-        "Une erreur serveur est survenue lors de la récupération de l'email à partir de l'identifiant.");
+        "Les informations d'identification sont invalides. Veuillez vérifier vos données.");
   }
 
   final jsonResponse = jsonDecode(response.body);

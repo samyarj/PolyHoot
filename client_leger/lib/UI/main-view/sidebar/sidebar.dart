@@ -23,7 +23,7 @@ class SideBar extends ConsumerStatefulWidget {
 class _SideBarState extends ConsumerState<SideBar>
     with TickerProviderStateMixin {
   late TabController _tabController;
-  final socketManager = WebSocketManager.instance;
+  final socketManager = WebSocketManager();
   final _channelManager = ChannelManager();
   StreamSubscription<List<ChatChannel>>? _chatChannelsSubscription;
   final ValueNotifier<List<ChatChannel>> _channelsNotifier = ValueNotifier([]);

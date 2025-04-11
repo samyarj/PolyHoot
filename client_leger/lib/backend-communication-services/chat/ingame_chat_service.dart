@@ -9,10 +9,15 @@ import 'package:client_leger/utilities/socket_events.dart';
 import 'package:flutter/material.dart';
 
 class InGameChatService {
-  InGameChatService._privateConstructor();
-  final WebSocketManager _socketManager = WebSocketManager.instance;
+  InGameChatService._privateConstructor() {
+    AppLogger.w("Creating InGameChatService");
+    WebSocketManager().currentRoomIdNotifier.removeListener(_onRoomIdChanged);
+    WebSocketManager().currentRoomIdNotifier.addListener(_onRoomIdChanged);
+  }
+
+  final WebSocketManager _socketManager = WebSocketManager();
   final FirebaseChatService _firebaseChatService = FirebaseChatService();
-  late String _username;
+  String _username = "";
   late String? _uid;
   late String? _avatar;
   late String? _border;
@@ -24,7 +29,6 @@ class InGameChatService {
 
   final inGameChatMessagesNotifier = ValueNotifier<List<InGameChatMessage>>([]);
 
-  String? currentRoomId;
   Timer? quickRepliesTimer;
   MessageNotifNotifier? _notifier;
 
@@ -34,6 +38,17 @@ class InGameChatService {
     return _instance;
   }
 
+  void _onRoomIdChanged() {
+    final newRoomId = WebSocketManager().currentRoomIdNotifier.value;
+    if (newRoomId == null) {
+      resetGameNotifs();
+      _notifier?.onGameEnd();
+    } else {
+      AppLogger.w("roomId changed to $newRoomId");
+      readyForInGameNotifs();
+    }
+  }
+
   requestQuickReplies() {
     if (_socketManager.roomId != null) {
       _socketManager
@@ -41,64 +56,45 @@ class InGameChatService {
     }
   }
 
-  void reset() {
-    if (currentRoomId == _socketManager.roomId && currentRoomId != null) {
-      AppLogger.i("user changed channel tabs, not resetting InGameChatService");
-    } else if (_socketManager.roomId == null) {
-      AppLogger.w(
-          "Resetting InGameChatService because we're not in a game anymore");
-      _socketManager.socket?.off(ChatEvents.RoomLeft.value);
-      _socketManager.socket?.off(ChatEvents.MessageAdded.value);
-      _socketManager.socket?.off(ChatEvents.QuickRepliesGenerated.value);
-      currentRoomId = null;
-      _username = "";
-      _avatar = null;
-      _border = null;
-      _uid = null;
-      _notifier = null;
-      _userDetails = {};
-      inGameChatMessagesNotifier.value = [];
-      quickRepliesTimer?.cancel();
-      quickRepliesTimer = null;
-      quickRepliesNotifier.value = [];
-    }
+  void resetGameNotifs() {
+    AppLogger.w("resetGameNotifs");
+    _socketManager.socket?.off(ChatEvents.RoomLeft.value);
+    _socketManager.socket?.off(ChatEvents.MessageAdded.value);
+    _socketManager.socket?.off(ChatEvents.QuickRepliesGenerated.value);
+    _userDetails = {};
+    inGameChatMessagesNotifier.value = [];
+    quickRepliesTimer?.cancel();
+    quickRepliesTimer = null;
+    quickRepliesNotifier.value = [];
   }
 
   void startQuickRepliesInterval() {
-    quickRepliesTimer = Timer.periodic(
-      const Duration(seconds: 8),
-      (timer) {
-        requestQuickReplies();
-      },
-    );
+    if (quickRepliesTimer == null) {
+      AppLogger.i("Starting quick replies timer");
+      quickRepliesTimer = Timer.periodic(
+        const Duration(seconds: 8),
+        (timer) {
+          requestQuickReplies();
+        },
+      );
+    }
   }
 
-  void setUserInfosAndInitialize(
-    String username,
-    String? uid,
-    String? avatar,
-    String? border,
-    MessageNotifNotifier notifier,
-  ) {
-    if (currentRoomId == _socketManager.roomId && currentRoomId != null) {
-      AppLogger.i(
-          "user changed channel tabs, not initializing InGameChatService");
-      return;
-    } else {
-      AppLogger.i("new game detected. SetUsernameAndInitialize");
-      _username = username;
-      _avatar = avatar;
-      _border = border;
-      _uid = uid;
-      _notifier = notifier;
-      currentRoomId = _socketManager.roomId;
-      configureChatSocketFeatures();
-      getHistory();
-      if (quickRepliesTimer == null) {
-        AppLogger.i("Starting quick replies timer");
-        startQuickRepliesInterval();
-      }
-    }
+// done by chat messages notif (not tied to the ingameChatWindow)
+  void setUserInfos(String? username, String? uid, String? avatar,
+      String? border, MessageNotifNotifier notifier) {
+    AppLogger.i("setUserInfos notifier is $notifier");
+    _username = username ?? "";
+    _avatar = avatar;
+    _border = border;
+    _uid = uid;
+    _notifier = notifier;
+  }
+
+  void readyForInGameNotifs() {
+    AppLogger.i("readyForInGameNotifs");
+    configureChatSocketFeatures();
+    getHistory();
   }
 
   bool isOrganizer() {
@@ -127,6 +123,7 @@ class InGameChatService {
         }),
       );
       messages.sort((a, b) => b.date!.compareTo(a.date!));
+      _notifier?.onInGameHistoryReceived(messages.length);
       inGameChatMessagesNotifier.value = messages;
     });
   }
@@ -183,7 +180,9 @@ class InGameChatService {
         await attachUrlToMessage(message);
       }
 
-      _notifier?.onIngameMessageReceived();
+      if (message.author != getAuthor()) {
+        _notifier?.onIngameMessageReceived();
+      }
 
       inGameChatMessagesNotifier.value = [
         message,

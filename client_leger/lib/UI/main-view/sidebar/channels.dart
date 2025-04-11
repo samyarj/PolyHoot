@@ -164,8 +164,8 @@ class _ChannelsState extends ConsumerState<Channels> {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: Icon(Icons.exit_to_app,
-                    size: 30, color: colorScheme.onPrimary),
+                icon: Icon(FontAwesomeIcons.rightFromBracket,
+                    color: colorScheme.onPrimary),
                 onPressed: () async {
                   await showConfirmationDialog(
                       context,

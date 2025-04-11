@@ -4,9 +4,6 @@ import 'package:client_leger/classes/sound_player.dart';
 import 'package:client_leger/utilities/logger.dart';
 
 const String HOOT_SOUND_PATH = "sounds/owl.mp3";
-const double ALERT_SOUND_INTENSITY_DECREMENTATION = 0.01;
-const Duration ALERT_SOUND_DECREASE_INTERVAL = Duration(milliseconds: 200);
-const double DEFAULT_VOLUME = 0.5;
 
 class HootSoundPlayer {
   static final HootSoundPlayer _instance = HootSoundPlayer._internal();
@@ -27,8 +24,7 @@ class HootSoundPlayer {
   }
 
   AudioPlayer? _audioPlayer;
-  Timer? _timer;
-  double _volume = DEFAULT_VOLUME;
+  final double _volume = 1;
   bool _isInitialized = false;
   bool _isPlaying = false;
   StreamSubscription<void>? _completionSubscription;
@@ -58,9 +54,6 @@ class HootSoundPlayer {
       return;
     }
 
-    // Reset volume for new play
-    _volume = DEFAULT_VOLUME;
-
     if (!_isInitialized || _audioPlayer == null) {
       AppLogger.w("AudioPlayer not initialized, trying again...");
       await _initializePlayer();
@@ -72,9 +65,6 @@ class HootSoundPlayer {
     }
 
     try {
-      // Cancel any existing timer
-      _timer?.cancel();
-
       // Reset state and release resources before playing
       await _audioPlayer?.stop();
 
@@ -83,14 +73,8 @@ class HootSoundPlayer {
 
       await _audioPlayer?.setVolume(_volume);
       await _audioPlayer?.resume();
-
-      _timer = Timer.periodic(ALERT_SOUND_DECREASE_INTERVAL, (timer) {
-        _handleSoundIntensity();
-      });
     } catch (e) {
       AppLogger.e("Error playing sound: $e");
-      // Cancel any existing timer
-      _timer?.cancel();
       _isPlaying = false;
     }
   }
@@ -102,26 +86,9 @@ class HootSoundPlayer {
       }
       AppLogger.i("Stopping alert sound");
       _audioPlayer?.stop();
-      _timer?.cancel();
       _isPlaying = false;
     } catch (e) {
       AppLogger.e("Error stopping sound: $e");
-    }
-  }
-
-  void _handleSoundIntensity() {
-    if (_volume > ALERT_SOUND_INTENSITY_DECREMENTATION) {
-      _volume -= ALERT_SOUND_INTENSITY_DECREMENTATION;
-      try {
-        _audioPlayer?.setVolume(_volume);
-      } catch (e) {
-        AppLogger.e("Error adjusting volume: $e");
-        stop();
-      }
-    } else {
-      if (_isPlaying) {
-        stop(); // Only stop once
-      }
     }
   }
 

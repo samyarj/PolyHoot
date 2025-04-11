@@ -18,7 +18,7 @@ class PlayerInfoWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
-    final socketManager = WebSocketManager.instance;
+    final socketManager = WebSocketManager();
     final isNotPlayer = socketManager.playerName != player.name || isOrganizer;
 
     return Padding(

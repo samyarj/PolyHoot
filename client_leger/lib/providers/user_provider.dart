@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
 import 'package:client_leger/backend-communication-services/chat/firebase_chat_service.dart';
@@ -36,6 +35,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
   final FirebaseChatService _firebaseChatService = FirebaseChatService();
   String? currentToken;
   final FirebasePushApi _firebasePushApi = FirebasePushApi();
+  final _webSocketManager = WebSocketManager();
 
   AuthNotifier() : super(const AsyncValue.loading()) {
     fetchUser();
@@ -52,8 +52,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
         currentToken = newToken;
         AppLogger.w(
             "current token has expired or user just signed in, will call initializeSocketConnection");
-        WebSocketManager.instance
-            .initializeSocketConnection(currentToken, user.uid);
+        _webSocketManager.initializeSocketConnection(currentToken, user.uid);
       }
     });
   }
@@ -65,10 +64,9 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       AppLogger.d("Fetching user...");
       final firebaseUser = FirebaseAuth.instance.currentUser;
 
-      AppLogger.d("Firebase user: $firebaseUser");
       if (firebaseUser == null) {
         state = const AsyncValue.data(null);
-        WebSocketManager.instance.playerName = null;
+        _webSocketManager.playerName = null;
         return;
       }
 
@@ -123,7 +121,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
         }
 
         isLoggedIn.value = true;
-        WebSocketManager.instance.playerName = user.username;
+        _webSocketManager.playerName = user.username;
         AppLogger.d("User data updated in real-time: ${user.username}");
 
         // for the chat notifs
@@ -164,12 +162,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
         final user = user_model.User.fromJson(userJson);
         state = AsyncValue.data(user);
         isLoggedIn.value = true;
-        if (isLogin) {
-          await _firebasePushApi.onLogin();
-        } else {
-          _firebasePushApi.setupFcmTokenListener();
-        }
-        WebSocketManager.instance.playerName = user.username;
+        _webSocketManager.playerName = user.username;
 
         if (userCredential.user != null) {
           listenToTokenChanges();
@@ -220,7 +213,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
 
       await fetchUser();
       isLoggedIn.value = true;
-      await _firebasePushApi.onLogin();
     } catch (e, stack) {
       AppLogger.e("Sign-in error: $e");
       state = AsyncValue.error(e, stack);
@@ -407,7 +399,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
 
       // Update state
       state = const AsyncValue.data(null);
-      WebSocketManager.instance.disconnectFromSocket();
+      _webSocketManager.disconnectFromSocket();
       isLoggedIn.value = false;
       _reportService.resetParam();
       _firebaseChatService.clearUserDetailsCache();
@@ -424,7 +416,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       }
 
       state = const AsyncValue.data(null);
-      WebSocketManager.instance.disconnectFromSocket();
+      _webSocketManager.disconnectFromSocket();
       isLoggedIn.value = false;
       _reportService.resetParam();
       _firebaseChatService.clearUserDetailsCache();

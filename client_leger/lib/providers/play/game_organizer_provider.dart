@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:client_leger/backend-communication-services/chat/ingame_chat_service.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/classes/sound_player.dart';
 import 'package:client_leger/models/game-related/answer_qrl.dart';
@@ -17,7 +18,7 @@ const TIME_TO_NEXT_ANSWER = 3000;
 
 final organizerProvider =
     StateNotifierProvider.autoDispose<OrganizerNotifier, OrganizerState>((ref) {
-  return OrganizerNotifier(WebSocketManager.instance);
+  return OrganizerNotifier(WebSocketManager());
 });
 
 class OrganizerState {
@@ -82,6 +83,7 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
   final WebSocketManager _socketManager;
   SoundPlayer alertSoundPlayer = SoundPlayer();
   List<PlayerData> resultPlayerList = [];
+  final ingameChatService = InGameChatService();
 
   OrganizerNotifier(this._socketManager)
       : super(OrganizerState(
@@ -251,6 +253,8 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
 
   void _handleEveryoneSubmitted() {
     _socketManager.webSocketReceiver(GameEvents.EveryoneSubmitted.value, (_) {
+      ingameChatService.requestQuickReplies();
+
       final updatedGameInfo = GameInfo(
         time: 0,
         currentQuestionIndex: state.gameInfo.currentQuestionIndex,
@@ -427,6 +431,8 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
   void _handleNextQuestion() {
     _socketManager.webSocketReceiver(GameEvents.ProceedToNextQuestion.value,
         (_) {
+      ingameChatService.requestQuickReplies();
+
       if (state.currentQuestion.type == 'QCM' ||
           state.currentQuestion.type == 'QRE') {
         final updatedGameInfo = state.gameInfo.copyWith(time: 0);

@@ -45,10 +45,9 @@ class _AppBarRightSectionState extends State<AppBarRightSection> {
     final logout = widget.logout;
 
     return Container(
-      width: sidebarWidth - 26,
+      width: sidebarWidth + 24,
       padding: const EdgeInsets.symmetric(horizontal: 0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
             height: 48,
@@ -224,7 +223,7 @@ class _AppBarRightSectionState extends State<AppBarRightSection> {
                     color: colorScheme.surface,
                     shadowColor: colorScheme.shadow,
                     position: PopupMenuPosition.under,
-                    offset: Offset(95, 6.5),
+                    offset: Offset(75, 6.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                       side: BorderSide(
@@ -241,7 +240,7 @@ class _AppBarRightSectionState extends State<AppBarRightSection> {
                           bottomLeft: Radius.circular(6),
                         ),
                       ),
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -258,7 +257,9 @@ class _AppBarRightSectionState extends State<AppBarRightSection> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                user?.username ?? 'Guest',
+                                (user?.username.length ?? 0) > 10
+                                    ? '${user?.username.substring(0, 10)}...' // Limit to 10 characters
+                                    : (user?.username ?? 'Inconnu'),
                                 softWrap: false,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
@@ -275,6 +276,14 @@ class _AppBarRightSectionState extends State<AppBarRightSection> {
                                 ),
                               ),
                             ],
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 6.0),
+                            child: Icon(
+                              Icons.keyboard_arrow_down,
+                              color: colorScheme.onPrimary,
+                              size: 20,
+                            ),
                           ),
                         ],
                       ),

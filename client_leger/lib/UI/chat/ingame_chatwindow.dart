@@ -7,7 +7,6 @@ import 'package:client_leger/models/ingame_chat_messages.dart';
 import 'package:client_leger/providers/messages/messages_notif_provider.dart';
 import 'package:client_leger/providers/user_provider.dart';
 import 'package:client_leger/utilities/helper_functions.dart';
-import 'package:client_leger/utilities/logger.dart';
 import 'package:client_leger/utilities/socket_events.dart';
 import 'package:client_leger/utilities/themed_progress_indecator.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +31,6 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
 
   @override
   void initState() {
-    final user = ref.read(userProvider).value!;
     _notifier = ref.read(messageNotifProvider.notifier);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -40,22 +38,13 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
 
       _notifier.markChatAsRead(inGameChat);
     });
-
-    _inGameChatManager.setUserInfosAndInitialize(user.username, user.uid,
-        user.avatarEquipped, user.borderEquipped, _notifier);
+    _inGameChatManager.startQuickRepliesInterval();
     super.initState();
   }
 
   String formatDate(DateTime date) {
     return DateFormat('HH:mm:ss')
         .format(date.toUtc().subtract(Duration(hours: 4))); // UTC-5
-  }
-
-  @override
-  void dispose() {
-    AppLogger.i("Disposing InGameChatWindow");
-    _inGameChatManager.reset();
-    super.dispose();
   }
 
   void sendMessage() {
@@ -469,6 +458,7 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                 onTapOutside: (_) =>
                                     FocusScope.of(context).unfocus(),
                                 child: TextField(
+                                  maxLength: 200,
                                   controller: _textController,
                                   focusNode: _focusNode,
                                   minLines: 1,
@@ -476,6 +466,8 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                   style:
                                       TextStyle(color: colorScheme.onSurface),
                                   decoration: InputDecoration(
+                                    counterStyle:
+                                        TextStyle(color: colorScheme.onPrimary),
                                     hintText: 'Écrivez un message...',
                                     filled: true,
                                     fillColor: colorScheme.surface,

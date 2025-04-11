@@ -12,7 +12,7 @@ export class PushNotifService implements OnModuleInit, OnModuleDestroy {
     constructor() { }
 
     onModuleInit() {
-        this.logger.debug("onModuleInit");
+        this.logger.log("onModuleInit");
         this.listenForChannelChanges();
         this.listenToGlobalChat();
     }
@@ -140,7 +140,7 @@ export class PushNotifService implements OnModuleInit, OnModuleDestroy {
                         // Send notifications per device
                         const notifications = Array.from(deviceUserMap.entries()).map(([token, name]) => {
                             const title = `Salut ${name} ! Ici PolyHoot !`;
-                            const body = `Nouveau message dans le Global Chat: ${newMessage.message}`;
+                            const body = `Nouveau message dans le chat Général: ${newMessage.message}`;
                             return this.sendNotification(token, title, body);
                         });
 
@@ -150,6 +150,31 @@ export class PushNotifService implements OnModuleInit, OnModuleDestroy {
             });
 
         this.unsubscribeListeners.set('globalChat', unsubscribe);
+    }
+
+    async onIngameMessage(message: string, userUid: string) {
+        try {
+            // Fetch the user from Firestore
+            const userDoc = await this.firestore.collection('users').doc(userUid).get();
+
+            if (!userDoc.exists) {
+                this.logger.log(`User with UID ${userUid} not found`);
+                return;
+            }
+
+            const user = userDoc.data();
+
+            // Check for valid FCM token
+            if (user?.fcmToken && user.isOnline) {
+                const title = `Salut ${user.username} ! Ici PolyHoot !`;
+                const body = `Nouveau message en jeu : ${message}`;
+                this.logger.log(`Sending ingame push notification to ${user.username}`);
+                await this.sendNotification(user.fcmToken, title, body);
+            }
+        } catch (error) {
+            this.logger.debug(`Failed to send ingame message notification: ${error}`);
+        }
+
     }
 
 
