@@ -63,6 +63,7 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
 
   void onIngameMessageReceived() {
     if (currentDisplayedChannel != inGameChat) {
+      AppLogger.w("Ingame message received");
       _playSound();
       final int newCount = (state.unreadMessages[inGameChat] ?? 0) + 1;
       state = state.copyWith(unreadMessages: {
@@ -70,6 +71,22 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
         inGameChat: newCount,
       });
     }
+  }
+
+  void onInGameHistoryReceived(int nMessages) {
+    if (currentDisplayedChannel != inGameChat) {
+      final int newCount = (state.unreadMessages[inGameChat] ?? 0) + nMessages;
+      state = state.copyWith(unreadMessages: {
+        ...state.unreadMessages,
+        inGameChat: newCount,
+      });
+    }
+  }
+
+  void onGameEnd() {
+    final updatedUnread = {...state.unreadMessages};
+    updatedUnread.remove(inGameChat);
+    state = state.copyWith(unreadMessages: updatedUnread);
   }
 
   // Function to count unread messages in a specific channel -- for the first snapshot

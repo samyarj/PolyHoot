@@ -1,4 +1,5 @@
 import 'package:client_leger/backend-communication-services/chat/chat_notif_persistence_service.dart';
+import 'package:client_leger/backend-communication-services/chat/ingame_chat_service.dart';
 import 'package:client_leger/providers/messages/messages_notif_provider.dart';
 import 'package:client_leger/providers/user_provider.dart';
 import 'package:client_leger/utilities/logger.dart';
@@ -29,6 +30,8 @@ class _ChatMessagesNotificationState
   final mapEquals = const DeepCollectionEquality().equals;
   final chatNotifPersistenceService = ChatNotifPersistenceService();
   Map<String, Timestamp>? _previousReadMessages;
+  final inGameChatService = InGameChatService();
+  late final MessageNotifNotifier messageNotifNotifier;
 
   void _forceChatNotifMenuRebuild() {
     // so that the list of popup menu items is updated on live when menu is open
@@ -45,8 +48,18 @@ class _ChatMessagesNotificationState
   }
 
   @override
+  void initState() {
+    final user = ref.read(userProvider).value;
+
+    messageNotifNotifier = ref.read(messageNotifProvider.notifier);
+
+    inGameChatService.setUserInfos(user?.username, user?.uid,
+        user?.avatarEquipped, user?.borderEquipped, messageNotifNotifier);
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final messageNotifNotifier = ref.read(messageNotifProvider.notifier);
     final messageNotifState = ref.watch(messageNotifProvider);
     final userState = ref.watch(userProvider);
     final colorScheme = Theme.of(context).colorScheme;
