@@ -14,7 +14,6 @@ export class ChatGateway {
     @WebSocketServer() private server: Server;
     private readonly logger = new Logger(ChatGateway.name);
 
-
     constructor(
         private chatService: ChatService,
         private quickReplyService: QuickReplyService,
@@ -30,18 +29,22 @@ export class ChatGateway {
         this.chatService.addMessage(message, clientRoomId);
         this.server.to(clientRoomId).emit(ChatEvents.MessageAdded, message);
 
-        // push notif 
+        // send push notif to all players 
         try {
             const game = this.gameManagerService.getGameByRoomId(clientRoomId);
             game.players.forEach((player) => {
-                if (player.isInGame) {
+                const isInGame: boolean = Array.from(player.socket.rooms.values())[1] === clientRoomId;
+                if (isInGame) {
                     const userUid = this.userService.getUserUidFromMap(player.socket.id);
                     if (userUid && userUid != message.uid) {
                         this.pushNotifService.onIngameMessage(message.message, userUid);
                     }
                 }
             });
-            if (game.organizer.isInGame) {
+
+            // send push notif to organizer
+            const isInGame: boolean = Array.from(game.organizer.socket.rooms.values())[1] === clientRoomId;
+            if (isInGame) {
                 const organizerUid = this.userService.getUserUidFromMap(game.organizer.socket.id);
                 if (organizerUid && organizerUid != message.uid) {
                     this.pushNotifService.onIngameMessage(message.message, organizerUid);
