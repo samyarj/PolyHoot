@@ -127,8 +127,8 @@ class _ChannelSearchState extends State<ChannelSearch> {
                           children: [
                             IconButton(
                               icon: Icon(
-                                Icons.meeting_room_rounded,
-                                size: 32,
+                                Icons.add_circle,
+                                size: 30,
                                 color: colorScheme.onPrimary,
                               ),
                               onPressed: () async {
