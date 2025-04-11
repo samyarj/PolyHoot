@@ -12,7 +12,7 @@ export class PushNotifService implements OnModuleInit, OnModuleDestroy {
     constructor() { }
 
     onModuleInit() {
-        this.logger.debug("onModuleInit");
+        this.logger.log("onModuleInit");
         this.listenForChannelChanges();
         this.listenToGlobalChat();
     }

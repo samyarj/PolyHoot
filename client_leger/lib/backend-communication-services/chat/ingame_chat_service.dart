@@ -12,7 +12,7 @@ class InGameChatService {
   InGameChatService._privateConstructor();
   final WebSocketManager _socketManager = WebSocketManager();
   final FirebaseChatService _firebaseChatService = FirebaseChatService();
-  late String _username;
+  String _username = "";
   late String? _uid;
   late String? _avatar;
   late String? _border;
