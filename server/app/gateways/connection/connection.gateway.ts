@@ -120,7 +120,7 @@ export class ConnectionGateway implements OnGatewayDisconnect {
         if (client) {
             const game = this.gameManager.getGameByRoomId(roomId);
             if (client.id === game.organizer.socket.id) {
-                this.sendDisconnectMessage('Organisateur', roomId);
+                this.sendDisconnectMessage("L'organisateur", roomId);
             } else {
                 const player = this.gameManager.getGameByRoomId(roomId).findTargetedPlayer(client);
                 if (player) {

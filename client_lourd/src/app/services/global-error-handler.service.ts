@@ -14,14 +14,21 @@ export class GlobalErrorHandlerService extends ErrorHandler {
         const toastr = this.injector.get(ToastrService);
         const authService = this.injector.get(AuthService);
 
+        error = (error as any)?.rejection ?? error; // <--- 👈 important
+
         if (error instanceof HttpErrorResponse) {
             return;
         }
         if (error instanceof FirebaseError) {
             const message = this.getFirebaseErrorMessage(error);
-            if (message) {
+            if (message && error.code !== 'permission-denied') {
                 toastr.error(message, 'Erreur Firebase');
             }
+
+            if (error.code === 'permission-denied') {
+                return;
+            }
+
             console.error('Erreur Firebase :', error);
         } else if (error instanceof Error) {
             // Gérer les erreurs JavaScript générales
