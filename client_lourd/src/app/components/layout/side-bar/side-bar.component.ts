@@ -259,10 +259,17 @@ export class SideBarComponent implements OnDestroy {
      * Load older messages when scrolling to the top.
      */
     loadOlderMessages(): void {
-        if (this.isFetchingOlderMessages || !this.lastMessageDate || !this.selectedChannel) return;
+        if (this.isFetchingOlderMessages || !this.lastMessageDate) return;
 
         this.isFetchingOlderMessages = true;
-        this.firebaseChatService.loadOlderMessages(this.selectedChannel, this.lastMessageDate).subscribe({
+        const targetChannel = this.activeTab === 1 ? 'General' : this.selectedChannel;
+
+        if (!targetChannel) {
+            this.isFetchingOlderMessages = false;
+            return;
+        }
+
+        this.firebaseChatService.loadOlderMessages(targetChannel, this.lastMessageDate).subscribe({
             next: (olderMessages) => {
                 if (olderMessages.length > 0) {
                     // Ensure olderMessages are sorted ascending before prepending
@@ -271,7 +278,13 @@ export class SideBarComponent implements OnDestroy {
                         const dateB = (b.date as any)?.toMillis?.() || 0;
                         return dateA - dateB; // Oldest first
                     });
-                    this.selectedChannelMessages = [...sortedOlderMessages, ...this.selectedChannelMessages];
+
+                    if (this.activeTab === 1) {
+                        this.globalChatMessages = [...sortedOlderMessages, ...this.globalChatMessages];
+                    } else {
+                        this.selectedChannelMessages = [...sortedOlderMessages, ...this.selectedChannelMessages];
+                    }
+
                     // Update lastMessageDate to the oldest message date from the newly loaded batch
                     if (sortedOlderMessages.length > 0) {
                         this.lastMessageDate = sortedOlderMessages[0].date;
@@ -375,12 +388,22 @@ export class SideBarComponent implements OnDestroy {
                     return;
                 }
 
+                // Reset message loading state
+                this.selectedChannelMessages = [];
+                this.selectedChannelMessagesLoading = true;
+                this.lastMessageDate = undefined;
+                this.isFetchingOlderMessages = false;
+
+                // Unsubscribe from previous channel's messages
+                if (this.messagesSubscription) {
+                    this.messagesSubscription.unsubscribe();
+                    this.messagesSubscription = null;
+                }
+
                 // Call joinChannel to ensure the user is added to the channel
                 await this.firebaseChatService.joinChannel(channel);
 
                 this.selectedChannel = channel;
-                this.selectedChannelMessages = []; // Clear the messages array
-                this.selectedChannelMessagesLoading = true; // Set loading state
 
                 // Switch to the third tab
                 if (tab3) {
@@ -641,17 +664,37 @@ export class SideBarComponent implements OnDestroy {
     }
 
     private subscribeToGlobalMessages(): void {
-        // Unsubscribe from previous global messages observable to avoid memory leaks
+        // Unsubscribe from previous messages observable to avoid memory leaks
         if (this.messagesSubscription) {
-            // Check the messages subscription used for both global and channel
             this.messagesSubscription.unsubscribe();
+            this.messagesSubscription = null;
         }
 
         this.globalChatMessagesLoading = true;
+        this.globalChatMessages = []; // Clear messages for global chat
+        this.lastMessageDate = undefined; // Reset pagination
+        this.isFetchingOlderMessages = false; // Reset fetching state
+
+        // Subscribe to the message stream from the service
         this.messagesSubscription = this.firebaseChatService.getMessages('General').subscribe({
             next: (messages) => {
-                this.globalChatMessages = messages;
+                this.globalChatMessages = messages; // Receives the full, sorted list
                 this.globalChatMessagesLoading = false;
+
+                // Set lastMessageDate for pagination 'loadOlderMessages'
+                if (messages.length > 0) {
+                    // Sort ascending (oldest first) to get the correct date for 'startAfter'
+                    const sortedMessages = [...messages].sort((a, b) => {
+                        const dateA = (a.date as any)?.toMillis?.() || 0;
+                        const dateB = (b.date as any)?.toMillis?.() || 0;
+                        return dateA - dateB;
+                    });
+                    if (sortedMessages.length > 0) {
+                        this.lastMessageDate = sortedMessages[0].date;
+                    }
+                } else {
+                    this.lastMessageDate = undefined; // Reset if chat is empty
+                }
             },
             error: (err) => {
                 console.error('Error while fetching global messages:', err);
@@ -664,12 +707,13 @@ export class SideBarComponent implements OnDestroy {
         // Unsubscribe from previous channel's messages
         if (this.messagesSubscription) {
             this.messagesSubscription.unsubscribe();
-            this.messagesSubscription = null; // Clear the reference
+            this.messagesSubscription = null;
         }
 
         this.selectedChannelMessagesLoading = true;
         this.selectedChannelMessages = []; // Clear messages for the new channel
         this.lastMessageDate = undefined; // Reset pagination
+        this.isFetchingOlderMessages = false; // Reset fetching state
 
         // Subscribe to the message stream from the service
         this.messagesSubscription = this.firebaseChatService.getMessages(channel).subscribe({
