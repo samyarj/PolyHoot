@@ -118,15 +118,14 @@ Future<bool> emailCheck(String email) async {
     if (emailExists && provider == passwordProvider) {
       return true;
     } else if (provider == googleProvider) {
-      throw Exception(
-          "This functionnality is not available with Google sign-in");
+      throw "Ce courriel n'est pas enregistré.";
     } else if (!emailExists) {
-      throw Exception("This email is not registered.");
+      throw "Ce courriel n'est pas enregistré.";
     }
   } else {
     AppLogger.e(
         "Error in emailCheck : ${response.statusCode}  ${response.reasonPhrase}");
-    throw Exception("An error occured ${response.reasonPhrase}");
+    throw "Une erreur est survenue ${response.reasonPhrase}";
   }
   return false;
 }

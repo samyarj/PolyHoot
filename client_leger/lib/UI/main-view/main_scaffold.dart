@@ -237,12 +237,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
                           ),
                           Spacer(),
                           IconButton(
-                            icon: Icon(FontAwesomeIcons.clover),
-                            iconSize: 28,
-                            color: colorScheme.tertiary,
-                            onPressed: () => context.go(Paths.luck),
-                          ),
-                          IconButton(
                             icon: SizedBox(
                               width: 34,
                               height: 34,
@@ -260,6 +254,12 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
                             iconSize: 28,
                             color: colorScheme.tertiary,
                             onPressed: () => context.go(Paths.shop),
+                          ),
+                          IconButton(
+                            icon: Icon(FontAwesomeIcons.clover),
+                            iconSize: 28,
+                            color: colorScheme.tertiary,
+                            onPressed: () => context.go(Paths.luck),
                           ),
                           SizedBox(
                             height: kToolbarHeight,

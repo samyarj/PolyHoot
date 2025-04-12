@@ -18,7 +18,7 @@ class _PasswordResetPageState extends State<PasswordResetPage>
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
           Container(
@@ -48,32 +48,35 @@ class _PasswordResetPageState extends State<PasswordResetPage>
             ),
           ),
           Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const AnimatedTitleWidget(title: 'POLYHOOT', fontSize: 38),
-                const SizedBox(height: 15),
-                Container(
-                  width: 450,
-                  height: screenHeight * 0.5,
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withAlpha(180),
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .tertiary
-                            .withAlpha(204),
-                        blurRadius: 15,
-                        spreadRadius: 1,
-                      ),
-                    ],
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const AnimatedTitleWidget(title: 'POLYHOOT', fontSize: 38),
+                  const SizedBox(height: 15),
+                  Container(
+                    width: 450,
+                    height: screenHeight * 0.5,
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    decoration: BoxDecoration(
+                      color:
+                          Theme.of(context).colorScheme.primary.withAlpha(180),
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .tertiary
+                              .withAlpha(204),
+                          blurRadius: 15,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: PasswordResetForm(),
                   ),
-                  child: PasswordResetForm(),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
