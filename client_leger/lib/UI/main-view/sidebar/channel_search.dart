@@ -8,19 +8,20 @@ import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
 
 class ChannelSearch extends StatefulWidget {
-  const ChannelSearch({
-    super.key,
-    required this.filteredChannels,
-    required this.onDeleteChannel,
-    required this.currentUserUid,
-    required this.filterChannels,
-    required this.currentQuery,
-  });
+  const ChannelSearch(
+      {super.key,
+      required this.filteredChannels,
+      required this.onDeleteChannel,
+      required this.currentUserUid,
+      required this.filterChannels,
+      required this.currentQuery,
+      required this.onChannelPicked});
   final List<ChatChannel> filteredChannels; // filtered by parent
   final Future<void> Function(String) onDeleteChannel;
   final Function(String) filterChannels; // parent callback
   final String? currentUserUid;
   final String currentQuery;
+  final Function(int, String) onChannelPicked;
 
   @override
   State<ChannelSearch> createState() => _ChannelSearchState();
@@ -210,8 +211,9 @@ class _ChannelSearchState extends State<ChannelSearch> {
             final channelName = _textChannelController.text.trim();
             if (channelName.isEmpty) return;
             try {
-              await _channelManager
-                  .createChannel(_textChannelController.text.trim());
+              await _channelManager.createChannel(
+                  _textChannelController.text.trim(), widget.currentUserUid);
+              widget.onChannelPicked(2, _textChannelController.text.trim());
               _textChannelController.clear();
             } catch (e) {
               if (!mounted) return;

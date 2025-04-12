@@ -59,14 +59,16 @@ class _ChannelsState extends ConsumerState<Channels> {
           !areEquals(_previousJoinableChannels, joinableChannels)) {
         currentQuery = query;
         _previousJoinableChannels = joinableChannels;
-        setState(() {
-          AppLogger.i("Filtering channels with query: $query");
+        if (mounted) {
+          setState(() {
+            AppLogger.i("Filtering channels with query: $query");
 
-          _filteredChannels = joinableChannels
-              .where((channel) =>
-                  channel.name.toLowerCase().contains(query.toLowerCase()))
-              .toList();
-        });
+            _filteredChannels = joinableChannels
+                .where((channel) =>
+                    channel.name.toLowerCase().contains(query.toLowerCase()))
+                .toList();
+          });
+        }
       }
     });
   }
@@ -121,6 +123,7 @@ class _ChannelsState extends ConsumerState<Channels> {
                         currentUserUid: widget.userUid,
                         filterChannels: _filterChannels,
                         currentQuery: currentQuery,
+                        onChannelPicked: widget.onChannelPicked,
                       ),
                     ],
                   ),
