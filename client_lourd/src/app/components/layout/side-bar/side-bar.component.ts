@@ -11,8 +11,14 @@ import { ChatService } from '@app/services/chat-services/chat.service';
 import { FirebaseChatService } from '@app/services/chat-services/firebase/firebase-chat.service';
 import { FriendSystemService } from '@app/services/friend-system.service';
 import { HeaderNavigationService } from '@app/services/ui-services/header-navigation.service';
+import { SocketClientService } from '@app/services/websocket-services/general/socket-client-manager.service';
 import { ChatMessage } from '@common/chat-message';
 import { Observable, Subscription } from 'rxjs';
+
+const ROOM_ID_CHECK_INTERVAL = 500; // ms
+const DELETION_MESSAGE_TIMEOUT = 5000; // ms
+const ERROR_MESSAGE_TIMEOUT = 4000; // ms
+const UNAUTHORIZED_STATUS = 401;
 
 @Component({
     selector: 'app-side-bar',
@@ -60,6 +66,8 @@ export class SideBarComponent implements OnDestroy {
     private onlineStatusSubscription: { [key: string]: () => void } = {};
     private gameChatSubscription: Subscription;
     private chatEventsSubscription: Subscription;
+    private roomIdCheckInterval: ReturnType<typeof setInterval>;
+    private lastKnownRoomId: string | null = null;
 
     constructor(
         private authService: AuthService,
@@ -70,10 +78,14 @@ export class SideBarComponent implements OnDestroy {
         private firestore: Firestore,
         private chatService: ChatService,
         private cdr: ChangeDetectorRef,
+        private socketClientService: SocketClientService,
     ) {
         this.user$ = this.authService.user$;
         // Subscribe to live chat messages for the global chat
         this.subscribeToGlobalMessages();
+
+        // Monitor roomId changes
+        this.startRoomMonitoring();
 
         // Subscribe to channel deletion events
         this.channelDeletedSubscription = this.firebaseChatService.channelDeleted$.subscribe((deletedChannel) => {
@@ -83,7 +95,7 @@ export class SideBarComponent implements OnDestroy {
                     this.deletionMessage = 'Le canal a été supprimé. Veuillez en sélectionner un autre ou en créer un nouveau.';
                     setTimeout(() => {
                         this.deletionMessage = '';
-                    }, 5000);
+                    }, DELETION_MESSAGE_TIMEOUT);
                 }
                 this.selectedChannel = null;
                 this.selectedChannelMessages = [];
@@ -156,6 +168,8 @@ export class SideBarComponent implements OnDestroy {
         this.chatEventsSubscription = this.chatService.chatEvents$.subscribe((event) => {
             if (event.event === ChatEvents.RoomLeft) {
                 this.cleanupGameChat();
+                // Restart room monitoring when leaving a room
+                this.startRoomMonitoring();
             }
         });
 
@@ -243,6 +257,11 @@ export class SideBarComponent implements OnDestroy {
 
         // Clean up online status listeners
         Object.values(this.onlineStatusSubscription).forEach((unsubscribe) => unsubscribe());
+
+        // Clear the roomId check interval
+        if (this.roomIdCheckInterval) {
+            clearInterval(this.roomIdCheckInterval);
+        }
     }
 
     logout(): void {
@@ -324,7 +343,7 @@ export class SideBarComponent implements OnDestroy {
                     this.errorMessage = 'Le nom du canal existe déjà. Veuillez choisir un autre nom.';
                     setTimeout(() => {
                         this.errorMessage = '';
-                    }, 4000);
+                    }, ERROR_MESSAGE_TIMEOUT);
                     this.isWorkingWithChannel = false;
                     return;
                 }
@@ -598,7 +617,7 @@ export class SideBarComponent implements OnDestroy {
             } catch (error: any) {
                 console.error("Erreur lors de l'envoi de la demande d'ami:", error);
                 this.isClickingFriendButton = false;
-                if (error?.status === 401) {
+                if (error?.status === UNAUTHORIZED_STATUS) {
                     this.searchError = 'Votre session a expiré. Veuillez vous reconnecter.';
                     this.authService.logout();
                     this.router.navigateByUrl('/login');
@@ -899,6 +918,7 @@ export class SideBarComponent implements OnDestroy {
         if (this.isGameChatInitialized) {
             this.gameChatMessages = [];
             this.isGameChatInitialized = false;
+            this.lastKnownRoomId = null;
         }
     }
 
@@ -908,5 +928,38 @@ export class SideBarComponent implements OnDestroy {
             // Re-trigger the search to update results
             this.onSearchInputChange({ target: { value: this.searchQuery } });
         }
+    }
+
+    private startRoomMonitoring(): void {
+        // Clear any existing interval
+        if (this.roomIdCheckInterval) {
+            clearInterval(this.roomIdCheckInterval);
+        }
+
+        // Reset last known room ID
+        this.lastKnownRoomId = null;
+
+        // Create a new interval to check roomId changes
+        this.roomIdCheckInterval = setInterval(() => {
+            const currentRoomId = this.socketClientService.roomId;
+
+            // Only act if the room ID has changed
+            if (currentRoomId !== this.lastKnownRoomId) {
+                this.lastKnownRoomId = currentRoomId;
+
+                if (currentRoomId && (this.isOnGamePage || this.isOnResultsPage)) {
+                    // Initialize game chat if needed
+                    if (!this.isGameChatInitialized) {
+                        this.initializeGameChat();
+                    }
+                    // Switch to game chat tab
+                    const tab2 = document.querySelector('[href="#tab2"]') as HTMLElement;
+                    if (tab2) {
+                        tab2.click();
+                        this.setActiveTab(2);
+                    }
+                }
+            }
+        }, ROOM_ID_CHECK_INTERVAL);
     }
 }
