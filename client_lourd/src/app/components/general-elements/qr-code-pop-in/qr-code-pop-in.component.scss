@@ -52,9 +52,10 @@
         border-radius: 30px;
         border: 2px solid var(--secondary-color);
         margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         .custom-qr {
-            height: 30vh !important; /* Set height */
-            width: 30vh !important; /* Maintain aspect ratio */
         }
     }
 }

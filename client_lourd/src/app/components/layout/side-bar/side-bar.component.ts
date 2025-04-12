@@ -11,8 +11,14 @@ import { ChatService } from '@app/services/chat-services/chat.service';
 import { FirebaseChatService } from '@app/services/chat-services/firebase/firebase-chat.service';
 import { FriendSystemService } from '@app/services/friend-system.service';
 import { HeaderNavigationService } from '@app/services/ui-services/header-navigation.service';
+import { SocketClientService } from '@app/services/websocket-services/general/socket-client-manager.service';
 import { ChatMessage } from '@common/chat-message';
 import { Observable, Subscription } from 'rxjs';
+
+const ROOM_ID_CHECK_INTERVAL = 500; // ms
+const DELETION_MESSAGE_TIMEOUT = 5000; // ms
+const ERROR_MESSAGE_TIMEOUT = 4000; // ms
+const UNAUTHORIZED_STATUS = 401;
 
 @Component({
     selector: 'app-side-bar',
@@ -60,6 +66,8 @@ export class SideBarComponent implements OnDestroy {
     private onlineStatusSubscription: { [key: string]: () => void } = {};
     private gameChatSubscription: Subscription;
     private chatEventsSubscription: Subscription;
+    private roomIdCheckInterval: ReturnType<typeof setInterval>;
+    private lastKnownRoomId: string | null = null;
 
     constructor(
         private authService: AuthService,
@@ -70,10 +78,14 @@ export class SideBarComponent implements OnDestroy {
         private firestore: Firestore,
         private chatService: ChatService,
         private cdr: ChangeDetectorRef,
+        private socketClientService: SocketClientService,
     ) {
         this.user$ = this.authService.user$;
         // Subscribe to live chat messages for the global chat
         this.subscribeToGlobalMessages();
+
+        // Monitor roomId changes
+        this.startRoomMonitoring();
 
         // Subscribe to channel deletion events
         this.channelDeletedSubscription = this.firebaseChatService.channelDeleted$.subscribe((deletedChannel) => {
@@ -83,7 +95,7 @@ export class SideBarComponent implements OnDestroy {
                     this.deletionMessage = 'Le canal a été supprimé. Veuillez en sélectionner un autre ou en créer un nouveau.';
                     setTimeout(() => {
                         this.deletionMessage = '';
-                    }, 5000);
+                    }, DELETION_MESSAGE_TIMEOUT);
                 }
                 this.selectedChannel = null;
                 this.selectedChannelMessages = [];
@@ -156,6 +168,8 @@ export class SideBarComponent implements OnDestroy {
         this.chatEventsSubscription = this.chatService.chatEvents$.subscribe((event) => {
             if (event.event === ChatEvents.RoomLeft) {
                 this.cleanupGameChat();
+                // Restart room monitoring when leaving a room
+                this.startRoomMonitoring();
             }
         });
 
@@ -243,6 +257,11 @@ export class SideBarComponent implements OnDestroy {
 
         // Clean up online status listeners
         Object.values(this.onlineStatusSubscription).forEach((unsubscribe) => unsubscribe());
+
+        // Clear the roomId check interval
+        if (this.roomIdCheckInterval) {
+            clearInterval(this.roomIdCheckInterval);
+        }
     }
 
     logout(): void {
@@ -259,10 +278,17 @@ export class SideBarComponent implements OnDestroy {
      * Load older messages when scrolling to the top.
      */
     loadOlderMessages(): void {
-        if (this.isFetchingOlderMessages || !this.lastMessageDate || !this.selectedChannel) return;
+        if (this.isFetchingOlderMessages || !this.lastMessageDate) return;
 
         this.isFetchingOlderMessages = true;
-        this.firebaseChatService.loadOlderMessages(this.selectedChannel, this.lastMessageDate).subscribe({
+        const targetChannel = this.activeTab === 1 ? 'General' : this.selectedChannel;
+
+        if (!targetChannel) {
+            this.isFetchingOlderMessages = false;
+            return;
+        }
+
+        this.firebaseChatService.loadOlderMessages(targetChannel, this.lastMessageDate).subscribe({
             next: (olderMessages) => {
                 if (olderMessages.length > 0) {
                     // Ensure olderMessages are sorted ascending before prepending
@@ -271,7 +297,13 @@ export class SideBarComponent implements OnDestroy {
                         const dateB = (b.date as any)?.toMillis?.() || 0;
                         return dateA - dateB; // Oldest first
                     });
-                    this.selectedChannelMessages = [...sortedOlderMessages, ...this.selectedChannelMessages];
+
+                    if (this.activeTab === 1) {
+                        this.globalChatMessages = [...sortedOlderMessages, ...this.globalChatMessages];
+                    } else {
+                        this.selectedChannelMessages = [...sortedOlderMessages, ...this.selectedChannelMessages];
+                    }
+
                     // Update lastMessageDate to the oldest message date from the newly loaded batch
                     if (sortedOlderMessages.length > 0) {
                         this.lastMessageDate = sortedOlderMessages[0].date;
@@ -311,7 +343,7 @@ export class SideBarComponent implements OnDestroy {
                     this.errorMessage = 'Le nom du canal existe déjà. Veuillez choisir un autre nom.';
                     setTimeout(() => {
                         this.errorMessage = '';
-                    }, 4000);
+                    }, ERROR_MESSAGE_TIMEOUT);
                     this.isWorkingWithChannel = false;
                     return;
                 }
@@ -375,12 +407,22 @@ export class SideBarComponent implements OnDestroy {
                     return;
                 }
 
+                // Reset message loading state
+                this.selectedChannelMessages = [];
+                this.selectedChannelMessagesLoading = true;
+                this.lastMessageDate = undefined;
+                this.isFetchingOlderMessages = false;
+
+                // Unsubscribe from previous channel's messages
+                if (this.messagesSubscription) {
+                    this.messagesSubscription.unsubscribe();
+                    this.messagesSubscription = null;
+                }
+
                 // Call joinChannel to ensure the user is added to the channel
                 await this.firebaseChatService.joinChannel(channel);
 
                 this.selectedChannel = channel;
-                this.selectedChannelMessages = []; // Clear the messages array
-                this.selectedChannelMessagesLoading = true; // Set loading state
 
                 // Switch to the third tab
                 if (tab3) {
@@ -575,7 +617,7 @@ export class SideBarComponent implements OnDestroy {
             } catch (error: any) {
                 console.error("Erreur lors de l'envoi de la demande d'ami:", error);
                 this.isClickingFriendButton = false;
-                if (error?.status === 401) {
+                if (error?.status === UNAUTHORIZED_STATUS) {
                     this.searchError = 'Votre session a expiré. Veuillez vous reconnecter.';
                     this.authService.logout();
                     this.router.navigateByUrl('/login');
@@ -641,17 +683,37 @@ export class SideBarComponent implements OnDestroy {
     }
 
     private subscribeToGlobalMessages(): void {
-        // Unsubscribe from previous global messages observable to avoid memory leaks
+        // Unsubscribe from previous messages observable to avoid memory leaks
         if (this.messagesSubscription) {
-            // Check the messages subscription used for both global and channel
             this.messagesSubscription.unsubscribe();
+            this.messagesSubscription = null;
         }
 
         this.globalChatMessagesLoading = true;
+        this.globalChatMessages = []; // Clear messages for global chat
+        this.lastMessageDate = undefined; // Reset pagination
+        this.isFetchingOlderMessages = false; // Reset fetching state
+
+        // Subscribe to the message stream from the service
         this.messagesSubscription = this.firebaseChatService.getMessages('General').subscribe({
             next: (messages) => {
-                this.globalChatMessages = messages;
+                this.globalChatMessages = messages; // Receives the full, sorted list
                 this.globalChatMessagesLoading = false;
+
+                // Set lastMessageDate for pagination 'loadOlderMessages'
+                if (messages.length > 0) {
+                    // Sort ascending (oldest first) to get the correct date for 'startAfter'
+                    const sortedMessages = [...messages].sort((a, b) => {
+                        const dateA = (a.date as any)?.toMillis?.() || 0;
+                        const dateB = (b.date as any)?.toMillis?.() || 0;
+                        return dateA - dateB;
+                    });
+                    if (sortedMessages.length > 0) {
+                        this.lastMessageDate = sortedMessages[0].date;
+                    }
+                } else {
+                    this.lastMessageDate = undefined; // Reset if chat is empty
+                }
             },
             error: (err) => {
                 console.error('Error while fetching global messages:', err);
@@ -664,12 +726,13 @@ export class SideBarComponent implements OnDestroy {
         // Unsubscribe from previous channel's messages
         if (this.messagesSubscription) {
             this.messagesSubscription.unsubscribe();
-            this.messagesSubscription = null; // Clear the reference
+            this.messagesSubscription = null;
         }
 
         this.selectedChannelMessagesLoading = true;
         this.selectedChannelMessages = []; // Clear messages for the new channel
         this.lastMessageDate = undefined; // Reset pagination
+        this.isFetchingOlderMessages = false; // Reset fetching state
 
         // Subscribe to the message stream from the service
         this.messagesSubscription = this.firebaseChatService.getMessages(channel).subscribe({
@@ -855,6 +918,7 @@ export class SideBarComponent implements OnDestroy {
         if (this.isGameChatInitialized) {
             this.gameChatMessages = [];
             this.isGameChatInitialized = false;
+            this.lastKnownRoomId = null;
         }
     }
 
@@ -864,5 +928,38 @@ export class SideBarComponent implements OnDestroy {
             // Re-trigger the search to update results
             this.onSearchInputChange({ target: { value: this.searchQuery } });
         }
+    }
+
+    private startRoomMonitoring(): void {
+        // Clear any existing interval
+        if (this.roomIdCheckInterval) {
+            clearInterval(this.roomIdCheckInterval);
+        }
+
+        // Reset last known room ID
+        this.lastKnownRoomId = null;
+
+        // Create a new interval to check roomId changes
+        this.roomIdCheckInterval = setInterval(() => {
+            const currentRoomId = this.socketClientService.roomId;
+
+            // Only act if the room ID has changed
+            if (currentRoomId !== this.lastKnownRoomId) {
+                this.lastKnownRoomId = currentRoomId;
+
+                if (currentRoomId && (this.isOnGamePage || this.isOnResultsPage)) {
+                    // Initialize game chat if needed
+                    if (!this.isGameChatInitialized) {
+                        this.initializeGameChat();
+                    }
+                    // Switch to game chat tab
+                    const tab2 = document.querySelector('[href="#tab2"]') as HTMLElement;
+                    if (tab2) {
+                        tab2.click();
+                        this.setActiveTab(2);
+                    }
+                }
+            }
+        }, ROOM_ID_CHECK_INTERVAL);
     }
 }

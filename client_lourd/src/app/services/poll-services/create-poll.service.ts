@@ -62,6 +62,7 @@ export class CreatePollService {
     }
     emptyPoll() {
         this.poll = JSON.parse(JSON.stringify(EMPTY_POLL));
+        this.emptyQuestion();
     }
     editQuestion(index: number) {
         this.question = this.poll.questions[index];

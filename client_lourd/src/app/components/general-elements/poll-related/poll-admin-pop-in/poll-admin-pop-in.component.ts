@@ -4,6 +4,7 @@ import { ConfirmationMessage } from '@app/constants/enum-class';
 import { Poll } from '@app/interfaces/poll';
 import { ConsultPollPageComponent } from '@app/pages/admin-pages/poll-related/consult-poll-page/consult-poll-page.component';
 import { MessageHandlerService } from '@app/services/general-services/error-handler/message-handler.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
     selector: 'app-poll-admin-pop-in.component',
@@ -20,15 +21,20 @@ export class PollAdminPopInComponent implements AfterViewInit {
             parentComponent: ConsultPollPageComponent;
         },
         private messageHandlerService: MessageHandlerService,
+        private toastr: ToastrService,
     ) {
         this.poll = data.poll;
     }
     onPublish() {
         if (this.data.poll.id) {
-            // Appel direct de la méthode du parent
             this.messageHandlerService.confirmationDialog(
                 ConfirmationMessage.PublishPoll,
                 () => {
+                    if (!this.isDateValid()) {
+                        this.toastr.error("La date sélectionnée n'est plus valide");
+                        return;
+                        // this.dialogRef.close();
+                    }
                     // Callback si l'utilisateur confirme
                     this.data.parentComponent.publishCallback(this.data.poll.id);
                     this.dialogRef.close();
@@ -57,7 +63,7 @@ export class PollAdminPopInComponent implements AfterViewInit {
         const selectedDate = new Date(this.poll.endDate);
         const now = new Date();
         now.setSeconds(0, 0);
-        return selectedDate >= now;
+        return selectedDate > now;
     }
     private setMinDate(): void {
         const dateTimeInput = document.querySelector<HTMLInputElement>('#dateTimePicker');
@@ -72,7 +78,7 @@ export class PollAdminPopInComponent implements AfterViewInit {
 
                 // Vérifier si la valeur sélectionnée est devenue invalide
                 const selectedDateTime = new Date(dateTimeInput.value);
-                if (selectedDateTime < now) {
+                if (selectedDateTime <= now) {
                     dateTimeInput.value = minDateTime; // Réinitialiser si la valeur devient invalide
                 }
             };
