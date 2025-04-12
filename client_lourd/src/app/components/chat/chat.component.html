@@ -53,5 +53,5 @@
             Envoyer
         </button>
     </div>
-    <span class="error" *ngIf="!isLengthInRange()"> Attention ! Limite de 200 caractères atteinte </span>
+    <span class="error" *ngIf="inputMessage.length === 200"> Attention ! Limite de 200 caractères atteinte </span>
 </div>

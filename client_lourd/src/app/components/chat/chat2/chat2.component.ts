@@ -127,7 +127,7 @@ export class Chat2Component implements OnChanges {
      * Checks if message length is within the limit
      */
     isLengthInRange(): boolean {
-        return this.inputMessage.length < MAX_CHAR;
+        return this.inputMessage.length <= MAX_CHAR;
     }
 
     getFormattedDate(chatmessage: FirebaseChatMessage): Date {
