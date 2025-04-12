@@ -114,8 +114,9 @@ export class PollController {
     @ApiNotFoundResponse({
         description: 'Poll not found',
     })
-    @Delete('/delete/:id')
+    @Delete('/:id')
     async deletePollById(@Param('id') id: string, @Res() response: Response) {
+        console.log('Deleting poll with ID:', id);
         try {
             await this.pollService.deletePollById(id);
             response.status(HttpStatus.OK).send();
