@@ -61,12 +61,7 @@ Expected Output:
         }
     }
 
-    async generateQuickReplies(
-        channelId: string,
-        user: string,
-        message: string,
-        gameContext?: string, // for game chat
-    ): Promise<string[]> {
+    async generateQuickReplies(channelId: string, user: string, message: string, gameContext?: string): Promise<string[]> {
         try {
             // Initialize the context
             const context = this.initializeContext();
@@ -85,28 +80,39 @@ ${message}`;
                 content: userContent,
             });
 
-            // Send the conversation context to the LLM
-            const chatCompletion = await this.groq.chat.completions.create({
-                messages: context,
-                model: 'llama3-70b-8192',
-                temperature: 1,
-                max_completion_tokens: 1024,
-                top_p: 1,
-                stream: false,
-                response_format: {
-                    type: 'json_object',
-                },
-                stop: null,
-            });
+            let attempts = 0;
+            const maxAttempts = 5;
 
-            const response = chatCompletion.choices[0]?.message?.content;
-            const parsedResponse = JSON.parse(response);
+            while (attempts < maxAttempts) {
+                try {
+                    // Send the conversation context to the LLM
+                    const chatCompletion = await this.groq.chat.completions.create({
+                        messages: context,
+                        model: 'llama3-70b-8192',
+                        temperature: 1,
+                        max_completion_tokens: 1024,
+                        top_p: 1,
+                        stream: false,
+                        response_format: {
+                            type: 'json_object',
+                        },
+                        stop: null,
+                    });
 
-            if (this.validateQuickRepliesSchema(parsedResponse)) {
-                return parsedResponse.quick_replies;
-            } else {
-                return ['Wow!', 'Bien joué!', 'Intéressant!'];
+                    const response = chatCompletion.choices[0]?.message?.content;
+                    const parsedResponse = JSON.parse(response);
+
+                    if (this.validateQuickRepliesSchema(parsedResponse)) {
+                        return parsedResponse.quick_replies;
+                    }
+                } catch (error) {
+                    console.error(`Attempt ${attempts + 1} failed:`, error);
+                }
+
+                attempts++;
             }
+
+            return ['Wow!', 'Bien joué!', 'Intéressant!'];
         } catch (error) {
             console.error('Error generating quick replies:', error);
             return ['Wow!', 'Bien joué!', 'Intéressant!'];
