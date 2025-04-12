@@ -42,11 +42,6 @@ class PollRecordStats extends StatelessWidget {
       votes = List.generate(currentQuestion.choices?.length ?? 0, (index) => 0);
     }
 
-    int totalResponses = 0;
-    poll.totalVotes.forEach((key, votesList) {
-      totalResponses += votesList.fold(0, (sum, count) => sum + count);
-    });
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -111,13 +106,7 @@ class PollRecordStats extends StatelessWidget {
                                   "${poll.questions.length}",
                                   Icons.format_list_numbered_outlined,
                                 ),
-                                SizedBox(height: 12),
-                                _buildInfoRow(
-                                  context,
-                                  "Total des réponses:",
-                                  "$totalResponses",
-                                  Icons.how_to_vote_outlined,
-                                ),
+                                
                                 SizedBox(height: 16),
                                 Divider(
                                     color:
