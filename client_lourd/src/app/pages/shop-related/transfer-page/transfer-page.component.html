@@ -152,7 +152,14 @@
                     </div>
                     <div class="tab-navigation">
                         <button class="back-button custom-button-cancel" (click)="currentTab = 1">Retour</button>
-                        <button class="confirm-button custom-button" (click)="confirmTransfer()">Confirmer le transfert</button>
+                        <button
+                            class="confirm-button custom-button"
+                            (click)="confirmTransfer()"
+                            [disabled]="isTransferring"
+                            [ngClass]="{ 'custom-button-disabled': isTransferring }"
+                        >
+                            Confirmer le transfert
+                        </button>
                     </div>
                 </div>
             </div>

@@ -17,7 +17,7 @@ export class TransferPageComponent implements OnInit, OnDestroy {
     searchError: string = '';
     private userDocSubscription: Unsubscribe;
     userUID: string | null = null;
-
+    isTransferring: boolean = false;
     // New properties for tabbed interface
     currentTab: number = 0;
     selectedRecipient: { id: string; username: string; avatarEquipped: string; borderEquipped: string } | null = null;
@@ -113,38 +113,45 @@ export class TransferPageComponent implements OnInit, OnDestroy {
     }
 
     async confirmTransfer(): Promise<void> {
-        if (!this.selectedRecipient || !this.transferAmount || this.transferAmount <= 0 || this.transferAmount > this.userBalance) {
-            this.transferError = 'Transaction invalide';
-            return;
-        }
+        if (!this.isTransferring) {
+            this.isTransferring = true;
 
-        if (!this.userUID) {
-            this.transferError = 'Vous devez être connecté pour effectuer un transfert';
-            return;
-        }
+            if (!this.selectedRecipient || !this.transferAmount || this.transferAmount <= 0 || this.transferAmount > this.userBalance) {
+                this.transferError = 'Transaction invalide';
+                return;
+            }
 
-        try {
-            this.coinTransferService.transferCoins(this.userUID, this.selectedRecipient.id, this.transferAmount).subscribe({
-                next: (response) => {
-                    if (response.success) {
-                        // Reset the form
-                        this.currentTab = 0;
-                        this.selectedRecipient = null;
-                        this.transferAmount = 0;
-                        this.transferError = '';
-                        this.toastr.success('Vous avez effectué la transaction avec succès.');
-                    } else {
-                        this.transferError = response.message;
-                    }
-                },
-                error: (error) => {
-                    console.error('Error during transfer:', error);
-                    this.transferError = 'Une erreur est survenue lors du transfert';
-                },
-            });
-        } catch (error) {
-            console.error('Error during transfer:', error);
-            this.transferError = 'Une erreur est survenue lors du transfert';
+            if (!this.userUID) {
+                this.transferError = 'Vous devez être connecté pour effectuer un transfert';
+                return;
+            }
+
+            try {
+                this.coinTransferService.transferCoins(this.userUID, this.selectedRecipient.id, this.transferAmount).subscribe({
+                    next: (response) => {
+                        if (response.success) {
+                            // Reset the form
+                            this.currentTab = 0;
+                            this.selectedRecipient = null;
+                            this.transferAmount = 0;
+                            this.transferError = '';
+                            this.toastr.success('Vous avez effectué la transaction avec succès.');
+                        } else {
+                            this.transferError = response.message;
+                        }
+                        this.isTransferring = false;
+                    },
+                    error: (error) => {
+                        console.error('Error during transfer:', error);
+                        this.transferError = 'Une erreur est survenue lors du transfert';
+                        this.isTransferring = false;
+                    },
+                });
+            } catch (error) {
+                console.error('Error during transfer:', error);
+                this.transferError = 'Une erreur est survenue lors du transfert';
+                this.isTransferring = false;
+            }
         }
     }
 
