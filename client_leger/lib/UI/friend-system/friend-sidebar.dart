@@ -198,7 +198,7 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
       if (mounted) {
         showToast(
           context,
-          'Transaction réussie! $amount coins envoyés à ${friend.user.username}',
+          'Transaction réussie! $amount pièces envoyés à ${friend.user.username}',
           type: ToastificationType.success,
         );
       }

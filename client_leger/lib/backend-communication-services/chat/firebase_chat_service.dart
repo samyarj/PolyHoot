@@ -61,9 +61,9 @@ class FirebaseChatService {
     }
   }
 
-  Future<void> createChannel(String channel) async {
+  Future<void> createChannel(String channel, String? currentUserUid) async {
     try {
-      if (FirebaseAuth.instance.currentUser != null) {
+      if (FirebaseAuth.instance.currentUser != null && currentUserUid != null) {
         final channelDoc = await _chatChannelsCollection.doc(channel).get();
 
         if (channelDoc.exists) {
@@ -73,7 +73,7 @@ class FirebaseChatService {
 
         Map<String, dynamic> newChannelData = {
           'name': channel,
-          'users': [],
+          'users': [currentUserUid],
         };
 
         await _chatChannelsCollection.doc(channel).set(newChannelData);

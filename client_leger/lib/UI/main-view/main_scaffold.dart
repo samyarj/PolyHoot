@@ -1,4 +1,5 @@
 import 'package:client_leger/UI/error/error_dialog.dart';
+import 'package:client_leger/UI/friend-system/friend-request-notification.dart';
 import 'package:client_leger/UI/friend-system/friend-sidebar.dart';
 import 'package:client_leger/UI/main-view/chat_message_notif/chat_messages_notif.dart';
 import 'package:client_leger/UI/main-view/sidebar/sidebar.dart';
@@ -29,6 +30,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
   bool _isLoggingOut = false;
   final double sidebarWidth = 410;
   bool _isSidebarVisible = true;
+  bool _notificationActive = false;
 
   late AnimationController _animationController;
 
@@ -176,7 +178,62 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
                                   width: 2,
                                 ),
                               ),
-                              child: ChatMessagesNotification(),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ChatMessagesNotification(),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                    child: SizedBox(
+                                      height: 24,
+                                      child: VerticalDivider(
+                                        color: colorScheme.tertiary,
+                                        thickness: 1.5,
+                                        width: 10,
+                                      ),
+                                    ),
+                                  ),
+                                  FriendRequestNotification(
+                                    onTap: () {
+                                      setState(() {
+                                        _notificationActive =
+                                            !_notificationActive;
+                                      });
+                                    },
+                                    isActive: _notificationActive,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                    child: SizedBox(
+                                      height: 24,
+                                      child: VerticalDivider(
+                                        color: colorScheme.tertiary,
+                                        thickness: 1.5,
+                                        width: 10,
+                                      ),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(
+                                      FontAwesomeIcons.userGroup,
+                                      size: 16,
+                                      color: _currentSidebar ==
+                                              SidebarContent.friends
+                                          ? colorScheme.secondary
+                                          : colorScheme.tertiary,
+                                    ),
+                                    constraints: BoxConstraints(
+                                      minWidth: 40,
+                                      minHeight: 40,
+                                    ),
+                                    padding: EdgeInsets.zero,
+                                    onPressed: () =>
+                                        _toggleSidebar(SidebarContent.friends),
+                                  )
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -237,12 +294,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
                           ),
                           Spacer(),
                           IconButton(
-                            icon: Icon(FontAwesomeIcons.clover),
-                            iconSize: 28,
-                            color: colorScheme.tertiary,
-                            onPressed: () => context.go(Paths.luck),
-                          ),
-                          IconButton(
                             icon: SizedBox(
                               width: 34,
                               height: 34,
@@ -260,6 +311,12 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
                             iconSize: 28,
                             color: colorScheme.tertiary,
                             onPressed: () => context.go(Paths.shop),
+                          ),
+                          IconButton(
+                            icon: Icon(FontAwesomeIcons.clover),
+                            iconSize: 28,
+                            color: colorScheme.tertiary,
+                            onPressed: () => context.go(Paths.luck),
                           ),
                           SizedBox(
                             height: kToolbarHeight,

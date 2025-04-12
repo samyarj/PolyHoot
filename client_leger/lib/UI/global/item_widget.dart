@@ -122,7 +122,7 @@ class ItemWidget extends StatelessWidget {
                         ),
                         child: Center(
                           child: Text(
-                            '$price COINS',
+                            '$price PIÈCES',
                             style: TextStyle(
                               color: colorScheme.onPrimary,
                               fontSize: 10,

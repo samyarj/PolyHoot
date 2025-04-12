@@ -71,7 +71,7 @@ Future<bool> showShopConfirmationDialog({
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '$price COINS',
+                          '$price PIÈCES',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: colorScheme.onPrimary,

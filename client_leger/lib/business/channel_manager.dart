@@ -38,8 +38,8 @@ class ChannelManager {
     await _firebaseChatService.sendMessage(currentUserUid, channel, message);
   }
 
-  Future<void> createChannel(String channel) async {
-    await _firebaseChatService.createChannel(channel);
+  Future<void> createChannel(String channel, String? currentUserUid) async {
+    await _firebaseChatService.createChannel(channel, currentUserUid);
   }
 
   Future<List<ChatMessage>> loadOlderMessages(

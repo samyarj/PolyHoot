@@ -192,7 +192,7 @@ class CoinflipNotifier extends StateNotifier<CoinflipState> {
 
     showConfirmationDialog(
         context,
-        "Voulez vous miser la somme de : ${state.betAmount} coins?",
+        "Voulez vous miser la somme de : ${state.betAmount} pièces?",
         null,
         () => onSubmitBetConfirm(context));
   }
@@ -215,13 +215,13 @@ class CoinflipNotifier extends StateNotifier<CoinflipState> {
                   {
                     showErrorDialog(
                       context,
-                      'Vous ne pouvez pas parier plus de coins que ceux détenus ou bien parier en dehors de la phase de mise!',
+                      'Vous ne pouvez pas parier plus de pièces que ceux détenus ou bien parier en dehors de la phase de mise!',
                     ),
                   },
               });
     } else if (state.betAmount == 0 || state.betAmount % 1 != 0) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        showErrorDialog(context, 'Vous ne pouvez pas parier 0 coins.');
+        showErrorDialog(context, 'Vous ne pouvez pas parier 0 pièce.');
       });
     } else if (state.gameState != CoinFlipGameState.BettingPhase) {
       errorOutsideBettingPhase(context);

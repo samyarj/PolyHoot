@@ -71,7 +71,7 @@ class InventorySection extends StatelessWidget {
                   const SizedBox(height: 8),
                   avatars.isEmpty
                       ? _buildEmptyMessage(
-                          'Vous n\'avez pas d\'avatars obtenus, allez-en obtenir dans la boutique ou dans les lootbox!',
+                          'Vous n\'avez pas d\'avatars obtenus, allez-en obtenir dans la boutique ou dans les coffres!',
                           colorScheme,
                         )
                       : UnifiedItemGrid.grid(
@@ -87,7 +87,7 @@ class InventorySection extends StatelessWidget {
                   const SizedBox(height: 8),
                   banners.isEmpty
                       ? _buildEmptyMessage(
-                          'Vous n\'avez pas de bannières obtenues, allez-en obtenir dans la boutique ou dans les lootbox!',
+                          'Vous n\'avez pas de bannières obtenues, allez-en obtenir dans la boutique ou dans les coffres!',
                           colorScheme,
                         )
                       : _buildBannerGrid(context, itemsPerRow, itemSize),
