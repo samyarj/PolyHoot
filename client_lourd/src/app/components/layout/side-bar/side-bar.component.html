@@ -249,12 +249,14 @@
                 <h2>Canal : {{ selectedChannel }}</h2>
                 <div *ngIf="deletionMessage" class="deletion-message">{{ deletionMessage }}</div>
                 <ng-container *ngIf="selectedChannel; else noChannelSelected">
-                    <app-chat2
-                        [chatMessagesLoading]="selectedChannelMessagesLoading"
-                        [chatMessages]="selectedChannelMessages"
-                        (sendMessageToRoom)="handleSendMessageToChannel($event)"
-                        (loadOlderMessages)="loadOlderMessages()"
-                    ></app-chat2>
+                    <div class="app-chat2">
+                        <app-chat2
+                            [chatMessagesLoading]="selectedChannelMessagesLoading"
+                            [chatMessages]="selectedChannelMessages"
+                            (sendMessageToRoom)="handleSendMessageToChannel($event)"
+                            (loadOlderMessages)="loadOlderMessages()"
+                        ></app-chat2>
+                    </div>
                 </ng-container>
                 <ng-template #noChannelSelected>
                     <p>Aucun canal sélectionné.</p>

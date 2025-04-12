@@ -321,6 +321,7 @@ div.friend-request {
 
 //chat configuration
 .chat-menu {
+    position: relative;
     padding-top: 15px;
     padding-bottom: 10px;
     height: calc(87% - 100px);
@@ -333,6 +334,7 @@ div.friend-request {
         position: relative;
         width: 100%;
         height: calc(100% - 44px - 1.5rem);
+        max-height: calc(100% - 44px - 1.5rem);
         padding-left: 15px;
         padding-right: 15px;
 
@@ -455,7 +457,6 @@ img.global-channels-icon {
     color: var(--tertiary-color);
     font-style: italic;
 }
-
 //channel list configuration
 #tab4-1 {
     color: var(--tertiary-color);
