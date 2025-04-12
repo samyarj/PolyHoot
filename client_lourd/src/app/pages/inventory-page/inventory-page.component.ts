@@ -52,7 +52,7 @@ export class InventoryPageComponent {
     selectAvatar(avatarURL: string) {
         this.currentTheme = '';
         this.currentAvatar = avatarURL;
-        if (this.currentBanner === '' && this.equippedBorder !== undefined && this.equippedBorder !== '') {
+        if (this.currentBanner === '' && this.equippedBorder !== undefined) {
             this.currentBanner = this.equippedBorder;
         }
     }

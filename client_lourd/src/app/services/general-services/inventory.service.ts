@@ -41,7 +41,7 @@ export class InventoryService {
                 if (user?.avatarEquipped) {
                     this.equippedAvatar = user.avatarEquipped;
                 }
-                if (user?.borderEquipped) {
+                if (user?.borderEquipped || user?.borderEquipped === '') {
                     this.equippedBorder = user.borderEquipped;
                 }
             },

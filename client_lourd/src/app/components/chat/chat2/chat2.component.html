@@ -42,7 +42,13 @@
 
     <!-- Chat Input -->
     <div id="chat-message-input-div">
-        <textarea id="myTextInput" (keydown)="onKeyDown($event)" placeholder="Entrez votre message." [(ngModel)]="inputMessage"></textarea>
+        <textarea
+            id="myTextInput"
+            (keydown)="onKeyDown($event)"
+            placeholder="Entrez votre message."
+            [(ngModel)]="inputMessage"
+            maxlength="200"
+        ></textarea>
         <button
             type="button"
             [disabled]="inputMessage === ''"

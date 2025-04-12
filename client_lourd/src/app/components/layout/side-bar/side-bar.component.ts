@@ -20,6 +20,8 @@ import { Observable, Subscription } from 'rxjs';
     styleUrls: ['./side-bar.component.scss'],
 })
 export class SideBarComponent implements OnDestroy {
+    @ViewChild('tab1Link') tab1Link: any;
+
     globalChatMessages: FirebaseChatMessage[] = [];
     globalChatMessagesLoading: boolean = true;
     selectedChannelMessages: FirebaseChatMessage[] = [];
@@ -27,13 +29,6 @@ export class SideBarComponent implements OnDestroy {
     user$: Observable<User | null>;
     userUID: string | null = null;
     friendRequests: { id: string; username: string; avatarEquipped?: string; borderEquipped?: string }[] = [];
-    private messagesSubscription: Subscription | null = null;
-    private channelsSubscription: Subscription;
-    private userSubscription: Subscription;
-    private friendRequestsSubscription: Subscription;
-    private userDocSubscription: Unsubscribe;
-    private lastMessageDate: FieldPath | undefined;
-    private channelDeletedSubscription: Subscription;
     isFetchingOlderMessages: boolean = false;
     channels: ChatChannel[] = [];
     joinedChannels: string[] = [];
@@ -48,17 +43,23 @@ export class SideBarComponent implements OnDestroy {
     searchError: string = '';
     friends: { id: string; username: string; avatarEquipped?: string; borderEquipped?: string; isOnline?: boolean }[] = [];
     searchResults: { id: string; username: string; avatarEquipped?: string; borderEquipped?: string; isOnline?: boolean }[] = [];
-    private searchSubscription: Subscription | null = null;
-    private onlineStatusSubscription: { [key: string]: () => void } = {};
-
     gameChatMessages: ChatMessage[] = [];
-    private gameChatSubscription: Subscription;
-    private chatEventsSubscription: Subscription;
     isGameChatInitialized: boolean = false;
     isWorkingWithChannel: boolean = false;
-    @ViewChild('tab1Link') tab1Link: any;
     activeTab: number = 1;
     deletionMessage: string = '';
+    isClickingFriendButton: boolean = false;
+    private messagesSubscription: Subscription | null = null;
+    private channelsSubscription: Subscription;
+    private userSubscription: Subscription;
+    private friendRequestsSubscription: Subscription;
+    private userDocSubscription: Unsubscribe;
+    private lastMessageDate: FieldPath | undefined;
+    private channelDeletedSubscription: Subscription;
+    private searchSubscription: Subscription | null = null;
+    private onlineStatusSubscription: { [key: string]: () => void } = {};
+    private gameChatSubscription: Subscription;
+    private chatEventsSubscription: Subscription;
 
     constructor(
         private authService: AuthService,
@@ -204,147 +205,6 @@ export class SideBarComponent implements OnDestroy {
     getBoundHandleChildAction() {
         return this.handleChildAction.bind(this); // Bind to the parent's context
     }
-
-    private setupRealtimeUserUpdates(uid: string) {
-        // Clean up previous subscription if it exists
-        if (this.userDocSubscription) {
-            this.userDocSubscription();
-        }
-
-        // Clean up existing friend listeners
-        Object.values(this.onlineStatusSubscription).forEach((unsubscribe) => unsubscribe());
-        this.onlineStatusSubscription = {};
-
-        const userRef = doc(this.firestore, 'users', uid);
-        this.userDocSubscription = onSnapshot(userRef, async (docSnapshot) => {
-            if (docSnapshot.exists()) {
-                const userData = docSnapshot.data();
-                const prevFriendIds = this.friends.map((f) => f.id);
-                const prevRequestIds = this.friendRequests.map((r) => r.id);
-
-                // Update friend requests in real-time
-                if (userData.friendRequests) {
-                    // Set up real-time listeners for each friend request
-                    userData.friendRequests.forEach((id: string) => {
-                        const friendRef = doc(this.firestore, 'users', id);
-                        onSnapshot(friendRef, (friendDoc) => {
-                            if (friendDoc.exists()) {
-                                const friendData = friendDoc.data();
-                                // Update the friend request in the list
-                                this.friendRequests = this.friendRequests.map((request) => {
-                                    if (request.id === id) {
-                                        return {
-                                            ...request,
-                                            username: friendData.username || 'Unknown User',
-                                            avatarEquipped: friendData.avatarEquipped,
-                                            borderEquipped: friendData.borderEquipped,
-                                        };
-                                    }
-                                    return request;
-                                });
-                            }
-                        });
-                    });
-
-                    // Initial fetch of friend requests data
-                    const friendRequestsData = await Promise.all(
-                        userData.friendRequests.map(async (id: string) => {
-                            const friendDoc = await getDoc(doc(this.firestore, 'users', id));
-                            const friendData = friendDoc.data();
-                            return {
-                                id,
-                                username: friendData?.username || 'Unknown User',
-                                avatarEquipped: friendData?.avatarEquipped,
-                                borderEquipped: friendData?.borderEquipped,
-                            };
-                        }),
-                    );
-                    this.friendRequests = friendRequestsData;
-                } else {
-                    this.friendRequests = [];
-                }
-
-                // Update friends list in real-time
-                if (userData.friends && Array.isArray(userData.friends)) {
-                    // Make sure friends array is unique to prevent duplicates
-                    const uniqueFriendIds: string[] = [...new Set(userData.friends as string[])];
-
-                    // Set up real-time listeners for each friend's profile data
-                    this.setupFriendProfileListeners(uniqueFriendIds);
-
-                    // Initial fetch of friends data
-                    const friendsData = await Promise.all(
-                        uniqueFriendIds.map(async (id: string) => {
-                            const friendDoc = await getDoc(doc(this.firestore, 'users', id));
-                            const friendData = friendDoc.data();
-                            return {
-                                id,
-                                username: friendData?.username || 'Unknown User',
-                                avatarEquipped: friendData?.avatarEquipped,
-                                borderEquipped: friendData?.borderEquipped,
-                                isOnline: friendData?.isOnline || false,
-                            };
-                        }),
-                    );
-
-                    // Set the friends list with the unique data
-                    this.friends = friendsData;
-                } else {
-                    this.friends = [];
-                }
-
-                // Check if friend list or friend requests changed and update search results if needed
-                const newFriendIds = this.friends.map((f) => f.id);
-                const newRequestIds = this.friendRequests.map((r) => r.id);
-                const friendsChanged =
-                    newFriendIds.length !== prevFriendIds.length ||
-                    newFriendIds.some((id) => !prevFriendIds.includes(id)) ||
-                    prevFriendIds.some((id) => !newFriendIds.includes(id));
-                const requestsChanged =
-                    newRequestIds.length !== prevRequestIds.length ||
-                    newRequestIds.some((id) => !prevRequestIds.includes(id)) ||
-                    prevRequestIds.some((id) => !newRequestIds.includes(id));
-
-                if (friendsChanged || requestsChanged) {
-                    this.updateSearchResults();
-                }
-            }
-        });
-    }
-
-    private setupFriendProfileListeners(friendIds: string[]): void {
-        // Clean up existing listeners
-        Object.values(this.onlineStatusSubscription).forEach((unsubscribe) => unsubscribe());
-        this.onlineStatusSubscription = {};
-
-        // Set up new listeners for each friend
-        friendIds.forEach((friendId) => {
-            const userRef = doc(this.firestore, 'users', friendId);
-            this.onlineStatusSubscription[friendId] = onSnapshot(userRef, (docSnapshot) => {
-                if (docSnapshot.exists()) {
-                    const userData = docSnapshot.data();
-                    const isOnline = userData.isOnline || false;
-                    const username = userData.username || 'Unknown User';
-                    const avatarEquipped = userData.avatarEquipped || '';
-                    const borderEquipped = userData.borderEquipped || '';
-
-                    // Update the friend's data in the friends array
-                    this.friends = this.friends.map((friend) =>
-                        friend.id === friendId
-                            ? {
-                                  ...friend,
-                                  isOnline,
-                                  username,
-                                  avatarEquipped,
-                                  borderEquipped,
-                              }
-                            : friend,
-                    );
-                }
-            });
-        });
-    }
-
     ngOnDestroy(): void {
         // Unsubscribe from messages observable to avoid memory leaks
         if (this.messagesSubscription) {
@@ -680,45 +540,103 @@ export class SideBarComponent implements OnDestroy {
     }
 
     async sendFriendRequest(userId?: string, username?: string): Promise<void> {
-        const currentUser = this.authService.getUser();
-        if (!currentUser) {
-            this.searchError = "Vous devez être connecté pour envoyer une demande d'ami";
-            return;
+        if (!this.isClickingFriendButton) {
+            this.isClickingFriendButton = true;
+            const currentUser = this.authService.getUser();
+            if (!currentUser) {
+                this.searchError = "Vous devez être connecté pour envoyer une demande d'ami";
+                return;
+            }
+
+            try {
+                if (username) {
+                    // When clicking the add button in search results
+                    await this.friendSystemService.sendFriendRequest(currentUser.uid, username);
+                    // Remove the user from search results after sending request
+                    this.searchResults = this.searchResults.filter((user) => user.id !== userId);
+                } else {
+                    // When manually entering a username
+                    if (!this.searchQuery.trim()) {
+                        this.searchError = "Veuillez entrer un nom d'utilisateur";
+                        return;
+                    }
+
+                    if (this.searchQuery.trim().toLowerCase() === currentUser.username.toLowerCase()) {
+                        this.searchError = "Vous ne pouvez pas vous envoyer une demande d'ami à vous-même";
+                        this.isClickingFriendButton = false;
+                        return;
+                    }
+
+                    await this.friendSystemService.sendFriendRequest(currentUser.uid, this.searchQuery.trim());
+                    this.searchQuery = '';
+                }
+                this.isClickingFriendButton = false;
+                this.searchError = '';
+            } catch (error: any) {
+                console.error("Erreur lors de l'envoi de la demande d'ami:", error);
+                this.isClickingFriendButton = false;
+                if (error?.status === 401) {
+                    this.searchError = 'Votre session a expiré. Veuillez vous reconnecter.';
+                    this.authService.logout();
+                    this.router.navigateByUrl('/login');
+                } else if (error?.error?.message) {
+                    this.searchError = error.error.message;
+                } else {
+                    this.searchError = "Erreur lors de l'envoi de la demande d'ami. Veuillez réessayer.";
+                }
+            }
         }
+    }
 
-        try {
-            if (username) {
-                // When clicking the add button in search results
-                await this.friendSystemService.sendFriendRequest(currentUser.uid, username);
-                // Remove the user from search results after sending request
-                this.searchResults = this.searchResults.filter((user) => user.id !== userId);
-            } else {
-                // When manually entering a username
-                if (!this.searchQuery.trim()) {
-                    this.searchError = "Veuillez entrer un nom d'utilisateur";
-                    return;
-                }
+    async removeFriend(userId: string, friendId: string): Promise<void> {
+        if (!this.isClickingFriendButton) {
+            this.isClickingFriendButton = true;
+            if (!userId) return;
 
-                if (this.searchQuery.trim().toLowerCase() === currentUser.username.toLowerCase()) {
-                    this.searchError = "Vous ne pouvez pas vous envoyer une demande d'ami à vous-même";
-                    return;
-                }
-
-                await this.friendSystemService.sendFriendRequest(currentUser.uid, this.searchQuery.trim());
-                this.searchQuery = '';
+            try {
+                await this.friendSystemService.removeFriend(userId, friendId);
+                this.isClickingFriendButton = false;
+            } catch (error) {
+                console.error("Erreur lors de la suppression de l'ami:", error);
+                this.isClickingFriendButton = false;
             }
-            this.searchError = '';
-        } catch (error: any) {
-            console.error("Erreur lors de l'envoi de la demande d'ami:", error);
-            if (error?.status === 401) {
-                this.searchError = 'Votre session a expiré. Veuillez vous reconnecter.';
-                this.authService.logout();
-                this.router.navigateByUrl('/login');
-            } else if (error?.error?.message) {
-                this.searchError = error.error.message;
-            } else {
-                this.searchError = "Erreur lors de l'envoi de la demande d'ami. Veuillez réessayer.";
+        }
+    }
+
+    async acceptFriendRequest(friendId: string): Promise<void> {
+        if (!this.isClickingFriendButton) {
+            this.isClickingFriendButton = true;
+            console.log('accepting friend request');
+            if (!this.userUID) return;
+
+            try {
+                await this.friendSystemService.acceptFriendRequest(this.userUID, friendId);
+                this.isClickingFriendButton = false;
+            } catch (error) {
+                console.error("Erreur lors de l'acceptation de la demande d'ami:", error);
+                this.isClickingFriendButton = false;
             }
+        }
+    }
+
+    async declineFriendRequest(friendId: string): Promise<void> {
+        if (!this.isClickingFriendButton) {
+            this.isClickingFriendButton = true;
+            if (!this.userUID) return;
+
+            try {
+                await this.friendSystemService.cancelFriendRequest(friendId, this.userUID);
+                this.isClickingFriendButton = false;
+            } catch (error) {
+                console.error("Erreur lors du refus de la demande d'ami:", error);
+                this.isClickingFriendButton = false;
+            }
+        }
+    }
+
+    async handleSendMessageToGame(message: string): Promise<void> {
+        if (this.isOnGamePage) {
+            this.chatService.sendMessageToRoom(message);
         }
     }
 
@@ -781,34 +699,144 @@ export class SideBarComponent implements OnDestroy {
         });
     }
 
-    async removeFriend(userId: string, friendId: string): Promise<void> {
-        if (!userId) return;
-
-        try {
-            await this.friendSystemService.removeFriend(userId, friendId);
-        } catch (error) {
-            console.error("Erreur lors de la suppression de l'ami:", error);
+    private setupRealtimeUserUpdates(uid: string) {
+        // Clean up previous subscription if it exists
+        if (this.userDocSubscription) {
+            this.userDocSubscription();
         }
+
+        // Clean up existing friend listeners
+        Object.values(this.onlineStatusSubscription).forEach((unsubscribe) => unsubscribe());
+        this.onlineStatusSubscription = {};
+
+        const userRef = doc(this.firestore, 'users', uid);
+        this.userDocSubscription = onSnapshot(userRef, async (docSnapshot) => {
+            if (docSnapshot.exists()) {
+                const userData = docSnapshot.data();
+                const prevFriendIds = this.friends.map((f) => f.id);
+                const prevRequestIds = this.friendRequests.map((r) => r.id);
+
+                // Update friend requests in real-time
+                if (userData.friendRequests) {
+                    // Set up real-time listeners for each friend request
+                    userData.friendRequests.forEach((id: string) => {
+                        const friendRef = doc(this.firestore, 'users', id);
+                        onSnapshot(friendRef, (friendDoc) => {
+                            if (friendDoc.exists()) {
+                                const friendData = friendDoc.data();
+                                // Update the friend request in the list
+                                this.friendRequests = this.friendRequests.map((request) => {
+                                    if (request.id === id) {
+                                        return {
+                                            ...request,
+                                            username: friendData.username || 'Unknown User',
+                                            avatarEquipped: friendData.avatarEquipped,
+                                            borderEquipped: friendData.borderEquipped,
+                                        };
+                                    }
+                                    return request;
+                                });
+                            }
+                        });
+                    });
+
+                    // Initial fetch of friend requests data
+                    const friendRequestsData = await Promise.all(
+                        userData.friendRequests.map(async (id: string) => {
+                            const friendDoc = await getDoc(doc(this.firestore, 'users', id));
+                            const friendData = friendDoc.data();
+                            return {
+                                id,
+                                username: friendData?.username || 'Unknown User',
+                                avatarEquipped: friendData?.avatarEquipped,
+                                borderEquipped: friendData?.borderEquipped,
+                            };
+                        }),
+                    );
+                    this.friendRequests = friendRequestsData;
+                } else {
+                    this.friendRequests = [];
+                }
+
+                // Update friends list in real-time
+                if (userData.friends && Array.isArray(userData.friends)) {
+                    // Make sure friends array is unique to prevent duplicates
+                    const uniqueFriendIds: string[] = [...new Set(userData.friends as string[])];
+
+                    // Set up real-time listeners for each friend's profile data
+                    this.setupFriendProfileListeners(uniqueFriendIds);
+
+                    // Initial fetch of friends data
+                    const friendsData = await Promise.all(
+                        uniqueFriendIds.map(async (id: string) => {
+                            const friendDoc = await getDoc(doc(this.firestore, 'users', id));
+                            const friendData = friendDoc.data();
+                            return {
+                                id,
+                                username: friendData?.username || 'Unknown User',
+                                avatarEquipped: friendData?.avatarEquipped,
+                                borderEquipped: friendData?.borderEquipped,
+                                isOnline: friendData?.isOnline || false,
+                            };
+                        }),
+                    );
+
+                    // Set the friends list with the unique data
+                    this.friends = friendsData;
+                } else {
+                    this.friends = [];
+                }
+
+                // Check if friend list or friend requests changed and update search results if needed
+                const newFriendIds = this.friends.map((f) => f.id);
+                const newRequestIds = this.friendRequests.map((r) => r.id);
+                const friendsChanged =
+                    newFriendIds.length !== prevFriendIds.length ||
+                    newFriendIds.some((id) => !prevFriendIds.includes(id)) ||
+                    prevFriendIds.some((id) => !newFriendIds.includes(id));
+                const requestsChanged =
+                    newRequestIds.length !== prevRequestIds.length ||
+                    newRequestIds.some((id) => !prevRequestIds.includes(id)) ||
+                    prevRequestIds.some((id) => !newRequestIds.includes(id));
+
+                if (friendsChanged || requestsChanged) {
+                    this.updateSearchResults();
+                }
+            }
+        });
     }
 
-    async acceptFriendRequest(friendId: string): Promise<void> {
-        if (!this.userUID) return;
+    private setupFriendProfileListeners(friendIds: string[]): void {
+        // Clean up existing listeners
+        Object.values(this.onlineStatusSubscription).forEach((unsubscribe) => unsubscribe());
+        this.onlineStatusSubscription = {};
 
-        try {
-            await this.friendSystemService.acceptFriendRequest(this.userUID, friendId);
-        } catch (error) {
-            console.error("Erreur lors de l'acceptation de la demande d'ami:", error);
-        }
-    }
+        // Set up new listeners for each friend
+        friendIds.forEach((friendId) => {
+            const userRef = doc(this.firestore, 'users', friendId);
+            this.onlineStatusSubscription[friendId] = onSnapshot(userRef, (docSnapshot) => {
+                if (docSnapshot.exists()) {
+                    const userData = docSnapshot.data();
+                    const isOnline = userData.isOnline || false;
+                    const username = userData.username || 'Unknown User';
+                    const avatarEquipped = userData.avatarEquipped || '';
+                    const borderEquipped = userData.borderEquipped || '';
 
-    async declineFriendRequest(friendId: string): Promise<void> {
-        if (!this.userUID) return;
-
-        try {
-            await this.friendSystemService.cancelFriendRequest(friendId, this.userUID);
-        } catch (error) {
-            console.error("Erreur lors du refu de la demande d'ami:", error);
-        }
+                    // Update the friend's data in the friends array
+                    this.friends = this.friends.map((friend) =>
+                        friend.id === friendId
+                            ? {
+                                  ...friend,
+                                  isOnline,
+                                  username,
+                                  avatarEquipped,
+                                  borderEquipped,
+                              }
+                            : friend,
+                    );
+                }
+            });
+        });
     }
 
     private initializeGameChat(): void {
@@ -827,12 +855,6 @@ export class SideBarComponent implements OnDestroy {
         if (this.isGameChatInitialized) {
             this.gameChatMessages = [];
             this.isGameChatInitialized = false;
-        }
-    }
-
-    async handleSendMessageToGame(message: string): Promise<void> {
-        if (this.isOnGamePage) {
-            this.chatService.sendMessageToRoom(message);
         }
     }
 

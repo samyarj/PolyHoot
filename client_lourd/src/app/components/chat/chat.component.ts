@@ -136,7 +136,7 @@ export class ChatComponent implements OnDestroy, AfterViewChecked {
     }
 
     isLengthInRange() {
-        return this.inputMessage.length <= MAX_CHAR;
+        return this.inputMessage.length < MAX_CHAR;
     }
 
     private scrollToBottom(): void {

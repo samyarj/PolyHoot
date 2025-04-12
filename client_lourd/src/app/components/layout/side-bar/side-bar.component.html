@@ -68,7 +68,7 @@
                                     class="search-result-avatar"
                                 ></app-avatar-banner>
                                 <span class="username">{{ user.username }}</span>
-                                <button (click)="sendFriendRequest(user.id, user.username)">
+                                <button (click)="sendFriendRequest(user.id, user.username)" [disabled]="isClickingFriendButton">
                                     <i class="fa-solid fa-user-plus"></i>
                                 </button>
                             </div>
@@ -94,10 +94,10 @@
                                 ></app-avatar-banner>
                                 <span>{{ friend.username }}</span>
                                 <div class="friend-request-actions">
-                                    <button class="accept-btn" (click)="acceptFriendRequest(friend.id)">
+                                    <button class="accept-btn" (click)="acceptFriendRequest(friend.id)" [disabled]="isClickingFriendButton">
                                         <i class="fa-solid fa-check"></i>
                                     </button>
-                                    <button class="decline-btn" (click)="declineFriendRequest(friend.id)">
+                                    <button class="decline-btn" (click)="declineFriendRequest(friend.id)" [disabled]="isClickingFriendButton">
                                         <i class="fa-solid fa-times"></i>
                                     </button>
                                 </div>
@@ -136,7 +136,11 @@
                                         {{ friend.isOnline ? 'En ligne' : 'Hors ligne' }}
                                     </span>
                                 </div>
-                                <button class="remove-friend-button" [disabled]="!userUID" (click)="userUID && removeFriend(userUID, friend.id)">
+                                <button
+                                    class="remove-friend-button"
+                                    [disabled]="!userUID && isClickingFriendButton"
+                                    (click)="userUID && removeFriend(userUID, friend.id)"
+                                >
                                     <i class="fa-solid fa-user-minus"></i>
                                 </button>
                             </li>

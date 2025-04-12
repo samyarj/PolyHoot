@@ -13,7 +13,7 @@ export class UserService {
     private usersSocketIdMap = new Map<string, string>();
     private readonly logger = new Logger(UserService.name);
 
-    constructor(private readonly cloudinaryService: CloudinaryService) { }
+    constructor(private readonly cloudinaryService: CloudinaryService) {}
 
     addUserToMap(socketId: string, uid: string) {
         if (!this.isUserInMap(socketId)) {
@@ -26,7 +26,6 @@ export class UserService {
     isUserInMap(socketId: string): boolean {
         return this.usersSocketIdMap.has(socketId);
     }
-
 
     getUserUidFromMap(socketId: string): string | undefined {
         return this.usersSocketIdMap.get(socketId);
@@ -124,6 +123,7 @@ export class UserService {
             } else {
                 // User does not exist, create a new user in Firestore
                 const username = await this.getNewGoogleUsername(displayName);
+                await this.adminAuth.updateUser(uid, { displayName: username });
                 const newUser = await this.createUserInFirestore(uid, username, email, fcmToken);
                 return newUser;
             }
@@ -550,8 +550,8 @@ export class UserService {
 
             if (userData.friendRequests.includes(friendId)) {
                 // Add each user to the other's friend list
-                userData.friends.push(friendId);
-                friendData.friends.push(userId);
+                if (!userData.friends.includes(friendId)) userData.friends.push(friendId);
+                if (!friendData.friends.includes(userId)) friendData.friends.push(userId);
 
                 // Remove the friend request
                 userData.friendRequests = userData.friendRequests.filter((id) => id !== friendId);
