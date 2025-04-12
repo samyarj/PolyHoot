@@ -106,7 +106,6 @@ class PollRecordStats extends StatelessWidget {
                                   "${poll.questions.length}",
                                   Icons.format_list_numbered_outlined,
                                 ),
-                                
                                 SizedBox(height: 16),
                                 Divider(
                                     color:
@@ -438,7 +437,7 @@ class PollRecordStats extends StatelessWidget {
             height: 8,
             width: availableWidth,
             decoration: BoxDecoration(
-              color: colorScheme.primary.withOpacity(0.1),
+              color: colorScheme.tertiary.withOpacity(0.3),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Stack(

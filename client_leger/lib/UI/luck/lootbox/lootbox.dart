@@ -135,7 +135,7 @@ class _LootBoxState extends ConsumerState<LootBox> {
                       return Column(
                         children: [
                           Text(
-                            "${container.image} ${container.price} coins",
+                            "${container.image} ${container.price} pièces",
                             style: TextStyle(
                               color: colorScheme.onPrimary,
                               fontWeight: FontWeight.bold,
@@ -278,7 +278,7 @@ class _LootBoxState extends ConsumerState<LootBox> {
                                               _indexOfLoadingBox == index
                                           ? ThemedProgressIndicator()
                                           : Text(
-                                              "Ouvrir pour ${container.price} coins", // Button text
+                                              "Ouvrir pour ${container.price} pièces", // Button text
                                               style: TextStyle(
                                                 fontSize: 14,
                                                 color: Theme.of(context)

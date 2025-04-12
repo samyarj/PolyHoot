@@ -25,7 +25,7 @@ class SendMoneyDialog extends StatelessWidget {
 
     return AlertDialog(
       title: Text(
-        'Envoyer des coins à ${friend.user.username}',
+        'Envoyer des pièces à ${friend.user.username}',
         style: TextStyle(color: colorScheme.onPrimary),
       ),
       backgroundColor: colorScheme.surface,
@@ -33,7 +33,7 @@ class SendMoneyDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Votre solde actuel: $currentUserCoins coins',
+            'Votre solde actuel: $currentUserCoins pièces',
             style: TextStyle(color: colorScheme.onPrimary),
           ),
           const SizedBox(height: 16),
