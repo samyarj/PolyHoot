@@ -4,9 +4,9 @@
         <!-- Loader when fetching messages -->
         <div *ngIf="chatMessagesLoading" class="loading-container">
             <div class="spinner-border text-primary" role="status"></div>
-            <div>Chat is loading...</div>
+            <div>Chargement du clavardage</div>
         </div>
-
+        <div *ngIf="chatMessages.length === 0 && !chatMessagesLoading">Écrivez un message pour débuter le clavardage!</div>
         <!-- Chat Messages -->
         <div
             *ngFor="let chatmessage of chatMessages"

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/member-ordering */
 import { Injectable, OnDestroy } from '@angular/core';
 import {
     FieldValue,
@@ -147,7 +148,7 @@ export class FirebaseChatService implements OnDestroy {
                     }
                 });
 
-                if (updatedMessages.length === 0) return;
+                if (updatedMessages.length === 0) observer.next([]);
 
                 // Fetch user details
                 const users = await this.fetchUserDetails(Array.from(userIds));
