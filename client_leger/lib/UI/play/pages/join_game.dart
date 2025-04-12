@@ -244,11 +244,8 @@ class _JoinGameState extends ConsumerState<JoinGame> {
                                                 ),
                                               ),
                                               ElevatedButton(
-                                                onPressed: (lobby.isLocked ||
-                                                        (joinState.isJoining &&
-                                                            joinState
-                                                                    .joiningRoomId !=
-                                                                lobby.roomId))
+                                                onPressed: lobby.isLocked ||
+                                                        joinState.isJoining
                                                     ? null
                                                     : () {
                                                         joinNotifier
@@ -278,12 +275,7 @@ class _JoinGameState extends ConsumerState<JoinGame> {
                                                             Radius.circular(
                                                                 40)),
                                                     side: (lobby.isLocked ||
-                                                            (joinState
-                                                                    .isJoining &&
-                                                                joinState
-                                                                        .joiningRoomId !=
-                                                                    lobby
-                                                                        .roomId))
+                                                            joinState.isJoining)
                                                         ? BorderSide.none
                                                         : BorderSide(
                                                             color: colorScheme
@@ -535,15 +527,23 @@ class _JoinGameState extends ConsumerState<JoinGame> {
                                     color: colorScheme.primary,
                                     borderRadius: BorderRadius.circular(40),
                                     border: Border.all(
-                                      color: colorScheme.tertiary,
+                                      color: joinState.isJoining
+                                          ? colorScheme.tertiary
+                                              .withOpacity(0.5)
+                                          : colorScheme.tertiary,
                                       width: 2,
                                     ),
                                   ),
                                   child: IconButton(
                                     icon: Icon(Icons.qr_code_scanner,
-                                        color: colorScheme.onPrimary),
+                                        color: joinState.isJoining
+                                            ? colorScheme.onPrimary
+                                                .withOpacity(0.7)
+                                            : colorScheme.onPrimary),
                                     tooltip: 'Scanner QR code',
-                                    onPressed: _openQRScanner,
+                                    onPressed: joinState.isJoining
+                                        ? null
+                                        : _openQRScanner,
                                     style: IconButton.styleFrom(
                                       padding: EdgeInsets.all(12),
                                     ),

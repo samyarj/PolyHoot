@@ -179,9 +179,14 @@ class JoinGameNotifier extends StateNotifier<JoinGameState> {
   }
 
   void validGameId(String gameId) {
-    state = state.copyWith(isJoining: true, joiningRoomId: gameId);
-    AppLogger.i("Validating game ID: $gameId");
-    _socketManager.webSocketSender(JoinEvents.ValidateGameId.value, gameId);
+    if (!state.isJoining) {
+      state = state.copyWith(isJoining: true, joiningRoomId: gameId);
+      AppLogger.i("Validating game ID: $gameId");
+      _socketManager.webSocketSender(JoinEvents.ValidateGameId.value, gameId);
+    } else {
+      AppLogger.w(
+          "Already attempting to join a game, ignoring request for gameId: $gameId");
+    }
   }
 
   void getAllLobbys() {
