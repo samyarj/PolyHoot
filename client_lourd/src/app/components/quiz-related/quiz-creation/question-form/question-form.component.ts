@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { EMPTY_STRING, MAX_CHOICES, MIN_CHOICES } from '@app/constants/constants';
 import { ButtonType } from '@app/constants/enum-class';
-import { EMPTY_QCM_QUESTION, EMPTY_QRE_QUESTION } from '@app/constants/mock-constants';
+import { EMPTY_QCM_QUESTION, EMPTY_QRE_QUESTION, EMPTY_QRL_QUESTION } from '@app/constants/mock-constants';
 import { Question } from '@app/interfaces/question';
 import { QuestionChoice } from '@app/interfaces/question-choice';
 import { QuestionType } from '@app/interfaces/question-type';
@@ -104,16 +104,17 @@ export class QuestionFormComponent implements OnChanges {
         switch (this.questionType) {
             case QuestionType.QRL: {
                 this.question.type = QuestionType.QRL;
+                Object.assign(this.question, EMPTY_QRL_QUESTION);
                 break;
             }
             case QuestionType.QCM: {
                 this.question.type = QuestionType.QCM;
-                this.question = JSON.parse(JSON.stringify(EMPTY_QCM_QUESTION));
+                Object.assign(this.question, EMPTY_QCM_QUESTION);
                 break;
             }
             case QuestionType.QRE: {
                 this.question.type = QuestionType.QRE;
-                this.question.qreAttributes = JSON.parse(JSON.stringify(EMPTY_QRE_QUESTION.qreAttributes));
+                Object.assign(this.question, EMPTY_QRE_QUESTION);
                 break;
             }
         }

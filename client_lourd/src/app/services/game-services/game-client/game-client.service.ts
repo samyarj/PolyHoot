@@ -109,7 +109,6 @@ export class GameClientService {
             type: '',
             text: '',
             points: 0,
-            creator: '',
         };
     }
 
