@@ -95,9 +95,12 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     loadLogs() {
         const user = this.authService.getUser();
         this.logs = user?.cxnLogs ?? [];
-        this.logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        this.logs.sort((a, b) => this.parseTimestamp(b.timestamp).getTime() - this.parseTimestamp(a.timestamp).getTime());
         this.gameLogs = user?.gameLogs ?? [];
-        this.gameLogs.sort((a, b) => new Date(b.endTime || 0).getTime() - new Date(a.endTime || 0).getTime());
+        this.gameLogs.sort(
+            (a, b) =>
+                this.parseTimestamp(b.endTime || '01/01/1970 00:00:00').getTime() - this.parseTimestamp(a.endTime || '01/01/1970 00:00:00').getTime(),
+        );
         for (const log of this.gameLogs) {
             let gameTime = 0;
             if (log.endTime && log.startTime) {
