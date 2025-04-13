@@ -99,7 +99,8 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         this.gameLogs = user?.gameLogs ?? [];
         this.gameLogs.sort(
             (a, b) =>
-                this.parseTimestamp(b.endTime || '01/01/1970 00:00:00').getTime() - this.parseTimestamp(a.endTime || '01/01/1970 00:00:00').getTime(),
+                this.parseTimestamp(b.startTime || '01/01/1970 00:00:00').getTime() -
+                this.parseTimestamp(a.startTime || '01/01/1970 00:00:00').getTime(),
         );
         for (const log of this.gameLogs) {
             let gameTime = 0;
