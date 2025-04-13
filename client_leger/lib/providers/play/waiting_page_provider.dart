@@ -1,3 +1,4 @@
+import 'package:client_leger/backend-communication-services/chat/ingame_chat_service.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/player_data.dart';
 import 'package:client_leger/utilities/logger.dart';
@@ -53,6 +54,7 @@ class WaitingPageState {
 
 class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
   final WebSocketManager _socketManager;
+  final ingameChatService = InGameChatService();
 
   WaitingPageNotifier(this._socketManager)
       : super(WaitingPageState(
@@ -180,7 +182,9 @@ class WaitingPageNotifier extends StateNotifier<WaitingPageState> {
             .toList();
 
         state = state.copyWith(playersInfo: updatedPlayers);
-        AppLogger.i("Players updated: ${state.playersInfo}");
+        AppLogger.i(
+            "Players updated: ${state.playersInfo}. requesting quick replies");
+        ingameChatService.requestQuickReplies();
       } else {
         AppLogger.w("Invalid or missing data for JoinSuccess event.");
       }

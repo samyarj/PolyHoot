@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:client_leger/backend-communication-services/chat/ingame_chat_service.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/classes/sound_player.dart';
@@ -253,8 +252,6 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
 
   void _handleEveryoneSubmitted() {
     _socketManager.webSocketReceiver(GameEvents.EveryoneSubmitted.value, (_) {
-      ingameChatService.requestQuickReplies();
-
       final updatedGameInfo = GameInfo(
         time: 0,
         currentQuestionIndex: state.gameInfo.currentQuestionIndex,
@@ -267,7 +264,8 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
         gameStatus: GameStatus.OrganizerCorrecting,
       );
 
-      AppLogger.i("Everyone submitted their answers");
+      AppLogger.i("Everyone submitted their answers, requesting quick replies");
+      ingameChatService.requestQuickReplies();
     });
   }
 
@@ -431,8 +429,6 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
   void _handleNextQuestion() {
     _socketManager.webSocketReceiver(GameEvents.ProceedToNextQuestion.value,
         (_) {
-      ingameChatService.requestQuickReplies();
-
       if (state.currentQuestion.type == 'QCM' ||
           state.currentQuestion.type == 'QRE') {
         final updatedGameInfo = state.gameInfo.copyWith(time: 0);
@@ -447,7 +443,9 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
           gameInfo: updatedGameInfo,
         );
 
-        AppLogger.i("Proceeding to next question automatically");
+        AppLogger.i(
+            "Proceeding to next question automatically, requesting quick replies");
+        ingameChatService.requestQuickReplies();
       }
     });
 
@@ -481,7 +479,9 @@ class OrganizerNotifier extends StateNotifier<OrganizerState> {
           playerList: updatedPlayerList,
         );
 
-        AppLogger.i("Next question received: ${data['index']}");
+        AppLogger.i(
+            "Next question received: ${data['index']}, requesting quick replies");
+        ingameChatService.requestQuickReplies();
       }
     });
   }

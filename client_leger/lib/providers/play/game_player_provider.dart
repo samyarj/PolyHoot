@@ -193,6 +193,9 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
             currentQuestionIndex: nextQuestion['index'],
             currentQuestion: currentQuestion,
             qreAnswer: qreAnswer ?? state.qreAnswer);
+
+        AppLogger.i("requesting quick replies");
+        ingameChatService.requestQuickReplies();
       }
     });
 
@@ -218,9 +221,6 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
         feedback = ChoiceFeedback.Exact;
       }
 
-      // request quick replies when receiving correction from server
-      ingameChatService.requestQuickReplies();
-
       state = state.copyWith(
         playerPoints: points,
         time: 0,
@@ -233,6 +233,10 @@ class GamePlayerNotifier extends StateNotifier<GamePlayerState> {
           exactAnswer: isExactAnswer,
         ),
       );
+
+      // request quick replies when receiving correction from server
+      AppLogger.i("Feedback received, requesting quick replies");
+      ingameChatService.requestQuickReplies();
     });
 
     _socketManager.webSocketReceiver(GameEvents.SendResults.value, (data) {
