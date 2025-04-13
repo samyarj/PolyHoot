@@ -24,7 +24,7 @@ export class UserService {
     }
 
     isUserInMap(socketId: string): boolean {
-        this.logger.debug(`Socket map in user service is ${this.usersSocketIdMap}`);
+        console.log(`Socket map in user service is ${this.usersSocketIdMap}`);
         return this.usersSocketIdMap.has(socketId);
     }
 
