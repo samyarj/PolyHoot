@@ -1,6 +1,6 @@
 import { AuthenticatedSocket } from '@app/interface/authenticated-request';
 import { UserService } from '@app/services/auth/user.service';
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 
 @Injectable()
@@ -37,11 +37,13 @@ export class AuthGuard implements CanActivate {
 
 @Injectable()
 export class WsAuthGuard implements CanActivate {
+    logger = new Logger(WsAuthGuard.name);
     constructor(private userService: UserService) {}
     private auth = admin.auth();
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const client = context.switchToWs().getClient<AuthenticatedSocket>();
+        this.logger.debug(`Checking if uid : ${client.id} is in map on next line`);
         if (this.userService.isUserInMap(client.id)) {
             const userUid = this.userService.getUserUidFromMap(client.id);
             const user = await this.userService.getUserByUid(userUid);
