@@ -26,6 +26,10 @@
                     </div>
                 </li>
                 <hr class="dropdown-divider" />
+                <div class="qrcode" matTooltip="Code d'ami" matTooltipClass="custom-tooltip" (click)="openFriendQrCode(user.username, user.uid)">
+                    <i class="fa-solid fa-qrcode"></i>
+                </div>
+                <hr class="dropdown-divider" />
                 <li class="logout-container" (click)="logout()">
                     <a>Déconnexion <i class="fa-solid fa-right-from-bracket"></i></a>
                 </li>

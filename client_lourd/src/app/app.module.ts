@@ -34,6 +34,7 @@ import { LootBoxWinDialogComponent } from './components/general-elements/lootbox
 import { PollAdminPopInComponent } from './components/general-elements/poll-related/poll-admin-pop-in/poll-admin-pop-in.component';
 import { PollPlayerPopInComponent } from './components/general-elements/poll-related/poll-player-pop-in/poll-player-pop-in.component';
 import { PopUpCreationComponent } from './components/general-elements/pop-up-creation/pop-up-creation.component';
+import { QrCodeFriendPopInComponent } from './components/general-elements/qr-code-friend-pop-in/qr-code-friend-pop-in.component';
 import { QrCodePopInComponent } from './components/general-elements/qr-code-pop-in/qr-code-pop-in.component';
 import { HeaderGameComponent } from './components/layout/filler/header-game/header-game.component';
 import { SecondaryHeaderGameComponent } from './components/layout/filler/secondary-header-game/secondary-header-game.component';
@@ -161,6 +162,7 @@ import { SocketClientService } from './services/websocket-services/general/socke
         PollAdminPopInComponent,
         NotificationsComponent,
         QrCodePopInComponent,
+        QrCodeFriendPopInComponent,
         AnswerPollComponent,
     ],
     providers: [

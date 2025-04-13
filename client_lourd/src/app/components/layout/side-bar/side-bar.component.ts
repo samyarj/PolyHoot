@@ -1,7 +1,9 @@
 /* eslint-disable max-lines */
 import { ChangeDetectorRef, Component, OnDestroy, ViewChild } from '@angular/core';
 import { doc, FieldPath, Firestore, getDoc, onSnapshot, Unsubscribe } from '@angular/fire/firestore';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { QrCodeFriendPopInComponent } from '@app/components/general-elements/qr-code-friend-pop-in/qr-code-friend-pop-in.component';
 import { FirebaseChatMessage } from '@app/interfaces/chat-message';
 import { User } from '@app/interfaces/user';
 import { AuthService } from '@app/services/auth/auth.service';
@@ -79,6 +81,7 @@ export class SideBarComponent implements OnDestroy {
         private chatService: ChatService,
         private cdr: ChangeDetectorRef,
         private socketClientService: SocketClientService,
+        private dialog: MatDialog,
     ) {
         this.user$ = this.authService.user$;
         // Subscribe to live chat messages for the global chat
@@ -185,6 +188,19 @@ export class SideBarComponent implements OnDestroy {
 
     get isOnResultsPage() {
         return this.headerService.isOnResultsPage;
+    }
+
+    openFriendQrCode(username: string, uid: string): void {
+        this.dialog.open(QrCodeFriendPopInComponent, {
+            width: '40vw',
+            backdropClass: 'quiz-info-popup',
+            panelClass: 'custom-container',
+            data: {
+                type: 'friend-request',
+                username,
+                uid,
+            },
+        });
     }
 
     setActiveTab(tab: number): void {

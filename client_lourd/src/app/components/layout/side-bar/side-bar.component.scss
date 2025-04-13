@@ -23,6 +23,20 @@
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+.qrcode {
+    font-size: 1.5rem;
+    color: var(--text-color);
+    text-shadow: 0 0 2px var(--tertiary-color);
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    &:hover {
+        text-shadow: 0 0 5px var(--tertiary-color);
+        cursor: pointer;
+    }
+}
+
 .menu-bar-content {
     width: 95%;
     display: flex;

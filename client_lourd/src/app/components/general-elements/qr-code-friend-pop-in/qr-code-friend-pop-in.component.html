@@ -1,0 +1,18 @@
+<div class="qr-code-popin">
+    <div class="header">
+        <div class="title">Mon Code QR</div>
+        <div class="description">Faites scanner ce code à vos amis pour qu'ils puissent vous ajouter</div>
+    </div>
+    <div class="qr-code-container">
+        <qrcode
+            [qrdata]="qrData"
+            [colorDark]="colorDark"
+            [colorLight]="'#ffffff00'"
+            [errorCorrectionLevel]="'H'"
+            [width]="200"
+            class="custom-qr"
+        ></qrcode>
+    </div>
+    <div class="name">{{ data.username }}</div>
+    <button class="custom-button-medium" (click)="onClose()">Fermer</button>
+</div>
