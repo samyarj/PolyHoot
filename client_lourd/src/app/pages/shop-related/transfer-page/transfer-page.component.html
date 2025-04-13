@@ -106,12 +106,17 @@
                                 type="number"
                                 [(ngModel)]="transferAmount"
                                 (input)="validateAmount($event)"
-                                placeholder="Entrez le montant"
+                                placeholder="Entrez le montant à transférer"
                                 class="amount-input"
                                 min="1"
                                 step="1"
+                                pattern="[0-9]*"
+                                (keydown)="blockInvalidKeys($event)"
                             />
                             <span class="coins-label"><i class="fa-solid fa-coins"></i></span>
+                        </div>
+                        <div class="balance-info" *ngIf="transferAmount > userBalance">
+                            Vous ne pouvez pas transfèrer plus de pièces que ce que vous possèdez.
                         </div>
                         <div class="balance-info">
                             <p>Solde disponible: {{ userBalance }} <i class="fa-solid fa-coins"></i></p>

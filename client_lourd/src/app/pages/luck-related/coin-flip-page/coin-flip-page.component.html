@@ -103,9 +103,11 @@
                 <input
                     [(ngModel)]="betAmount"
                     (ngModelChange)="betAmount = updateBetAmount($event)"
+                    (keydown)="blockInvalidKeys($event)"
                     type="number"
                     min="1"
                     step="1"
+                    pattern="[0-9]*"
                     placeholder="Placer votre mise"
                     class="bet-input"
                 />

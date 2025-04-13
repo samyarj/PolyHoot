@@ -41,6 +41,13 @@ export class TransferPageComponent implements OnInit, OnDestroy {
         });
     }
 
+    blockInvalidKeys(event: KeyboardEvent): void {
+        const invalidChars = ['e', 'E', '+', '-', '.'];
+        if (invalidChars.includes(event.key)) {
+            event.preventDefault();
+        }
+    }
+
     private setupRealtimeUserUpdates(uid: string) {
         if (this.userDocSubscription) {
             this.userDocSubscription();

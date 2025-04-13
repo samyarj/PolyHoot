@@ -45,6 +45,13 @@ export class CoinFlipPageComponent implements OnDestroy {
         this.coinFlipService.betAmount = value;
     }
 
+    blockInvalidKeys(event: KeyboardEvent): void {
+        const invalidChars = ['e', 'E', '+', '-', '.'];
+        if (invalidChars.includes(event.key)) {
+            event.preventDefault();
+        }
+    }
+
     ngOnDestroy(): void {
         this.coinFlipService.removeEventListeners();
     }
