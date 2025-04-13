@@ -33,8 +33,8 @@ export const EMPTY_QUIZ_GAME_CLIENT: Quiz = {
     duration: 15,
     lastModification: '123',
     questions: [
-        { type: QuestionType.QCM, text: '', points: 20, lastModified: '123', creator: '', choices: [] },
-        { type: QuestionType.QCM, text: 'other text', points: 20, lastModified: '123', creator: '', choices: [] },
+        { type: QuestionType.QCM, text: '', points: 20, lastModified: '123', choices: [] },
+        { type: QuestionType.QCM, text: 'other text', points: 20, lastModified: '123', choices: [] },
     ],
 };
 
@@ -42,18 +42,22 @@ export const EMPTY_QCM_QUESTION: Question = {
     type: QuestionType.QCM,
     text: '',
     points: 10,
-    creator: '',
     choices: [
         { text: '', isCorrect: false },
         { text: '', isCorrect: false },
     ],
+};
+export const EMPTY_QRL_QUESTION: Question = {
+    type: QuestionType.QRL,
+    text: '',
+    points: 10,
 };
 export const EMPTY_QRE_QUESTION: Question = {
     id: '',
     type: QuestionType.QRE,
     text: '',
     points: 10,
-    creator: '',
+
     qreAttributes: {
         goodAnswer: 0,
         minBound: 0,
@@ -81,7 +85,7 @@ export const EMPTY_POLL_QUESTION: Question = {
     type: QuestionType.QCM,
     text: '',
     points: 10,
-    creator: '',
+
     choices: [{ text: '' }, { text: '' }],
 };
 
@@ -89,7 +93,6 @@ export const EMPTY_QUESTION_WITHOUT_CHOICES: Question = {
     type: QuestionType.QRL,
     text: '',
     points: 10,
-    creator: '',
 };
 
 export const QUIZ_EXAMPLE: Quiz = {
@@ -103,7 +106,7 @@ export const QUIZ_EXAMPLE: Quiz = {
             type: QuestionType.QCM,
             text: 'Parmi les mots suivants, lesquels sont des mots clés réservés en JS?',
             points: 40,
-            creator: '',
+
             lastModified: '123',
             choices: [
                 {
@@ -127,14 +130,14 @@ export const QUIZ_EXAMPLE: Quiz = {
             type: QuestionType.QRL,
             text: "Donnez la différence entre 'let' et 'var' pour la déclaration d'une variable en JS ?",
             points: 60,
-            creator: '',
+
             lastModified: '123',
         },
         {
             type: QuestionType.QCM,
             text: "Est-ce qu'on le code suivant lance une erreur : const a = 1/NaN; ? ",
             points: 20,
-            creator: '',
+
             lastModified: '123',
             choices: [
                 {
@@ -159,7 +162,7 @@ export const MOCK_QUIZ: Quiz = {
             text: 'What is React?',
             type: QuestionType.QCM,
             points: 30,
-            creator: '',
+
             choices: [
                 { text: 'A library for building user interfaces', isCorrect: true },
                 { text: 'A framework for building user interfaces', isCorrect: false },
@@ -170,7 +173,7 @@ export const MOCK_QUIZ: Quiz = {
             text: 'Who built React?',
             type: QuestionType.QCM,
             points: 30,
-            creator: '',
+
             choices: [
                 { text: 'Facebook', isCorrect: true },
                 { text: 'Google', isCorrect: false },
@@ -182,7 +185,7 @@ export const MOCK_QUIZ: Quiz = {
             text: 'Fin du questionnaire',
             type: QuestionType.QCM,
             points: 0,
-            creator: '',
+
             choices: [],
         },
     ],
@@ -203,7 +206,7 @@ export const MOCK_QUIZZES: Quiz[] = [
                 type: QuestionType.QCM,
                 text: 'What is the capital of France?',
                 points: 5,
-                creator: '',
+
                 choices: [
                     { text: 'Paris', isCorrect: true },
                     { text: 'London', isCorrect: false },
@@ -216,7 +219,7 @@ export const MOCK_QUIZZES: Quiz[] = [
                 type: QuestionType.QCM,
                 text: 'Who wrote Hamlet?',
                 points: 5,
-                creator: '',
+
                 choices: [
                     { text: 'William Shakespeare', isCorrect: true },
                     { text: 'Charles Dickens', isCorrect: false },
@@ -238,7 +241,7 @@ export const MOCK_QUIZZES: Quiz[] = [
                 type: QuestionType.QCM,
                 text: 'What is the chemical symbol for gold?',
                 points: 40,
-                creator: '',
+
                 choices: [
                     { text: 'Au', isCorrect: true },
                     { text: 'Ag', isCorrect: false },
@@ -251,7 +254,7 @@ export const MOCK_QUIZZES: Quiz[] = [
                 type: QuestionType.QCM,
                 text: 'How many planets are in our solar system?',
                 points: 50,
-                creator: '',
+
                 choices: [
                     { text: '8', isCorrect: true },
                     { text: '9', isCorrect: false },
@@ -273,7 +276,7 @@ export const MOCK_QUIZZES: Quiz[] = [
                 type: QuestionType.QCM,
                 text: 'Who was the first president of the United States?',
                 points: 50,
-                creator: '',
+
                 choices: [
                     { text: 'George Washington', isCorrect: true },
                     { text: 'Thomas Jefferson', isCorrect: false },
@@ -286,7 +289,7 @@ export const MOCK_QUIZZES: Quiz[] = [
                 type: QuestionType.QCM,
                 text: 'In which year did the World War I begin?',
                 points: 20,
-                creator: '',
+
                 choices: [
                     { text: '1914', isCorrect: true },
                     { text: '1916', isCorrect: false },
@@ -314,7 +317,7 @@ export const MOCK_QUIZZES_ADMIN: Quiz[] = [
                 type: QuestionType.QCM,
                 text: 'What is the main architectural pattern used by NestJS?',
                 points: 30,
-                creator: '',
+
                 choices: [
                     { text: 'Model-View-Controller (MVC)', isCorrect: false },
                     { text: 'Observer pattern', isCorrect: false },
@@ -325,7 +328,7 @@ export const MOCK_QUIZZES_ADMIN: Quiz[] = [
                 type: QuestionType.QCM,
                 text: 'Which package is commonly used for handling HTTP requests in NestJS?',
                 points: 15,
-                creator: '',
+
                 choices: [
                     { text: 'express', isCorrect: true },
                     { text: 'koa', isCorrect: false },
@@ -345,7 +348,7 @@ export const MOCK_QUIZZES_ADMIN: Quiz[] = [
                 type: QuestionType.QCM,
                 text: 'Which of the following directives is used to loop on an array?',
                 points: 30,
-                creator: '',
+
                 choices: [
                     { text: 'div', isCorrect: false },
                     { text: '*ngFor', isCorrect: true },
@@ -357,7 +360,7 @@ export const MOCK_QUIZZES_ADMIN: Quiz[] = [
                 type: QuestionType.QCM,
                 text: 'What does HTML stand for?',
                 points: 20,
-                creator: '',
+
                 choices: [
                     { text: 'HyperText Markup Language', isCorrect: true },
                     { text: 'Highly Typed Modeling Language', isCorrect: false },
@@ -373,7 +376,7 @@ export const MOCK_QUESTION_GAME_PAGE: Question = {
     text: 'asd',
     points: 20,
     lastModified: '123',
-    creator: '',
+
     choices: [
         {
             text: 'var',
@@ -394,7 +397,7 @@ export const MOCK_QUESTION_ADD_POINTS: Question = {
     type: QuestionType.QCM,
     text: 'text',
     points: 40,
-    creator: '',
+
     lastModified: '123',
     choices: [
         {
