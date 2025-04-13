@@ -78,7 +78,7 @@ export class ShopPageComponent {
                             width: '400px',
                             panelClass: 'custom-container',
                             data: {
-                                message: "Vous n'avez pas assez d'argent pour vous procurer l'item :(.",
+                                message: "Vous n'avez pas assez de pièces pour vous procurer l'item :(.",
                                 reloadOnClose: false,
                             },
                         });

@@ -66,7 +66,9 @@ export class BankPanelComponent {
     }
 
     emptyQuestion(questionType: string): void {
+        console.log('emptyQuestion', questionType);
         this.question = questionType === 'QRE' ? this.deepCloneQuestion(EMPTY_QRE_QUESTION) : this.deepCloneQuestion(EMPTY_QCM_QUESTION);
+        console.log(this.question);
         this.question.type = questionType;
     }
 

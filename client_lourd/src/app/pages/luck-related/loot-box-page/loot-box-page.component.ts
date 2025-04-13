@@ -43,7 +43,7 @@ export class LootBoxPageComponent {
                         const dialogRef = this.matdialog.open(ErrorDialogComponent, {
                             width: '400px',
                             panelClass: 'custom-container',
-                            data: { message: "Vous n'avez pas assez d'argent pour vous procurer ce coffre.", reloadOnClose: false },
+                            data: { message: "Vous n'avez pas assez de pièces pour vous procurer ce coffre.", reloadOnClose: false },
                         });
 
                         dialogRef.afterClosed().subscribe(() => {

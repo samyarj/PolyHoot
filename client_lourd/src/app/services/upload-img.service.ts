@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, of, switchMap } from 'rxjs';
+import { Observable, switchMap, take } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from './auth/auth.service';
 
@@ -23,15 +23,22 @@ export class UploadImgService {
         const urlWithContext = `${this.baseUrl}?context=${context}`;
 
         return this.authService.token$.pipe(
+            take(1), // Prendre le premier token émis
             switchMap((token) => {
                 if (!token) {
-                    // throw new Error('Authentication token is missing. Please log in.');
-                    return of({ message: '', imageUrl: '' });
+                    throw new Error("Le jeton d'authentification est manquant. Veuillez vous connecter.");
                 }
 
                 const headers = new HttpHeaders({
                     authorization: `Bearer ${token}`,
                 });
+
+                if (!formData.has('image')) {
+                    // Retourner une valeur par défaut si formData est vide
+                    throw new Error('Aucun fichier image fourni.');
+                }
+
+                // Ajouter le finalize uniquement autour de la requête HTTP
                 return this.http.post<{ message: string; imageUrl: string }>(urlWithContext, formData, { headers });
             }),
         );
@@ -42,9 +49,10 @@ export class UploadImgService {
 
     updateSelectedDefaultAvatar(avatarUrl: string): Observable<{ message: string }> {
         return this.authService.token$.pipe(
+            take(1),
             switchMap((token) => {
                 if (!token) {
-                    throw new Error('Authentication token is missing. Please log in.');
+                    throw new Error("Le jeton d'authentification est manquant. Veuillez vous connecter.");
                 }
 
                 const headers = new HttpHeaders({
@@ -57,9 +65,10 @@ export class UploadImgService {
     }
     deleteImage(imageURL: string): Observable<{ message: string }> {
         return this.authService.token$.pipe(
+            take(1),
             switchMap((token) => {
                 if (!token) {
-                    throw new Error('Authentication token is missing. Please log in.');
+                    throw new Error("Le jeton d'authentification est manquant. Veuillez vous connecter.");
                 }
 
                 const headers = new HttpHeaders({

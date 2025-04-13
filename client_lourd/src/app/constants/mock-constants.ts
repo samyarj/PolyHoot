@@ -50,7 +50,7 @@ export const EMPTY_QCM_QUESTION: Question = {
 };
 export const EMPTY_QRE_QUESTION: Question = {
     id: '',
-    type: 'QRE',
+    type: QuestionType.QRE,
     text: '',
     points: 10,
     creator: '',

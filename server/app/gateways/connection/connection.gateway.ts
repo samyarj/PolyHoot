@@ -119,26 +119,28 @@ export class ConnectionGateway implements OnGatewayDisconnect {
     private disconnectUserFromResultsPage(roomId: string, client: Socket) {
         if (client) {
             const game = this.gameManager.getGameByRoomId(roomId);
-            if (client.id === game.organizer.socket.id) {
-                this.sendDisconnectMessage("L'organisateur", roomId);
-            } else {
-                const player = this.gameManager.getGameByRoomId(roomId).findTargetedPlayer(client);
-                if (player) {
-                    this.sendDisconnectMessage(player.name, roomId);
+            if (game) {
+                if (client.id === game.organizer.socket.id) {
+                    this.sendDisconnectMessage("L'organisateur", roomId);
+                } else {
+                    const player = this.gameManager.getGameByRoomId(roomId).findTargetedPlayer(client);
+                    if (player) {
+                        this.sendDisconnectMessage(player.name, roomId);
 
-                    this.userService.updateGameLog(player.uid, {
-                        endTime: this.userService.formatTimestamp(new Date()),
-                        status: 'complete',
-                    });
+                        this.userService.updateGameLog(player.uid, {
+                            endTime: this.userService.formatTimestamp(new Date()),
+                            status: 'complete',
+                        });
+                    }
                 }
-            }
-            client.leave(roomId);
-            this.gameManager.socketRoomsMap.delete(client);
-            const clientIds = this.server.sockets.adapter.rooms.get(roomId);
-            if ((clientIds && clientIds.size === 0) || !clientIds) {
-                this.server.emit(GameEvents.End, roomId);
-                this.gameManager.endGame(roomId);
-                this.chatService.deleteHistory(roomId);
+                client.leave(roomId);
+                this.gameManager.socketRoomsMap.delete(client);
+                const clientIds = this.server.sockets.adapter.rooms.get(roomId);
+                if ((clientIds && clientIds.size === 0) || !clientIds) {
+                    this.server.emit(GameEvents.End, roomId);
+                    this.gameManager.endGame(roomId);
+                    this.chatService.deleteHistory(roomId);
+                }
             }
         }
     }
