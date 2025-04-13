@@ -18,4 +18,7 @@
 
 #question-type {
     flex: 1;
+    &:hover {
+        cursor: pointer;
+    }
 }

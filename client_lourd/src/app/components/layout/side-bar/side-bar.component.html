@@ -25,8 +25,15 @@
                         <small class="text-muted">{{ user.email }}</small>
                     </div>
                 </li>
-                <hr class="dropdown-divider" />
-                <div class="qrcode" matTooltip="Code d'ami" matTooltipClass="custom-tooltip" (click)="openFriendQrCode(user.username, user.uid)">
+                <hr *ngIf="user.role !== 'admin'" class="dropdown-divider" />
+                <div
+                    *ngIf="user.role !== 'admin'"
+                    class="qrcode"
+                    matTooltip="Code d'ami"
+                    matTooltipClass="custom-tooltip"
+                    matTooltipPosition="above"
+                    (click)="openFriendQrCode(user.username, user.uid)"
+                >
                     <i class="fa-solid fa-qrcode"></i>
                 </div>
                 <hr class="dropdown-divider" />
