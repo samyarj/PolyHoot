@@ -20,7 +20,7 @@ export class ChatGateway {
         private gameManagerService: GameManagerService,
         private userService: UserService,
         private pushNotifService: PushNotifService,
-    ) { }
+    ) {}
 
     @SubscribeMessage(ChatEvents.RoomMessage)
     async roomMessage(clientSocket: Socket, message: ChatMessage) {
@@ -29,7 +29,7 @@ export class ChatGateway {
         this.chatService.addMessage(message, clientRoomId);
         this.server.to(clientRoomId).emit(ChatEvents.MessageAdded, message);
 
-        // send push notif to all players 
+        // send push notif to all players
         try {
             const game = this.gameManagerService.getGameByRoomId(clientRoomId);
             game.players.forEach((player) => {
@@ -51,7 +51,7 @@ export class ChatGateway {
                 }
             }
         } catch (e) {
-            this.logger.debug("Couldnt find game or players to send push notif");
+            this.logger.debug('Couldnt find game or players to send push notif');
         }
     }
 
@@ -64,6 +64,14 @@ export class ChatGateway {
     @SubscribeMessage(ChatEvents.RequestQuickReplies)
     async handleQuickRepliesRequest(clientSocket: Socket, data: { user: string }) {
         const clientRoomId: string = Array.from(clientSocket.rooms.values())[1];
+        const minInterval = 3000;
+
+        // Check if the user has made a recent request
+        if (!this.chatService.checkAndUpdateTimestamp(clientRoomId, data.user, minInterval)) {
+            console.log('Quick-Reply: Please wait before making another request.');
+            return;
+        }
+
         try {
             // Get chat history
             const messageHistory = this.chatService.getHistory(clientRoomId);
