@@ -240,9 +240,9 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
         await chatNotifPersistenceService.addChannelToReadMessages(channelId);
 
         // if user joined channels for the first time and there are previous messages => do not count
-        if (!state.unreadMessages.containsKey(channelId) &&
-            !_subscriptions.containsKey(channelId)) {
-          AppLogger.w("User joined channel: $channelId");
+        if (!_subscriptions.containsKey(channelId)) {
+          AppLogger.w(
+              "User joined channel: $channelId, will create a subscription");
           _firstSnapshotFlags[channelId] = true;
 
           _subscriptions[channelId] = _firestore
