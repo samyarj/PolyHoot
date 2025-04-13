@@ -109,7 +109,15 @@
                     </div>
                     <div class="section-divider"></div>
                     <div class="buy-zone-wrapper">
-                        <button *ngIf="canClaim" (click)="openDailyFree()" class="custom-button-big">Reclamer le prix quotidien!</button>
+                        <button
+                            *ngIf="canClaim && initialized"
+                            (click)="openDailyFree()"
+                            class="custom-button-big"
+                            [disabled]="isOpeningLootBox"
+                            [ngClass]="{ 'custom-button-big-disabled': isOpeningLootBox }"
+                        >
+                            Reclamer le prix quotidien!
+                        </button>
                         <button *ngIf="!canClaim && availableIn !== 'Checking status'" class="custom-button-big-disabled">
                             Prix disponible dans {{ availableIn }}
                         </button>

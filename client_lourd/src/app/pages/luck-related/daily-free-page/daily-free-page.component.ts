@@ -25,6 +25,8 @@ export class DailyFreePageComponent implements OnInit, OnDestroy {
     minutesLeft: number = 0;
     canClaim: boolean = true; // needed by default so startTimer dont start on ngOninit
     shouldConsiderAvailable: boolean = false;
+    isOpeningLootBox: boolean = false;
+    initialized: boolean = false;
     private destroy$ = new Subject<void>();
     private intervalSubscription: Subscription | null = null;
     private dailyFreeObserver: Partial<Observer<{ lootbox: LootBoxContainer; canClaim: boolean; hoursLeft: number; minutesLeft: number }>> = {
@@ -39,9 +41,12 @@ export class DailyFreePageComponent implements OnInit, OnDestroy {
             } else {
                 this.shouldConsiderAvailable = true;
             }
+            this.isOpeningLootBox = false;
+            this.initialized = true;
         },
         error: () => {
             console.log('Could not fetch lootBoxes.');
+            this.isOpeningLootBox = false;
         },
     };
 
@@ -136,21 +141,28 @@ export class DailyFreePageComponent implements OnInit, OnDestroy {
     }
 
     openDailyFree() {
-        this.lootBoxService.openDailyFree().subscribe({
-            next: async (reward: Reward) => {
-                this.isMoved = true;
-                this.matdialog.open(LootBoxWinDialogComponent, {
-                    data: reward,
-                    backdropClass: `backdrop-dialog-${reward.rarity}`,
-                    panelClass: 'custom-container',
-                });
-                this.lootBoxService.getDailyFree().subscribe(this.dailyFreeObserver);
-            },
-        });
+        if (!this.isOpeningLootBox) {
+            this.isOpeningLootBox = true;
+
+            this.lootBoxService.openDailyFree().subscribe({
+                next: async (reward: Reward) => {
+                    this.isMoved = true;
+                    this.matdialog.open(LootBoxWinDialogComponent, {
+                        data: reward,
+                        backdropClass: `backdrop-dialog-${reward.rarity}`,
+                        panelClass: 'custom-container',
+                    });
+
+                    this.lootBoxService.getDailyFree().subscribe(this.dailyFreeObserver);
+                },
+            });
+        }
     }
 
     private async loadDailyFree(): Promise<void> {
+        this.initialized = false;
         this.stopTimer();
+        this.isOpeningLootBox = false;
         this.lootBoxService.getDailyFree().subscribe(this.dailyFreeObserver);
     }
 }
