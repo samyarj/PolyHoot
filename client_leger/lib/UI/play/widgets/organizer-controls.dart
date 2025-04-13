@@ -57,7 +57,9 @@ class OrganizerControls extends ConsumerWidget {
                     onPressed: state.gameStatus ==
                                 GameStatus.WaitingForAnswers &&
                             !state.gameModifiers.alertMode &&
-                            ((state.currentQuestion.type == 'QCM' &&
+                            ((state.currentQuestion.type == 'QRE' &&
+                                    state.gameInfo.time > 10) ||
+                                (state.currentQuestion.type == 'QCM' &&
                                     state.gameInfo.time > 10) ||
                                 (state.currentQuestion.type == 'QRL' &&
                                     state.gameInfo.time > 20))

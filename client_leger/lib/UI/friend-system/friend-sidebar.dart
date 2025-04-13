@@ -2,7 +2,6 @@
 import 'dart:async';
 
 import 'package:client_leger/UI/confirmation/confirmation_dialog.dart';
-import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/friend-system/add_friend_tab.dart';
 import 'package:client_leger/UI/friend-system/confirm_transaction_dialog.dart';
 import 'package:client_leger/UI/friend-system/friend_tab_bar.dart';
@@ -204,8 +203,9 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
       }
     } catch (e) {
       if (mounted) {
-        showErrorDialog(
-            context, 'Erreur lors de la transaction: ${e.toString()}');
+        showToast(context, 'Erreur lors de la transaction: ${e.toString()}',
+            type: ToastificationType.error,
+            duration: const Duration(seconds: 5));
       }
     }
   }
@@ -309,7 +309,8 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
                   _removingUsers.remove(friend.user.uid);
                 });
                 showToast(context, error.toString(),
-                    type: ToastificationType.error);
+                    type: ToastificationType.error,
+                    duration: const Duration(seconds: 5));
               }
             });
           }
@@ -332,7 +333,8 @@ class _FriendSidebarState extends ConsumerState<FriendSidebar> {
       _searchController.clear();
     } catch (e) {
       if (!mounted) return;
-      showErrorDialog(context, e.toString());
+      showToast(context, e.toString(),
+          type: ToastificationType.error, duration: const Duration(seconds: 5));
     } finally {
       if (!mounted) return;
       setState(() {
