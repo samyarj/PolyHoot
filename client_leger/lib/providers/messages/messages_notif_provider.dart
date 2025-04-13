@@ -62,9 +62,10 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
   }
 
   void onIngameMessageReceived() {
+    _playSound();
     if (currentDisplayedChannel != inGameChat) {
-      AppLogger.w("Ingame message received");
-      _playSound();
+      AppLogger.w(
+          "Ingame message received and currentDisplayedChannel is $currentDisplayedChannel");
       final int newCount = (state.unreadMessages[inGameChat] ?? 0) + 1;
       state = state.copyWith(unreadMessages: {
         ...state.unreadMessages,
@@ -152,9 +153,12 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
 
         for (final change in snapshot.docChanges) {
           if (change.type == DocumentChangeType.added &&
+              change.doc.data()?['uid'] != getUserUid()) {
+            _playSound();
+          }
+          if (change.type == DocumentChangeType.added &&
               change.doc.data()?['uid'] != getUserUid() &&
               currentDisplayedChannel != 'globalChat') {
-            _playSound();
             final int newCount = (state.unreadMessages["globalChat"] ?? 0) + 1;
             state = state.copyWith(unreadMessages: {
               ...state.unreadMessages,
@@ -258,9 +262,12 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
             }
             for (final change in messagesSnapshot.docChanges) {
               if (change.type == DocumentChangeType.added &&
+                  change.doc.data()?['uid'] != getUserUid()) {
+                _playSound();
+              }
+              if (change.type == DocumentChangeType.added &&
                   change.doc.data()?['uid'] != getUserUid() &&
                   currentDisplayedChannel != channelId) {
-                _playSound();
                 final int newCount =
                     (state.unreadMessages[channel.id] ?? 0) + 1;
                 state = state.copyWith(unreadMessages: {
