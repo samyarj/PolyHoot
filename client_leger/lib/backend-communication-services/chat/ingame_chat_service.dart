@@ -29,7 +29,6 @@ class InGameChatService {
 
   final inGameChatMessagesNotifier = ValueNotifier<List<InGameChatMessage>>([]);
 
-  Timer? quickRepliesTimer;
   MessageNotifNotifier? _notifier;
 
   final quickRepliesNotifier = ValueNotifier<List<String>>([]);
@@ -63,21 +62,8 @@ class InGameChatService {
     _socketManager.socket?.off(ChatEvents.QuickRepliesGenerated.value);
     _userDetails = {};
     inGameChatMessagesNotifier.value = [];
-    quickRepliesTimer?.cancel();
-    quickRepliesTimer = null;
-    quickRepliesNotifier.value = [];
-  }
 
-  void startQuickRepliesInterval() {
-    if (quickRepliesTimer == null) {
-      AppLogger.i("Starting quick replies timer");
-      quickRepliesTimer = Timer.periodic(
-        const Duration(seconds: 8),
-        (timer) {
-          requestQuickReplies();
-        },
-      );
-    }
+    quickRepliesNotifier.value = [];
   }
 
 // done by chat messages notif (not tied to the ingameChatWindow)

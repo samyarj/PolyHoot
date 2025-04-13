@@ -1,5 +1,6 @@
 import 'package:client_leger/UI/global/header_title.dart';
 import 'package:client_leger/UI/play/widgets/result_player_info.dart';
+import 'package:client_leger/backend-communication-services/chat/ingame_chat_service.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/player_data.dart';
 import 'package:client_leger/providers/user_provider.dart';
@@ -23,6 +24,7 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
   late final bool _isOrganizer;
   late final String _nameForDisconnect;
   late final int maxPoints;
+  final ingameChatService = InGameChatService();
 
   @override
   void initState() {
@@ -34,6 +36,9 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
       _nameForDisconnect = _username;
     }
     maxPoints = widget.playerList[0].points;
+    AppLogger.i("In result page, requesting quick replies");
+    ingameChatService.requestQuickReplies();
+
     super.initState();
   }
 

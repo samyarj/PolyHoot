@@ -38,7 +38,6 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
 
       _notifier.markChatAsRead(inGameChat);
     });
-    _inGameChatManager.startQuickRepliesInterval();
     super.initState();
   }
 
@@ -424,6 +423,8 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
                                                         _textController.text =
                                                             reply;
                                                         sendMessage();
+                                                        _inGameChatManager
+                                                            .requestQuickReplies();
                                                       },
                                                       child: Text(
                                                         reply,
