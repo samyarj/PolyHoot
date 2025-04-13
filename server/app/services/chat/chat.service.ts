@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class ChatService {
     private histories: Map<string, ChatMessage[]>;
+    private lastRequestTimestamps: Map<string, Map<string, number>> = new Map();
 
     constructor() {
         this.histories = new Map<string, ChatMessage[]>();
@@ -19,6 +20,7 @@ export class ChatService {
     }
 
     deleteHistory(roomId: string) {
+        this.lastRequestTimestamps.delete(roomId);
         return this.histories.delete(roomId);
     }
 
@@ -32,5 +34,22 @@ export class ChatService {
 
     private addMessageInHistory(message: ChatMessage, roomId: string): void {
         this.histories.get(roomId).push(message);
+    }
+
+    checkAndUpdateTimestamp(roomId: string, user: string, minInterval: number): boolean {
+        const currentTime = Date.now();
+        if (!this.lastRequestTimestamps.has(roomId)) {
+            this.lastRequestTimestamps.set(roomId, new Map());
+        }
+
+        const userTimestamps = this.lastRequestTimestamps.get(roomId);
+        if (userTimestamps.has(user)) {
+            const lastRequestTime = userTimestamps.get(user);
+            if (lastRequestTime && currentTime - lastRequestTime < minInterval) {
+                return false;
+            }
+        }
+        userTimestamps.set(user, currentTime);
+        return true;
     }
 }
