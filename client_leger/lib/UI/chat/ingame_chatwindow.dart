@@ -3,6 +3,7 @@ import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/global/avatar_banner_widget.dart';
 import 'package:client_leger/backend-communication-services/chat/ingame_chat_service.dart';
 import 'package:client_leger/backend-communication-services/report/report_service.dart';
+import 'package:client_leger/classes/hoot_sound_player.dart';
 import 'package:client_leger/models/ingame_chat_messages.dart';
 import 'package:client_leger/providers/messages/messages_notif_provider.dart';
 import 'package:client_leger/providers/user_provider.dart';
@@ -28,6 +29,7 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
   final InGameChatService _inGameChatManager = InGameChatService();
   final ReportService _reportService = ReportService();
   late final MessageNotifNotifier _notifier;
+  HootSoundPlayer owlSoundPlayer = HootSoundPlayer();
 
   @override
   void initState() {
@@ -39,6 +41,13 @@ class _ChatWindowState extends ConsumerState<InGameChatWindow> {
       _notifier.markChatAsRead(inGameChat);
     });
     super.initState();
+  }
+
+  @override
+  dispose() {
+    owlSoundPlayer
+        .stop(); // pour ne pas entendre le hoot du dernier message systeme quand on te kick out
+    super.dispose();
   }
 
   String formatDate(DateTime date) {

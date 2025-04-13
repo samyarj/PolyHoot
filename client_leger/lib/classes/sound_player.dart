@@ -34,6 +34,13 @@ class SoundPlayer {
   Future<void> _initializePlayer() async {
     try {
       _audioPlayer = AudioPlayer(playerId: 'alertPlayer');
+      await _audioPlayer!.setAudioContext(AudioContext(
+        android: AudioContextAndroid(
+          contentType: AndroidContentType.music,
+          usageType: AndroidUsageType.media,
+          audioFocus: AndroidAudioFocus.none, // <- this is the key line
+        ),
+      ));
       _isInitialized = true;
       // Setup completion listener
       _completionSubscription = _audioPlayer?.onPlayerComplete.listen((event) {

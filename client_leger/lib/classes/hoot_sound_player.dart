@@ -1,13 +1,11 @@
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:client_leger/classes/sound_player.dart';
 import 'package:client_leger/utilities/logger.dart';
 
 const String HOOT_SOUND_PATH = "sounds/owl.mp3";
 
 class HootSoundPlayer {
   static final HootSoundPlayer _instance = HootSoundPlayer._internal();
-  final SoundPlayer alertSoundPlayer = SoundPlayer();
 
   HootSoundPlayer._internal() {
     AppLogger.w("_internal SoundPlayer instance");
@@ -32,6 +30,13 @@ class HootSoundPlayer {
   Future<void> _initializePlayer() async {
     try {
       _audioPlayer = AudioPlayer(playerId: 'owlPlayer');
+      await _audioPlayer!.setAudioContext(AudioContext(
+        android: AudioContextAndroid(
+          contentType: AndroidContentType.sonification,
+          usageType: AndroidUsageType.media,
+          audioFocus: AndroidAudioFocus.none, // <- this is the key line
+        ),
+      ));
       _isInitialized = true;
       // Setup completion listener
       _completionSubscription = _audioPlayer?.onPlayerComplete.listen((event) {
@@ -49,7 +54,7 @@ class HootSoundPlayer {
 
   Future<void> play() async {
     // Don't play if already playing
-    if (_isPlaying || alertSoundPlayer.isPlaying) {
+    if (_isPlaying) {
       AppLogger.i("Sound is already playing, ignoring play request");
       return;
     }
@@ -81,9 +86,6 @@ class HootSoundPlayer {
 
   void stop() {
     try {
-      if (alertSoundPlayer.isPlaying) {
-        return;
-      }
       AppLogger.i("Stopping alert sound");
       _audioPlayer?.stop();
       _isPlaying = false;
