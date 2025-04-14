@@ -20,6 +20,7 @@ export class UserService {
             this.usersSocketIdMap.set(socketId, uid);
             this.setLog(uid, 'connect').catch((error) => console.error('Failed to log connection:', error));
             this.logger.log(`User ${uid} connected with socket ID ${socketId}`);
+            console.log('Socket map in user service:', this.usersSocketIdMap);
         }
     }
 
@@ -210,7 +211,6 @@ export class UserService {
 
             // Update the user's online status and log the disconnect
             transaction.update(userRef, updateData);
-            this.logger.log(`User ${uid} disconnected after logging out`);
         });
     }
 

@@ -3,12 +3,12 @@ import { WsAuthGuard } from '@app/guards/auth/auth.guard';
 import { AuthenticatedSocket } from '@app/interface/authenticated-request';
 import { CoinflipManagerService } from '@app/services/coinflip-manager/coinflip-manager.service';
 import { Logger, UseGuards } from '@nestjs/common';
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 
 @WebSocketGateway()
 @UseGuards(WsAuthGuard)
-export class CoinflipGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+export class CoinflipGateway implements OnGatewayInit {
     private logger: Logger = new Logger('CoinflipGateway');
 
     @WebSocketServer()
@@ -19,21 +19,6 @@ export class CoinflipGateway implements OnGatewayInit, OnGatewayConnection, OnGa
     afterInit(server: Server) {
         this.logger.log('Initialized');
         this.coinflipManager.setServer(server);
-    }
-
-    handleConnection(client: AuthenticatedSocket, ...args: any[]) {
-        this.logger.log(`Client connected: ${client.id}`);
-
-        // THIS DOESNT WORK HERE ON INITIAL CONNECTION, ISSUE IS WITH THE FACT THAT  THIS IS EXECUTED BEFORE THE GUARDS => no user yet.
-        // if (client.user.displayName) {
-        //     this.logger.log(`DisplayName of user: ${client.user.displayName}`);
-        // }
-
-        // Additional logic for handling new connections can be added here
-    }
-
-    handleDisconnect(client: AuthenticatedSocket, ...args: any[]) {
-        this.logger.log(`Client disconnected: ${client.id}`);
     }
 
     @SubscribeMessage(CoinFlipEvents.SubmitChoice)

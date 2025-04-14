@@ -330,7 +330,10 @@ export class AuthService {
                     if (!idToken) throw new Error('Votre session a expiré. Veuillez vous reconnecter.');
                     this.tokenBS.next(idToken);
                     // this.socketClientService.disconnect(); <- causes errors in terms of socket handling backend, if token refreshes.
-                    this.socketClientService.connect(idToken);
+                    if (!this.isAuthenticating) {
+                        console.log('connecting while not authenticating');
+                        this.socketClientService.connect(idToken);
+                    }
 
                     this.isUserOnline(firebaseUser.uid).subscribe((isOnline) => {
                         if (isOnline && !this.userBS.value && !this.isPostSignupSetup) {
