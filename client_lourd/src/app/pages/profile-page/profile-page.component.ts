@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /* eslint-disable max-params */
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
@@ -12,7 +13,7 @@ import { debounceTime, Subject, takeUntil } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
-const SECONDS_IN_MINUTE = 60;
+// const SECONDS_IN_MINUTE = 60;
 
 interface GameLogEntry {
     gameName?: string;
@@ -86,6 +87,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.loadDefaultAvatars();
         this.loadLogs();
+        this.fetchAverageTimePerGame();
     }
 
     ngOnDestroy(): void {
@@ -139,12 +141,12 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
             this.averageCorrectAnswers = user.stats?.rightAnswerPercentage || 0;
 
             // Calculate average time
-            if (this.totalGamesPlayed > 0 && this.totalGameTime > 0) {
-                const averageSeconds = Math.floor(this.totalGameTime / this.totalGamesPlayed);
-                const minutes = Math.floor(averageSeconds / SECONDS_IN_MINUTE);
-                const seconds = averageSeconds % SECONDS_IN_MINUTE;
-                this.averageTimePerGame = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            }
+            // if (this.totalGamesPlayed > 0 && this.totalGameTime > 0) {
+            //     const averageSeconds = Math.floor(this.totalGameTime / this.totalGamesPlayed);
+            //     const minutes = Math.floor(averageSeconds / SECONDS_IN_MINUTE);
+            //     const seconds = averageSeconds % SECONDS_IN_MINUTE;
+            //     this.averageTimePerGame = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            // }
         }
     }
 
@@ -345,5 +347,35 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         // Calculate the absolute difference in milliseconds and convert to seconds
         // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         return Math.floor(Math.abs(date2.getTime() - date1.getTime()) / 1000);
+    }
+
+    private fetchAverageTimePerGame(): void {
+        const user = this.authService.getUser();
+        if (!user) return;
+
+        this.authService.token$.pipe(take(1)).subscribe({
+            next: (token) => {
+                if (!token) {
+                    this.toastr.error('Authentication token not found. Please try again.');
+                    return;
+                }
+
+                const options = {
+                    headers: { authorization: `Bearer ${token}` },
+                };
+
+                this.http.get<{ averageTimePerGame: string }>(`${this.baseUrl}/average-time-per-game`, options).subscribe({
+                    next: (response) => {
+                        this.averageTimePerGame = response.averageTimePerGame;
+                    },
+                    error: (error) => {
+                        this.toastr.error('Erreur lors de la récupération du temps moyen par partie : ' + error.message);
+                    },
+                });
+            },
+            error: (error) => {
+                this.toastr.error("Erreur lors de la récupération du jeton d'authentification : " + error.message);
+            },
+        });
     }
 }
