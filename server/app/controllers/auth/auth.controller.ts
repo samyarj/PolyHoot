@@ -224,4 +224,19 @@ export class AuthController {
             });
         }
     }
+
+    @UseGuards(AuthGuard)
+    @ApiOkResponse({ description: 'Average time per game successfully fetched' })
+    @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+    @Get('average-time-per-game')
+    async getAverageTimePerGame(@Req() req: AuthenticatedRequest, @Res() response: Response) {
+        this.logger.log(`Fetching average time per game for user: ${req.user.displayName}`);
+        try {
+            const averageTimePerGame = await this.userService.calculateAverageTimePerGame(req.user.uid);
+            response.status(HttpStatus.OK).json({ averageTimePerGame });
+        } catch (error) {
+            this.logger.error(`Error fetching average time per game: ${error.message}`);
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message || 'Erreur interne du serveur' });
+        }
+    }
 }

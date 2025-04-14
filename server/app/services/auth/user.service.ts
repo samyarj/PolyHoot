@@ -999,4 +999,58 @@ export class UserService {
             return { success: false, message: 'Une erreur est survenue lors du transfert' };
         }
     }
+
+    async calculateAverageTimePerGame(uid: string): Promise<string> {
+        const userRef = this.firestore.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+
+        if (!userDoc.exists) {
+            throw new Error("L'utilisateur n'existe pas.");
+        }
+
+        const gameLogs = userDoc.data().gameLogs || [];
+        let totalGameTime = 0;
+
+        for (const log of gameLogs) {
+            if (log.startTime && log.endTime) {
+                const startTime = this.parseTimestamp(log.startTime);
+                const endTime = this.parseTimestamp(log.endTime);
+                totalGameTime += this.diffDates(startTime, endTime);
+            }
+        }
+
+        const totalGamesPlayed = userDoc.data().nGames || 0;
+
+        if (totalGamesPlayed === 0 || totalGameTime === 0) {
+            return '0:00';
+        }
+
+        const averageSeconds = Math.floor(totalGameTime / totalGamesPlayed);
+        const minutes = Math.floor(averageSeconds / 60);
+        const seconds = averageSeconds % 60;
+
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    private parseTimestamp(timestamp: string): Date {
+        // Split the string into date and time parts
+        const [datePart, timePart] = timestamp.split(' ');
+        if (!datePart || !timePart) {
+            throw new Error('Invalid timestamp format');
+        }
+
+        // Split the date part into day, month, and year
+        const [day, month, year] = datePart.split('/').map(Number);
+        // Split the time part into hours, minutes, and seconds
+        const [hours, minutes, seconds] = timePart.split(':').map(Number);
+
+        // Create a new Date object (note: month is 0-indexed in JS Date)
+        return new Date(year, month - 1, day, hours, minutes, seconds);
+    }
+
+    private diffDates(date1: Date, date2: Date): number {
+        // Calculate the absolute difference in milliseconds and convert to seconds
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        return Math.floor(Math.abs(date2.getTime() - date1.getTime()) / 1000);
+    }
 }
