@@ -207,12 +207,20 @@
                         *ngIf="!profileForm.invalid"
                         type="submit"
                         [disabled]="
-                            profileForm.invalid || isUsernameTaken || isCheckingUsername || profileForm.get('username')?.value === currentUsername
+                            profileForm.invalid ||
+                            isUsernameTaken ||
+                            isCheckingUsername ||
+                            profileForm.get('username')?.value === currentUsername ||
+                            submittingUsername
                         "
                         class="custom-button"
                         [ngClass]="{
                             'custom-button-disabled':
-                                profileForm.invalid || isUsernameTaken || isCheckingUsername || profileForm.get('username')?.value === currentUsername
+                                profileForm.invalid ||
+                                isUsernameTaken ||
+                                isCheckingUsername ||
+                                profileForm.get('username')?.value === currentUsername ||
+                                submittingUsername
                         }"
                     >
                         Mettre à jour le pseudonyme

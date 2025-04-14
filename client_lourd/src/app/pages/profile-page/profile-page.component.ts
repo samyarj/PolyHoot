@@ -45,6 +45,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     math = Math;
     gameLogs: GameLogEntry[];
     logs: CnxLogEntry[];
+    submittingUsername: boolean = false;
     // Constants for username validation
     readonly usernamePattern: string = USERNAME_REGEX.source;
     readonly maxUsernameLength: number = USERNAME_MAX_LENGTH;
@@ -148,59 +149,71 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     }
 
     onUsernameSubmit() {
-        if (this.profileForm.invalid || this.isUsernameTaken) {
-            return;
-        }
+        if (!this.submittingUsername) {
+            this.submittingUsername = true;
 
-        const newUsername = this.profileForm.get('username')?.value;
-        if (!newUsername || newUsername === this.currentUsername) {
-            return;
-        }
+            if (this.profileForm.invalid || this.isUsernameTaken) {
+                this.submittingUsername = false;
+                return;
+            }
 
-        const user = this.authService.getUser();
-        if (!user) {
-            return;
-        }
+            const newUsername = this.profileForm.get('username')?.value;
+            if (!newUsername || newUsername === this.currentUsername) {
+                this.submittingUsername = false;
+                return;
+            }
 
-        // Get the current token from auth service
-        this.authService.token$.pipe(take(1)).subscribe({
-            next: async (token) => {
-                if (!token) {
-                    this.toastr.error('Authentication token not found. Please try again.');
-                    return;
-                }
+            const user = this.authService.getUser();
+            if (!user) {
+                this.submittingUsername = false;
+                return;
+            }
 
-                const options = {
-                    headers: { authorization: `Bearer ${token}` },
-                };
-
-                try {
-                    // First update Firebase Auth display name
-                    if (this.auth.currentUser) {
-                        await updateProfile(this.auth.currentUser, {
-                            displayName: newUsername,
-                        });
+            // Get the current token from auth service
+            this.authService.token$.pipe(take(1)).subscribe({
+                next: async (token) => {
+                    if (!token) {
+                        this.toastr.error('Authentication token not found. Please try again.');
+                        this.submittingUsername = false;
+                        return;
                     }
 
-                    // Then update Firestore through our backend
-                    this.http.patch<User>(`${this.baseUrl}/update-username`, { username: newUsername }, options).subscribe({
-                        next: (updatedUser) => {
-                            this.currentUsername = updatedUser.username;
-                            this.authService.setUser(updatedUser);
-                            this.toastr.success('Pseudonyme mis à jour avec succès !');
-                        },
-                        error: (error: Error) => {
-                            this.toastr.error('Erreur lors de la mise à jour du pseudonyme : ' + error.message);
-                        },
-                    });
-                } catch (error) {
-                    this.toastr.error('Erreur lors de la mise à jour du profil : ' + (error as Error).message);
-                }
-            },
-            error: (error: Error) => {
-                this.toastr.error("Erreur lors de la récupération du jeton d'authentification : " + error.message);
-            },
-        });
+                    const options = {
+                        headers: { authorization: `Bearer ${token}` },
+                    };
+
+                    try {
+                        // First update Firebase Auth display name
+                        if (this.auth.currentUser) {
+                            await updateProfile(this.auth.currentUser, {
+                                displayName: newUsername,
+                            });
+                        }
+
+                        // Then update Firestore through our backend
+                        this.http.patch<User>(`${this.baseUrl}/update-username`, { username: newUsername }, options).subscribe({
+                            next: (updatedUser) => {
+                                this.currentUsername = updatedUser.username;
+                                this.authService.setUser(updatedUser);
+                                this.toastr.success('Pseudonyme mis à jour avec succès !');
+                                this.submittingUsername = false;
+                            },
+                            error: (error: Error) => {
+                                this.toastr.error('Erreur lors de la mise à jour du pseudonyme : ' + error.message);
+                                this.submittingUsername = false;
+                            },
+                        });
+                    } catch (error) {
+                        this.toastr.error('Erreur lors de la mise à jour du profil : ' + (error as Error).message);
+                        this.submittingUsername = false;
+                    }
+                },
+                error: (error: Error) => {
+                    this.toastr.error("Erreur lors de la récupération du jeton d'authentification : " + error.message);
+                    this.submittingUsername = false;
+                },
+            });
+        }
     }
 
     checkUsername(): void {
