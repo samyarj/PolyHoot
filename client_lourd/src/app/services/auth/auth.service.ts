@@ -299,8 +299,9 @@ export class AuthService {
             }),
             tap((user) => {
                 if (user && user.uid) {
-                    this.socketClientService.send(ConnectEvents.IdentifyClient, user.uid);
                     this.clientIsIdentified = true;
+                    console.log('identifying through handleAuthAndFetchUser');
+                    this.socketClientService.send(ConnectEvents.IdentifyClient, user.uid);
                 }
             }),
         );
@@ -359,9 +360,11 @@ export class AuthService {
                                     // Check if user is banned (unBanDate is in the future)
                                     if (this.checkAndHandleBan(userData)) return;
 
-                                    if (!this.clientIsIdentified) {
-                                        this.socketClientService.send(ConnectEvents.IdentifyClient, firebaseUser.uid);
+                                    if (!this.clientIsIdentified && !(this.isAuthenticating || this.isSigningUp)) {
                                         this.clientIsIdentified = true;
+                                        console.log(this.user$);
+                                        console.log('identifying through monitorTokenChanges');
+                                        this.socketClientService.send(ConnectEvents.IdentifyClient, firebaseUser.uid);
                                     }
                                     this.userBS.next(userData);
                                 } else {
@@ -414,8 +417,9 @@ export class AuthService {
                         if (this.checkAndHandleBan(userData)) return;
 
                         if (!this.clientIsIdentified) {
-                            this.socketClientService.send(ConnectEvents.IdentifyClient, firebaseUser.uid);
                             this.clientIsIdentified = true;
+                            console.log('identifying through setupTokenListener');
+                            this.socketClientService.send(ConnectEvents.IdentifyClient, firebaseUser.uid);
                         }
                         this.userBS.next(userData);
                     } else {
