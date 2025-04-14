@@ -404,7 +404,6 @@ export class FirebaseChatService implements OnDestroy {
             await updateDoc(userDocRef, {
                 [`readMessages.${channelName}`]: lastRead,
             });
-            console.warn(`Successfully updated ${channelId} to ${lastRead} in read messages`);
         } catch (error) {
             console.error('Error updating read messages: ', error);
         }
