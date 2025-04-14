@@ -1,37 +1,42 @@
-import 'package:client_leger/models/game-log-entry-model.dart';
+import 'dart:convert';
+
+import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
+import 'package:client_leger/environment_config.dart';
 import 'package:client_leger/utilities/logger.dart';
-import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:http/http.dart' as http;
 
-String getAverageTimePerGame(List<GameLogEntry> gameLogs) {
-  // Parse the date format
-  final dateFormat = DateFormat("dd/MM/yyyy HH:mm:ss");
-
-  // Calculate total duration in seconds
-  int totalDurationInSeconds = 0;
-  int skippedLogs = 0;
-  for (final log in gameLogs) {
-    try {
-      if (log.startTime != null && log.endTime != null) {
-        final startTime = dateFormat.parse(log.startTime!);
-        final endTime = dateFormat.parse(log.endTime!);
-        totalDurationInSeconds += endTime.difference(startTime).inSeconds;
-      }
-    } catch (e) {
-      AppLogger.w(
-          "Error parsing date: $e log = $log, startTime = ${log.startTime}, endTime = ${log.endTime}");
-      skippedLogs++;
-      continue;
+Future<String> fetchAverageTimePerGame() async {
+  try {
+    final currentUser = firebase_auth.FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      throw Exception('User not authenticated');
     }
+
+    final token = await currentUser.getIdToken();
+
+    final response = await http.get(
+      Uri.parse('${EnvironmentConfig.serverUrl}/users/average-time-per-game'),
+      headers: {
+        'Content-Type': 'application/json',
+        'authorization': 'Bearer $token'
+      },
+    );
+
+    if (response.statusCode == 200) {
+      // Parse the response
+      final Map<String, dynamic> responseBody = json.decode(response.body);
+
+      // Assuming the backend returns a 'averageTimePerGame' field
+      final String averageTime = responseBody['averageTimePerGame'] ?? '0:00';
+
+      return averageTime;
+    } else {
+      AppLogger.w('Failed to fetch average time per game: ${response.body}');
+      throw Exception('Failed to fetch average time per game');
+    }
+  } catch (e) {
+    AppLogger.e('Error fetching average time per game: ${e.toString()}');
+    throw Exception(getCustomError(e));
   }
-
-  // Calculate average duration
-  if (gameLogs.isEmpty) return "0:00";
-  final averageDurationInSeconds =
-      totalDurationInSeconds ~/ (gameLogs.length - skippedLogs);
-
-  // Convert to minutes and seconds
-  final minutes = averageDurationInSeconds ~/ 60;
-  final seconds = averageDurationInSeconds % 60;
-
-  return "$minutes:$seconds";
 }
