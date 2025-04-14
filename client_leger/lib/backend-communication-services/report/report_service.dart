@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:client_leger/environment_config.dart';
 import 'package:client_leger/models/report/report_state.dart';
 import 'package:client_leger/utilities/helper_functions.dart';
@@ -6,8 +7,8 @@ import 'package:client_leger/utilities/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:toastification/toastification.dart';
 import 'package:http/http.dart' as http;
+import 'package:toastification/toastification.dart';
 
 class ReportService {
   static final ReportService _instance = ReportService._();
@@ -23,6 +24,7 @@ class ReportService {
   bool isWarned = false;
   ValueNotifier<int?> nbReport = ValueNotifier<int?>(null);
   ValueNotifier<Timestamp?> unBanDate = ValueNotifier<Timestamp?>(null);
+  bool isBanned = false;
 
   behaviourWarning(BuildContext context) {
     if (!isWarned) {
@@ -44,6 +46,7 @@ class ReportService {
 
   resetParam() {
     isWarned = false;
+    isBanned = false;
     nbReport.value = null;
     unBanDate.value = null;
   }

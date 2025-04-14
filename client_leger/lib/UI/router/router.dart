@@ -246,12 +246,16 @@ final GoRouter router = GoRouter(
             "User has been reported more than 2 times or has been banned");
         final reportState =
             await _reportService.getReportState(currentUserState.value?.uid);
-        if (reportState != null && reportState.isBanned) {
+        if (reportState != null &&
+            reportState.isBanned &&
+            !_reportService.isBanned) {
+          _reportService.isBanned = true;
           _reportService.banInfo(reportState.message, context);
           WidgetsBinding.instance.addPostFrameCallback((_) {
             containerRef.read(user_provider.userProvider.notifier).logout();
           });
-        } else {
+        } else if (reportState != null && !reportState.isBanned) {
+          _reportService.isBanned = false;
           _reportService.behaviourWarning(context);
         }
       }
