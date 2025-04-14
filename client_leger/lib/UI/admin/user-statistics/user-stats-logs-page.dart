@@ -15,7 +15,7 @@ class UserStatsAndLogsPage extends ConsumerStatefulWidget {
 }
 
 class _UserStatsAndLogsPageState extends ConsumerState<UserStatsAndLogsPage> {
-  String _averageTimePerGame = '0:00';
+  String _averageTimePerGame = '0m:00s';
 
   @override
   void initState() {
@@ -32,10 +32,9 @@ class _UserStatsAndLogsPageState extends ConsumerState<UserStatsAndLogsPage> {
         });
       }
     } catch (e) {
-      // Keep the default '0:00' if fetching fails
       if (mounted) {
         setState(() {
-          _averageTimePerGame = '0:00';
+          _averageTimePerGame = '0m:00s';
         });
       }
     }

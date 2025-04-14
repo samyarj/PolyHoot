@@ -57,7 +57,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     gamesWon: number = 0;
     averageCorrectAnswers: number = 0;
     totalGameTime: number = 0;
-    averageTimePerGame: string = '0:00';
+    averageTimePerGame: string = '0m:00s';
     totalActions: number = 0;
     lastLogin: string = 'N/A';
 
@@ -366,7 +366,14 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
 
                 this.http.get<{ averageTimePerGame: string }>(`${this.baseUrl}/average-time-per-game`, options).subscribe({
                     next: (response) => {
-                        this.averageTimePerGame = response.averageTimePerGame;
+                        const rawTime = response.averageTimePerGame || '0m:00s';
+                        const timeParts = rawTime.split(':');
+
+                        if (timeParts.length === 2) {
+                            this.averageTimePerGame = `${timeParts[0]}m:${timeParts[1]}s`;
+                        } else {
+                            this.averageTimePerGame = rawTime;
+                        }
                     },
                     error: (error) => {
                         this.toastr.error('Erreur lors de la récupération du temps moyen par partie : ' + error.message);
