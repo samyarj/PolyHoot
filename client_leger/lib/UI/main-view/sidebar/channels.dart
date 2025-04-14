@@ -1,14 +1,12 @@
 import 'dart:async';
-import 'package:client_leger/UI/confirmation/confirmation_dialog.dart';
-import 'package:client_leger/UI/confirmation/confirmation_messages.dart';
 import 'package:client_leger/UI/main-view/sidebar/channel_search.dart';
+import 'package:client_leger/UI/main-view/sidebar/user_channels.dart';
 import 'package:client_leger/business/channel_manager.dart';
 import 'package:client_leger/models/chat_channels.dart';
 import 'package:client_leger/providers/messages/messages_notif_provider.dart';
 import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class Channels extends ConsumerStatefulWidget {
   const Channels({
@@ -30,9 +28,12 @@ class _ChannelsState extends ConsumerState<Channels> {
   final ChannelManager channelManager = ChannelManager();
   List<ChatChannel> userChannels = [];
   List<ChatChannel> joinableChannels = [];
-  List<ChatChannel> _filteredChannels = [];
+  List<ChatChannel> _filteredJoinChannels = [];
+  List<ChatChannel> _filteredUserChannels = [];
   List<ChatChannel> _previousJoinableChannels = [];
-  String currentQuery = "";
+  List<ChatChannel> _previousUserChannels = [];
+  String currentJoinQuery = "";
+  String currentUserQuery = "";
 
   @override
   void initState() {
@@ -53,17 +54,37 @@ class _ChannelsState extends ConsumerState<Channels> {
     return true;
   }
 
-  void _filterChannels(String query) {
+  void _filterJoinChannels(String query) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (query != currentQuery ||
+      if (query != currentJoinQuery ||
           !areEquals(_previousJoinableChannels, joinableChannels)) {
-        currentQuery = query;
+        currentJoinQuery = query;
         _previousJoinableChannels = joinableChannels;
         if (mounted) {
           setState(() {
-            AppLogger.i("Filtering channels with query: $query");
+            AppLogger.i("Filtering join channels with query: $query");
 
-            _filteredChannels = joinableChannels
+            _filteredJoinChannels = joinableChannels
+                .where((channel) =>
+                    channel.name.toLowerCase().contains(query.toLowerCase()))
+                .toList();
+          });
+        }
+      }
+    });
+  }
+
+  void _filterUserChannels(String query) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (query != currentUserQuery ||
+          !areEquals(_previousUserChannels, userChannels)) {
+        currentUserQuery = query;
+        _previousUserChannels = userChannels;
+        if (mounted) {
+          setState(() {
+            AppLogger.i("Filtering user channels channels with query: $query");
+
+            _filteredUserChannels = userChannels
                 .where((channel) =>
                     channel.name.toLowerCase().contains(query.toLowerCase()))
                 .toList();
@@ -86,7 +107,8 @@ class _ChannelsState extends ConsumerState<Channels> {
         joinableChannels =
             channels.where((channel) => !channel.isUserInChannel).toList();
 
-        _filterChannels(currentQuery);
+        _filterJoinChannels(currentJoinQuery);
+        _filterUserChannels(currentUserQuery);
 
         return DefaultTabController(
           length: 2,
@@ -115,14 +137,19 @@ class _ChannelsState extends ConsumerState<Channels> {
                 Expanded(
                   child: TabBarView(
                     children: [
-                      _buildUserChannels(
-                          userChannels, widget.userUid, colorScheme),
+                      UserChannels(
+                        filteredChannels: _filteredUserChannels,
+                        filterChannels: _filterUserChannels,
+                        currentUserUid: widget.userUid,
+                        currentQuery: currentUserQuery,
+                        onChannelPicked: widget.onChannelPicked,
+                      ),
                       ChannelSearch(
-                        filteredChannels: _filteredChannels,
+                        filteredChannels: _filteredJoinChannels,
                         onDeleteChannel: onDeleteChannel,
                         currentUserUid: widget.userUid,
-                        filterChannels: _filterChannels,
-                        currentQuery: currentQuery,
+                        filterChannels: _filterJoinChannels,
+                        currentQuery: currentJoinQuery,
                         onChannelPicked: widget.onChannelPicked,
                       ),
                     ],
@@ -130,66 +157,6 @@ class _ChannelsState extends ConsumerState<Channels> {
                 ),
               ],
             ),
-          ),
-        );
-      },
-    );
-  }
-
-  _buildUserChannels(List<ChatChannel> userChannels, String? currentUserUid,
-      ColorScheme colorScheme) {
-    if (userChannels.isEmpty) {
-      return Center(
-        child: Text(
-          'Vous êtes dans aucun canal.',
-          style: TextStyle(color: colorScheme.onPrimary),
-        ),
-      );
-    }
-
-    return ListView.builder(
-      itemCount: userChannels.length,
-      itemBuilder: (context, index) {
-        final channel = userChannels[index];
-        return ListTile(
-          leading: IconButton(
-            icon: Icon(
-              FontAwesomeIcons.comment,
-              color: colorScheme.onPrimary,
-            ),
-            onPressed: () => widget.onChannelPicked(2, channel.name),
-          ),
-          title: Text(
-            channel.name,
-            style: TextStyle(color: colorScheme.onPrimary, fontSize: 18),
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: Icon(FontAwesomeIcons.rightFromBracket,
-                    color: colorScheme.onPrimary),
-                onPressed: () async {
-                  await showConfirmationDialog(
-                      context,
-                      "$quitChannel ${channel.name} ?",
-                      () => channelManager.quitChannel(
-                          currentUserUid, channel.name),
-                      null);
-                },
-              ),
-              IconButton(
-                icon:
-                    Icon(Icons.delete, size: 30, color: colorScheme.onPrimary),
-                onPressed: () async {
-                  await showConfirmationDialog(
-                      context,
-                      "$deleteChannel ${channel.name} ?",
-                      () => onDeleteChannel(channel.name),
-                      null);
-                },
-              ),
-            ],
           ),
         );
       },
