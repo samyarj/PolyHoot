@@ -5,6 +5,7 @@ import { UserService } from '@app/services/auth/user.service';
 import { ChatService } from '@app/services/chat/chat.service';
 import { GameManagerService } from '@app/services/game-manager/game-manager.service';
 import { ChatMessage } from '@common/chat-message';
+import { Logger } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
@@ -12,7 +13,7 @@ import { Server, Socket } from 'socket.io';
 export class ConnectionGateway implements OnGatewayDisconnect {
     @WebSocketServer()
     server: Server;
-
+    logger = new Logger('ConnectionGateway');
     constructor(
         private chatService: ChatService,
         private gameManager: GameManagerService,
@@ -21,6 +22,7 @@ export class ConnectionGateway implements OnGatewayDisconnect {
 
     @SubscribeMessage(ConnectEvents.IdentifyClient)
     handleIdentify(@MessageBody() uid: string, @ConnectedSocket() client: Socket) {
+        console.log('identifying client');
         this.userService.addUserToMap(client.id, uid);
     }
 
@@ -59,10 +61,12 @@ export class ConnectionGateway implements OnGatewayDisconnect {
     Appelé quand l'utilisateur fait close all sur le client léger ou quand il logout
     */
     handleDisconnect(client: Socket) {
+        console.log(`entering handledisconnect for some reason`);
         if (this.userService.isUserInMap(client.id)) {
             const clientUid = this.userService.getUserUidFromMap(client.id);
             if (clientUid) {
                 this.userService.logout(clientUid);
+                this.logger.debug(`Removing user ${clientUid} from map because disconnected`);
                 this.userService.removeUserFromMap(client.id);
             }
         }
@@ -87,9 +91,11 @@ export class ConnectionGateway implements OnGatewayDisconnect {
         const game = this.gameManager.getGameByRoomId(roomId);
         const clientIds = this.server.sockets.adapter.rooms.get(roomId);
         if (game && game.gameState !== GameState.RESULTS) {
+            this.logger.debug(`Disconnecting organizer from gamepage : ${roomId}`);
             this.disconnectOrganizerFromOtherPages(roomId, clientIds);
             client.emit(ChatEvents.RoomLeft);
         } else if (game && game.gameState === GameState.RESULTS) {
+            this.logger.debug(`Disconnecting organizer from results : ${roomId}`);
             this.disconnectUserFromResultsPage(roomId, client);
         }
     }
@@ -147,19 +153,23 @@ export class ConnectionGateway implements OnGatewayDisconnect {
 
     private disconnectPlayer(game: Game, player: Player, roomId: string) {
         if (game) {
+            this.logger.debug(`Disconnecting ${player.name} from game : ${roomId}`);
             switch (game.gameState) {
                 case GameState.WAITING: {
+                    this.logger.debug(`Disconnecting ${player.name} from waiting page : ${roomId}`);
                     this.sendDisconnectMessage(player.name, roomId);
                     this.disconnectPlayerFromWaitingPage(roomId, player, game);
                     break;
                 }
                 case GameState.GAMING: {
+                    this.logger.debug(`Disconnecting ${player.name} from gaming page : ${roomId}`);
                     game.playersRemoved.push(player);
                     this.sendDisconnectMessage(player.name, roomId);
                     this.disconnectPlayerFromGamePage(game, player);
                     break;
                 }
                 case GameState.RESULTS: {
+                    this.logger.debug(`Disconnecting ${player.name} from results page : ${roomId}`);
                     this.disconnectUserFromResultsPage(roomId, player.socket);
                     break;
                 }

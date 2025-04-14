@@ -17,10 +17,15 @@ export class SocketClientService {
 
     connect(token: string) {
         if (!this.isSocketAlive() && token !== null) {
+            console.log('Connecting to socket server...');
             this.socket = io(environment.serverUrlSocket, {
                 transports: ['websocket'],
                 upgrade: false,
                 query: { token },
+            });
+
+            this.socket.on('disconnect', (reason) => {
+                console.log(`Socket ${this.socket.id} disconnected: ${reason}`);
             });
         }
     }

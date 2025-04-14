@@ -10,7 +10,7 @@ import { User } from '@app/interface/user';
 import { Quiz } from '@app/model/schema/quiz/quiz';
 import { UserService } from '@app/services/auth/user.service';
 import { PartialPlayer, PlayerResult } from '@common/partial-player';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConnectedSocket } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { ALERT_MODE_TIME_LIMITS, ANSWER_TIME_INTERVAL } from './game.constants';
@@ -26,6 +26,7 @@ export class Game {
     timer: Timer;
     playersRemoved: Player[];
     organizer: Player;
+    logger = new Logger('Game');
     private playersReadyForNext: boolean;
     private currentQuestionIndex: number;
     private lastFinalizeCall: number | null;
@@ -47,6 +48,7 @@ export class Game {
     }
 
     removePlayer(playerName: string): Player[] {
+        this.logger.debug(`Removing player ${playerName} from game ${this.roomId}`);
         const index = this.players.findIndex((player) => player.name.toLowerCase() === playerName.toLowerCase());
         const outRangeIndex = -1;
         if (index !== outRangeIndex) {

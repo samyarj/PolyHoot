@@ -16,14 +16,17 @@ export class UserService {
     constructor(private readonly cloudinaryService: CloudinaryService) {}
 
     addUserToMap(socketId: string, uid: string) {
+        console.log('entering add user to map.');
         if (!this.isUserInMap(socketId)) {
             this.usersSocketIdMap.set(socketId, uid);
             this.setLog(uid, 'connect').catch((error) => console.error('Failed to log connection:', error));
             this.logger.log(`User ${uid} connected with socket ID ${socketId}`);
+            console.log('Socket map in user service-adduser:', this.usersSocketIdMap);
         }
     }
 
     isUserInMap(socketId: string): boolean {
+        console.log('Socket map in user service-isUserInMap:', this.usersSocketIdMap);
         return this.usersSocketIdMap.has(socketId);
     }
 
@@ -37,7 +40,6 @@ export class UserService {
         if (uid) {
             this.setLog(uid, 'disconnect').catch((error) => console.error('Failed to log disconnection:', error));
             await this.removeFcmToken(uid).catch((error) => console.error('Failed to remove FCM token:', error));
-            this.logger.log(`User ${uid} disconnected after losing socket connection`);
         }
     }
 
@@ -209,7 +211,6 @@ export class UserService {
 
             // Update the user's online status and log the disconnect
             transaction.update(userRef, updateData);
-            this.logger.log(`User ${uid} disconnected after logging out`);
         });
     }
 
