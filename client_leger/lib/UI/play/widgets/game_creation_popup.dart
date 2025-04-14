@@ -250,7 +250,6 @@ class GameCreationPopup {
       AppLogger.i('Creating game with quiz: $roomId');
       socket.setRoomId(roomId);
       socket.isOrganizer = true;
-      socket.isPlaying = true;
       Navigator.pop(context);
       GoRouter.of(context).push('${Paths.play}/${Paths.waitingPage}');
     });

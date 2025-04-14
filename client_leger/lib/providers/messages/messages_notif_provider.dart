@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:client_leger/backend-communication-services/chat/chat_notif_persistence_service.dart';
 import 'package:client_leger/classes/hoot_sound_player.dart';
 import 'package:client_leger/push-notif-api/life_cycle_service.dart';
@@ -85,9 +86,11 @@ class MessageNotifNotifier extends StateNotifier<MessageNotifState> {
   }
 
   void onGameEnd() {
-    final updatedUnread = {...state.unreadMessages};
-    updatedUnread.remove(inGameChat);
-    state = state.copyWith(unreadMessages: updatedUnread);
+    if (mounted) {
+      final updatedUnread = {...state.unreadMessages};
+      updatedUnread.remove(inGameChat);
+      state = state.copyWith(unreadMessages: updatedUnread);
+    }
   }
 
   // Function to count unread messages in a specific channel -- for the first snapshot

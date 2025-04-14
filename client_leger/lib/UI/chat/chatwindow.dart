@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:client_leger/UI/confirmation/confirmation_dialog.dart';
 import 'package:client_leger/UI/error/error_dialog.dart';
 import 'package:client_leger/UI/global/avatar_banner_widget.dart';
@@ -167,8 +168,9 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
       showToast(context, "Une erreur a eu lieu",
           type: ToastificationType.error);
     } else if (isReported! && mounted) {
-      showToast(context,
-          'Merci pour votre contribution à la bonne atmosphère du jeu. Le joueur est signalé.',
+      showToast(context, 'Merci!',
+          description:
+              'Merci pour votre contribution à la bonne atmosphère du jeu. Le joueur est signalé.',
           type: ToastificationType.success);
     } else if (mounted) {
       showToast(context, 'Vous avez déjà signalé ce joueur.',

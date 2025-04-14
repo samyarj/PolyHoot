@@ -233,20 +233,17 @@ final GoRouter router = GoRouter(
       final containerRef = ProviderScope.containerOf(context);
       final currentUserState = containerRef.read(user_provider.userProvider);
 
-      if (_reportService.unBanDate.value != null &&
-          _reportService.unBanDate.value!.toDate().isAfter(DateTime.now())) {
-        _reportService.banInfo(
-            "Vous êtes banni pendant les prochaines 15 minutes", context);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          containerRef.read(user_provider.userProvider.notifier).logout();
-        });
-        return null;
-      }
+      final isAdmin = currentUserState.value?.role == 'admin';
 
-      if (_reportService.nbReport.value != null &&
-          _reportService.nbReport.value! >= 2) {
-        AppLogger.w("User has been reported more than 2 times");
-        _reportService.behaviourWarning(context);
+      if (!isAdmin &&
+          ((_reportService.nbReport.value != null &&
+                  _reportService.nbReport.value! >= 2) ||
+              (_reportService.unBanDate.value != null &&
+                  _reportService.unBanDate.value!
+                      .toDate()
+                      .isAfter(DateTime.now())))) {
+        AppLogger.w(
+            "User has been reported more than 2 times or has been banned");
         final reportState =
             await _reportService.getReportState(currentUserState.value?.uid);
         if (reportState != null && reportState.isBanned) {
@@ -254,10 +251,10 @@ final GoRouter router = GoRouter(
           WidgetsBinding.instance.addPostFrameCallback((_) {
             containerRef.read(user_provider.userProvider.notifier).logout();
           });
+        } else {
+          _reportService.behaviourWarning(context);
         }
       }
-
-      final isAdmin = currentUserState.value?.role == 'admin';
 
       // Check if admin is trying to access normal user routes or vice versa
       final isAdminRoute = state.matchedLocation.startsWith(Paths.adminHome) ||

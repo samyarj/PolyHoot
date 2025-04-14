@@ -32,13 +32,13 @@ class ConfirmTransactionDialog extends StatelessWidget {
           _buildTransactionInfoRow(
               context, 'Destinataire:', friend.user.username),
           const SizedBox(height: 12),
-          _buildTransactionInfoRow(context, 'Montant:', '$amount coins'),
+          _buildTransactionInfoRow(context, 'Montant:', '$amount pièces'),
           const SizedBox(height: 12),
           _buildTransactionInfoRow(
-              context, 'Solde après transfert:', '$newBalance coins'),
+              context, 'Solde après transfert:', '$newBalance pièces'),
           const Divider(color: Colors.white30),
           const SizedBox(height: 16),
-          _buildTransactionInfoRow(context, 'Total:', '$amount coins'),
+          _buildTransactionInfoRow(context, 'Total:', '$amount pièces'),
         ],
       ),
       actions: [

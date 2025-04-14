@@ -16,7 +16,6 @@ class OrganizerGamePage extends ConsumerWidget {
     if (!context.mounted) return;
     if (shouldAbandon) {
       ref.read(organizerProvider.notifier).abandonGame();
-      WebSocketManager().isPlaying = false;
       context.go(Paths.play);
     }
   }
@@ -30,7 +29,7 @@ class OrganizerGamePage extends ConsumerWidget {
       if (next.shouldNavigateToResults) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           final resultPlayerList = notifier.getResultPlayerList();
-          WebSocketManager().isPlaying = false;
+          WebSocketManager().isInResultPage = true;
           context.go('${Paths.play}/${Paths.resultsView}',
               extra: resultPlayerList);
         });
@@ -38,7 +37,6 @@ class OrganizerGamePage extends ConsumerWidget {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _showToast(context, 'Tous les joueurs ont quitté la partie');
           context.go(Paths.play);
-          WebSocketManager().isPlaying = false;
         });
       }
     });

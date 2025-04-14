@@ -26,7 +26,7 @@ final class WebSocketManager {
   final firebasePushNotif = FirebasePushApi();
 
   bool isOrganizer = false;
-  bool isPlaying = false;
+  bool isInResultPage = false;
   String? playerName;
   IO.Socket? socket;
 

@@ -32,7 +32,6 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
   void dispose() {
     if (shouldDisconnect) {
       AppLogger.i("Disconnecting player from game and removing roomId");
-      _socketManager.isPlaying = false;
       _socketManager.webSocketSender(DisconnectEvents.Player.value);
       _socketManager.removeRoomId();
     }
@@ -45,7 +44,6 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
         context, "Êtes-vous sûr de vouloir abandonner la partie?", () async {
       playerGameNotifier.stopAlertSound();
       GoRouter.of(context).go(Paths.play);
-      _socketManager.isPlaying = false;
     }, null);
   }
 
@@ -60,13 +58,12 @@ class _PlayerGamePageState extends ConsumerState<PlayerGamePage> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           shouldDisconnect = false;
           resultPlayerList = playerGameNotifier.getResultPlayerList();
-          _socketManager.isPlaying = false;
+          _socketManager.isInResultPage = true;
           GoRouter.of(context).go('${Paths.play}/${Paths.resultsView}',
               extra: resultPlayerList);
         });
       } else if (next.organizerDisconnected == true) {
         showToast(context, "L'organisateur a quitté la partie.");
-        _socketManager.isPlaying = false;
         GoRouter.of(context).go(Paths.play);
       }
     });

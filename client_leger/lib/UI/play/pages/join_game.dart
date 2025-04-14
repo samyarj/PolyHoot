@@ -4,7 +4,6 @@ import 'package:client_leger/UI/friend-system/qr-scanner-widget.dart';
 import 'package:client_leger/UI/global/header_title.dart';
 import 'package:client_leger/UI/play/widgets/game_creation_popup.dart';
 import 'package:client_leger/UI/router/routes.dart';
-import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/models/enums.dart';
 import 'package:client_leger/providers/play/join_game_provider.dart';
 import 'package:client_leger/utilities/helper_functions.dart';
@@ -53,7 +52,6 @@ class _JoinGameState extends ConsumerState<JoinGame> {
     ref.listen(joinGameProvider, (previous, next) {
       if (next.isJoined) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          WebSocketManager().isPlaying = true;
           GoRouter.of(context).go('${Paths.play}/${Paths.waitingPage}');
         });
       }

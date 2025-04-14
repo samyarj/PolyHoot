@@ -2,7 +2,6 @@ import 'package:client_leger/UI/play/widgets/leave_game_button.dart';
 import 'package:client_leger/UI/play/widgets/player-section.dart';
 import 'package:client_leger/UI/play/widgets/question_content.dart';
 import 'package:client_leger/UI/play/widgets/question_section.dart';
-import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
 import 'package:client_leger/providers/play/game_organizer_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,7 +86,6 @@ class ImprovedGameArea extends ConsumerWidget {
               ),
               TextButton(
                 onPressed: () {
-                  WebSocketManager().isPlaying = false;
                   Navigator.pop(context, true);
                 },
                 child: Text("Abandonner",

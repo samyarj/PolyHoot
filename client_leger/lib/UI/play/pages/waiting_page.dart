@@ -406,7 +406,6 @@ class WaitingPage extends ConsumerWidget {
       final route =
           socketManager.isOrganizer ? '/play' : '/play/${Paths.joinGame}';
       GoRouter.of(context).go(route);
-      WebSocketManager().isPlaying = false;
     });
   }
 }
