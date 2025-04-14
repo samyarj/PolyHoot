@@ -20,12 +20,12 @@ export class UserService {
             this.usersSocketIdMap.set(socketId, uid);
             this.setLog(uid, 'connect').catch((error) => console.error('Failed to log connection:', error));
             this.logger.log(`User ${uid} connected with socket ID ${socketId}`);
-            console.log('Socket map in user service:', this.usersSocketIdMap);
+            console.log('Socket map in user service-adduser:', this.usersSocketIdMap);
         }
     }
 
     isUserInMap(socketId: string): boolean {
-        console.log('Socket map in user service:', this.usersSocketIdMap);
+        console.log('Socket map in user service-isUserInMap:', this.usersSocketIdMap);
         return this.usersSocketIdMap.has(socketId);
     }
 

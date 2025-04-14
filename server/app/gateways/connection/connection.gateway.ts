@@ -60,6 +60,7 @@ export class ConnectionGateway implements OnGatewayDisconnect {
     Appelé quand l'utilisateur fait close all sur le client léger ou quand il logout
     */
     handleDisconnect(client: Socket) {
+        console.log(`entering handledisconnect for some reason`);
         if (this.userService.isUserInMap(client.id)) {
             const clientUid = this.userService.getUserUidFromMap(client.id);
             if (clientUid) {
