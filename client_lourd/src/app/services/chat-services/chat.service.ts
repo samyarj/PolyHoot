@@ -56,7 +56,7 @@ export class ChatService implements OnDestroy {
                 const message: ChatMessage = {
                     message: messageInput,
                     // author: user.username,
-                    author: this.socketClientService.playerName,
+                    author: this.socketClientService.isOrganizer ? 'Organisateur' : this.socketClientService.playerName,
                     uid: user.uid,
                     avatar: user.avatarEquipped || 'https://res.cloudinary.com/dtu6fkkm9/image/upload/v1737478954/default-avatar_qcaycl.jpg',
                     border: user.borderEquipped,
@@ -76,7 +76,8 @@ export class ChatService implements OnDestroy {
     }
 
     getUserName() {
-        return this.socketClientService.isOrganizer ? (this.socketClientService.playerName = 'Organisateur') : this.socketClientService.playerName;
+        this.socketClientService.playerName = this.socketClientService.isOrganizer ? 'Organisateur' : this.socketClientService.playerName;
+        return this.socketClientService.playerName;
     }
 
     configureChatSocketFeatures() {
