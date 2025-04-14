@@ -25,7 +25,7 @@ export class SocketClientService {
             });
 
             this.socket.on('disconnect', (reason) => {
-                console.log(`Socket ${this.socket.id} disconnected: ${reason}`);
+                console.log('Socket ', this.socket.id, 'disconnected: ', reason);
             });
         }
     }
