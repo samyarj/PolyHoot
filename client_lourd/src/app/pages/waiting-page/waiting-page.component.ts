@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { Component, HostListener, OnDestroy } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { moveDownAnimation, moveUpAnimation, playerJoinAnimation, playerLeftAnimation } from '@app/animations/animation';
 import { START_GAME_COUNTDOWN } from '@app/constants/constants';
@@ -34,7 +34,6 @@ export class WaitingPageComponent implements OnDestroy {
         private waitingPageService: WaitingPageService,
         private location: Location,
     ) {
-        this.onUnload();
         this.handleSocketSubscriptions();
         this.waitingPageService.setupSockets();
         this.waitingPageService.playerName.subscribe((value: User | null) => {
@@ -76,11 +75,6 @@ export class WaitingPageComponent implements OnDestroy {
         this.waitingPageService.openQrCode();
     }
 
-    @HostListener('window:beforeunload')
-    handleBeforeUnload() {
-        localStorage.setItem('navigatedFromUnload', 'true');
-    }
-
     ngOnDestroy() {
         this.handleRouteNavigation();
         this.waitingPageService.clearSockets();
@@ -113,11 +107,13 @@ export class WaitingPageComponent implements OnDestroy {
 
     leaveWaitingPageAsPlayer() {
         this.waitingPageService.leaveWaitingPageAsPlayer();
+        console.log('leaving as player');
         this.router.navigate([AppRoute.HOME]);
     }
 
     leaveWaitingPageAsOrganizor(): void {
         this.waitingPageService.leaveWaitingPageAsOrganizor();
+        console.log('leaving as organizer');
         this.router.navigate([AppRoute.HOME]);
     }
 
@@ -203,13 +199,6 @@ export class WaitingPageComponent implements OnDestroy {
             this.router.navigate([AppRoute.ORGANIZER]);
         } else {
             this.router.navigate([AppRoute.GAME]);
-        }
-    }
-
-    private onUnload() {
-        if (localStorage.getItem('navigatedFromUnload') === 'true') {
-            localStorage.removeItem('navigatedFromUnload');
-            this.router.navigate([AppRoute.HOME]);
         }
     }
 }

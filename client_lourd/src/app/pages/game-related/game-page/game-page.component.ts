@@ -20,11 +20,6 @@ export class GamePageComponent implements OnDestroy {
         private gameClientService: GameClientService,
         private location: Location,
     ) {
-        // cette fonction est appelee a chaque fois que la page est rechargee
-        if (localStorage.getItem('navigatedFromUnload') === 'true') {
-            this.onUnload();
-            return;
-        }
         this.gameClientService.getTitle();
         this.gameClientService.resetInformationFields();
         this.gameClientService.resetAttributes();
@@ -95,11 +90,6 @@ export class GamePageComponent implements OnDestroy {
     }
     set qreAnswer(value: number) {
         this.gameClientService.qreAnswer = value;
-    }
-    // J'ai remplace le window:unload par window:beforeunload pour que le localStorage soit modifie avant que la page soit dechargee
-    @HostListener('window:beforeunload')
-    handleBeforeUnload() {
-        localStorage.setItem('navigatedFromUnload', 'true');
     }
 
     @HostListener('document:keyup', ['$event'])
@@ -176,10 +166,5 @@ export class GamePageComponent implements OnDestroy {
 
     abandonGame() {
         this.gameClientService.abandonGame();
-    }
-
-    private onUnload() {
-        localStorage.removeItem('navigatedFromUnload');
-        this.router.navigate([AppRoute.HOME]);
     }
 }

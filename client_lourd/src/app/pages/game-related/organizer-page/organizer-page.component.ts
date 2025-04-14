@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { Component, HostListener, OnDestroy } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoute, QRLGrade } from '@app/constants/enum-class';
 import { OrganizerService } from '@app/services/game-services/organizer/organizer.service';
@@ -16,13 +16,6 @@ export class OrganizerPageComponent implements OnDestroy {
         private router: Router,
         private location: Location,
     ) {
-        // cette fonction est appelee a chaque fois que la page est rechargee
-        // correction d'un bug car on veut pas que signalUserConnect soit appeler si on ne fait
-        // que reload la page
-        if (localStorage.getItem('navigatedFromUnload') === 'true') {
-            this.onUnload();
-            return;
-        }
         this.organizerService.initializeAttributes();
         this.organizerService.handleSockets();
         this.organizerService.signalUserConnect();
@@ -78,12 +71,6 @@ export class OrganizerPageComponent implements OnDestroy {
         return this.organizerService.sentResults;
     }
 
-    // J'ai mis window:beforeunload pour que le localStorage soit modifie avant que la page soit dechargee
-    @HostListener('window:beforeunload')
-    handleBeforeUnload() {
-        localStorage.setItem('navigatedFromUnload', 'true');
-    }
-
     ngOnDestroy() {
         const location = this.location.path();
         const shouldGoHome = this.organizerService.shouldDisconnect && this.organizerService.roomId;
@@ -119,11 +106,5 @@ export class OrganizerPageComponent implements OnDestroy {
 
     abandonGame() {
         this.organizerService.abandonGame();
-    }
-
-    private onUnload() {
-        localStorage.removeItem('navigatedFromUnload');
-        this.router.navigate([AppRoute.HOME]);
-        this.organizerService.alertSoundPlayer.stop();
     }
 }
