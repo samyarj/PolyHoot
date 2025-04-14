@@ -95,6 +95,9 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
       if (mounted) {
         setState(() {
           _defaultAvatars = avatars;
+          if (_defaultAvatars.isNotEmpty) {
+            _selectedAvatar = _defaultAvatars[0];
+          }
         });
       }
     } catch (e) {
