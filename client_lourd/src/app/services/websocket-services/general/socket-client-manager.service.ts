@@ -23,6 +23,10 @@ export class SocketClientService {
                 upgrade: false,
                 query: { token },
             });
+
+            this.socket.on('disconnect', (reason) => {
+                console.log(`Socket ${this.socket.id} disconnected: ${reason}`);
+            });
         }
     }
 

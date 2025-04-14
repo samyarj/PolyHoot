@@ -39,7 +39,6 @@ export class UserService {
         if (uid) {
             this.setLog(uid, 'disconnect').catch((error) => console.error('Failed to log disconnection:', error));
             await this.removeFcmToken(uid).catch((error) => console.error('Failed to remove FCM token:', error));
-            this.logger.log(`User ${uid} disconnected after losing socket connection`);
         }
     }
 
