@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:client_leger/backend-communication-services/auth/auth_service.dart'
     as auth_service;
-import 'package:client_leger/backend-communication-services/chat/firebase_chat_service.dart';
 import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/backend-communication-services/report/report_service.dart';
 import 'package:client_leger/backend-communication-services/socket/websocketmanager.dart';
@@ -32,7 +32,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
   StreamSubscription<DocumentSnapshot>? _userDocSubscription;
   StreamSubscription<User?>? _tokenSubscription;
   final ReportService _reportService = ReportService();
-  final FirebaseChatService _firebaseChatService = FirebaseChatService();
   String? currentToken;
   final FirebasePushApi _firebasePushApi = FirebasePushApi();
   final _webSocketManager = WebSocketManager();
@@ -402,7 +401,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       _webSocketManager.disconnectFromSocket();
       isLoggedIn.value = false;
       _reportService.resetParam();
-      _firebaseChatService.clearUserDetailsCache();
     } catch (e, stack) {
       AppLogger.e("Logout error: $e");
 
@@ -419,7 +417,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<user_model.User?>> {
       _webSocketManager.disconnectFromSocket();
       isLoggedIn.value = false;
       _reportService.resetParam();
-      _firebaseChatService.clearUserDetailsCache();
 
       throw Exception(getCustomError(e));
     }
