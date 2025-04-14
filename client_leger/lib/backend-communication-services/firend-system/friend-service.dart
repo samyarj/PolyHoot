@@ -245,11 +245,13 @@ class FriendService {
         final friendRequests =
             List<String>.from(userWithId.user.friendRequests ?? []);
         final hasNoPendingRequest = !friendRequests.contains(currentUser.uid);
+        final isPlayer = userWithId.user.role == 'player';
 
         return isNotCurrentUser &&
             isNotFriend &&
             hasNoPendingRequest &&
-            isNotRequestingMe;
+            isNotRequestingMe &&
+            isPlayer;
       }).toList();
 
       return filteredUsers;
