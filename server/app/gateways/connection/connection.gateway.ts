@@ -22,6 +22,7 @@ export class ConnectionGateway implements OnGatewayDisconnect {
 
     @SubscribeMessage(ConnectEvents.IdentifyClient)
     handleIdentify(@MessageBody() uid: string, @ConnectedSocket() client: Socket) {
+        console.log('identifying client');
         this.userService.addUserToMap(client.id, uid);
     }
 

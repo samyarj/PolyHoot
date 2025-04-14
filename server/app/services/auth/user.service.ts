@@ -16,6 +16,7 @@ export class UserService {
     constructor(private readonly cloudinaryService: CloudinaryService) {}
 
     addUserToMap(socketId: string, uid: string) {
+        console.log('entering add user to map.');
         if (!this.isUserInMap(socketId)) {
             this.usersSocketIdMap.set(socketId, uid);
             this.setLog(uid, 'connect').catch((error) => console.error('Failed to log connection:', error));
