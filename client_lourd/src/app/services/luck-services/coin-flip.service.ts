@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-imports */
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '@app/components/general-elements/confirmation-dialog/confirmation-dialog.component';
@@ -5,6 +6,7 @@ import { ErrorDialogComponent } from '@app/components/general-elements/error-dia
 import { WIDTH_SIZE } from '@app/constants/constants';
 import { CoinFlipEvents, CoinFlipGameState } from '@app/constants/enum-class';
 import { SocketClientService } from 'src/app/services/websocket-services/general/socket-client-manager.service';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable({
     providedIn: 'root',
@@ -16,6 +18,7 @@ export class CoinFlipService {
     betAmount: number = 0;
     submitted: boolean = false;
     time: number = 0;
+    name: string = '';
     playerList: {
         heads: { name: string; bet: number }[];
         tails: { name: string; bet: number }[];
@@ -25,9 +28,19 @@ export class CoinFlipService {
     constructor(
         private socketService: SocketClientService,
         private matdialog: MatDialog,
+        private authService: AuthService,
     ) {
         this.resetAttributes();
         this.initializeEventListeners();
+        this.subscribeToName();
+    }
+
+    subscribeToName(): void {
+        this.authService.user$.subscribe((user) => {
+            if (user) {
+                this.name = user.username;
+            }
+        });
     }
 
     selectSide(side: string) {
@@ -57,6 +70,12 @@ export class CoinFlipService {
                 this.playerList = answer.playerList;
                 this.history = answer.history;
                 this.gameState = answer.state;
+                const allPlayers = [...answer.playerList.heads, ...answer.playerList.tails];
+                const isMePlaying = allPlayers.some((player) => player.name === this.name);
+
+                if (!isMePlaying && this.gameState === CoinFlipGameState.BettingPhase) {
+                    this.resetAttributes();
+                }
             },
         );
     }

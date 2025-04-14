@@ -30,14 +30,6 @@ class FirebaseChatService {
 
   static const int messagesLimit = 8;
 
-  Map<String, user_model.PartialUser> _userDetailsCache =
-      {}; // key = uid, value = border + avatar + isAdmin
-  // to avoid excessive refetches
-
-  void clearUserDetailsCache() {
-    _userDetailsCache.clear();
-  }
-
   Future<void> sendMessage(
       String currentUserUid, String channel, String message) async {
     try {
@@ -161,16 +153,11 @@ class FirebaseChatService {
 
       final userFetches = userIds.map(
         (uid) async {
-          // Check if the user details are already cached
-          if (_userDetailsCache.containsKey(uid)) {
-            userDetails[uid] = _userDetailsCache[uid]!;
-          } else if (FirebaseAuth.instance.currentUser != null) {
+          if (FirebaseAuth.instance.currentUser != null) {
             final userDoc = await _usersCollection.doc(uid).get();
             if (userDoc.exists) {
               userDetails[uid] = user_model.PartialUser.fromJson(
                   userDoc.data() as Map<String, dynamic>);
-              // Cache the user details
-              _userDetailsCache[uid] = userDetails[uid]!;
             }
           }
         },

@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /* eslint-disable max-params */
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
@@ -12,7 +13,7 @@ import { debounceTime, Subject, takeUntil } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
-const SECONDS_IN_MINUTE = 60;
+// const SECONDS_IN_MINUTE = 60;
 
 interface GameLogEntry {
     gameName?: string;
@@ -45,6 +46,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     math = Math;
     gameLogs: GameLogEntry[];
     logs: CnxLogEntry[];
+    submittingUsername: boolean = false;
     // Constants for username validation
     readonly usernamePattern: string = USERNAME_REGEX.source;
     readonly maxUsernameLength: number = USERNAME_MAX_LENGTH;
@@ -55,7 +57,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     gamesWon: number = 0;
     averageCorrectAnswers: number = 0;
     totalGameTime: number = 0;
-    averageTimePerGame: string = '0:00';
+    averageTimePerGame: string = '0m:00s';
     totalActions: number = 0;
     lastLogin: string = 'N/A';
 
@@ -85,6 +87,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.loadDefaultAvatars();
         this.loadLogs();
+        this.fetchAverageTimePerGame();
     }
 
     ngOnDestroy(): void {
@@ -138,69 +141,81 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
             this.averageCorrectAnswers = user.stats?.rightAnswerPercentage || 0;
 
             // Calculate average time
-            if (this.totalGamesPlayed > 0 && this.totalGameTime > 0) {
-                const averageSeconds = Math.floor(this.totalGameTime / this.totalGamesPlayed);
-                const minutes = Math.floor(averageSeconds / SECONDS_IN_MINUTE);
-                const seconds = averageSeconds % SECONDS_IN_MINUTE;
-                this.averageTimePerGame = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            }
+            // if (this.totalGamesPlayed > 0 && this.totalGameTime > 0) {
+            //     const averageSeconds = Math.floor(this.totalGameTime / this.totalGamesPlayed);
+            //     const minutes = Math.floor(averageSeconds / SECONDS_IN_MINUTE);
+            //     const seconds = averageSeconds % SECONDS_IN_MINUTE;
+            //     this.averageTimePerGame = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            // }
         }
     }
 
     onUsernameSubmit() {
-        if (this.profileForm.invalid || this.isUsernameTaken) {
-            return;
-        }
+        if (!this.submittingUsername) {
+            this.submittingUsername = true;
 
-        const newUsername = this.profileForm.get('username')?.value;
-        if (!newUsername || newUsername === this.currentUsername) {
-            return;
-        }
+            if (this.profileForm.invalid || this.isUsernameTaken) {
+                this.submittingUsername = false;
+                return;
+            }
 
-        const user = this.authService.getUser();
-        if (!user) {
-            return;
-        }
+            const newUsername = this.profileForm.get('username')?.value;
+            if (!newUsername || newUsername === this.currentUsername) {
+                this.submittingUsername = false;
+                return;
+            }
 
-        // Get the current token from auth service
-        this.authService.token$.pipe(take(1)).subscribe({
-            next: async (token) => {
-                if (!token) {
-                    this.toastr.error('Authentication token not found. Please try again.');
-                    return;
-                }
+            const user = this.authService.getUser();
+            if (!user) {
+                this.submittingUsername = false;
+                return;
+            }
 
-                const options = {
-                    headers: { authorization: `Bearer ${token}` },
-                };
-
-                try {
-                    // First update Firebase Auth display name
-                    if (this.auth.currentUser) {
-                        await updateProfile(this.auth.currentUser, {
-                            displayName: newUsername,
-                        });
+            // Get the current token from auth service
+            this.authService.token$.pipe(take(1)).subscribe({
+                next: async (token) => {
+                    if (!token) {
+                        this.toastr.error('Authentication token not found. Please try again.');
+                        this.submittingUsername = false;
+                        return;
                     }
 
-                    // Then update Firestore through our backend
-                    this.http.patch<User>(`${this.baseUrl}/update-username`, { username: newUsername }, options).subscribe({
-                        next: (updatedUser) => {
-                            this.currentUsername = updatedUser.username;
-                            this.authService.setUser(updatedUser);
-                            this.toastr.success('Pseudonyme mis à jour avec succès !');
-                        },
-                        error: (error: Error) => {
-                            this.toastr.error('Erreur lors de la mise à jour du pseudonyme : ' + error.message);
-                        },
-                    });
-                } catch (error) {
-                    this.toastr.error('Erreur lors de la mise à jour du profil : ' + (error as Error).message);
-                }
-            },
-            error: (error: Error) => {
-                this.toastr.error("Erreur lors de la récupération du jeton d'authentification : " + error.message);
-            },
-        });
+                    const options = {
+                        headers: { authorization: `Bearer ${token}` },
+                    };
+
+                    try {
+                        // First update Firebase Auth display name
+                        if (this.auth.currentUser) {
+                            await updateProfile(this.auth.currentUser, {
+                                displayName: newUsername,
+                            });
+                        }
+
+                        // Then update Firestore through our backend
+                        this.http.patch<User>(`${this.baseUrl}/update-username`, { username: newUsername }, options).subscribe({
+                            next: (updatedUser) => {
+                                this.currentUsername = updatedUser.username;
+                                this.authService.setUser(updatedUser);
+                                this.toastr.success('Pseudonyme mis à jour avec succès !');
+                                this.submittingUsername = false;
+                            },
+                            error: (error: Error) => {
+                                this.toastr.error('Erreur lors de la mise à jour du pseudonyme : ' + error.message);
+                                this.submittingUsername = false;
+                            },
+                        });
+                    } catch (error) {
+                        this.toastr.error('Erreur lors de la mise à jour du profil : ' + (error as Error).message);
+                        this.submittingUsername = false;
+                    }
+                },
+                error: (error: Error) => {
+                    this.toastr.error("Erreur lors de la récupération du jeton d'authentification : " + error.message);
+                    this.submittingUsername = false;
+                },
+            });
+        }
     }
 
     checkUsername(): void {
@@ -332,5 +347,42 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         // Calculate the absolute difference in milliseconds and convert to seconds
         // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         return Math.floor(Math.abs(date2.getTime() - date1.getTime()) / 1000);
+    }
+
+    private fetchAverageTimePerGame(): void {
+        const user = this.authService.getUser();
+        if (!user) return;
+
+        this.authService.token$.pipe(take(1)).subscribe({
+            next: (token) => {
+                if (!token) {
+                    this.toastr.error('Authentication token not found. Please try again.');
+                    return;
+                }
+
+                const options = {
+                    headers: { authorization: `Bearer ${token}` },
+                };
+
+                this.http.get<{ averageTimePerGame: string }>(`${this.baseUrl}/average-time-per-game`, options).subscribe({
+                    next: (response) => {
+                        const rawTime = response.averageTimePerGame || '0m:00s';
+                        const timeParts = rawTime.split(':');
+
+                        if (timeParts.length === 2) {
+                            this.averageTimePerGame = `${timeParts[0]}m:${timeParts[1]}s`;
+                        } else {
+                            this.averageTimePerGame = rawTime;
+                        }
+                    },
+                    error: (error) => {
+                        this.toastr.error('Erreur lors de la récupération du temps moyen par partie : ' + error.message);
+                    },
+                });
+            },
+            error: (error) => {
+                this.toastr.error("Erreur lors de la récupération du jeton d'authentification : " + error.message);
+            },
+        });
     }
 }

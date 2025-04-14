@@ -139,10 +139,6 @@ class UsernameFormWidget extends StatelessWidget {
                         return 'Le pseudonyme doit contenir entre $USERNAME_MIN_LENGTH et $USERNAME_MAX_LENGTH caractères et ne peut inclure que des lettres, des chiffres, des points, des underscores ou des tirets.';
                       }
 
-                      if (isUsernameTaken) {
-                        return 'Ce pseudonyme est déjà utilisé.';
-                      }
-
                       return null;
                     },
                   ),

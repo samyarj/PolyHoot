@@ -1,37 +1,35 @@
 import 'package:client_leger/UI/confirmation/confirmation_dialog.dart';
 import 'package:client_leger/UI/confirmation/confirmation_messages.dart';
-import 'package:client_leger/UI/error/error_dialog.dart';
-import 'package:client_leger/backend-communication-services/error-handlers/global_error_handler.dart';
 import 'package:client_leger/business/channel_manager.dart';
 import 'package:client_leger/models/chat_channels.dart';
-import 'package:client_leger/utilities/logger.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class ChannelSearch extends StatefulWidget {
-  const ChannelSearch(
-      {super.key,
-      required this.filteredChannels,
-      required this.onDeleteChannel,
-      required this.currentUserUid,
-      required this.filterChannels,
-      required this.currentQuery,
-      required this.onChannelPicked});
-  final List<ChatChannel> filteredChannels; // filtered by parent
-  final Future<void> Function(String) onDeleteChannel;
+class UserChannels extends StatefulWidget {
+  const UserChannels({
+    super.key,
+    required this.filteredChannels,
+    required this.filterChannels,
+    required this.currentUserUid,
+    required this.currentQuery,
+    required this.onChannelPicked,
+  });
+
+  final List<ChatChannel>
+      filteredChannels; // filtered by parent, what we display
   final Function(String) filterChannels; // parent callback
   final String? currentUserUid;
   final String currentQuery;
   final Function(int, String) onChannelPicked;
 
   @override
-  State<ChannelSearch> createState() => _ChannelSearchState();
+  State<UserChannels> createState() => _UserChannelsState();
 }
 
-class _ChannelSearchState extends State<ChannelSearch> {
+class _UserChannelsState extends State<UserChannels> {
   final ChannelManager _channelManager = ChannelManager();
   final TextEditingController _searchChannelTextController =
       TextEditingController();
-  final TextEditingController _textChannelController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
   @override
@@ -42,17 +40,19 @@ class _ChannelSearchState extends State<ChannelSearch> {
     super.initState();
   }
 
+  Future<void> onDeleteChannel(String channel) async {
+    await _channelManager.deleteChannel(channel);
+  }
+
   @override
   void dispose() {
     _searchChannelTextController.dispose();
-    _textChannelController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    AppLogger.i("Building ChannelSearch widget");
     final colorScheme = Theme.of(context).colorScheme;
 
     return SingleChildScrollView(
@@ -103,10 +103,10 @@ class _ChannelSearchState extends State<ChannelSearch> {
             ),
           ),
           SizedBox(
-            height: 300,
+            height: 450,
             child: widget.filteredChannels.isEmpty
                 ? Text(
-                    "Aucun canal trouvé",
+                    'Aucun canal trouvé.',
                     style: TextStyle(
                       color: colorScheme.onPrimary,
                       fontSize: 16,
@@ -118,6 +118,14 @@ class _ChannelSearchState extends State<ChannelSearch> {
                     itemBuilder: (context, index) {
                       final channel = widget.filteredChannels[index];
                       return ListTile(
+                        leading: IconButton(
+                          icon: Icon(
+                            FontAwesomeIcons.comment,
+                            color: colorScheme.onPrimary,
+                          ),
+                          onPressed: () =>
+                              widget.onChannelPicked(2, channel.name),
+                        ),
                         title: Text(
                           channel.name,
                           style: TextStyle(
@@ -127,27 +135,25 @@ class _ChannelSearchState extends State<ChannelSearch> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              icon: Icon(
-                                Icons.add_circle,
-                                size: 30,
-                                color: colorScheme.onPrimary,
-                              ),
+                              icon: Icon(FontAwesomeIcons.rightFromBracket,
+                                  color: colorScheme.onPrimary),
                               onPressed: () async {
-                                await _channelManager.joinChannel(
-                                    widget.currentUserUid, channel.name);
+                                await showConfirmationDialog(
+                                    context,
+                                    "$quitChannel ${channel.name} ?",
+                                    () => _channelManager.quitChannel(
+                                        widget.currentUserUid, channel.name),
+                                    null);
                               },
                             ),
                             IconButton(
-                              icon: Icon(
-                                Icons.delete,
-                                size: 30,
-                                color: colorScheme.onPrimary,
-                              ),
+                              icon: Icon(Icons.delete,
+                                  size: 30, color: colorScheme.onPrimary),
                               onPressed: () async {
                                 await showConfirmationDialog(
                                     context,
                                     "$deleteChannel ${channel.name} ?",
-                                    () => widget.onDeleteChannel(channel.name),
+                                    () => onDeleteChannel(channel.name),
                                     null);
                               },
                             ),
@@ -157,87 +163,8 @@ class _ChannelSearchState extends State<ChannelSearch> {
                     },
                   ),
           ),
-          addChannel(),
         ],
       ),
-    );
-  }
-
-  Widget addChannel() {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        TapRegion(
-          onTapOutside: (_) => FocusScope.of(context).unfocus(),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              maxLength: 20,
-              style: TextStyle(color: colorScheme.onPrimary),
-              controller: _textChannelController,
-              decoration: InputDecoration(
-                counterStyle: TextStyle(color: colorScheme.onPrimary),
-                labelText: "Nom du nouveau canal",
-                labelStyle: TextStyle(color: colorScheme.onPrimary),
-                fillColor: colorScheme.surface.withValues(alpha: 0.3),
-                filled: true,
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: colorScheme.secondary),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                      color: colorScheme.onPrimary.withValues(alpha: 0.5)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: colorScheme.secondary),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.clear, color: colorScheme.onPrimary),
-                  onPressed: () {
-                    _textChannelController.clear();
-                  },
-                ),
-              ),
-            ),
-          ),
-        ),
-        ElevatedButton(
-          onPressed: () async {
-            final channelName = _textChannelController.text.trim();
-            if (channelName.isEmpty) return;
-            try {
-              await _channelManager.createChannel(
-                  _textChannelController.text.trim(), widget.currentUserUid);
-              widget.onChannelPicked(2, _textChannelController.text.trim());
-              _textChannelController.clear();
-            } catch (e) {
-              if (!mounted) return;
-              showErrorDialog(context, getCustomError(e));
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16.0),
-            ),
-            backgroundColor: colorScheme.secondary.withValues(alpha: 0.7),
-            foregroundColor: colorScheme.onSecondary,
-            elevation: 2.0,
-          ),
-          child: Text(
-            "Créer le canal",
-            style: TextStyle(
-                color: colorScheme.onSecondary,
-                fontSize: 16,
-                fontWeight: FontWeight.bold),
-          ),
-        ),
-      ],
     );
   }
 }

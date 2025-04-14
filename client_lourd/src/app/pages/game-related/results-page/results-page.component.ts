@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoute } from '@app/constants/enum-class';
 import { RewardType } from '@app/interfaces/lootbox-related';
@@ -10,7 +10,7 @@ import { ResultsService } from '@app/services/game-services/results-service/resu
     templateUrl: './results-page.component.html',
     styleUrls: ['./results-page.component.scss'],
 })
-export class ResultsPageComponent implements OnInit, OnDestroy {
+export class ResultsPageComponent implements OnDestroy {
     rewardType = RewardType;
     constructor(
         private resultsService: ResultsService,
@@ -27,18 +27,6 @@ export class ResultsPageComponent implements OnInit, OnDestroy {
         return this.resultsService.playerList;
     }
 
-    @HostListener('window:beforeunload')
-    handleBeforeUnload() {
-        localStorage.setItem('navigatedFromUnload', 'true');
-    }
-
-    ngOnInit(): void {
-        if (localStorage.getItem('navigatedFromUnload') === 'true') {
-            this.onUnload();
-            return;
-        }
-    }
-
     returnHome() {
         this.router.navigate([AppRoute.HOME]);
     }
@@ -53,9 +41,5 @@ export class ResultsPageComponent implements OnInit, OnDestroy {
             // this.returnHome();
         }
         this.resultsService.clearResultsSockets();
-    }
-    private onUnload() {
-        localStorage.removeItem('navigatedFromUnload');
-        this.router.navigate([AppRoute.HOME]);
     }
 }
