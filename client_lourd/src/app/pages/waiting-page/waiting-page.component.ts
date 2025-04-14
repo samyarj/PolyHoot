@@ -176,7 +176,7 @@ export class WaitingPageComponent implements OnDestroy {
     }
     private bannedPlayerSubsription() {
         this.bannedSubscription = this.waitingPageService.bannedPlayer$.subscribe(() => {
-            this.popUpErrorDialog("Vous avez été banni de la salle d'attente", AppRoute.HOME);
+            this.popUpErrorDialog("Vous avez été banni de la salle d'attente", AppRoute.JOINGAME);
             this.isplayerBanned = true;
         });
     }
