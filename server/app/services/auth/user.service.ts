@@ -235,7 +235,14 @@ export class UserService {
         if (unBanDate) {
             let timeDiff: number = unBanDate.getTime() - new Date().getTime();
             if (timeDiff > 0) {
-                const minutesLeft = Math.ceil(timeDiff / (1000 * 60));
+                let minutesLeft = Math.ceil(timeDiff / (1000 * 60));
+                if (minutesLeft === 16 && userDoc.data().nbReport >= 6) {
+                    minutesLeft = 15;
+                } else if (minutesLeft === 6 && userDoc.data().nbReport === 5) {
+                    minutesLeft = 5;
+                } else if (minutesLeft === 2 && userDoc.data().nbReport === 4) {
+                    minutesLeft = 1;
+                }
                 return {
                     message: `Vous êtes banni pendant les prochaines ${minutesLeft} minutes`,
                     isBanned: true,
