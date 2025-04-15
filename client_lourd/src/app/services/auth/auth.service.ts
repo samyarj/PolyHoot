@@ -32,7 +32,6 @@ import { environment } from 'src/environments/environment';
 })
 export class AuthService {
     private readonly baseUrl = `${environment.serverUrl}/users`;
-    private readonly MILLISECONDS_PER_MINUTE = 60 * 1000;
     private userBS: BehaviorSubject<User | null> = new BehaviorSubject<User | null>(null);
     private googleProvider = new GoogleAuthProvider();
     private loadingTokenBS = new BehaviorSubject<boolean>(false);
@@ -61,8 +60,10 @@ export class AuthService {
     ) {
         this.user$.subscribe({
             next: (user: User | null) => {
-                if (user && user.nbReport !== undefined && user.nbReport >= 2) {
-                    this.reportService.behaviourWarning();
+                if (user && user.nbReport !== undefined) {
+                    if (user.nbReport >= 2) {
+                        this.reportService.behaviourWarning();
+                    }
                     this.reportService.getReportState(user.uid).subscribe({
                         next: (value: { message: string; isBanned: boolean }) => {
                             if (value.isBanned) {
@@ -358,9 +359,6 @@ export class AuthService {
                                 if (docSnapshot.exists()) {
                                     const userData = docSnapshot.data() as User;
 
-                                    // Check if user is banned (unBanDate is in the future)
-                                    if (this.checkAndHandleBan(userData)) return;
-
                                     if (!this.clientIsIdentified && !(this.isAuthenticating || this.isSigningUp)) {
                                         this.clientIsIdentified = true;
                                         console.log(this.user$);
@@ -413,9 +411,6 @@ export class AuthService {
                 (docSnapshot) => {
                     if (docSnapshot.exists()) {
                         const userData = docSnapshot.data() as User;
-
-                        // Check if user is banned (unBanDate is in the future)
-                        if (this.checkAndHandleBan(userData)) return;
 
                         if (!this.clientIsIdentified) {
                             this.clientIsIdentified = true;
@@ -579,41 +574,6 @@ export class AuthService {
 
     private updateUserProfile(user: FirebaseUser, profileData: Partial<Pick<FirebaseUser, 'displayName' | 'photoURL'>>): Observable<void> {
         return from(updateProfile(user, profileData));
-    }
-
-    private convertToDate(dateValue: any): Date {
-        if (typeof dateValue === 'object' && dateValue !== null && 'toDate' in dateValue && typeof dateValue.toDate === 'function') {
-            return dateValue.toDate();
-        }
-        return new Date(dateValue);
-    }
-
-    /**
-     * Checks if user is banned and handles the ban enforcement
-     * @returns true if user is banned, false otherwise
-     */
-    private checkAndHandleBan(userData: User): boolean {
-        if (!userData.unBanDate) return false;
-        if (!userData.nbReport) return false;
-
-        const unBanDate = this.convertToDate(userData.unBanDate);
-        const now = new Date();
-
-        if (unBanDate > now) {
-            let minutesLeft = Math.ceil((unBanDate.getTime() - now.getTime()) / this.MILLISECONDS_PER_MINUTE);
-            if (minutesLeft === 16 && userData.nbReport >= 6) {
-                minutesLeft = 15;
-            } else if (minutesLeft === 6 && userData.nbReport === 5) {
-                minutesLeft = 5;
-            } else if (minutesLeft === 2 && userData.nbReport === 4) {
-                minutesLeft = 1;
-            }
-            const message = `Vous êtes banni pendant les prochaines ${minutesLeft} minutes`;
-            this.enforceBan(message);
-            return true;
-        }
-
-        return false;
     }
 
     private enforceBan(message: string): void {

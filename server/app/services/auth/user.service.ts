@@ -874,12 +874,19 @@ export class UserService {
                     break;
             }
 
-            await userRef.update({
-                playerReports: updatedReports,
-                nbReport: data.nbReport + 1,
-                unBanDate: unbanDate,
-                nbBan: newNbBans,
-            });
+            if (data.unBanDate.toDate().getTime() < unbanDate.getTime()) {
+                await userRef.update({
+                    playerReports: updatedReports,
+                    nbReport: data.nbReport + 1,
+                    unBanDate: unbanDate,
+                    nbBan: newNbBans,
+                });
+            } else {
+                await userRef.update({
+                    playerReports: updatedReports,
+                    nbReport: data.nbReport + 1,
+                });
+            }
 
             return true;
         }
