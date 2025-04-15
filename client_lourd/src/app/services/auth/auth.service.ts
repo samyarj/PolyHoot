@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable max-lines */
 import { SocketClientService } from './../websocket-services/general/socket-client-manager.service';
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -593,12 +594,20 @@ export class AuthService {
      */
     private checkAndHandleBan(userData: User): boolean {
         if (!userData.unBanDate) return false;
+        if (!userData.nbReport) return false;
 
         const unBanDate = this.convertToDate(userData.unBanDate);
         const now = new Date();
 
         if (unBanDate > now) {
-            const minutesLeft = Math.ceil((unBanDate.getTime() - now.getTime()) / this.MILLISECONDS_PER_MINUTE);
+            let minutesLeft = Math.ceil((unBanDate.getTime() - now.getTime()) / this.MILLISECONDS_PER_MINUTE);
+            if (minutesLeft === 16 && userData.nbReport >= 6) {
+                minutesLeft = 15;
+            } else if (minutesLeft === 6 && userData.nbReport === 5) {
+                minutesLeft = 5;
+            } else if (minutesLeft === 2 && userData.nbReport === 4) {
+                minutesLeft = 1;
+            }
             const message = `Vous êtes banni pendant les prochaines ${minutesLeft} minutes`;
             this.enforceBan(message);
             return true;
